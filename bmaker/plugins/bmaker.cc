@@ -13,53 +13,43 @@
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 
+// FW physics include files
+#include "DataFormats/PatCandidates/interface/Jet.h"
+
+
+// ROOT include files
+#include "TFile.h"
+
 // User include files
 #include "babymaker/bmaker/interface/bmaker.hh"
-#include "CommonTools/UtilAlgos/interface/TFileService.h"
-#include "FWCore/ServiceRegistry/interface/Service.h"
+#include "babymaker/bmaker/interface/baby_basic.hh"
 
 
 // Constructors and destructor
 bmaker::bmaker(const edm::ParameterSet& iConfig){
-  // edm::Service<TFileService> fs;      
-  // tree_=fs->make<TTree>("tree_global","tree_global tree");
   outfile = new TFile("baby.root", "recreate");
   outfile->cd();
-  tree_ = new TTree("tree_global","tree_global");
-  tree_->Branch("nevent", &nevent, "nevent/I");
-  nevent = 0;
 }
 
 
 bmaker::~bmaker(){
- 
-   // do anything here that needs to be done at desctruction time
-   // (e.g. close files, deallocate resources etc.)
-  tree_->Write();
+  baby.Write();
   outfile->Close();
 
-  delete tree_;
   delete outfile;
 }
 
 
 // ------------ method called for each event  ------------
 void bmaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
-   using namespace edm;
 
-   nevent++;
-   std::cout<<nevent<<": Hola. Header file!"<<std::endl;
-   tree_->Fill();
+  //////////////// Jets //////////////////
+  edm::Handle<pat::JetCollection> jets;
+  iEvent.getByLabel("slimmedJets", jets);
+  baby.njets() = jets->size();
 
-#ifdef THIS_IS_AN_EVENT_EXAMPLE
-   Handle<ExampleData> pIn;
-   iEvent.getByLabel("example",pIn);
-#endif
-   
-#ifdef THIS_IS_AN_EVENTSETUP_EXAMPLE
-   ESHandle<SetupData> pSetup;
-   iSetup.get<SetupRecord>().get(pSetup);
-#endif
+  // Filling the tree
+  baby.Fill();
 }
 
 

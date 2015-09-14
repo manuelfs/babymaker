@@ -2,4 +2,6 @@
 <use name="FWCore/PluginManager"/>
 <use name="FWCore/ParameterSet"/>
 <use   name="CommonTools/UtilAlgos"/>
+<use   name="babymaker/bmaker"/>
+<use   name="DataFormats/PatCandidates"/>
 <flags EDM_PLUGIN="1"/>

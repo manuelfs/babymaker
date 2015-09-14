@@ -17,6 +17,9 @@
 // ROOT include files
 #include "TTree.h"
 
+// User include files
+#include "babymaker/bmaker/interface/baby_basic.hh"
+
 // Class declaration
 
 class bmaker : public edm::EDAnalyzer {
@@ -26,7 +29,7 @@ public:
 
   static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
   TFile * outfile;
-  TTree * tree_;
+  baby_basic baby;
   long nevent;
 
 

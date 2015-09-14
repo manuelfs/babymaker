@@ -25,6 +25,7 @@ public:
   ~bmaker();
 
   static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
+  TFile * outfile;
   TTree * tree_;
   long nevent;
 

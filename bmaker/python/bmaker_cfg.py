@@ -1,5 +1,9 @@
 import FWCore.ParameterSet.Config as cms
 
+# from FWCore.ParameterSet.VarParsing import VarParsing
+# options = VarParsing ('optparser')
+# options.parseArguments()
+
 process = cms.Process("Baby")
 
 process.load("FWCore.MessageService.MessageLogger_cfi")
@@ -14,9 +18,9 @@ process.source = cms.Source("PoolSource",
 
 process.baby = cms.EDAnalyzer('bmaker')
 
-process.TFileService = cms.Service("TFileService",
-                                   fileName = cms.string('baby.root')
-                                   )
+# process.TFileService = cms.Service("TFileService",
+#                                    fileName = cms.string('baby.root')
+#                                    )
 
 
 process.p = cms.Path(process.baby)

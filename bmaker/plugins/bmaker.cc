@@ -21,8 +21,11 @@
 
 // Constructors and destructor
 bmaker::bmaker(const edm::ParameterSet& iConfig){
-  edm::Service<TFileService> fs;      
-  tree_=fs->make<TTree>("tree_global","tree_global tree");
+  // edm::Service<TFileService> fs;      
+  // tree_=fs->make<TTree>("tree_global","tree_global tree");
+  outfile = new TFile("baby.root", "recreate");
+  outfile->cd();
+  tree_ = new TTree("tree_global","tree_global");
   tree_->Branch("nevent", &nevent, "nevent/I");
   nevent = 0;
 }
@@ -32,7 +35,11 @@ bmaker::~bmaker(){
  
    // do anything here that needs to be done at desctruction time
    // (e.g. close files, deallocate resources etc.)
+  tree_->Write();
+  outfile->Close();
 
+  delete tree_;
+  delete outfile;
 }
 
 

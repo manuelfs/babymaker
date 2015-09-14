@@ -1,0 +1,44 @@
+small_tree*.*pp
+plots/*
+run/*.exe
+archive
+txt/data_card*
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.pyc
+*__init_*
+
+# Compiled Dynamic libraries
+*.so
+*.d
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+
+# Compiled executables
+*.exe
+
+# Generated source files
+bin/*
+
+# emacs backups
+*~
+*#
+
+# Other
+*.root
+*.log
+*.pdf
+*.eps
+*.tex
+*.aux
+gmon.out
+out
+archive
+.nfs*
+.#-emacs*

@@ -3,8 +3,8 @@
 currentdir=$(pwd)
 
 cd ../..
-rm -f bmaker/interface/baby*hpp
-rm -f bmaker/src/baby*cpp
+rm -f bmaker/interface/baby*hh
+rm -f bmaker/src/baby*cc
 
 shopt -s nullglob
 

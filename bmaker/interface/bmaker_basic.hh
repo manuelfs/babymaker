@@ -1,6 +1,4 @@
-// Original Author:  Manuel Franco Sevilla
-//         Created:  Mon, 14 Sep 2015 08:56:08 GMT
-
+// Creates baby tree with basic branches
 
 #ifndef H_BMAKER_BASIC
 #define H_BMAKER_BASIC
@@ -13,6 +11,11 @@
 #include "FWCore/Framework/interface/EDAnalyzer.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
+
+// FW physics include files
+#include "DataFormats/PatCandidates/interface/Muon.h"
+#include "DataFormats/VertexReco/interface/Vertex.h"
+#include "DataFormats/PatCandidates/interface/PackedGenParticle.h"
 
 // ROOT include files
 #include "TTree.h"
@@ -27,11 +30,15 @@ public:
   explicit bmaker_basic(const edm::ParameterSet&);
   ~bmaker_basic();
 
-  static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
   TFile * outfile;
   baby_basic baby;
-  long nevent;
+  void WriteMuons(baby_basic &baby, edm::Handle<pat::MuonCollection> muons, 
+		  edm::Handle<pat::PackedCandidateCollection> pfcands, edm::Handle<reco::VertexCollection> vtx);
 
+
+  static float MinSignalLeptonPt, MinVetoLeptonPt;
+
+  static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 
 private:
   virtual void beginJob() override;

@@ -1,1 +1,17 @@
+##################   Provenance   #############
+int run
+int lumiblock
+int event
+
 int njets
+
+##################   Leptons   ################
+int nmus
+int nvmus
+std::vector<float> mus_pt
+std::vector<float> mus_eta
+std::vector<float> mus_phi
+std::vector<bool> mus_medium
+std::vector<bool> mus_tight
+std::vector<float> mus_miniso
+std::vector<int> mus_charge

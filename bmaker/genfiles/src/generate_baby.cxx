@@ -171,13 +171,13 @@ void WriteBaseHeader(const set<Variable> &all_vars,
                      const set<Variable> &com_vars,
                      const vector<string> &names){
 
-  ofstream file("../interface/baby.hh");
+  ofstream file("../interface/baby_base.hh");
 
-  file << "// baby: base class to handle reduced tree ntuples\n";
+  file << "// baby_base: base class to handle reduced tree ntuples\n";
   file << "// File generated with generate_baby.exe\n\n";
 
-  file << "#ifndef H_BABY\n";
-  file << "#define H_BABY\n\n";
+  file << "#ifndef H_BABY_BASE\n";
+  file << "#define H_BABY_BASE\n\n";
 
   file << "#include <vector>\n";
   file << "#include <string>\n\n";
@@ -186,10 +186,10 @@ void WriteBaseHeader(const set<Variable> &all_vars,
   file << "#include \"TChain.h\"\n";
   //  file << "#include \"TTreeFormula.h\"\n\n";
 
-  file << "class baby{\n";
+  file << "class baby_base{\n";
   file << "public:\n";
-  file << "  baby(); // Constructor to create tree\n";
-  file << "  baby(const std::string &filename); // Constructor to read tree\n\n";
+  file << "  baby_base(); // Constructor to create tree\n";
+  file << "  baby_base(const std::string &filename); // Constructor to read tree\n\n";
 
   file << "  int Add(const std::string &filename);\n";
 
@@ -204,7 +204,7 @@ void WriteBaseHeader(const set<Variable> &all_vars,
 
   file << "  static const double bad_val_;\n\n";
 
-  file << "  virtual ~baby();\n\n";
+  file << "  virtual ~baby_base();\n\n";
 
   for(set<Variable>::const_iterator var = com_vars.begin();
       var != com_vars.end();
@@ -252,7 +252,7 @@ void WriteBaseHeader(const set<Variable> &all_vars,
   }
   file << "};\n\n";
 
-  file << "baby* NewTree(const std::type_info &type);\n\n";
+  file << "baby_base* NewTree(const std::type_info &type);\n\n";
 
   for(size_t i = 0; i < names.size(); ++i){
     file << "#include \"babymaker/bmaker/interface/baby_" << names.at(i) << ".hh\"\n";
@@ -267,12 +267,12 @@ void WriteBaseHeader(const set<Variable> &all_vars,
 void WriteBaseSource(const set<Variable> &all_vars,
                      const set<Variable> &com_vars,
                      const vector<string> &names){
-  ofstream file("../src/baby.cc");
+  ofstream file("../src/baby_base.cc");
 
-  file << "// baby: base class to handle reduce tree ntuples\n";
+  file << "// baby_base: base class to handle reduce tree ntuples\n";
   file << "//File generated with generate_baby.exe\n\n";
 
-  file << "#include \"babymaker/bmaker/interface/baby.hh\"\n\n";
+  file << "#include \"babymaker/bmaker/interface/baby_base.hh\"\n\n";
 
   file << "#include <stdexcept>\n";
   file << "#include <string>\n";
@@ -287,20 +287,20 @@ void WriteBaseSource(const set<Variable> &all_vars,
 
   file << "using namespace std;\n\n";
 
-  file << "bool baby::VectorLoader::loaded_ = false;\n\n";
+  file << "bool baby_base::VectorLoader::loaded_ = false;\n\n";
 
-  file << "baby::VectorLoader baby::vl_ = baby::VectorLoader();\n\n";
+  file << "baby_base::VectorLoader baby_base::vl_ = baby_base::VectorLoader();\n\n";
 
-  file << "baby::VectorLoader::VectorLoader(){\n";
+  file << "baby_base::VectorLoader::VectorLoader(){\n";
   file << "  if(!loaded_){\n";
   file << "    gROOT->ProcessLine(\"#include <vector>\");\n";
   file << "    loaded_ = true;\n";
   file << "  }\n";
   file << "}\n\n";
 
-  file << "const double baby::bad_val_ = -999.;\n\n";
+  file << "const double baby_base::bad_val_ = -999.;\n\n";
 
-  file << "baby::baby():\n";
+  file << "baby_base::baby_base():\n";
   file << "  chain_(\"junk\", \"junk\"),\n";
   file << "  tree_(\"tree\", \"tree\"),\n";
   file << "  entry_(0),\n";
@@ -327,7 +327,7 @@ void WriteBaseSource(const set<Variable> &all_vars,
   }
   file << "}\n\n";
 
-  file << "baby::baby(const string &filename):\n";
+  file << "baby_base::baby_base(const string &filename):\n";
   file << "  chain_(\"tree\",\"tree\"),\n";
   file << "  tree_(\"junk\",\"junk\"),\n";
   file << "  entry_(0),\n";
@@ -363,7 +363,7 @@ void WriteBaseSource(const set<Variable> &all_vars,
   }
   file << "}\n\n";
 
-  file << "void baby::Fill(){\n";
+  file << "void baby_base::Fill(){\n";
   file << "  if(read_only_){\n";
   file << "    throw std::logic_error(\"Trying to write to read-only tree\");\n";
   file << "  }else{\n";
@@ -382,7 +382,7 @@ void WriteBaseSource(const set<Variable> &all_vars,
   }
   file << "}\n\n";
 
-  file << "void baby::Write(){\n";
+  file << "void baby_base::Write(){\n";
   file << "  if(read_only_){\n";
   file << "    throw std::logic_error(\"Trying to write to read-only tree.\");\n";
   file << "  }else{\n";
@@ -390,14 +390,14 @@ void WriteBaseSource(const set<Variable> &all_vars,
   file << "  }\n";
   file << "}\n\n";
 
-  file << "string baby::Type() const{\n";
+  file << "string baby_base::Type() const{\n";
   file << "  return \"\";\n";
   file << "}\n\n";
 
-  file << "baby::~baby(){\n";
+  file << "baby_base::~baby_base(){\n";
   file << "}\n\n";
 
-  file << "int baby::Add(const std::string &filename){\n";
+  file << "int baby_base::Add(const std::string &filename){\n";
   file << "  if(!read_only_){\n";
   file << "    throw std::logic_error(\"Trying to add files to tree opened for writing.\");\n";
   file << "  }\n";
@@ -405,14 +405,14 @@ void WriteBaseSource(const set<Variable> &all_vars,
   file << "}\n\n";
 
 
-  file << "bool baby::PassString(TString cut){\n";
+  file << "bool baby_base::PassString(TString cut){\n";
   //  file << " TTreeFormula f(\"formula\",cut, &chain_);\n";
   //  file << " bool result = f.EvalInstance(0);\n";
   file << " bool result = true;\n";
   file << " return result;\n";
   file << "}\n\n";
   
-  file << "long baby::GetEntries() const{\n";
+  file << "long baby_base::GetEntries() const{\n";
   file << "  if(read_only_){\n";
   file << "    return chain_.GetEntries();\n";
   file << "  }else{\n";
@@ -420,7 +420,7 @@ void WriteBaseSource(const set<Variable> &all_vars,
   file << "  }\n";
   file << "}\n\n";
 
-  file << "void baby::GetEntry(const long entry){\n";
+  file << "void baby_base::GetEntry(const long entry){\n";
   file << "  if(!read_only_){\n";
   file << "    throw std::logic_error(\"Trying to read from write-only tree.\");\n";
   file << "  }\n\n";
@@ -432,7 +432,7 @@ void WriteBaseSource(const set<Variable> &all_vars,
   file << "}\n\n";
 
   for(set<Variable>::const_iterator var = com_vars.begin(); var != com_vars.end(); ++var){
-    file << var->type_ << " const & baby::" << var->name_ << "() const{\n";
+    file << var->type_ << " const & baby_base::" << var->name_ << "() const{\n";
     file << "  if(!read_only_){\n";
     file << "    throw std::logic_error(\"Trying to write to const tree.\");\n";
     file << "  }\n";
@@ -445,7 +445,7 @@ void WriteBaseSource(const set<Variable> &all_vars,
   }
 
   for(set<Variable>::const_iterator var = com_vars.begin(); var != com_vars.end(); ++var){
-    file << var->type_ << " & baby::" << var->name_ << "(){\n";
+    file << var->type_ << " & baby_base::" << var->name_ << "(){\n";
     file << "  if(read_only_ && !c_" << var->name_ << "_ && b_" << var->name_ <<"_){\n";
     file << "    b_" << var->name_ << "_->GetEntry(entry_);\n";
     file << "    c_" << var->name_ << "_ = true;\n";
@@ -456,29 +456,29 @@ void WriteBaseSource(const set<Variable> &all_vars,
 
   for(set<Variable>::const_iterator var = all_vars.begin(); var != all_vars.end(); ++var){
     if(com_vars.find(*var) != com_vars.end()) continue;
-    file << var->type_ << " const & baby::" << var->name_ << "() const{\n";
+    file << var->type_ << " const & baby_base::" << var->name_ << "() const{\n";
     file << "  throw std::logic_error(\"" << var->name_
-         << " does not exist in this baby version.\");\n";
+         << " does not exist in this baby_base version.\");\n";
     file << "}\n\n";
   }
 
   for(set<Variable>::const_iterator var = all_vars.begin(); var != all_vars.end(); ++var){
     if(com_vars.find(*var) != com_vars.end()) continue;
-    file << var->type_ << " & baby::" << var->name_ << "(){\n";
+    file << var->type_ << " & baby_base::" << var->name_ << "(){\n";
     file << "  throw std::logic_error(\"" << var->name_
-         << " does not exist in this baby version.\");\n";
+         << " does not exist in this baby_base version.\");\n";
     file << "}\n\n";
   }
 
   for(size_t i = 0; i < names.size(); ++i){
     file << "#include \"babymaker/bmaker/interface/baby_" << names.at(i) << ".hh\"\n";
   }
-  file << "baby* NewTree(const std::type_info &type){\n\n";
-  file << "  if(type == typeid(baby)) return new baby;\n";
+  file << "baby_base* NewTree(const std::type_info &type){\n\n";
+  file << "  if(type == typeid(baby_base)) return new baby_base;\n";
   for(size_t i = 0; i < names.size(); ++i){
-    file << "  else if(type == typeid(baby_" << names.at(i) << ")) return static_cast<baby*>(new baby_" << names.at(i) << ");\n";
+    file << "  else if(type == typeid(baby_" << names.at(i) << ")) return static_cast<baby_base*>(new baby_" << names.at(i) << ");\n";
   }
-  file << "  else return new baby;\n";
+  file << "  else return new baby_base;\n";
   file << "}\n\n";
 
   file.close();
@@ -490,7 +490,7 @@ void WriteSepHeader(const pair<string, set<Variable> > &sep_vars){
   set<Variable> vars = sep_vars.second;
   ofstream file(("../interface/baby_"+name+".hh").c_str());
 
-  file << "// baby_" << name << ": " << name << " version of baby to handle reduce tree ntuples\n";
+  file << "// baby_" << name << ": " << name << " version of baby_base to handle reduce tree ntuples\n";
   file << "// File generated with generate_baby.exe\n\n";
 
   file << "#ifndef H_BABY_" << NAME << "\n";
@@ -502,9 +502,9 @@ void WriteSepHeader(const pair<string, set<Variable> > &sep_vars){
   file << "#include \"TTree.h\"\n";
   file << "#include \"TChain.h\"\n\n";
 
-  file << "#include \"babymaker/bmaker/interface/baby.hh\"\n\n";
+  file << "#include \"babymaker/bmaker/interface/baby_base.hh\"\n\n";
 
-  file << "class baby_" << name << " : public baby{\n";
+  file << "class baby_" << name << " : public baby_base{\n";
   file << "public:\n";
   file << "  baby_" << name << "(); // Constructor to create tree\n";
   file << "  baby_" << name << "(const std::string &filename); // Constructor to read tree\n\n";
@@ -549,10 +549,10 @@ void WriteSepSource(const pair<string, set<Variable> > &sep_vars){
   set<Variable> vars = sep_vars.second;
   ofstream file(("../src/baby_"+name+".cc").c_str());
 
-  file << "// baby_" << name << ": " << name << " version of baby to handle reduce tree ntuples\n";
+  file << "// baby_" << name << ": " << name << " version of baby_base to handle reduce tree ntuples\n";
   file << "//File generated with generate_baby.exe\n\n";
 
-  file << "#include \"babymaker/bmaker/interface/baby.hh\"\n\n";
+  file << "#include \"babymaker/bmaker/interface/baby_base.hh\"\n\n";
   file << "#include \"babymaker/bmaker/interface/baby_" << name << ".hh\"\n\n";
 
   file << "#include <stdexcept>\n";
@@ -568,7 +568,7 @@ void WriteSepSource(const pair<string, set<Variable> > &sep_vars){
   file << "baby_" << name << "::baby_" << name << "():\n";
   if(vars.size()){
     const set<Variable>::const_iterator vars_end_2 = --vars.end();
-    file << "  baby(),\n";
+    file << "  baby_base(),\n";
     for(set<Variable>::const_iterator var = vars.begin();
         var != vars_end_2;
         ++var){
@@ -590,14 +590,14 @@ void WriteSepSource(const pair<string, set<Variable> > &sep_vars){
     }
     file << "  c_" << vars_end_2->name_ << "_(false){\n";
   }else{
-    file << "  baby(){\n";
+    file << "  baby_base(){\n";
   }
   file << "}\n\n";
 
   file << "baby_" << name << "::baby_" << name << "(const string &filename):\n";
   if(vars.size()){
     const set<Variable>::const_iterator vars_end_2 = --vars.end();
-    file << "  baby(filename),\n";
+    file << "  baby_base(filename),\n";
     for(set<Variable>::const_iterator var = vars.begin();
         var != vars_end_2;
         ++var){
@@ -615,7 +615,7 @@ void WriteSepSource(const pair<string, set<Variable> > &sep_vars){
     file << "  b_" << vars_end_2->name_ << "_(NULL),\n";
     file << "  c_" << vars_end_2->name_ << "_(false){\n";
   }else{
-    file << "  baby(filename){\n";
+    file << "  baby_base(filename){\n";
   }
   for(set<Variable>::const_iterator var = vars.begin(); var != vars.end(); ++var){
     if(Contains(var->type_, "vector")){
@@ -627,7 +627,7 @@ void WriteSepSource(const pair<string, set<Variable> > &sep_vars){
   file << "}\n\n";
 
   file << "void baby_" << name << "::Fill(){\n";
-  file << "  baby::Fill();\n";
+  file << "  baby_base::Fill();\n";
 
   file << "  //Resetting variables\n";
   for(set<Variable>::const_iterator var = vars.begin(); var != vars.end(); ++var){
@@ -649,7 +649,7 @@ void WriteSepSource(const pair<string, set<Variable> > &sep_vars){
   file << "}\n\n";
 
   file << "void baby_" << name << "::GetEntry(const long entry){\n";
-  file << "  baby::GetEntry(entry);\n\n";
+  file << "  baby_base::GetEntry(entry);\n\n";
 
   for(set<Variable>::const_iterator var = vars.begin(); var!= vars.end(); ++var){
     file << "  c_" << var->name_ << "_ = false;\n";

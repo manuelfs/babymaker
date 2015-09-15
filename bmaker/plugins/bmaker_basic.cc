@@ -106,7 +106,7 @@ void bmaker_basic::WriteMuons(baby_basic &baby, edm::Handle<pat::MuonCollection>
 */
 
 bmaker_basic::bmaker_basic(const edm::ParameterSet& iConfig){
-  outfile = new TFile("baby.root", "recreate");
+  outfile = new TFile(TString(iConfig.getParameter<std::string>("outputFile")), "recreate");
   outfile->cd();
 }
 

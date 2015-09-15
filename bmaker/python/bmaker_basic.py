@@ -16,7 +16,7 @@ process.source = cms.Source("PoolSource",
     )
 )
 
-process.baby = cms.EDAnalyzer('bmaker')
+process.baby = cms.EDAnalyzer('bmaker_basic')
 
 # process.TFileService = cms.Service("TFileService",
 #                                    fileName = cms.string('baby.root')

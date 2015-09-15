@@ -21,18 +21,33 @@
 #include "TFile.h"
 
 // User include files
-#include "babymaker/bmaker/interface/bmaker.hh"
+#include "babymaker/bmaker/interface/bmaker_basic.hh"
 #include "babymaker/bmaker/interface/baby_basic.hh"
+
+using namespace std;
+
+// ------------ method called for each event  ------------
+void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+
+  //////////////// Jets //////////////////
+  edm::Handle<pat::JetCollection> jets;
+  iEvent.getByLabel("slimmedJets", jets);
+  baby.njets() = jets->size();
+  cout<<"Found "<<baby.njets()<<" jets"<<endl;
+
+  // Filling the tree
+  baby.Fill();
+}
 
 
 // Constructors and destructor
-bmaker::bmaker(const edm::ParameterSet& iConfig){
+bmaker_basic::bmaker_basic(const edm::ParameterSet& iConfig){
   outfile = new TFile("baby.root", "recreate");
   outfile->cd();
 }
 
 
-bmaker::~bmaker(){
+bmaker_basic::~bmaker_basic(){
   baby.Write();
   outfile->Close();
 
@@ -40,33 +55,20 @@ bmaker::~bmaker(){
 }
 
 
-// ------------ method called for each event  ------------
-void bmaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
-
-  //////////////// Jets //////////////////
-  edm::Handle<pat::JetCollection> jets;
-  iEvent.getByLabel("slimmedJets", jets);
-  baby.njets() = jets->size();
-
-  // Filling the tree
-  baby.Fill();
-}
-
-
 // ------------ method called once each job just before starting event loop  ------------
-void bmaker::beginJob() {
+void bmaker_basic::beginJob() {
 }
 
 // ------------ method called once each job just after ending the event loop  ------------
 void 
-bmaker::endJob() 
+bmaker_basic::endJob() 
 {
 }
 
 // ------------ method called when starting to processes a run  ------------
 /*
 void 
-bmaker::beginRun(edm::Run const&, edm::EventSetup const&)
+bmaker_basic::beginRun(edm::Run const&, edm::EventSetup const&)
 {
 }
 */
@@ -74,7 +76,7 @@ bmaker::beginRun(edm::Run const&, edm::EventSetup const&)
 // ------------ method called when ending the processing of a run  ------------
 /*
 void 
-bmaker::endRun(edm::Run const&, edm::EventSetup const&)
+bmaker_basic::endRun(edm::Run const&, edm::EventSetup const&)
 {
 }
 */
@@ -82,7 +84,7 @@ bmaker::endRun(edm::Run const&, edm::EventSetup const&)
 // ------------ method called when starting to processes a luminosity block  ------------
 /*
 void 
-bmaker::beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
+bmaker_basic::beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
 {
 }
 */
@@ -90,14 +92,14 @@ bmaker::beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&
 // ------------ method called when ending the processing of a luminosity block  ------------
 /*
 void 
-bmaker::endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
+bmaker_basic::endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
 {
 }
 */
 
 // ------------ method fills 'descriptions' with the allowed parameters for the module  ------------
 void
-bmaker::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
+bmaker_basic::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
   //The following says we do not know what parameters are allowed so do no validation
   // Please change this to state exactly what you do use, even if it is no parameters
   edm::ParameterSetDescription desc;
@@ -106,4 +108,4 @@ bmaker::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
 }
 
 //define this as a plug-in
-DEFINE_FWK_MODULE(bmaker);
+DEFINE_FWK_MODULE(bmaker_basic);

@@ -1,8 +1,6 @@
-small_tree*.*pp
-plots/*
-run/*.exe
-archive
-txt/data_card*
+# Generated on compilation
+baby*.hh
+baby*.cc
 
 # Compiled Object files
 *.slo

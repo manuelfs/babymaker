@@ -2,8 +2,8 @@
 //         Created:  Mon, 14 Sep 2015 08:56:08 GMT
 
 
-#ifndef H_BMAKER
-#define H_BMAKER
+#ifndef H_BMAKER_BASIC
+#define H_BMAKER_BASIC
 
 // System include files
 #include <memory>
@@ -22,10 +22,10 @@
 
 // Class declaration
 
-class bmaker : public edm::EDAnalyzer {
+class bmaker_basic : public edm::EDAnalyzer {
 public:
-  explicit bmaker(const edm::ParameterSet&);
-  ~bmaker();
+  explicit bmaker_basic(const edm::ParameterSet&);
+  ~bmaker_basic();
 
   static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
   TFile * outfile;

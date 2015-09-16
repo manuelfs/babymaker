@@ -6,6 +6,9 @@ int event
 int njets
 
 ##################   Leptons   ################
+int nleps
+int nvleps
+
 int nmus
 int nvmus
 std::vector<float> mus_pt
@@ -17,3 +20,15 @@ std::vector<float> mus_d0
 std::vector<bool> mus_medium
 std::vector<bool> mus_tight
 std::vector<int> mus_charge
+
+int nels
+int nvels
+std::vector<float> els_pt
+std::vector<float> els_eta
+std::vector<float> els_phi
+std::vector<float> els_miniso
+std::vector<float> els_dz
+std::vector<float> els_d0
+std::vector<bool> els_medium
+std::vector<bool> els_tight
+std::vector<int> els_charge

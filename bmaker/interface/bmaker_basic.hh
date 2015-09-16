@@ -14,8 +14,9 @@
 
 // FW physics include files
 #include "DataFormats/PatCandidates/interface/Muon.h"
+#include "DataFormats/PatCandidates/interface/Electron.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
-#include "DataFormats/PatCandidates/interface/PackedGenParticle.h"
+#include "DataFormats/PatCandidates/interface/PackedCandidate.h"
 
 // ROOT include files
 #include "TTree.h"
@@ -32,11 +33,15 @@ public:
 
   TFile * outfile;
   baby_basic baby;
+
+  // Functions that do the branch writing
   void WriteMuons(baby_basic &baby, edm::Handle<pat::MuonCollection> muons, 
 		  edm::Handle<pat::PackedCandidateCollection> pfcands, edm::Handle<reco::VertexCollection> vtx);
+  void WriteElectrons(baby_basic &baby, edm::Handle<pat::ElectronCollection> electrons, 
+		      edm::Handle<pat::PackedCandidateCollection> pfcands, edm::Handle<reco::VertexCollection> vtx);
 
 
-  static float MinSignalLeptonPt, MinVetoLeptonPt;
+  static float MinSignalLeptonPt, MinVetoLeptonPt, MuMiniIsoCut, ElMiniIsoCut;
 
   static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 

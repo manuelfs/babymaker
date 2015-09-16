@@ -32,6 +32,7 @@ public:
   ~bmaker_basic();
 
   TFile * outfile;
+  TString outname;
   baby_basic baby;
 
   // Functions that do the branch writing

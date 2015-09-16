@@ -121,9 +121,11 @@ void bmaker_basic::WriteElectrons(baby_basic &baby, edm::Handle<pat::ElectronCol
       dz = lep.gsfTrack()->vz()-vtx->at(0).z();
       d0 = lep.gsfTrack()->d0()-vtx->at(0).x()*sin(lep.gsfTrack()->phi())+vtx->at(0).y()*cos(lep.gsfTrack()->phi());
     } 
-    if(!IdElectron(lep, kVeto, vtx, false) || lep.pt() <= MinVetoLeptonPt || fabs(lep.eta()) > 2.5) continue;
+    if(!IdElectron(lep, kVeto, vtx, false) || lep.pt() <= MinVetoLeptonPt || 
+       fabs(lep.superCluster()->position().eta()) > 2.5) continue;
 
     baby.els_pt().push_back(lep.pt());
+    baby.els_sceta().push_back(lep.superCluster()->position().eta());
     baby.els_eta().push_back(lep.eta());
     baby.els_phi().push_back(lep.phi());
     baby.els_dz().push_back(dz);
@@ -152,15 +154,20 @@ void bmaker_basic::WriteElectrons(baby_basic &baby, edm::Handle<pat::ElectronCol
 */
 
 bmaker_basic::bmaker_basic(const edm::ParameterSet& iConfig){
-  outfile = new TFile(TString(iConfig.getParameter<std::string>("outputFile")), "recreate");
+  outname = TString(iConfig.getParameter<std::string>("outputFile"));
+  outfile = new TFile(outname, "recreate");
   outfile->cd();
   baby.tree_.SetDirectory(outfile);
 }
 
 
 bmaker_basic::~bmaker_basic(){
+  outfile->cd();
+  baby.tree_.SetDirectory(outfile);
   baby.Write();
   outfile->Close();
+
+  cout<<endl<<"Written baby in "<<outname<<endl<<endl;
 
   delete outfile;
 }

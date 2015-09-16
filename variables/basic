@@ -25,6 +25,7 @@ int nels
 int nvels
 std::vector<float> els_pt
 std::vector<float> els_eta
+std::vector<float> els_sceta
 std::vector<float> els_phi
 std::vector<float> els_miniso
 std::vector<float> els_dz

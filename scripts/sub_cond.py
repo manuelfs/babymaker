@@ -30,7 +30,6 @@ for ds in filedict.keys():
     # with the list of files in hand, determine the number of condor jobs     
     nfiles = len(filedict[ds])
     njobs = (nfiles/maxfiles) if (nfiles%maxfiles==0) else (nfiles/maxfiles+1)
-    if njobs>2: njobs=2
 
     for job in range(0,njobs):
         # name the baby

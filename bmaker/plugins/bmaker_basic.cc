@@ -77,11 +77,22 @@ void bmaker_basic::WriteMuons(baby_basic &baby, edm::Handle<pat::MuonCollection>
   baby.nmus() = 0; baby.nvmus() = 0;
   for (unsigned int ilep(0); ilep < muons->size(); ilep++) {
     const pat::Muon &lep = (*muons)[ilep];    
-    if(!lep.isLooseMuon() || lep.pt() <= MinVetoLeptonPt) continue;
+    //    const double dz = lep.track()->vz()-vtx->at(0).z();
+    //    const double d0 = lep.track()->d0()-vtx->at(0).x()*sin(lep.track()->phi())
+    //     +vtx->at(0).y()*cos(lep.track()->phi());
+    double dz(999.), d0(999.);
+    // if(lep.track()->isAvailable()){
+    //   dz = lep.track()->vz()-vtx->at(0).z();
+    //   d0 = lep.track()->d0()-vtx->at(0).x()*sin(lep.track()->phi())+vtx->at(0).y()*cos(lep.track()->phi());
+    // }
+    //if(!lep.isLooseMuon() || lep.pt() <= MinVetoLeptonPt || fabs(lep.eta()) > 2.4 || fabs(dz) > 0.5 || fabs(d0) > 0.2) continue;
+    if(!lep.isLooseMuon() || lep.pt() <= MinVetoLeptonPt || fabs(lep.eta()) > 2.4) continue;
 
     baby.mus_pt().push_back(lep.pt());
     baby.mus_eta().push_back(lep.eta());
     baby.mus_phi().push_back(lep.phi());
+    baby.mus_dz().push_back(dz);
+    baby.mus_d0().push_back(d0);
     baby.mus_charge().push_back(lep.charge());
     baby.mus_medium().push_back(lep.isMediumMuon());
     baby.mus_tight().push_back(lep.isTightMuon(vtx->at(0)));
@@ -108,6 +119,7 @@ void bmaker_basic::WriteMuons(baby_basic &baby, edm::Handle<pat::MuonCollection>
 bmaker_basic::bmaker_basic(const edm::ParameterSet& iConfig){
   outfile = new TFile(TString(iConfig.getParameter<std::string>("outputFile")), "recreate");
   outfile->cd();
+  baby.tree_.SetDirectory(outfile);
 }
 
 

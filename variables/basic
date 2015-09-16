@@ -11,7 +11,9 @@ int nvmus
 std::vector<float> mus_pt
 std::vector<float> mus_eta
 std::vector<float> mus_phi
+std::vector<float> mus_miniso
+std::vector<float> mus_dz
+std::vector<float> mus_d0
 std::vector<bool> mus_medium
 std::vector<bool> mus_tight
-std::vector<float> mus_miniso
 std::vector<int> mus_charge

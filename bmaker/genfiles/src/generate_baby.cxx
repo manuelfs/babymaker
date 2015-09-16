@@ -223,12 +223,12 @@ void WriteBaseHeader(const set<Variable> &all_vars,
     file << "  __attribute__((noreturn)) virtual "
          << var->type_ << " & " << var->name_ << "();\n";
   }
-  file << '\n';
-
-  file << "protected:\n";
   file << "  TChain chain_;\n";
   file << "  TTree tree_;\n";
   file << "  long entry_;\n";
+  file << '\n';
+
+  file << "protected:\n";
   file << "  const bool read_only_;\n\n";
 
   file << "private:\n";

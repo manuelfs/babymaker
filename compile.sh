@@ -21,7 +21,8 @@ else
 	echo "ERRORS AND WARNINGS:"
 	cat $tmp_file >&2
     else
-	echo "Compiled successfully without errors or warnings!"
+	echo "Generated baby header and source code files :o)"
+	echo
     fi
     
     rm -rf $tmp_file

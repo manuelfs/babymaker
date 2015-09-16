@@ -80,13 +80,12 @@ void bmaker_basic::WriteMuons(baby_basic &baby, edm::Handle<pat::MuonCollection>
     //    const double dz = lep.track()->vz()-vtx->at(0).z();
     //    const double d0 = lep.track()->d0()-vtx->at(0).x()*sin(lep.track()->phi())
     //     +vtx->at(0).y()*cos(lep.track()->phi());
-    double dz(999.), d0(999.);
-    // if(lep.track()->isAvailable()){
-    //   dz = lep.track()->vz()-vtx->at(0).z();
-    //   d0 = lep.track()->d0()-vtx->at(0).x()*sin(lep.track()->phi())+vtx->at(0).y()*cos(lep.track()->phi());
-    // }
-    //if(!lep.isLooseMuon() || lep.pt() <= MinVetoLeptonPt || fabs(lep.eta()) > 2.4 || fabs(dz) > 0.5 || fabs(d0) > 0.2) continue;
-    if(!lep.isLooseMuon() || lep.pt() <= MinVetoLeptonPt || fabs(lep.eta()) > 2.4) continue;
+    double dz(0.), d0(0.);
+    if(lep.track().isAvailable()){
+      dz = lep.track()->vz()-vtx->at(0).z();
+      d0 = lep.track()->d0()-vtx->at(0).x()*sin(lep.track()->phi())+vtx->at(0).y()*cos(lep.track()->phi());
+    }
+    if(!lep.isLooseMuon() || lep.pt() <= MinVetoLeptonPt || fabs(lep.eta()) > 2.4 || fabs(dz) > 0.5 || fabs(d0) > 0.2) continue;
 
     baby.mus_pt().push_back(lep.pt());
     baby.mus_eta().push_back(lep.eta());

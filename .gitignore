@@ -37,7 +37,8 @@ bin/*
 *.aux
 gmon.out
 out
-sub
+logs
+run
 archive
 .nfs*
 .#-emacs*

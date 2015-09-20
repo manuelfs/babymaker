@@ -42,3 +42,4 @@ run
 archive
 .nfs*
 .#-emacs*
+sftp-config.json

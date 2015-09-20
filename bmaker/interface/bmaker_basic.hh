@@ -18,6 +18,9 @@
 #include "DataFormats/PatCandidates/interface/Electron.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
+#include "DataFormats/Common/interface/TriggerResults.h"
+#include "DataFormats/PatCandidates/interface/PackedTriggerPrescales.h"
+#include "DataFormats/PatCandidates/interface/TriggerObjectStandAlone.h"
 #include "DataFormats/PatCandidates/interface/PackedCandidate.h"
 
 // ROOT include files
@@ -47,7 +50,16 @@ public:
   vCands writeElectrons(baby_basic &baby, edm::Handle<pat::ElectronCollection> electrons, 
 			edm::Handle<pat::PackedCandidateCollection> pfcands, 
 			edm::Handle<reco::VertexCollection> vtx);
+  void writeTriggers(baby_basic &baby, const edm::TriggerNames &names, 
+                     edm::Handle<edm::TriggerResults> triggerBits,
+                     edm::Handle<pat::PackedTriggerPrescales> triggerPrescales);
+  void writeHLTObjects(baby_basic &baby, const edm::TriggerNames &names, 
+                       edm::Handle<pat::TriggerObjectStandAloneCollection> triggerObjects);
+  void writeFilters(baby_basic &baby, const edm::TriggerNames &fnames,
+                    edm::Handle<edm::TriggerResults> filterBits,
+                    edm::Handle<reco::VertexCollection> vtx);
 
+  std::vector<TString> trig_name;
 
   static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 

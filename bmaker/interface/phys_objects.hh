@@ -63,6 +63,8 @@ namespace phys_objects{
 			const reco::Candidate* ptcl,  
 			double r_iso_min, double r_iso_max, double kt_scale,
 			bool charged_only);
+
+  bool hasGoodPV(edm::Handle<reco::VertexCollection> vtx);
 }
 
 #endif

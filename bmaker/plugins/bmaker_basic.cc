@@ -38,6 +38,36 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
   edm::Handle<reco::VertexCollection> vtx;
   iEvent.getByLabel("offlineSlimmedPrimaryVertices", vtx);
 
+  ////////////////////// Trigger /////////////////////
+  edm::Handle<edm::TriggerResults> triggerBits;
+  iEvent.getByLabel(edm::InputTag("TriggerResults","","HLT"),triggerBits);  
+  edm::Handle<pat::PackedTriggerPrescales> triggerPrescales;
+  iEvent.getByLabel("patTrigger",triggerPrescales);  
+  const edm::TriggerNames &names = iEvent.triggerNames(*triggerBits);
+  writeTriggers(baby, names, triggerBits, triggerPrescales);
+
+  //////////////// HLT objects //////////////////
+  edm::Handle<pat::TriggerObjectStandAloneCollection> triggerObjects;
+  iEvent.getByLabel("selectedPatTrigger",triggerObjects);  
+  writeHLTObjects(baby, names, triggerObjects);
+
+  ///////////////////// Filters ///////////////////////
+  edm::Handle<edm::TriggerResults> filterBits;
+  std::string processLabel = iEvent.isRealData() ? "RECO":"PAT"; // prompt reco runs in the "RECO" process
+  iEvent.getByLabel(edm::InputTag("TriggerResults","",processLabel),filterBits);  
+  // re-recoed data will have the process label "PAT" rather than "RECO";
+  // if the attempt to find data with "RECO" process fails, try "PAT"
+  if(!filterBits.isValid() && iEvent.isRealData()) 
+      iEvent.getByLabel(edm::InputTag("TriggerResults", "", "PAT"),filterBits);  
+  const edm::TriggerNames &fnames = iEvent.triggerNames(*filterBits);
+  writeFilters(baby, fnames, filterBits, vtx);
+  // the HBHE noise filter needs to be recomputed in early 2015 data
+  edm::Handle<bool> filter_hbhe;
+  if(iEvent.isRealData() && iEvent.getByLabel("HBHENoiseFilterResultProducer","HBHENoiseFilterResult",filter_hbhe)) { 
+    if(*filter_hbhe) baby.pass_hbhe() = true;
+    else baby.pass_hbhe() = false;
+  }
+
   //////////////////// pfcands  //////////////////////
   edm::Handle<pat::PackedCandidateCollection> pfcands;
   iEvent.getByLabel("packedPFCandidates", pfcands);
@@ -165,6 +195,51 @@ vCands bmaker_basic::writeElectrons(baby_basic &baby, edm::Handle<pat::ElectronC
   return signalelectrons;
 }
 
+void bmaker_basic::writeTriggers(baby_basic &baby, const edm::TriggerNames &names, 
+                                 edm::Handle<edm::TriggerResults> triggerBits, 
+                                 edm::Handle<pat::PackedTriggerPrescales> triggerPrescales){
+  baby.trig().resize(trig_name.size(), false);
+  baby.trig_prescale().resize(trig_name.size(), -1.);
+  for (unsigned int itrig(0); itrig < triggerBits->size(); itrig++) {
+    for(unsigned itn(0); itn < trig_name.size(); itn++){
+      if(names.triggerName(itrig).find(trig_name[itn])!=string::npos){
+        baby.trig()[itn] = triggerBits->accept(itrig);
+        baby.trig_prescale()[itn] = triggerPrescales->getPrescaleForIndex(itrig);
+      }
+    }
+  }
+}
+
+void bmaker_basic::writeHLTObjects(baby_basic &baby, const edm::TriggerNames &names, 
+                                   edm::Handle<pat::TriggerObjectStandAloneCollection> triggerObjects){
+  for (pat::TriggerObjectStandAlone obj : *triggerObjects) {
+    obj.unpackPathNames(names);
+    TString name(obj.collection());
+    float objpt(obj.pt());
+    if(name=="hltPFMETProducer::HLT") baby.onmet() = objpt;
+    else if(name=="hltPFHT::HLT") baby.onht() = objpt; // There's 2 of these, and we want the last one
+    else if(name=="hltL3MuonCandidates::HLT" && baby.onmaxmu()<objpt) baby.onmaxmu() = objpt;
+    else if(name=="hltEgammaCandidates::HLT" && baby.onmaxel()<objpt) baby.onmaxel() = objpt;
+  }
+}
+
+void bmaker_basic::writeFilters(baby_basic &baby, const edm::TriggerNames &fnames,
+                                  edm::Handle<edm::TriggerResults> filterBits,
+                                  edm::Handle<reco::VertexCollection> vtx){
+  for (unsigned int i(0); i < filterBits->size(); ++i) {
+    string name = fnames.triggerName(i);
+    bool pass = static_cast<bool>(filterBits->accept(i));
+    if (name=="Flag_goodVertices") baby.pass_goodv() = pass;
+    else if (name=="Flag_CSCTightHaloFilter") baby.pass_cschalo() = pass;
+    else if (name=="Flag_eeBadScFilter") baby.pass_eebadsc() = pass;
+    else if (name=="Flag_HBHENoiseFilter") baby.pass_hbhe() = pass;
+  }
+
+  baby.pass_goodv() &= hasGoodPV(vtx);
+  baby.pass_jets() = true; //FIXME
+
+  baby.pass() = baby.pass_hbhe() && baby.pass_goodv() && baby.pass_cschalo() && baby.pass_eebadsc() && baby.pass_jets();
+}
 
 /*
  _____                 _                   _                 
@@ -176,10 +251,40 @@ vCands bmaker_basic::writeElectrons(baby_basic &baby, edm::Handle<pat::ElectronC
 */
 
 bmaker_basic::bmaker_basic(const edm::ParameterSet& iConfig){
-  outname = TString(iConfig.getParameter<std::string>("outputFile"));
+  outname = TString(iConfig.getParameter<string>("outputFile"));
   outfile = new TFile(outname, "recreate");
   outfile->cd();
   baby.tree_.SetDirectory(outfile);
+
+  trig_name = vector<TString>();
+  trig_name.push_back("HLT_PFHT350_PFMET100_NoiseCleaned_v");     // 0
+  trig_name.push_back("HLT_Mu15_IsoVVVL_PFHT350_PFMET70_v");      // 1
+  trig_name.push_back("HLT_Mu15_IsoVVVL_PFHT600_v");        // 2
+  trig_name.push_back("HLT_Mu15_IsoVVVL_BTagCSV0p72_PFHT400_v");    // 3
+  trig_name.push_back("HLT_Mu15_PFHT300_v");          // 4
+  trig_name.push_back("HLT_Ele15_IsoVVVL_PFHT350_PFMET70_v");     // 5
+  trig_name.push_back("HLT_Ele15_IsoVVVL_PFHT600_v");       // 6
+  trig_name.push_back("HLT_Ele15_IsoVVVL_BTagCSV0p72_PFHT400_v");   // 7
+  trig_name.push_back("HLT_Ele15_PFHT300_v");         // 8
+  trig_name.push_back("HLT_DoubleMu8_Mass8_PFHT300_v");       // 9
+  trig_name.push_back("HLT_DoubleEle8_CaloIdM_TrackIdM_Mass8_PFHT300_v"); // 10
+  trig_name.push_back("HLT_PFHT475_v");           // 11
+  trig_name.push_back("HLT_PFHT800_v");           // 12
+  trig_name.push_back("HLT_PFMET120_NoiseCleaned_Mu5_v");     // 13
+  trig_name.push_back("HLT_PFMET170_NoiseCleaned_v");       // 14
+  trig_name.push_back("HLT_DoubleIsoMu17_eta2p1_v");        // 15
+  trig_name.push_back("HLT_Mu17_TrkIsoVVL_v");          // 16
+  trig_name.push_back("HLT_IsoMu17_eta2p1_v");          // 17
+  trig_name.push_back("HLT_IsoMu20_v");           // 18
+  trig_name.push_back("HLT_IsoMu24_eta2p1_v");          // 19
+  trig_name.push_back("HLT_IsoMu27_v");           // 20
+  trig_name.push_back("HLT_Mu50_v");            // 21
+  trig_name.push_back("HLT_Ele27_eta2p1_WPLoose_Gsf_v");      // 22
+  trig_name.push_back("HLT_Ele32_eta2p1_WPLoose_Gsf_v");      // 23
+  trig_name.push_back("HLT_Ele105_CaloIdVT_GsfTrkIdT_v");     // 24
+  trig_name.push_back("HLT_DoubleEle33_CaloIdL_GsfTrkIdVL_MW_v");   // 25
+  trig_name.push_back("HLT_DoubleEle24_22_eta2p1_WPLoose_Gsf_v");   // 26
+
 }
 
 
@@ -187,10 +292,22 @@ bmaker_basic::~bmaker_basic(){
   outfile->cd();
   baby.tree_.SetDirectory(outfile);
   baby.Write();
+
+  TTree treeglobal("treeglobal", "treeglobal");
+  // treeglobal.Branch("nev_file", &num_entries);
+  // treeglobal.Branch("nev_sample", &num_total_entries);
+  // treeglobal.Branch("commit", &commit);
+  // treeglobal.Branch("model", &model);
+  // treeglobal.Branch("type", &type);
+  // treeglobal.Branch("root_version", &root_version);
+  // treeglobal.Branch("root_tutorial_dir", &root_tutorial_dir);
+  treeglobal.Branch("trig_name", &trig_name);
+  treeglobal.Fill();
+  treeglobal.SetDirectory(outfile);
+  treeglobal.Write();
+  
   outfile->Close();
-
   cout<<endl<<"Written baby in "<<outname<<endl<<endl;
-
   delete outfile;
 }
 

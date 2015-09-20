@@ -46,3 +46,19 @@ std::vector<float> els_d0
 std::vector<bool> els_medium
 std::vector<bool> els_tight
 std::vector<int> els_charge
+
+###################   Trigger   ##################
+std::vector<bool> trig;
+std::vector<float> trig_prescale;
+float onht
+float onmet
+float onmaxmu
+float onmaxel
+
+###################   Quality   ##################
+bool pass_jets;
+bool pass_hbhe;
+bool pass_goodv;
+bool pass_cschalo;
+bool pass_eebadsc;
+bool pass;

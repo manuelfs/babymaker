@@ -218,10 +218,9 @@ namespace phys_objects{
   }
 
   double getPFIsolation(edm::Handle<pat::PackedCandidateCollection> pfcands,
-			const reco::Candidate* ptcl,  
-			double r_iso_min, double r_iso_max, double kt_scale,
-			bool charged_only) {
-
+                        const reco::Candidate* ptcl,  
+                        double r_iso_min, double r_iso_max, double kt_scale,
+                        bool charged_only) {
     if (ptcl->pt()<5.) return 99999.;
 
     double deadcone_nh(0.), deadcone_ch(0.), deadcone_ph(0.), deadcone_pu(0.);
@@ -232,58 +231,58 @@ namespace phys_objects{
     } else {
       //deadcone_ch = 0.0001; deadcone_pu = 0.01; deadcone_ph = 0.01;deadcone_nh = 0.01; // maybe use muon cones??
     }
-
-    double iso_nh(0.); double iso_ch(0.); 
-    double iso_ph(0.); double iso_pu(0.);
+    double iso_nh(0.), iso_ch(0.), iso_ph(0.), iso_pu(0.);
     double ptThresh(0.5), r_mini(kt_scale/ptcl->pt());
     if(ptcl->isElectron()) ptThresh = 0;
-    double r_iso = max(r_iso_min, min(r_iso_max, r_mini));
+    double r_iso(max(r_iso_min, min(r_iso_max, r_mini)));
+
     for (const pat::PackedCandidate &pfc : *pfcands) {
       if (abs(pfc.pdgId())<7) continue;
-
       double dr = deltaR(pfc, *ptcl);
       if (dr > r_iso) continue;
-      
-      //////////////////  NEUTRALS  /////////////////////////
-      if (pfc.charge()==0){
-	if (pfc.pt()>ptThresh) {
-	  /////////// PHOTONS ////////////
-	  if (abs(pfc.pdgId())==22) {
-	    if(dr < deadcone_ph) continue;
-	    iso_ph += pfc.pt();
-	    /////////// NEUTRAL HADRONS ////////////
-	  } else if (abs(pfc.pdgId())==130) {
-	    if(dr < deadcone_nh) continue;
-	    iso_nh += pfc.pt();
-	  }
-	}
-	//////////////////  CHARGED from PV  /////////////////////////
-      } else if (pfc.fromPV()>1){
-	if (abs(pfc.pdgId())==211) {
-	  if(dr < deadcone_ch) continue;
-	  iso_ch += pfc.pt();
-	}
-	//////////////////  CHARGED from PU  /////////////////////////
+      if (pfc.charge()==0){ //neutrals
+        if (pfc.pt()>ptThresh) {
+          if (abs(pfc.pdgId())==22) { //photons
+            if(dr < deadcone_ph) continue;
+            iso_ph += pfc.pt();
+          } else if (abs(pfc.pdgId())==130) { //neutral hadrons
+            if(dr < deadcone_nh) continue;
+            iso_nh += pfc.pt();
+          }
+        }
+      } else if (pfc.fromPV()>1){ //charged from PV
+        if (abs(pfc.pdgId())==211) {
+          if(dr < deadcone_ch) continue;
+          iso_ch += pfc.pt();
+        }
       } else {
-	if (pfc.pt()>ptThresh){
-	  if(dr < deadcone_pu) continue;
-	  iso_pu += pfc.pt();
-	}
+        if (pfc.pt()>ptThresh){ //charged from PU
+          if(dr < deadcone_pu) continue;
+          iso_pu += pfc.pt();
+        }
       }
-    }
+    } // Loop over pf cands
+
     double iso(0.);
     if (charged_only){
       iso = iso_ch;
     } else {
-      iso = iso_ph + iso_nh;
-      iso -= 0.5*iso_pu;
+      iso = iso_ph + iso_nh - 0.5*iso_pu;
       if (iso>0) iso += iso_ch;
       else iso = iso_ch;
     }
-    iso = iso/ptcl->pt();
-
-    return iso;
+    return iso/ptcl->pt();
   }
 
-
+  bool hasGoodPV(edm::Handle<reco::VertexCollection> vtx){
+    bool one_good_pv(false);
+    for(unsigned ipv(0); ipv < vtx->size(); ipv++){
+      const double pv_rho(sqrt(pow(vtx->at(ipv).x(),2) + pow(vtx->at(ipv).y(),2)));
+      if(vtx->at(ipv).ndof()>4 && fabs(vtx->at(ipv).z())<24. && pv_rho<2.0 && vtx->at(ipv).isFake()==0){
+        one_good_pv = true;
+        break;
+      }
+    } // Loop over vertices
+    return one_good_pv;
+  }
 }

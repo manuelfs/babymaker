@@ -5,6 +5,7 @@
 
 // System include files
 #include <memory>
+#include <vector>
 
 // FW include files
 #include "FWCore/Framework/interface/Frameworkfwd.h"
@@ -15,31 +16,37 @@
 // FW physics include files
 #include "DataFormats/PatCandidates/interface/Muon.h"
 #include "DataFormats/PatCandidates/interface/Electron.h"
+#include "DataFormats/PatCandidates/interface/Jet.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/PatCandidates/interface/PackedCandidate.h"
 
 // ROOT include files
 #include "TTree.h"
+#include "TString.h"
 
 // User include files
 #include "babymaker/bmaker/interface/baby_basic.hh"
 
-// Class declaration
+typedef std::vector<const reco::Candidate*> vCands;
 
+// Class declaration
 class bmaker_basic : public edm::EDAnalyzer {
 public:
   explicit bmaker_basic(const edm::ParameterSet&);
   ~bmaker_basic();
 
-  TFile * outfile;
+  TFile *outfile;
   TString outname;
   baby_basic baby;
 
   // Functions that do the branch writing
-  void WriteMuons(baby_basic &baby, edm::Handle<pat::MuonCollection> muons, 
-		  edm::Handle<pat::PackedCandidateCollection> pfcands, edm::Handle<reco::VertexCollection> vtx);
-  void WriteElectrons(baby_basic &baby, edm::Handle<pat::ElectronCollection> electrons, 
-		      edm::Handle<pat::PackedCandidateCollection> pfcands, edm::Handle<reco::VertexCollection> vtx);
+  void writeJets(baby_basic &baby, edm::Handle<pat::JetCollection> jets, vCands leptons);
+  vCands writeMuons(baby_basic &baby, edm::Handle<pat::MuonCollection> muons, 
+		    edm::Handle<pat::PackedCandidateCollection> pfcands, 
+		    edm::Handle<reco::VertexCollection> vtx);
+  vCands writeElectrons(baby_basic &baby, edm::Handle<pat::ElectronCollection> electrons, 
+			edm::Handle<pat::PackedCandidateCollection> pfcands, 
+			edm::Handle<reco::VertexCollection> vtx);
 
 
   static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);

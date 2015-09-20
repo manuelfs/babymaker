@@ -18,17 +18,55 @@ using namespace phys_objects;
 namespace phys_objects{
 
   ////////////////////////////////////////////////////////////////////////////////
-  ///////////////////////////////////// CUTS /////////////////////////////////////
+  ///////////////////////////////////// JETS /////////////////////////////////////
   ////////////////////////////////////////////////////////////////////////////////
-  // float JetPtCut		= 30.0;
-  // float JetEtaCut               = 2.4;
+  bool isGoodJet(const pat::Jet &jet, float ptcut, float etacut, vCands leptons){
+    // pT, eta cuts
+    if(jet.pt() <= ptcut) return false;
+    if(fabs(jet.eta()) > etacut) return false;
+    // ID cuts
+    if(!idJet(jet)) return false;
+    // Lepton cleaning
+    if(leptonInJet(jet, leptons)) return false;
 
-  float SignalLeptonPtCut	= 20.0;
-  float VetoLeptonPtCut		= 10.0;
-  float MuonEtaCut		= 2.4;
-  float ElectronEtaCut		= 2.5;
-  float MuonMiniIsoCut		= 0.2;
-  float ElectronMiniIsoCut	= 0.1;
+    return true;
+  }
+
+  bool leptonInJet(const pat::Jet &jet, vCands leptons){
+    for(unsigned ilep(0); ilep < leptons.size(); ilep++){
+      int indpf(-1);
+      unsigned npflep(leptons[ilep]->numberOfSourceCandidatePtrs());
+      if(leptons[ilep]->isMuon() && npflep==1) indpf = 0;
+      if(leptons[ilep]->isElectron() && npflep==2) indpf = 1; // Electrons have a missing reference at 0
+      if(indpf>=0){ // The lepton is PF -> looping over PF cands in jet
+	for (unsigned ijet(0); ijet < jet.numberOfSourceCandidatePtrs(); ijet++) 
+	  if(jet.sourceCandidatePtr(ijet) == leptons[ilep]->sourceCandidatePtr(indpf))
+	    return true;
+      } else { // The lepton is not PF, matching with deltaR
+	if(deltaR(jet, *leptons[ilep]) < 0.4) return true;
+      }
+    } // Loop over leptons
+
+    return false;
+  }
+
+  bool idJet(const pat::Jet &jet){
+    //LooseID from https://twiki.cern.ch/twiki/bin/view/CMS/JetID
+    double eta = jet.eta();
+    double NHF = jet.neutralHadronEnergyFraction();
+    double NEMF = jet.neutralEmEnergyFraction();
+    double CHF = jet.chargedHadronEnergyFraction();
+    double CEMF = jet.chargedEmEnergyFraction();
+    double NumConst = jet.chargedMultiplicity()+jet.neutralMultiplicity();
+    double NumNeutralParticles =jet.neutralMultiplicity();
+    double CHM = jet.chargedMultiplicity(); 
+    //double MUF = jet.muonEnergyFraction(); //Only used in TightID
+    
+    bool eta_leq_3 = (NHF<0.99 && NEMF<0.99 && NumConst>1) && ((fabs(eta)<=2.4 && CHF>0 && CHM>0 && CEMF<0.99) || fabs(eta)>2.4);
+    bool eta_g_3 = NEMF<0.90 && NumNeutralParticles>10;
+
+    return  (eta_leq_3 && fabs(eta)<=3.) || (eta_g_3 && fabs(eta)>3.);
+  }
 
 
   ////////////////////////////////////////////////////////////////////////////////
@@ -38,7 +76,7 @@ namespace phys_objects{
   //////////////////// Muons
   bool isSignalMuon(const pat::Muon &lep, edm::Handle<reco::VertexCollection> vtx, double lep_iso){
     // pT, eta cuts
-    if(lep.pt() <= VetoLeptonPtCut) return false;
+    if(lep.pt() <= SignalLeptonPtCut) return false;
     if(fabs(lep.eta()) > MuonEtaCut) return false;
     // ID cuts (includes dz/dz0 cuts)
     if(!idMuon(lep, vtx, kMedium)) return false;

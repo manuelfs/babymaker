@@ -1,4 +1,5 @@
-// Creates baby tree with basic branches
+//// BMAKER_BASIC: Creates baby tree with basic branches
+//// Function names follow the first-lowercase, following words-uppercase. No underscores
 
 
 // System include files
@@ -13,8 +14,6 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 
 // FW physics include files
-#include "DataFormats/PatCandidates/interface/Jet.h"
-#include "CondFormats/JetMETObjects/interface/FactorizedJetCorrector.h"
 
 // ROOT include files
 #include "TFile.h"
@@ -44,21 +43,24 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
   iEvent.getByLabel("packedPFCandidates", pfcands);
 
   ////////////////////// Leptons /////////////////////
-  edm::Handle<pat::MuonCollection> muons;
-  iEvent.getByLabel("slimmedMuons", muons);
-  WriteMuons(baby, muons, pfcands, vtx);
-  edm::Handle<pat::ElectronCollection> electrons;
-  iEvent.getByLabel("slimmedElectrons", electrons);
-  WriteElectrons(baby, electrons, pfcands, vtx);
+  vCands leptons, muons, electrons;
+  edm::Handle<pat::MuonCollection> allmuons;
+  iEvent.getByLabel("slimmedMuons", allmuons);
+  muons = writeMuons(baby, allmuons, pfcands, vtx);
+  edm::Handle<pat::ElectronCollection> allelectrons;
+  iEvent.getByLabel("slimmedElectrons", allelectrons);
+  electrons = writeElectrons(baby, allelectrons, pfcands, vtx);
 
+  // Putting muons and electrons together
   baby.nleps() = baby.nmus() + baby.nels();
   baby.nvleps() = baby.nvmus() + baby.nvels();
+  leptons = muons;
+  leptons.insert(leptons.end(), electrons.begin(), electrons.end());
 
   ////////////////////// Jets /////////////////////
-  edm::Handle<pat::JetCollection> jets;
-  iEvent.getByLabel("patJetsReapplyJEC", jets);
-  baby.njets() = jets->size();
-//FactorizedJetCorrector *jet_corrector_;
+  edm::Handle<pat::JetCollection> alljets;
+  iEvent.getByLabel("patJetsReapplyJEC", alljets);
+  writeJets(baby, alljets, leptons);
 
   ////////////////// Filling the tree //////////////////
   baby.Fill();
@@ -75,8 +77,31 @@ ______                      _                     _ _   _
                                                                  __/ |
                                                                 |___/ 
 */
-void bmaker_basic::WriteMuons(baby_basic &baby, edm::Handle<pat::MuonCollection> muons, 
-			      edm::Handle<pat::PackedCandidateCollection> pfcands, edm::Handle<reco::VertexCollection> vtx){
+void bmaker_basic::writeJets(baby_basic &baby, edm::Handle<pat::JetCollection> jets, vCands leptons){
+  baby.njets() = 0; baby.nbl() = 0; baby.nbm() = 0;  baby.nbt() = 0;  
+  baby.ht() = 0.;
+  for (unsigned int ijet(0); ijet < jets->size(); ijet++) {
+    const pat::Jet &jet = (*jets)[ijet];
+    if(!isGoodJet(jet, JetPtCut, JetEtaCut, leptons)) continue;
+
+    baby.jets_pt().push_back(jet.pt());
+    baby.jets_eta().push_back(jet.eta());
+    baby.jets_phi().push_back(jet.phi());
+    
+    float csv(jet.bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags"));
+    baby.jets_csv().push_back(csv);
+    if(csv>CSVLoose)  baby.nbl()++;
+    if(csv>CSVMedium) baby.nbm()++;
+    if(csv>CSVTight)  baby.nbt()++;
+
+    baby.njets()++;
+    baby.ht() += jet.pt();
+  } // Loop over jets  
+} 
+
+vCands bmaker_basic::writeMuons(baby_basic &baby, edm::Handle<pat::MuonCollection> muons, 
+				edm::Handle<pat::PackedCandidateCollection> pfcands, edm::Handle<reco::VertexCollection> vtx){
+  vCands signalmuons; 
   baby.nmus() = 0; baby.nvmus() = 0;
   for (unsigned int ilep(0); ilep < muons->size(); ilep++) {
     const pat::Muon &lep = (*muons)[ilep];    
@@ -92,18 +117,24 @@ void bmaker_basic::WriteMuons(baby_basic &baby, edm::Handle<pat::MuonCollection>
     baby.mus_dz().push_back(dz);
     baby.mus_d0().push_back(d0);
     baby.mus_charge().push_back(lep.charge());
-    baby.mus_medium().push_back(lep.isMediumMuon());
-    baby.mus_tight().push_back(lep.isTightMuon(vtx->at(0)));
+    baby.mus_medium().push_back(idMuon(lep, vtx, kMedium));
+    baby.mus_tight().push_back(idMuon(lep, vtx, kTight));
     baby.mus_miniso().push_back(lep_iso);
 
     if(isVetoMuon(lep, vtx, lep_iso))   baby.nvmus()++;
-    if(isSignalMuon(lep, vtx, lep_iso)) baby.nmus()++;
+    if(isSignalMuon(lep, vtx, lep_iso)) {
+      baby.nmus()++;
+      signalmuons.push_back(dynamic_cast<const reco::Candidate *>(&lep));
+    }
   } // Loop over muons
+  
+  return signalmuons;
 }
 
 
-void bmaker_basic::WriteElectrons(baby_basic &baby, edm::Handle<pat::ElectronCollection> electrons, 
-				  edm::Handle<pat::PackedCandidateCollection> pfcands, edm::Handle<reco::VertexCollection> vtx){
+vCands bmaker_basic::writeElectrons(baby_basic &baby, edm::Handle<pat::ElectronCollection> electrons, 
+				    edm::Handle<pat::PackedCandidateCollection> pfcands, edm::Handle<reco::VertexCollection> vtx){
+  vCands signalelectrons; 
   baby.nels() = 0; baby.nvels() = 0;
   for (unsigned int ilep(0); ilep < electrons->size(); ilep++) {
     const pat::Electron &lep = (*electrons)[ilep];    
@@ -125,9 +156,13 @@ void bmaker_basic::WriteElectrons(baby_basic &baby, edm::Handle<pat::ElectronCol
     baby.els_miniso().push_back(lep_iso);
 
     if(isVetoElectron(lep, vtx, lep_iso))   baby.nvels()++;
-    if(isSignalElectron(lep, vtx, lep_iso)) baby.nels()++;
+    if(isSignalElectron(lep, vtx, lep_iso)) {
+      baby.nels()++;
+      signalelectrons.push_back(dynamic_cast<const reco::Candidate *>(&lep));
+    }
   } // Loop over electrons
 
+  return signalelectrons;
 }
 
 

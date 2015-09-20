@@ -3,12 +3,20 @@ int run
 int lumiblock
 int event
 
+####################   Global   ###################
+float ht
 
 ###################   Jets   ##################
 int njets
+int nbl
+int nbm
+int nbt
+
 std::vector<float> jets_pt
 std::vector<float> jets_eta
 std::vector<float> jets_phi
+std::vector<float> jets_m
+std::vector<float> jets_csv
 
 ##################   Leptons   ################
 int nleps

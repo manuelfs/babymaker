@@ -5,11 +5,29 @@
 
 #include "FWCore/Framework/interface/ESHandle.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
+#include "DataFormats/PatCandidates/interface/Jet.h"
 #include "DataFormats/PatCandidates/interface/Muon.h"
 #include "DataFormats/PatCandidates/interface/Electron.h"
 #include "DataFormats/PatCandidates/interface/PackedCandidate.h"
 
 namespace phys_objects{
+  typedef std::vector<const reco::Candidate*> vCands;
+
+  ///////////////// CUTS ///////////////////////
+  float JetPtCut		= 30.0;
+  float JetEtaCut               = 2.4;
+  float CSVLoose                = 0.605;
+  float CSVMedium               = 0.890;
+  float CSVTight                = 0.970;
+
+  float SignalLeptonPtCut	= 20.0;
+  float VetoLeptonPtCut		= 10.0;
+  float MuonEtaCut		= 2.4;
+  float ElectronEtaCut		= 2.5;
+  float MuonMiniIsoCut		= 0.2;
+  float ElectronMiniIsoCut	= 0.1;
+
+
   enum CutLevel{kVeto, kLoose, kMedium, kTight};
   template<class T>
   T chooseVal(CutLevel threshold, T valVeto, T valLoose, T valMedium, T valTight){
@@ -27,6 +45,9 @@ namespace phys_objects{
    return valVeto;
  }
 
+  bool isGoodJet(const pat::Jet &jet, float ptcut, float etacut, vCands leptons = vCands());
+  bool leptonInJet(const pat::Jet &jet, vCands leptons);
+  bool idJet(const pat::Jet &jet);
 
   bool isVetoMuon(const pat::Muon &lep, edm::Handle<reco::VertexCollection> vtx, double lep_iso);
   bool isSignalMuon(const pat::Muon &lep, edm::Handle<reco::VertexCollection> vtx, double lep_iso);

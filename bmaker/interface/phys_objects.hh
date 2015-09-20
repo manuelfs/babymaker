@@ -5,6 +5,7 @@
 
 #include "FWCore/Framework/interface/ESHandle.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
+#include "DataFormats/PatCandidates/interface/Muon.h"
 #include "DataFormats/PatCandidates/interface/Electron.h"
 #include "DataFormats/PatCandidates/interface/PackedCandidate.h"
 
@@ -27,11 +28,20 @@ namespace phys_objects{
  }
 
 
+  bool isVetoMuon(const pat::Muon &lep, edm::Handle<reco::VertexCollection> vtx, double lep_iso);
+  bool isSignalMuon(const pat::Muon &lep, edm::Handle<reco::VertexCollection> vtx, double lep_iso);
+  bool idMuon(const pat::Muon &lep, edm::Handle<reco::VertexCollection> vtx, CutLevel threshold);
+  bool vertexMuon(const pat::Muon &lep, edm::Handle<reco::VertexCollection> vtx, double &dz, double &d0);
+
+  bool isVetoElectron(const pat::Electron &lep, edm::Handle<reco::VertexCollection> vtx, double lep_iso);
+  bool isSignalElectron(const pat::Electron &lep, edm::Handle<reco::VertexCollection> vtx, double lep_iso);
+  bool idElectron(const pat::Electron &lep, edm::Handle<reco::VertexCollection> vtx, CutLevel threshold, bool do_iso=false);
+  bool vertexElectron(const pat::Electron &lep, edm::Handle<reco::VertexCollection> vtx, double &dz, double &d0);
+
   double getPFIsolation(edm::Handle<pat::PackedCandidateCollection> pfcands,
 			const reco::Candidate* ptcl,  
 			double r_iso_min, double r_iso_max, double kt_scale,
 			bool charged_only);
-  bool IdElectron(const pat::Electron &lep, CutLevel threshold, edm::Handle<reco::VertexCollection> vtx, bool do_iso);
 }
 
 #endif

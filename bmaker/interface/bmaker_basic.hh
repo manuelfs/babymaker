@@ -42,8 +42,6 @@ public:
 		      edm::Handle<pat::PackedCandidateCollection> pfcands, edm::Handle<reco::VertexCollection> vtx);
 
 
-  static float MinSignalLeptonPt, MinVetoLeptonPt, MuMiniIsoCut, ElMiniIsoCut;
-
   static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 
 private:

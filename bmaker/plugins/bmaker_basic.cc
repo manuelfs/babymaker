@@ -14,6 +14,7 @@
 
 // FW physics include files
 #include "DataFormats/PatCandidates/interface/Jet.h"
+#include "CondFormats/JetMETObjects/interface/FactorizedJetCorrector.h"
 
 // ROOT include files
 #include "TFile.h"
@@ -25,11 +26,6 @@
 
 using namespace std;
 using namespace phys_objects;
-
-float bmaker_basic::MinSignalLeptonPt = 20.0;
-float bmaker_basic::MinVetoLeptonPt = 10.0;
-float bmaker_basic::MuMiniIsoCut = 0.2;
-float bmaker_basic::ElMiniIsoCut = 0.1;
 
 ///////////////////////// analyze: METHOD CALLED EACH EVENT ///////////////////////////
 void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
@@ -60,8 +56,9 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 
   ////////////////////// Jets /////////////////////
   edm::Handle<pat::JetCollection> jets;
-  iEvent.getByLabel("slimmedJets", jets);
+  iEvent.getByLabel("patJetsReapplyJEC", jets);
   baby.njets() = jets->size();
+//FactorizedJetCorrector *jet_corrector_;
 
   ////////////////// Filling the tree //////////////////
   baby.Fill();
@@ -83,14 +80,11 @@ void bmaker_basic::WriteMuons(baby_basic &baby, edm::Handle<pat::MuonCollection>
   baby.nmus() = 0; baby.nvmus() = 0;
   for (unsigned int ilep(0); ilep < muons->size(); ilep++) {
     const pat::Muon &lep = (*muons)[ilep];    
+    if(!isVetoMuon(lep, vtx, -99.)) continue; // Storing leptons that pass all veto cuts except for iso
+
+    double lep_iso(getPFIsolation(pfcands, dynamic_cast<const reco::Candidate *>(&lep), 0.05, 0.2, 10., false));
     double dz(0.), d0(0.);
-    if(lep.track().isAvailable()){
-      dz = lep.track()->vz()-vtx->at(0).z();
-      d0 = lep.track()->d0()-vtx->at(0).x()*sin(lep.track()->phi())+vtx->at(0).y()*cos(lep.track()->phi());
-    } //else cout<<ilep<<": (pt,eta,phi) = ("<<lep.pt()<<", "<<lep.eta()<<", "<<lep.phi()<<"). Is loose "<<lep.isLooseMuon()
-    //       <<", is tight "<<lep.isTightMuon(vtx->at(0))<<endl;
-    if(!lep.isLooseMuon() || lep.pt() <= MinVetoLeptonPt || fabs(lep.eta()) > 2.4 || 
-       fabs(dz) > 0.5 || fabs(d0) > 0.2) continue;
+    vertexMuon(lep, vtx, dz, d0); // Calculating dz and d0
 
     baby.mus_pt().push_back(lep.pt());
     baby.mus_eta().push_back(lep.eta());
@@ -100,14 +94,11 @@ void bmaker_basic::WriteMuons(baby_basic &baby, edm::Handle<pat::MuonCollection>
     baby.mus_charge().push_back(lep.charge());
     baby.mus_medium().push_back(lep.isMediumMuon());
     baby.mus_tight().push_back(lep.isTightMuon(vtx->at(0)));
-    baby.mus_miniso().push_back(getPFIsolation(pfcands, dynamic_cast<const reco::Candidate *>(&lep), 0.05, 0.2, 10., false));
+    baby.mus_miniso().push_back(lep_iso);
 
-    if(baby.mus_miniso().back() < MuMiniIsoCut){
-      baby.nvmus()++;
-      if(baby.mus_medium().back() && lep.pt() > MinSignalLeptonPt) baby.nmus()++;
-    }
+    if(isVetoMuon(lep, vtx, lep_iso))   baby.nvmus()++;
+    if(isSignalMuon(lep, vtx, lep_iso)) baby.nmus()++;
   } // Loop over muons
-
 }
 
 
@@ -116,13 +107,11 @@ void bmaker_basic::WriteElectrons(baby_basic &baby, edm::Handle<pat::ElectronCol
   baby.nels() = 0; baby.nvels() = 0;
   for (unsigned int ilep(0); ilep < electrons->size(); ilep++) {
     const pat::Electron &lep = (*electrons)[ilep];    
+    if(!isVetoElectron(lep, vtx, -99.)) continue; // Storing leptons that pass all veto cuts except for iso
+
+    double lep_iso(getPFIsolation(pfcands, dynamic_cast<const reco::Candidate *>(&lep), 0.05, 0.2, 10., false));
     double dz(0.), d0(0.);
-    if(lep.gsfTrack().isAvailable()){
-      dz = lep.gsfTrack()->vz()-vtx->at(0).z();
-      d0 = lep.gsfTrack()->d0()-vtx->at(0).x()*sin(lep.gsfTrack()->phi())+vtx->at(0).y()*cos(lep.gsfTrack()->phi());
-    } 
-    if(!IdElectron(lep, kVeto, vtx, false) || lep.pt() <= MinVetoLeptonPt || 
-       fabs(lep.superCluster()->position().eta()) > 2.5) continue;
+    vertexElectron(lep, vtx, dz, d0); // Calculating dz and d0
 
     baby.els_pt().push_back(lep.pt());
     baby.els_sceta().push_back(lep.superCluster()->position().eta());
@@ -131,14 +120,12 @@ void bmaker_basic::WriteElectrons(baby_basic &baby, edm::Handle<pat::ElectronCol
     baby.els_dz().push_back(dz);
     baby.els_d0().push_back(d0);
     baby.els_charge().push_back(lep.charge());
-    baby.els_medium().push_back(IdElectron(lep, kMedium, vtx, false));
-    baby.els_tight().push_back(IdElectron(lep, kTight, vtx, false));
-    baby.els_miniso().push_back(getPFIsolation(pfcands, dynamic_cast<const reco::Candidate *>(&lep), 0.05, 0.2, 10., false));
+    baby.els_medium().push_back(idElectron(lep, vtx, kMedium));
+    baby.els_tight().push_back(idElectron(lep, vtx, kTight));
+    baby.els_miniso().push_back(lep_iso);
 
-    if(baby.els_miniso().back() < ElMiniIsoCut){
-      baby.nvels()++;
-      if(baby.els_medium().back() && lep.pt() > MinSignalLeptonPt) baby.nels()++;
-    }
+    if(isVetoElectron(lep, vtx, lep_iso))   baby.nvels()++;
+    if(isSignalElectron(lep, vtx, lep_iso)) baby.nels()++;
   } // Loop over electrons
 
 }

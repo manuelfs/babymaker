@@ -15,6 +15,10 @@
 
 // FW physics include files
 #include "DataFormats/PatCandidates/interface/MET.h"
+#include <fastjet/JetDefinition.hh>
+#include <fastjet/PseudoJet.hh>
+#include <fastjet/ClusterSequence.hh>
+#include <fastjet/GhostedAreaSpec.hh>
 
 // ROOT include files
 #include "TFile.h"
@@ -47,7 +51,7 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
   iEvent.getByLabel("offlineSlimmedPrimaryVertices", vtx);
   edm::Handle<std::vector< PileupSummaryInfo > >  pu_info;
   if(!isData) iEvent.getByLabel("addPileupInfo", pu_info);
-  writeVertices(baby, vtx, pu_info);
+  writeVertices(vtx, pu_info);
 
   ////////////////////// Trigger /////////////////////
   edm::Handle<edm::TriggerResults> triggerBits;
@@ -55,12 +59,12 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
   edm::Handle<pat::PackedTriggerPrescales> triggerPrescales;
   iEvent.getByLabel("patTrigger",triggerPrescales);  
   const edm::TriggerNames &names = iEvent.triggerNames(*triggerBits);
-  writeTriggers(baby, names, triggerBits, triggerPrescales);
+  writeTriggers(names, triggerBits, triggerPrescales);
 
   //////////////// HLT objects //////////////////
   edm::Handle<pat::TriggerObjectStandAloneCollection> triggerObjects;
   iEvent.getByLabel("selectedPatTrigger",triggerObjects);  
-  writeHLTObjects(baby, names, triggerObjects);
+  writeHLTObjects(names, triggerObjects);
 
   //////////////////// pfcands  //////////////////////
   edm::Handle<pat::PackedCandidateCollection> pfcands;
@@ -70,15 +74,15 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
   vCands leptons, muons, electrons;
   edm::Handle<pat::MuonCollection> allmuons;
   iEvent.getByLabel("slimmedMuons", allmuons);
-  muons = writeMuons(baby, allmuons, pfcands, vtx);
+  muons = writeMuons(allmuons, pfcands, vtx);
   edm::Handle<pat::ElectronCollection> allelectrons;
   iEvent.getByLabel("slimmedElectrons", allelectrons);
-  electrons = writeElectrons(baby, allelectrons, pfcands, vtx);
+  electrons = writeElectrons(allelectrons, pfcands, vtx);
 
   // Putting muons and electrons together
   leptons = muons;
   leptons.insert(leptons.end(), electrons.begin(), electrons.end());
-  writeLeptons(baby, leptons);
+  writeLeptons(leptons);
 
   ////////////////////// mT, dphi /////////////////////
   if(leptons.size()>0){
@@ -92,9 +96,11 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
     
 
   ////////////////////// Jets /////////////////////
+  vCands jets;
   edm::Handle<pat::JetCollection> alljets;
   iEvent.getByLabel("patJetsReapplyJEC", alljets);
-  writeJets(baby, alljets, leptons);
+  jets = writeJets(alljets, leptons);
+  writeFatJets(jets);
 
   ///////////////////// Filters ///////////////////////
   edm::Handle<edm::TriggerResults> filterBits;
@@ -105,7 +111,7 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
   if(!filterBits.isValid() && isData) 
       iEvent.getByLabel(edm::InputTag("TriggerResults", "", "PAT"),filterBits);  
   const edm::TriggerNames &fnames = iEvent.triggerNames(*filterBits);
-  writeFilters(baby, fnames, filterBits, vtx);
+  writeFilters(fnames, filterBits, vtx);
   // the HBHE noise filter needs to be recomputed in early 2015 data
   edm::Handle<bool> filter_hbhe;
   if(isData && iEvent.getByLabel("HBHENoiseFilterResultProducer","HBHENoiseFilterResult",filter_hbhe)) { 
@@ -128,39 +134,137 @@ ______                      _                     _ _   _
                                                                  __/ |
                                                                 |___/ 
 */
-void bmaker_basic::writeJets(baby_basic &baby, edm::Handle<pat::JetCollection> jets, vCands leptons){
+vCands bmaker_basic::writeJets(edm::Handle<pat::JetCollection> alljets, vCands &leptons){
+  vCands jets;
   baby.njets() = 0; baby.nbl() = 0; baby.nbm() = 0;  baby.nbt() = 0;  
   baby.ht() = 0.;
   baby.pass_jets() = true; 
-  bool goodID;
-  for (unsigned int ijet(0); ijet < jets->size(); ijet++) {
-    const pat::Jet &jet = (*jets)[ijet];
-    if(!isGoodJet(jet, JetPtCut, JetEtaCut, goodID, leptons)) {
-      if(!goodID) baby.pass_jets() = false;
-      continue;
-    }
+  bool goodPtEta, isLep, goodID, goodJet;
+  for (size_t ijet(0); ijet < alljets->size(); ijet++) {
+    const pat::Jet &jet = (*alljets)[ijet];
 
+    // Saving good jets and jets corresponding to signal leptons
+    isLep = leptonInJet(jet, leptons);
+    goodID = idJet(jet);
+    goodPtEta = jet.pt() > JetPtCut && fabs(jet.eta()) <= JetEtaCut;
+    goodJet = (!isLep) && goodID && goodPtEta;
+    if(goodPtEta && !isLep && !goodID) baby.pass_jets() = false;
+    if(!isLep && !goodJet) continue;
+
+    // Filling branches
     baby.jets_pt().push_back(jet.pt());
     baby.jets_eta().push_back(jet.eta());
     baby.jets_phi().push_back(jet.phi());
     baby.jets_m().push_back(jet.mass());
+    baby.jets_islep().push_back(isLep);
     
     float csv(jet.bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags"));
     baby.jets_csv().push_back(csv);
-    if(csv>CSVLoose)  baby.nbl()++;
-    if(csv>CSVMedium) baby.nbm()++;
-    if(csv>CSVTight)  baby.nbt()++;
 
-    baby.njets()++;
-    baby.ht() += jet.pt();
+    jets.push_back(dynamic_cast<const reco::Candidate *>(&jet));
+
+    if(goodJet){
+      baby.njets()++;
+      baby.ht() += jet.pt();
+      if(csv>CSVLoose)  baby.nbl()++;
+      if(csv>CSVMedium) baby.nbm()++;
+      if(csv>CSVTight)  baby.nbt()++;
+    }
   } // Loop over jets  
+
+  return jets; // Returning jets that pass acceptance and ID, regardless of whether they're leptons
 } 
 
-vCands bmaker_basic::writeMuons(baby_basic &baby, edm::Handle<pat::MuonCollection> muons, 
+void bmaker_basic::writeFatJets(vCands &jets){
+  clusterFatJets(baby.nfjets(), baby.mj(),
+		 baby.fjets_pt(), baby.fjets_eta(),
+		 baby.fjets_phi(), baby.fjets_m(),
+		 baby.fjets_nconst(),
+		 baby.fjets_sumcsv(), baby.fjets_poscsv(),
+		 baby.fjets_btags(), baby.jets_fjet_index(),
+		 1.2, jets);
+  clusterFatJets(baby.nfjets08(), baby.mj08(),
+                 baby.fjets08_pt(), baby.fjets08_eta(),
+                 baby.fjets08_phi(), baby.fjets08_m(),
+                 baby.fjets08_nconst(),
+                 baby.fjets08_sumcsv(), baby.fjets08_poscsv(),
+                 baby.fjets08_btags(), baby.jets_fjet08_index(),
+                 0.8, jets);
+
+}
+void bmaker_basic::clusterFatJets(int &nfjets, float &mj,
+				  vector<float> &fjets_pt, 
+				  vector<float> &fjets_eta,
+				  vector<float> &fjets_phi, 
+				  vector<float> &fjets_m,
+				  vector<int> &fjets_nconst,
+				  vector<float> &fjets_sumcsv,
+				  vector<float> &fjets_poscsv,
+				  vector<int> &fjets_btags,
+				  vector<int> &jets_fjet_index,
+				  double radius,
+				  vCands &jets){
+
+  vector<fastjet::PseudoJet> sjets(0);
+  vector<float> csvs(0);
+  for(size_t ijet(0); ijet < jets.size(); ijet++){
+    const fastjet::PseudoJet this_pj(jets[ijet]->px(), jets[ijet]->py(), jets[ijet]->pz(), jets[ijet]->energy());
+    sjets.push_back(this_pj);
+    csvs.push_back(baby.jets_csv()[ijet]); // This require to have the same jets in baby and jets
+  } // Loop over skinny jets
+  fastjet::JetDefinition jet_def(fastjet::antikt_algorithm, radius);
+  fastjet::ClusterSequence cs(sjets, jet_def);
+  vector<fastjet::PseudoJet> fjets = cs.inclusive_jets();
+  sort(fjets.begin(), fjets.end(), greaterM);
+  nfjets = 0;
+  mj = 0.;
+  fjets_pt.resize(fjets.size());
+  fjets_eta.resize(fjets.size());
+  fjets_phi.resize(fjets.size());
+  fjets_m.resize(fjets.size());
+  fjets_nconst.resize(fjets.size());
+  fjets_sumcsv.resize(fjets.size());
+  fjets_poscsv.resize(fjets.size());
+  fjets_btags.resize(fjets.size());
+  jets_fjet_index.resize(jets.size());
+
+  for(size_t ipj = 0; ipj < fjets.size(); ++ipj){
+    const fastjet::PseudoJet &pj = fjets.at(ipj);
+    fjets_pt.at(ipj) = pj.pt();
+    fjets_eta.at(ipj) = pj.eta();
+    fjets_phi.at(ipj) = pj.phi_std();
+    fjets_m.at(ipj) = pj.m();
+    const vector<fastjet::PseudoJet> &cjets = pj.constituents();
+    fjets_nconst.at(ipj) = cjets.size();
+    mj += pj.m();
+    ++nfjets;
+    fjets_btags.at(ipj) = 0;
+    fjets_sumcsv.at(ipj) = 0.;
+    fjets_poscsv.at(ipj) = 0.;
+    for(size_t ijet = 0; ijet < jets.size(); ++ijet){
+      for(size_t cjet = 0; cjet < cjets.size(); ++ cjet){
+        if((cjets.at(cjet) - sjets.at(ijet)).pt() < 0.0001){
+          jets_fjet_index.at(ijet) = ipj;
+          fjets_sumcsv.at(ipj) += csvs.at(ijet);
+          if(csvs.at(ijet) > 0.){
+            fjets_poscsv.at(ipj) += csvs.at(ijet);
+          }
+          if(csvs.at(ijet) > CSVMedium){
+            ++(fjets_btags.at(ipj));
+          }
+        }
+      } // Loop over fat jet constituents
+    } // Loop over skinny jets
+  } // Loop over fat jets
+
+}
+
+
+vCands bmaker_basic::writeMuons(edm::Handle<pat::MuonCollection> muons, 
 				edm::Handle<pat::PackedCandidateCollection> pfcands, edm::Handle<reco::VertexCollection> vtx){
   vCands signalmuons; 
   baby.nmus() = 0; baby.nvmus() = 0;
-  for (unsigned int ilep(0); ilep < muons->size(); ilep++) {
+  for (size_t ilep(0); ilep < muons->size(); ilep++) {
     const pat::Muon &lep = (*muons)[ilep];    
     if(!isVetoMuon(lep, vtx, -99.)) continue; // Storing leptons that pass all veto cuts except for iso
 
@@ -189,11 +293,11 @@ vCands bmaker_basic::writeMuons(baby_basic &baby, edm::Handle<pat::MuonCollectio
 }
 
 
-vCands bmaker_basic::writeElectrons(baby_basic &baby, edm::Handle<pat::ElectronCollection> electrons, 
+vCands bmaker_basic::writeElectrons(edm::Handle<pat::ElectronCollection> electrons, 
 				    edm::Handle<pat::PackedCandidateCollection> pfcands, edm::Handle<reco::VertexCollection> vtx){
   vCands signalelectrons; 
   baby.nels() = 0; baby.nvels() = 0;
-  for (unsigned int ilep(0); ilep < electrons->size(); ilep++) {
+  for (size_t ilep(0); ilep < electrons->size(); ilep++) {
     const pat::Electron &lep = (*electrons)[ilep];    
     if(!isVetoElectron(lep, vtx, -99.)) continue; // Storing leptons that pass all veto cuts except for iso
 
@@ -223,11 +327,11 @@ vCands bmaker_basic::writeElectrons(baby_basic &baby, edm::Handle<pat::ElectronC
   return signalelectrons;
 }
 
-void bmaker_basic::writeLeptons(baby_basic &baby, vCands leptons){ 
+void bmaker_basic::writeLeptons(vCands &leptons){ 
   baby.nleps() = baby.nmus() + baby.nels();
   baby.nvleps() = baby.nvmus() + baby.nvels();
   sort(leptons.begin(), leptons.end(), greaterPt);
-  for(unsigned ind(0); ind < leptons.size(); ind++) {
+  for(size_t ind(0); ind < leptons.size(); ind++) {
     baby.leps_pt().push_back(leptons[ind]->pt());
     baby.leps_eta().push_back(leptons[ind]->eta());
     baby.leps_phi().push_back(leptons[ind]->phi());
@@ -236,13 +340,13 @@ void bmaker_basic::writeLeptons(baby_basic &baby, vCands leptons){
 }
 
 
-void bmaker_basic::writeTriggers(baby_basic &baby, const edm::TriggerNames &names, 
+void bmaker_basic::writeTriggers(const edm::TriggerNames &names, 
                                  edm::Handle<edm::TriggerResults> triggerBits, 
                                  edm::Handle<pat::PackedTriggerPrescales> triggerPrescales){
   baby.trig().resize(trig_name.size(), false);
   baby.trig_prescale().resize(trig_name.size(), -1.);
-  for (unsigned int itrig(0); itrig < triggerBits->size(); itrig++) {
-    for(unsigned itn(0); itn < trig_name.size(); itn++){
+  for (size_t itrig(0); itrig < triggerBits->size(); itrig++) {
+    for(size_t itn(0); itn < trig_name.size(); itn++){
       if(names.triggerName(itrig).find(trig_name[itn])!=string::npos){
         baby.trig()[itn] = triggerBits->accept(itrig);
         baby.trig_prescale()[itn] = triggerPrescales->getPrescaleForIndex(itrig);
@@ -251,7 +355,7 @@ void bmaker_basic::writeTriggers(baby_basic &baby, const edm::TriggerNames &name
   }
 }
 
-void bmaker_basic::writeHLTObjects(baby_basic &baby, const edm::TriggerNames &names, 
+void bmaker_basic::writeHLTObjects(const edm::TriggerNames &names, 
                                    edm::Handle<pat::TriggerObjectStandAloneCollection> triggerObjects){
   for (pat::TriggerObjectStandAlone obj : *triggerObjects) {
     obj.unpackPathNames(names);
@@ -264,10 +368,10 @@ void bmaker_basic::writeHLTObjects(baby_basic &baby, const edm::TriggerNames &na
   }
 }
 
-void bmaker_basic::writeFilters(baby_basic &baby, const edm::TriggerNames &fnames,
+void bmaker_basic::writeFilters(const edm::TriggerNames &fnames,
                                   edm::Handle<edm::TriggerResults> filterBits,
                                   edm::Handle<reco::VertexCollection> vtx){
-  for (unsigned int i(0); i < filterBits->size(); ++i) {
+  for (size_t i(0); i < filterBits->size(); ++i) {
     string name = fnames.triggerName(i);
     bool pass = static_cast<bool>(filterBits->accept(i));
     if (name=="Flag_goodVertices") baby.pass_goodv() = pass;
@@ -281,11 +385,11 @@ void bmaker_basic::writeFilters(baby_basic &baby, const edm::TriggerNames &fname
   baby.pass() = baby.pass_hbhe() && baby.pass_goodv() && baby.pass_cschalo() && baby.pass_eebadsc() && baby.pass_jets();
 }
 
-void bmaker_basic::writeVertices(baby_basic &baby, edm::Handle<reco::VertexCollection> vtx,
+void bmaker_basic::writeVertices(edm::Handle<reco::VertexCollection> vtx,
 				 edm::Handle<std::vector< PileupSummaryInfo > >  pu_info){  
   baby.npv() = vtx->size();
   if(pu_info.isValid()){
-    for(unsigned bc(0); bc<pu_info->size(); ++bc){
+    for(size_t bc(0); bc<pu_info->size(); ++bc){
       if(pu_info->at(bc).getBunchCrossing()==0){
 	baby.ntrupv() = pu_info->at(bc).getPU_NumInteractions();
 	baby.ntrupv_mean() = pu_info->at(bc).getTrueNumInteractions();

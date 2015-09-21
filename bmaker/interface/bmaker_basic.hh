@@ -43,23 +43,36 @@ public:
   bool isData;
 
   // Functions that do the branch writing
-  void writeJets(baby_basic &baby, edm::Handle<pat::JetCollection> jets, vCands leptons);
-  vCands writeMuons(baby_basic &baby, edm::Handle<pat::MuonCollection> muons, 
+  vCands writeJets(edm::Handle<pat::JetCollection> alljets, vCands &leptons);
+  void writeFatJets(vCands &jets);
+  void clusterFatJets(int &nfjets, float &mj,
+		      std::vector<float> &fjets_pt, 
+		      std::vector<float> &fjets_eta,
+		      std::vector<float> &fjets_phi, 
+		      std::vector<float> &fjets_m,
+		      std::vector<int> &fjets_nconst,
+		      std::vector<float> &fjets_sumcsv,
+		      std::vector<float> &fjets_poscsv,
+		      std::vector<int> &fjets_btags,
+		      std::vector<int> &jets_fjet_index,
+		      double radius,
+		      vCands &jets);
+  vCands writeMuons(edm::Handle<pat::MuonCollection> muons, 
 		    edm::Handle<pat::PackedCandidateCollection> pfcands, 
 		    edm::Handle<reco::VertexCollection> vtx);
-  vCands writeElectrons(baby_basic &baby, edm::Handle<pat::ElectronCollection> electrons, 
+  vCands writeElectrons(edm::Handle<pat::ElectronCollection> electrons, 
 			edm::Handle<pat::PackedCandidateCollection> pfcands, 
 			edm::Handle<reco::VertexCollection> vtx);
-  void writeLeptons(baby_basic &baby, vCands leptons); 
-  void writeTriggers(baby_basic &baby, const edm::TriggerNames &names, 
+  void writeLeptons(vCands &leptons); 
+  void writeTriggers(const edm::TriggerNames &names, 
                      edm::Handle<edm::TriggerResults> triggerBits,
                      edm::Handle<pat::PackedTriggerPrescales> triggerPrescales);
-  void writeHLTObjects(baby_basic &baby, const edm::TriggerNames &names, 
+  void writeHLTObjects(const edm::TriggerNames &names, 
                        edm::Handle<pat::TriggerObjectStandAloneCollection> triggerObjects);
-  void writeFilters(baby_basic &baby, const edm::TriggerNames &fnames,
+  void writeFilters(const edm::TriggerNames &fnames,
                     edm::Handle<edm::TriggerResults> filterBits,
                     edm::Handle<reco::VertexCollection> vtx);
-  void writeVertices(baby_basic &baby, edm::Handle<reco::VertexCollection> vtx,
+  void writeVertices(edm::Handle<reco::VertexCollection> vtx,
 		     edm::Handle<std::vector< PileupSummaryInfo > >  pu_info);  
 
   std::vector<TString> trig_name;

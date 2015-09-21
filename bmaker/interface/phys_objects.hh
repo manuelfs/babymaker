@@ -46,7 +46,6 @@ namespace phys_objects{
    return valVeto;
  }
 
-  bool isGoodJet(const pat::Jet &jet, float ptcut, float etacut, bool &goodID, vCands leptons = vCands());
   bool leptonInJet(const pat::Jet &jet, vCands leptons);
   bool idJet(const pat::Jet &jet);
 

@@ -24,6 +24,9 @@ std::vector<float> jets_eta
 std::vector<float> jets_phi
 std::vector<float> jets_m
 std::vector<float> jets_csv
+std::vector<bool>  jets_islep
+std::vector<int>   jets_fjet_index
+std::vector<int>   jets_fjet08_index
 
 ##################   Leptons   ################
 int nleps
@@ -74,3 +77,27 @@ bool pass_goodv;
 bool pass_cschalo;
 bool pass_eebadsc;
 bool pass;
+
+################  Fat Jets   ##################
+int nfjets
+float mj
+std::vector<float> fjets_pt
+std::vector<float> fjets_eta
+std::vector<float> fjets_phi
+std::vector<float> fjets_m
+std::vector<float> fjets_sumcsv
+std::vector<float> fjets_poscsv
+std::vector<int> fjets_btags
+std::vector<int> fjets_nconst
+
+int nfjets08
+float mj08
+std::vector<float> fjets08_pt
+std::vector<float> fjets08_eta
+std::vector<float> fjets08_phi
+std::vector<float> fjets08_m
+std::vector<float> fjets08_sumcsv
+std::vector<float> fjets08_poscsv
+std::vector<int> fjets08_btags
+std::vector<int> fjets08_nconst
+

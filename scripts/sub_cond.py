@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import os, sys, subprocess
 import glob
 import string
@@ -30,11 +32,12 @@ if not (cmssw+"/src/babymaker") in codedir:
 
 # Default output directory is the "out" sub-directory of the current working directory.
 outdir = os.getcwd()+'/out/'
+sub_time = time.strftime("%y%m%d_%H%M%S", time.gmtime())
 if not (os.path.exists(os.path.realpath(outdir))):
     sys.exit("\033[91m ERROR: Directory",outdir,"does not exist. Please either create a sym link or dir. \033[0m")
-outdir = os.path.join(os.path.realpath(outdir),time.strftime("%y%m%d_%H%M%S", time.gmtime()))
+outdir = os.path.join(os.path.realpath(outdir),sub_time)
 os.mkdir(outdir)
-logdir = os.path.join("logs",time.strftime("%y%m%d_%H%M%S", time.gmtime()))
+logdir = os.path.join("logs",sub_time)
 if not os.path.exists(logdir):
     if (host=='sd') or (host=='sb' and ('hadoop' not in logdir)): 
         os.makedirs(logdir)
@@ -45,14 +48,43 @@ if not os.path.exists(logdir):
 print "INFO: Babies will be written to: ", outdir
 print "INFO: Logs will be written to:   ", logdir
 
-# Get list of datasets and corresponding list of files
-flists = glob.glob("run/flist*.txt")
-filedict = {}
-for fnm in flists:
+# read in datasets to run over based on the flist_*txt files present in the run directory
+# from there, read the filenames for each dataset and add up the number of events
+# firstly, bookkeep datasets that are not extensions
+flists_pd = [x for x in glob.glob("run/flist*.txt") if "_ext" not in x]
+files_dict = {}
+nent_dict = {}
+for fnm in flists_pd:
     dsname = string.replace(string.replace(fnm,"run/flist_",""),".txt","")
     print "INFO: Adding PD: ",dsname
+    nent_dict[dsname] = 0
+    files_dict[dsname] = []
     with open(fnm) as f:
-        filedict[dsname] = f.read().splitlines()
+        for line in f:
+            split_line = line.split()
+            nent_dict[dsname] = nent_dict[dsname] + int(split_line[0])
+            files_dict[dsname].append(split_line[1])
+# now add the extensions...
+flists_ext = glob.glob("run/flist*_ext*.txt")
+for fnm in flists_ext:
+    dsname = string.replace(string.replace(fnm,"run/flist_",""),".txt","")
+    print "INFO: Adding PD extension: ",dsname
+    #get name without the "_ext?" to check if we are already bookeeping some files from the original version of that dataset
+    split_dsname = string.split(dsname,"_ext")
+    orig_dsname = split_dsname[0] + split_dsname[1][1:] # skip one character after "_ext" which is the number of the extension
+    if (orig_dsname not in files_dict.keys()): # in case it was an extension of a dataset we are not running on
+        nent_dict[orig_dsname] = 0
+        files_dict[orig_dsname] = []
+    with open(fnm) as f:
+        for line in f:
+            split_line = line.split()
+            nent_dict[orig_dsname] = nent_dict[orig_dsname] + int(split_line[0])
+            files_dict[orig_dsname].append(split_line[1])
+
+# add up number of events in each dataset 
+for ds in files_dict.keys():
+    for iline in files_dict[ds]:
+        files_dict[ds] 
 
 # Need a valid proxy to submit condor jobs at UCSD
 proxy,valid = "",""
@@ -61,10 +93,12 @@ if host=="sd":
     tmp = proc.stdout.read()
     if "Proxy not found" in tmp: 
         sys.exit("\033[91mERROR: Proxy not found. \033[0m")
+    elif ('timeleft' in tmp) and ('0:00:00' in tmp):
+        sys.exit("\033[91mERROR: Proxy expired. \033[0m")
     else: 
         for info in tmp.splitlines():
             if ("/tmp/x509" in info): proxy = "/tmp/x509"+(string.split(info,"/tmp/x509"))[1]
-            if ("timeleft" in info): valid = string.replace(info, "timeleft", "Time left before proxy expires")
+            if ("timeleft" in info): valid = "Time left before proxy expires: "+info.split()[-1]
 
     print "INFO: Found proxy path",proxy
     print "INFO:",valid
@@ -74,10 +108,11 @@ if (host=="sd"):
     print "INFO: Creating babymaker tarball to transfer to work node..."
     os.system("tar --directory=../ --exclude=\"babymaker/out\" --exclude=\"babymaker/run\" -c babymaker | xz > ../babymaker.tar.xz")
 
-for ds in filedict.keys():
+for ds in files_dict.keys():
+
 
     # with the list of files in hand, determine the number of condor jobs     
-    nfiles = len(filedict[ds])
+    nfiles = len(files_dict[ds])
     njobs = (nfiles/maxfiles) if (nfiles%maxfiles==0) else (nfiles/maxfiles+1)
 
     for job in range(0,njobs):
@@ -92,7 +127,8 @@ for ds in filedict.keys():
 
         # list of arguments to the cmsRun job
         args = []
-        args.append("inputFiles=\\\n"+",\\\n".join(filedict[ds][(job*maxfiles):((job+1)*maxfiles)]))
+        args.append("nEventsTotal="+str(nent_dict[ds]))
+        args.append("inputFiles=\\\n"+",\\\n".join(files_dict[ds][(job*maxfiles):((job+1)*maxfiles)]))
         if (host=="sb"): args.append("outputFile="+outpath)
         else: args.append("outputFile="+bname+".root")
 

@@ -1,6 +1,13 @@
+#!/usr/bin/env python
+
 import os, sys 
 import glob
 import string
+import ROOT
+from ROOT import TChain
+
+# silence ROOT
+ROOT.gROOT.ProcessLine("gErrorIgnoreLevel = kError;")
 
 # List of datasets to run over, could be either MC or data
 # Enter either the dataset path starting with "/store", e.g:
@@ -9,8 +16,9 @@ import string
 # /TTJets_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/MINIAODSIM
 datasets = []
 datasets.append('/TTJets_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/MINIAODSIM')
-datasets.append('/store/data/Run2015B/HTMHT/MINIAOD/PromptReco-v1')
-
+# datasets.append('/store/mc/RunIISpring15DR74/TTJets_SingleLeptFromT_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v1')
+# datasets.append('/store/mc/RunIISpring15DR74/TTJets_SingleLeptFromT_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9_ext1-v1')
+# datasets.append('/store/data/Run2015B/HTMHT/MINIAOD/PromptReco-v1')
 
 
 # Directory to dump all condor-related logs, schell and cmd files
@@ -54,7 +62,10 @@ for ds in datasets:
     
     fnm = '_'.join(['flist',dsname,campaign,reco+'.txt'])
     f = open(rundir+'/'+fnm,"w")
-    for file in filelist:
-        file = string.replace(file,hadoop,'')
-        f.write(file+'\n')
+    for i,ifile in enumerate(filelist):
+        tree = TChain("Events")
+        tree.Add(ifile)
+        nent = tree.GetEntries()
+        ifile = string.replace(ifile,hadoop,'')
+        f.write('{:<10}'.format(nent)+ifile+'\n')
     f.close()

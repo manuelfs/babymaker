@@ -15,6 +15,7 @@
 
 // FW physics include files
 #include "DataFormats/PatCandidates/interface/MET.h"
+#include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
 #include <fastjet/JetDefinition.hh>
 #include <fastjet/PseudoJet.hh>
 #include <fastjet/ClusterSequence.hh>
@@ -30,6 +31,7 @@
 
 using namespace std;
 using namespace phys_objects;
+using namespace utilities;
 
 ///////////////////////// analyze: METHOD CALLED EACH EVENT ///////////////////////////
 void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
@@ -39,6 +41,18 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
   baby.run() = iEvent.id().run();
   baby.event() = iEvent.id().event();
   baby.lumiblock() = iEvent.luminosityBlock();
+
+  const float luminosity = 1000.;
+
+  
+  baby.weight() = 1.;
+  if(!isData) {
+    edm::Handle<GenEventInfoProduct> gen_event_info;
+    iEvent.getByLabel("generator", gen_event_info);
+    if (gen_event_info->weight() < 0) baby.weight() *= -1.;
+    baby.weight() *= crossSection(outname)*luminosity / static_cast<double>(nevents_total);
+
+  }
 
   //////////////////////////// MET ///////////////////////////
   edm::Handle<pat::METCollection> mets;
@@ -410,7 +424,8 @@ void bmaker_basic::writeVertices(edm::Handle<reco::VertexCollection> vtx,
 
 bmaker_basic::bmaker_basic(const edm::ParameterSet& iConfig):
   outname(TString(iConfig.getParameter<string>("outputFile"))),
-  met_label(iConfig.getParameter<edm::InputTag>("met")){
+  met_label(iConfig.getParameter<edm::InputTag>("met")),
+  nevents_total(iConfig.getParameter<unsigned int>("nEventsTotal")){
 
   outfile = new TFile(outname, "recreate");
   outfile->cd();
@@ -455,7 +470,7 @@ bmaker_basic::~bmaker_basic(){
 
   TTree treeglobal("treeglobal", "treeglobal");
   // treeglobal.Branch("nev_file", &num_entries);
-  // treeglobal.Branch("nev_sample", &num_total_entries);
+  treeglobal.Branch("nev_total", &nevents_total);
   // treeglobal.Branch("commit", &commit);
   // treeglobal.Branch("model", &model);
   // treeglobal.Branch("type", &type);

@@ -12,8 +12,6 @@
 #include "babymaker/bmaker/interface/phys_objects.hh"
 
 using namespace std;
-using namespace phys_objects;
-
 
 namespace phys_objects{
 

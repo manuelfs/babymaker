@@ -2,10 +2,17 @@
 ### Configuration file to make basic babies from miniAOD
 ###########################################################
 
+maxEvents = 100
+
 ###### Input parameters parsing 
 import FWCore.ParameterSet.Config as cms
 from FWCore.ParameterSet.VarParsing import VarParsing
 options = VarParsing ('analysis')
+options.register('nEventsTotal',
+                 maxEvents,
+                 VarParsing.multiplicity.singleton,
+                 VarParsing.varType.int,
+                 "Total number of events in dataset for event weight calculation.")
 options.parseArguments()
 
 ###### Defining Baby process, input and output files 
@@ -15,12 +22,13 @@ process.source = cms.Source("PoolSource",
 )
 process.baby_basic = cms.EDAnalyzer('bmaker_basic',
                                     outputFile = cms.string(options.outputFile),
-                                    met = cms.InputTag("slimmedMETs")
+                                    met = cms.InputTag("slimmedMETs"),
+                                    nEventsTotal = cms.uint32(options.nEventsTotal)
 )
 
 ###### Setting up number of events, and reporing frequency 
 process.load("FWCore.MessageService.MessageLogger_cfi")
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(maxEvents) )
 process.MessageLogger.cerr.FwkReport.reportEvery = 10
 
 ###### Setting global tag 

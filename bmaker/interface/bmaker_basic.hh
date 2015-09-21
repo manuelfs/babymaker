@@ -80,6 +80,7 @@ public:
   // Input parameters
   TString outname;
   edm::InputTag met_label;
+  unsigned int nevents_total;
 
   static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 

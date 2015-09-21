@@ -28,7 +28,7 @@ else
     rm -rf $tmp_file
 fi
 
-cd ../..  ## Going back to the base babymaker folder
+cd ../../..  ## Going back to the base babymaker folder
 
 if [ $# -ne 0 ] && [ "$1" == "clean" ]
 then
@@ -36,5 +36,7 @@ then
 else
     scram b -j$(getconf _NPROCESSORS_ONLN)
 fi
+
+cd babymaker
 
 exit $exit_code

@@ -68,6 +68,13 @@ process.patJetsReapplyJEC = patJetsUpdated.clone(
     jetCorrFactorsSource = cms.VInputTag(cms.InputTag("patJetCorrFactorsReapplyJEC"))
 )
 
+###### HBHE
+## HBHE noise filter needs to be recomputed in early 2015 data
+process.load('CommonTools.RecoAlgos.HBHENoiseFilterResultProducer_cfi')
+process.HBHENoiseFilterResultProducer.minZeros = cms.int32(99999)
+
+###### Path
 process.p = cms.Path(process.patJetCorrFactorsReapplyJEC*
                      process.patJetsReapplyJEC*
+                     process.HBHENoiseFilterResultProducer*
                      process.baby_basic)

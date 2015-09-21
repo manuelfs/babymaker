@@ -22,6 +22,7 @@
 #include "DataFormats/PatCandidates/interface/PackedTriggerPrescales.h"
 #include "DataFormats/PatCandidates/interface/TriggerObjectStandAlone.h"
 #include "DataFormats/PatCandidates/interface/PackedCandidate.h"
+#include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h" 
 
 // ROOT include files
 #include "TTree.h"
@@ -39,6 +40,7 @@ public:
 
   TFile *outfile;
   baby_basic baby;
+  bool isData;
 
   // Functions that do the branch writing
   void writeJets(baby_basic &baby, edm::Handle<pat::JetCollection> jets, vCands leptons);
@@ -57,6 +59,8 @@ public:
   void writeFilters(baby_basic &baby, const edm::TriggerNames &fnames,
                     edm::Handle<edm::TriggerResults> filterBits,
                     edm::Handle<reco::VertexCollection> vtx);
+  void writeVertices(baby_basic &baby, edm::Handle<reco::VertexCollection> vtx,
+		     edm::Handle<std::vector< PileupSummaryInfo > >  pu_info);  
 
   std::vector<TString> trig_name;
 

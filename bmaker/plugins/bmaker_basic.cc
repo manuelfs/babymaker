@@ -29,6 +29,7 @@ using namespace phys_objects;
 
 ///////////////////////// analyze: METHOD CALLED EACH EVENT ///////////////////////////
 void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+  isData = iEvent.isRealData();
 
   ////////////////////// Event info /////////////////////
   baby.run() = iEvent.id().run();
@@ -44,6 +45,9 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
   ////////////////////// Primary vertices /////////////////////
   edm::Handle<reco::VertexCollection> vtx;
   iEvent.getByLabel("offlineSlimmedPrimaryVertices", vtx);
+  edm::Handle<std::vector< PileupSummaryInfo > >  pu_info;
+  if(!isData) iEvent.getByLabel("addPileupInfo", pu_info);
+  writeVertices(baby, vtx, pu_info);
 
   ////////////////////// Trigger /////////////////////
   edm::Handle<edm::TriggerResults> triggerBits;
@@ -57,23 +61,6 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
   edm::Handle<pat::TriggerObjectStandAloneCollection> triggerObjects;
   iEvent.getByLabel("selectedPatTrigger",triggerObjects);  
   writeHLTObjects(baby, names, triggerObjects);
-
-  ///////////////////// Filters ///////////////////////
-  edm::Handle<edm::TriggerResults> filterBits;
-  std::string processLabel = iEvent.isRealData() ? "RECO":"PAT"; // prompt reco runs in the "RECO" process
-  iEvent.getByLabel(edm::InputTag("TriggerResults","",processLabel),filterBits);  
-  // re-recoed data will have the process label "PAT" rather than "RECO";
-  // if the attempt to find data with "RECO" process fails, try "PAT"
-  if(!filterBits.isValid() && iEvent.isRealData()) 
-      iEvent.getByLabel(edm::InputTag("TriggerResults", "", "PAT"),filterBits);  
-  const edm::TriggerNames &fnames = iEvent.triggerNames(*filterBits);
-  writeFilters(baby, fnames, filterBits, vtx);
-  // the HBHE noise filter needs to be recomputed in early 2015 data
-  edm::Handle<bool> filter_hbhe;
-  if(iEvent.isRealData() && iEvent.getByLabel("HBHENoiseFilterResultProducer","HBHENoiseFilterResult",filter_hbhe)) { 
-    if(*filter_hbhe) baby.pass_hbhe() = true;
-    else baby.pass_hbhe() = false;
-  }
 
   //////////////////// pfcands  //////////////////////
   edm::Handle<pat::PackedCandidateCollection> pfcands;
@@ -109,6 +96,23 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
   iEvent.getByLabel("patJetsReapplyJEC", alljets);
   writeJets(baby, alljets, leptons);
 
+  ///////////////////// Filters ///////////////////////
+  edm::Handle<edm::TriggerResults> filterBits;
+  std::string processLabel = isData ? "RECO":"PAT"; // prompt reco runs in the "RECO" process
+  iEvent.getByLabel(edm::InputTag("TriggerResults","",processLabel),filterBits);  
+  // re-recoed data will have the process label "PAT" rather than "RECO";
+  // if the attempt to find data with "RECO" process fails, try "PAT"
+  if(!filterBits.isValid() && isData) 
+      iEvent.getByLabel(edm::InputTag("TriggerResults", "", "PAT"),filterBits);  
+  const edm::TriggerNames &fnames = iEvent.triggerNames(*filterBits);
+  writeFilters(baby, fnames, filterBits, vtx);
+  // the HBHE noise filter needs to be recomputed in early 2015 data
+  edm::Handle<bool> filter_hbhe;
+  if(isData && iEvent.getByLabel("HBHENoiseFilterResultProducer","HBHENoiseFilterResult",filter_hbhe)) { 
+    if(*filter_hbhe) baby.pass_hbhe() = true;
+    else baby.pass_hbhe() = false;
+  }
+
   ////////////////// Filling the tree //////////////////
   baby.Fill();
 }
@@ -127,9 +131,14 @@ ______                      _                     _ _   _
 void bmaker_basic::writeJets(baby_basic &baby, edm::Handle<pat::JetCollection> jets, vCands leptons){
   baby.njets() = 0; baby.nbl() = 0; baby.nbm() = 0;  baby.nbt() = 0;  
   baby.ht() = 0.;
+  baby.pass_jets() = true; 
+  bool goodID;
   for (unsigned int ijet(0); ijet < jets->size(); ijet++) {
     const pat::Jet &jet = (*jets)[ijet];
-    if(!isGoodJet(jet, JetPtCut, JetEtaCut, leptons)) continue;
+    if(!isGoodJet(jet, JetPtCut, JetEtaCut, goodID, leptons)) {
+      if(!goodID) baby.pass_jets() = false;
+      continue;
+    }
 
     baby.jets_pt().push_back(jet.pt());
     baby.jets_eta().push_back(jet.eta());
@@ -200,6 +209,7 @@ vCands bmaker_basic::writeElectrons(baby_basic &baby, edm::Handle<pat::ElectronC
     baby.els_d0().push_back(d0);
     baby.els_charge().push_back(lep.charge());
     baby.els_medium().push_back(idElectron(lep, vtx, kMedium));
+    baby.els_ispf().push_back(lep.numberOfSourceCandidatePtrs()==2 && abs(lep.sourceCandidatePtr(1)->pdgId())==11);
     baby.els_tight().push_back(idElectron(lep, vtx, kTight));
     baby.els_miniso().push_back(lep_iso);
 
@@ -267,9 +277,22 @@ void bmaker_basic::writeFilters(baby_basic &baby, const edm::TriggerNames &fname
   }
 
   baby.pass_goodv() &= hasGoodPV(vtx);
-  baby.pass_jets() = true; //FIXME
 
   baby.pass() = baby.pass_hbhe() && baby.pass_goodv() && baby.pass_cschalo() && baby.pass_eebadsc() && baby.pass_jets();
+}
+
+void bmaker_basic::writeVertices(baby_basic &baby, edm::Handle<reco::VertexCollection> vtx,
+				 edm::Handle<std::vector< PileupSummaryInfo > >  pu_info){  
+  baby.npv() = vtx->size();
+  if(pu_info.isValid()){
+    for(unsigned bc(0); bc<pu_info->size(); ++bc){
+      if(pu_info->at(bc).getBunchCrossing()==0){
+	baby.ntrupv() = pu_info->at(bc).getPU_NumInteractions();
+	baby.ntrupv_mean() = pu_info->at(bc).getTrueNumInteractions();
+	break;
+      }
+    } // Loop over true PVs
+  } // if pu_info is valid
 }
 
 /*

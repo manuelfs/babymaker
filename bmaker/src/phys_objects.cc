@@ -20,14 +20,18 @@ namespace phys_objects{
   ////////////////////////////////////////////////////////////////////////////////
   ///////////////////////////////////// JETS /////////////////////////////////////
   ////////////////////////////////////////////////////////////////////////////////
-  bool isGoodJet(const pat::Jet &jet, float ptcut, float etacut, vCands leptons){
+  bool isGoodJet(const pat::Jet &jet, float ptcut, float etacut, bool &goodID, vCands leptons){
+    goodID = true; // False only if jet passes acceptance, is not a lepton, and bad ID
     // pT, eta cuts
     if(jet.pt() <= ptcut) return false;
     if(fabs(jet.eta()) > etacut) return false;
-    // ID cuts
-    if(!idJet(jet)) return false;
     // Lepton cleaning
     if(leptonInJet(jet, leptons)) return false;
+    // ID cuts
+    if(!idJet(jet)) {
+      goodID = false;
+      return false;
+    }
 
     return true;
   }

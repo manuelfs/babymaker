@@ -4,6 +4,9 @@ int lumiblock
 int event
 
 ####################   Global   ###################
+int npv
+int ntrupv
+float ntrupv_mean
 float met
 float met_phi
 float ht
@@ -51,6 +54,7 @@ std::vector<float> els_phi
 std::vector<float> els_miniso
 std::vector<float> els_dz
 std::vector<float> els_d0
+std::vector<bool> els_ispf
 std::vector<bool> els_medium
 std::vector<bool> els_tight
 std::vector<int> els_charge

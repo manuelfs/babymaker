@@ -15,9 +15,9 @@ ROOT.gROOT.ProcessLine("gErrorIgnoreLevel = kError;")
 # or the dataset name as found in DAS, e.g:
 # /TTJets_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/MINIAODSIM
 datasets = []
-datasets.append('/TTJets_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/MINIAODSIM')
+datasets.append('/store/mc/RunIISpring15DR74/TTJets_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v2/')
 # datasets.append('/store/mc/RunIISpring15DR74/TTJets_SingleLeptFromT_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v1')
-# datasets.append('/store/mc/RunIISpring15DR74/TTJets_SingleLeptFromT_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9_ext1-v1')
+datasets.append('/store/mc/RunIISpring15DR74/TTJets_SingleLeptFromT_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9_ext1-v1')
 # datasets.append('/store/data/Run2015B/HTMHT/MINIAOD/PromptReco-v1')
 
 
@@ -61,12 +61,13 @@ for ds in datasets:
         continue
     
     fnm = '_'.join(['flist',dsname,campaign,reco+'.txt'])
-    print "INFO: Finding number of events in:", '_'.join([dsname,campaign,reco+'.txt'])
+    print "INFO: Finding number of events in:", '_'.join([dsname,campaign,reco])
     f = open(rundir+'/'+fnm,"w")
+    tree = TChain("Events")
     for i,ifile in enumerate(filelist):
-        tree = TChain("Events")
         tree.Add(ifile)
-        nent = tree.GetEntries()
         ifile = string.replace(ifile,hadoop,'')
-        f.write('{:<10}'.format(nent)+ifile+'\n')
+        f.write(ifile+'\n')
+    nent = tree.GetEntries()
+    f.write('nEventsTotal: '+'{:<10}'.format(nent))
     f.close()

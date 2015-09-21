@@ -29,14 +29,14 @@ print "INFO: Setting up job submission at",('UCSB.' if host=='sb' else 'UCSD.')
 # Job submission should be done from the babymaker directory, which is under a valid CMSSW release
 codedir = os.getcwd()
 if not (cmssw+"/src/babymaker") in codedir:
-    print "\033[91m ERROR: Please submit from path consistent with: <basedir>/"+cmssw+"/src/babymaker/ \033[0m"
+    print "\033[91mERROR: Please submit from path consistent with: <basedir>/"+cmssw+"/src/babymaker/ \033[0m\n"
     sys.exit(0)
 
 # Default output directory is the "out" sub-directory of the current working directory.
 outdir = os.getcwd()+'/out/'
 sub_time = time.strftime("%y%m%d_%H%M%S", time.gmtime())
 if not (os.path.exists(os.path.realpath(outdir))):
-    sys.exit("\033[91m ERROR: Directory"+outdir+"does not exist. Please either create a sym link or dir. \033[0m")
+    sys.exit("\033[91m ERROR: Directory "+outdir+" does not exist. Please either create a sym link or dir. \033[0m")
 outdir = os.path.join(os.path.realpath(outdir),sub_time)
 os.mkdir(outdir)
 logdir = os.path.join("logs",sub_time)
@@ -59,13 +59,8 @@ nent_dict = {}
 for fnm in flists_pd:
     dsname = string.replace(string.replace(fnm,"run/flist_",""),".txt","")
     print "INFO: Adding PD: ",dsname
-    nent_dict[dsname] = 0
-    files_dict[dsname] = []
-    with open(fnm) as f:
-        for line in f:
-            split_line = line.split()
-            nent_dict[dsname] = nent_dict[dsname] + int(split_line[0])
-            files_dict[dsname].append(split_line[1])
+    with open(fnm) as f: files_dict[dsname] = f.readlines()
+    nent_dict[dsname] = int(files_dict[dsname].pop().split().pop())
 # now add the extensions...
 flists_ext = glob.glob("run/flist*_ext*.txt")
 for fnm in flists_ext:
@@ -75,14 +70,12 @@ for fnm in flists_ext:
     split_dsname = string.split(dsname,"_ext")
     orig_dsname = split_dsname[0] + split_dsname[1][1:] # skip one character after "_ext" which is the number of the extension
     if (orig_dsname not in files_dict.keys()): # in case it was an extension of a dataset we are not running on
-        nent_dict[orig_dsname] = 0
-        files_dict[orig_dsname] = []
-    with open(fnm) as f:
-        for line in f:
-            split_line = line.split()
-            nent_dict[orig_dsname] = nent_dict[orig_dsname] + int(split_line[0])
-            files_dict[orig_dsname].append(split_line[1])
-
+        with open(fnm) as f: files_dict[orig_dsname] = f.readlines()
+        nent_dict[orig_dsname] = int(files_dict[orig_dsname].pop().split().pop())
+    else:
+        with open(fnm) as f: files_dict[orig_dsname].extend(f.readlines())
+        nent_dict[orig_dsname] = nent_dict[orig_dsname] + int(files_dict[orig_dsname].pop().split().pop())
+    
 # add up number of events in each dataset 
 for ds in files_dict.keys():
     for iline in files_dict[ds]:
@@ -111,7 +104,6 @@ if (host=="sd"):
     os.system("tar --directory=../ --exclude=\"babymaker/out\" --exclude=\"babymaker/run\" -c babymaker | xz > ../babymaker.tar.xz")
 
 for ds in files_dict.keys():
-
 
     # with the list of files in hand, determine the number of condor jobs     
     nfiles = len(files_dict[ds])

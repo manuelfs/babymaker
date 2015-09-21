@@ -12,12 +12,11 @@ on lxplus:
     git clone git@github.com:manuelfs/babymaker
     cd babymaker
     ./compile.sh
-    cmsRun bmaker/python/bmaker_basic_cfg.py
+    cmsRun bmaker/python/bmaker_basic_cfg.py inputFiles=/store/mc/RunIISpring15DR74/TTJets_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v2/70000/36C96F13-700D-E511-B171-20CF300E9ECF.root outputFile=baby_TTJets_TuneCUETP8M1_13TeV-madgraphMLM-pythia8.root nEventsSample=100 nEvents=100
 
 The `compile.sh` script first compiles the `babymaker/bmaker/genfiles` folder, which
 automatically generates the tree structure (see below), and then issues `scram b`
-in the `babymaker` folder. Note that this does not compile other CMSSW packages
-outside `babymaker`.
+in the `babymaker` folder. 
 
 #### Adding new branches
 
@@ -48,7 +47,7 @@ Log on to cms18 and set up the code are described above.
 Define the datasets you want to run over in `babymaker/scripts/get_flist.py` and run it
 from the `babymaker` folder with 
 
-    python babymaker/scripts/get_flist.py 
+    ./scripts/get_flist.py 
 
 This step finds the paths for the files that are to be run over.
 
@@ -57,5 +56,5 @@ with lots of disk space, such as `ln -s /net/cms2/cms2r0/user/out/ out`.
 
 Then log on to cms0 and submit the condor jobs from `babymaker` folder with
 
-    python scripts/sub_cond.py
+    ./scripts/sub_cond.py
 

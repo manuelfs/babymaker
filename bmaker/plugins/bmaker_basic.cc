@@ -50,7 +50,7 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
     edm::Handle<GenEventInfoProduct> gen_event_info;
     iEvent.getByLabel("generator", gen_event_info);
     if (gen_event_info->weight() < 0) baby.weight() *= -1.;
-    baby.weight() *= crossSection(outname)*luminosity / static_cast<double>(nevents_total);
+    baby.weight() *= crossSection(outname)*luminosity / static_cast<double>(nevents_sample);
 
   }
 
@@ -131,6 +131,13 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
   if(isData && iEvent.getByLabel("HBHENoiseFilterResultProducer","HBHENoiseFilterResult",filter_hbhe)) { 
     if(*filter_hbhe) baby.pass_hbhe() = true;
     else baby.pass_hbhe() = false;
+  }
+
+  ///////////////////// Truth Info ///////////////////////
+  if (!isData) {
+    edm::Handle<LHEEventProduct> lhe_info;
+    iEvent.getByLabel( "externalLHEProducer", lhe_info);
+    writeGenInfo(lhe_info);
   }
 
   ////////////////// Filling the tree //////////////////
@@ -413,6 +420,26 @@ void bmaker_basic::writeVertices(edm::Handle<reco::VertexCollection> vtx,
   } // if pu_info is valid
 }
 
+void bmaker_basic::writeGenInfo(edm::Handle<LHEEventProduct> lhe_info){
+  baby.nisr_me()=0; baby.ht_isr_me()=0.; baby.ntruleps()=0;
+  for ( unsigned int icount = 0 ; icount < (unsigned int)lhe_info->hepeup().NUP; icount++ ) {
+    unsigned int pdgid = abs(lhe_info->hepeup().IDUP[icount]);
+    int status = lhe_info->hepeup().ISTUP[icount];
+    int mom1id = abs(lhe_info->hepeup().IDUP[lhe_info->hepeup().MOTHUP[icount].first-1]);
+    int mom2id = abs(lhe_info->hepeup().IDUP[lhe_info->hepeup().MOTHUP[icount].second-1]);
+    float px = (lhe_info->hepeup().PUP[icount])[0];
+    float py = (lhe_info->hepeup().PUP[icount])[1];
+    float pt = sqrt(px*px+py*py);
+
+    if(status==1 && (pdgid<6 || pdgid==21) && mom1id!=6 && mom1id!=24 && mom2id!=6 && mom2id!=24) {
+       baby.nisr_me()++;
+       baby.ht_isr_me() += pt;
+    }
+
+    if (status==1 && (pdgid==11 || pdgid==13 || pdgid==15)) baby.ntruleps()++;
+  } // Loop over generator particles
+}
+
 /*
  _____                 _                   _                 
 /  __ \               | |                 | |                
@@ -425,7 +452,7 @@ void bmaker_basic::writeVertices(edm::Handle<reco::VertexCollection> vtx,
 bmaker_basic::bmaker_basic(const edm::ParameterSet& iConfig):
   outname(TString(iConfig.getParameter<string>("outputFile"))),
   met_label(iConfig.getParameter<edm::InputTag>("met")),
-  nevents_total(iConfig.getParameter<unsigned int>("nEventsTotal")){
+  nevents_sample(iConfig.getParameter<unsigned int>("nEventsSample")){
 
   outfile = new TFile(outname, "recreate");
   outfile->cd();
@@ -470,7 +497,7 @@ bmaker_basic::~bmaker_basic(){
 
   TTree treeglobal("treeglobal", "treeglobal");
   // treeglobal.Branch("nev_file", &num_entries);
-  treeglobal.Branch("nev_total", &nevents_total);
+  treeglobal.Branch("nev_total", &nevents_sample);
   // treeglobal.Branch("commit", &commit);
   // treeglobal.Branch("model", &model);
   // treeglobal.Branch("type", &type);

@@ -23,6 +23,7 @@
 #include "DataFormats/PatCandidates/interface/TriggerObjectStandAlone.h"
 #include "DataFormats/PatCandidates/interface/PackedCandidate.h"
 #include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h" 
+#include "SimDataFormats/GeneratorProducts/interface/LHEEventProduct.h"
 
 // ROOT include files
 #include "TTree.h"
@@ -74,13 +75,14 @@ public:
                     edm::Handle<reco::VertexCollection> vtx);
   void writeVertices(edm::Handle<reco::VertexCollection> vtx,
 		     edm::Handle<std::vector< PileupSummaryInfo > >  pu_info);  
+  void writeGenInfo(edm::Handle<LHEEventProduct> lhe_info);
 
   std::vector<TString> trig_name;
 
   // Input parameters
   TString outname;
   edm::InputTag met_label;
-  unsigned int nevents_total;
+  unsigned int nevents_sample;
 
   static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 

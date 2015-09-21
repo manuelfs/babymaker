@@ -51,7 +51,7 @@ for ds in datasets:
         campaign = (string.split(tags[2],'-'))[0]
         reco = tags[2][len(campaign)+1:]
         filetype = tags[3]
-    if 'PromptReco' in ds: path = '/'.join([hadoop+'/store/data',campaign,dsname,filetype,reco,'*/*/*/*/*root'])
+    if 'Run2015' in ds: path = '/'.join([hadoop+'/store/data',campaign,dsname,filetype,reco,'*/*/*/*/*root'])
     else: path = '/'.join([hadoop+'/store/mc',campaign,dsname,filetype,reco,'*/*root'])
 
     filelist = glob.glob(path)
@@ -61,6 +61,7 @@ for ds in datasets:
         continue
     
     fnm = '_'.join(['flist',dsname,campaign,reco+'.txt'])
+    print "INFO: Finding number of events in:", '_'.join([dsname,campaign,reco+'.txt'])
     f = open(rundir+'/'+fnm,"w")
     for i,ifile in enumerate(filelist):
         tree = TChain("Events")

@@ -102,3 +102,7 @@ std::vector<float> fjets08_poscsv
 std::vector<int> fjets08_btags
 std::vector<int> fjets08_nconst
 
+################  Truth   ##################
+int ntruleps
+int nisr_me
+float ht_isr_me

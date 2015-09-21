@@ -5,6 +5,8 @@ import glob
 import string
 import time
 
+print 
+
 # Maximum number of input MINIAOD files per condor job
 maxfiles = 20
 
@@ -34,7 +36,7 @@ if not (cmssw+"/src/babymaker") in codedir:
 outdir = os.getcwd()+'/out/'
 sub_time = time.strftime("%y%m%d_%H%M%S", time.gmtime())
 if not (os.path.exists(os.path.realpath(outdir))):
-    sys.exit("\033[91m ERROR: Directory",outdir,"does not exist. Please either create a sym link or dir. \033[0m")
+    sys.exit("\033[91m ERROR: Directory"+outdir+"does not exist. Please either create a sym link or dir. \033[0m")
 outdir = os.path.join(os.path.realpath(outdir),sub_time)
 os.mkdir(outdir)
 logdir = os.path.join("logs",sub_time)
@@ -127,7 +129,8 @@ for ds in files_dict.keys():
 
         # list of arguments to the cmsRun job
         args = []
-        args.append("nEventsTotal="+str(nent_dict[ds]))
+        args.append("nEvents=-1")
+        args.append("nEventsSample="+str(nent_dict[ds]))
         args.append("inputFiles=\\\n"+",\\\n".join(files_dict[ds][(job*maxfiles):((job+1)*maxfiles)]))
         if (host=="sb"): args.append("outputFile="+outpath)
         else: args.append("outputFile="+bname+".root")

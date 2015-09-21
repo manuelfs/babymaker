@@ -4,7 +4,11 @@ int lumiblock
 int event
 
 ####################   Global   ###################
+float met
+float met_phi
 float ht
+float mt
+float dphi_wlep
 
 ###################   Jets   ##################
 int njets
@@ -21,6 +25,10 @@ std::vector<float> jets_csv
 ##################   Leptons   ################
 int nleps
 int nvleps
+std::vector<float> leps_pt
+std::vector<float> leps_eta
+std::vector<float> leps_phi
+std::vector<float> leps_id
 
 int nmus
 int nvmus

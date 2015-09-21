@@ -14,6 +14,7 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 
 // FW physics include files
+#include "DataFormats/PatCandidates/interface/MET.h"
 
 // ROOT include files
 #include "TFile.h"
@@ -33,6 +34,12 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
   baby.run() = iEvent.id().run();
   baby.event() = iEvent.id().event();
   baby.lumiblock() = iEvent.luminosityBlock();
+
+  //////////////////////////// MET ///////////////////////////
+  edm::Handle<pat::METCollection> mets;
+  iEvent.getByLabel(met_label, mets);
+  baby.met() = mets->at(0).pt();
+  baby.met_phi() = mets->at(0).phi();
 
   ////////////////////// Primary vertices /////////////////////
   edm::Handle<reco::VertexCollection> vtx;
@@ -82,10 +89,20 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
   electrons = writeElectrons(baby, allelectrons, pfcands, vtx);
 
   // Putting muons and electrons together
-  baby.nleps() = baby.nmus() + baby.nels();
-  baby.nvleps() = baby.nvmus() + baby.nvels();
   leptons = muons;
   leptons.insert(leptons.end(), electrons.begin(), electrons.end());
+  writeLeptons(baby, leptons);
+
+  ////////////////////// mT, dphi /////////////////////
+  if(leptons.size()>0){
+    float wx = baby.met()*cos(baby.met_phi()) + leptons[0]->px();
+    float wy = baby.met()*sin(baby.met_phi()) + leptons[0]->py();
+    float wphi = atan2(wy, wx);
+
+    baby.dphi_wlep() = deltaPhi(wphi, leptons[0]->phi());
+    baby.mt() = sqrt(2.*baby.met()*leptons[0]->pt()*(1.-cos(leptons[0]->phi()-baby.met_phi())));
+  }   
+    
 
   ////////////////////// Jets /////////////////////
   edm::Handle<pat::JetCollection> alljets;
@@ -117,6 +134,7 @@ void bmaker_basic::writeJets(baby_basic &baby, edm::Handle<pat::JetCollection> j
     baby.jets_pt().push_back(jet.pt());
     baby.jets_eta().push_back(jet.eta());
     baby.jets_phi().push_back(jet.phi());
+    baby.jets_m().push_back(jet.mass());
     
     float csv(jet.bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags"));
     baby.jets_csv().push_back(csv);
@@ -195,6 +213,19 @@ vCands bmaker_basic::writeElectrons(baby_basic &baby, edm::Handle<pat::ElectronC
   return signalelectrons;
 }
 
+void bmaker_basic::writeLeptons(baby_basic &baby, vCands leptons){ 
+  baby.nleps() = baby.nmus() + baby.nels();
+  baby.nvleps() = baby.nvmus() + baby.nvels();
+  sort(leptons.begin(), leptons.end(), greaterPt);
+  for(unsigned ind(0); ind < leptons.size(); ind++) {
+    baby.leps_pt().push_back(leptons[ind]->pt());
+    baby.leps_eta().push_back(leptons[ind]->eta());
+    baby.leps_phi().push_back(leptons[ind]->phi());
+    baby.leps_id().push_back(leptons[ind]->pdgId());
+  } // Loop over leptons
+}
+
+
 void bmaker_basic::writeTriggers(baby_basic &baby, const edm::TriggerNames &names, 
                                  edm::Handle<edm::TriggerResults> triggerBits, 
                                  edm::Handle<pat::PackedTriggerPrescales> triggerPrescales){
@@ -250,8 +281,10 @@ void bmaker_basic::writeFilters(baby_basic &baby, const edm::TriggerNames &fname
  \____/\___/|_| |_|___/\__|_|   \__,_|\___|\__\___/|_|  |___/
 */
 
-bmaker_basic::bmaker_basic(const edm::ParameterSet& iConfig){
-  outname = TString(iConfig.getParameter<string>("outputFile"));
+bmaker_basic::bmaker_basic(const edm::ParameterSet& iConfig):
+  outname(TString(iConfig.getParameter<string>("outputFile"))),
+  met_label(iConfig.getParameter<edm::InputTag>("met")){
+
   outfile = new TFile(outname, "recreate");
   outfile->cd();
   baby.tree_.SetDirectory(outfile);

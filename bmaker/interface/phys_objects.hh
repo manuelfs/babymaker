@@ -10,8 +10,9 @@
 #include "DataFormats/PatCandidates/interface/Electron.h"
 #include "DataFormats/PatCandidates/interface/PackedCandidate.h"
 
+#include "babymaker/bmaker/interface/utilities.hh"
+
 namespace phys_objects{
-  typedef std::vector<const reco::Candidate*> vCands;
 
   ///////////////// CUTS ///////////////////////
   float JetPtCut		= 30.0;

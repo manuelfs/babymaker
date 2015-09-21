@@ -29,8 +29,7 @@
 
 // User include files
 #include "babymaker/bmaker/interface/baby_basic.hh"
-
-typedef std::vector<const reco::Candidate*> vCands;
+#include "babymaker/bmaker/interface/utilities.hh"
 
 // Class declaration
 class bmaker_basic : public edm::EDAnalyzer {
@@ -39,7 +38,6 @@ public:
   ~bmaker_basic();
 
   TFile *outfile;
-  TString outname;
   baby_basic baby;
 
   // Functions that do the branch writing
@@ -50,6 +48,7 @@ public:
   vCands writeElectrons(baby_basic &baby, edm::Handle<pat::ElectronCollection> electrons, 
 			edm::Handle<pat::PackedCandidateCollection> pfcands, 
 			edm::Handle<reco::VertexCollection> vtx);
+  void writeLeptons(baby_basic &baby, vCands leptons); 
   void writeTriggers(baby_basic &baby, const edm::TriggerNames &names, 
                      edm::Handle<edm::TriggerResults> triggerBits,
                      edm::Handle<pat::PackedTriggerPrescales> triggerPrescales);
@@ -60,6 +59,10 @@ public:
                     edm::Handle<reco::VertexCollection> vtx);
 
   std::vector<TString> trig_name;
+
+  // Input parameters
+  TString outname;
+  edm::InputTag met_label;
 
   static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 

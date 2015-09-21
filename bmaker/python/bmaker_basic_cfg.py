@@ -13,8 +13,9 @@ process = cms.Process("Baby")
 process.source = cms.Source("PoolSource",
                             fileNames = cms.untracked.vstring(options.inputFiles)
 )
-process.baby = cms.EDAnalyzer('bmaker_basic',
-                              outputFile = cms.string(options.outputFile)
+process.baby_basic = cms.EDAnalyzer('bmaker_basic',
+                                    outputFile = cms.string(options.outputFile),
+                                    met = cms.InputTag("slimmedMETs")
 )
 
 ###### Setting up number of events, and reporing frequency 
@@ -69,4 +70,4 @@ process.patJetsReapplyJEC = patJetsUpdated.clone(
 
 process.p = cms.Path(process.patJetCorrFactorsReapplyJEC*
                      process.patJetsReapplyJEC*
-                     process.baby)
+                     process.baby_basic)

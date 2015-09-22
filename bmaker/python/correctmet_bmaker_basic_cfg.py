@@ -3,6 +3,8 @@
 ###########################################################
 import math
 
+print "\nThis cfg file applies the latest JECs to MET. It REQUIRES\n  git cms-merge-topic -u cms-met:METCorUnc74X\n"
+
 ###### Input parameters parsing 
 import FWCore.ParameterSet.Config as cms
 from FWCore.ParameterSet.VarParsing import VarParsing
@@ -26,7 +28,7 @@ process.source = cms.Source("PoolSource",
 )
 process.baby_basic = cms.EDAnalyzer('bmaker_basic',
                                     outputFile = cms.string(options.outputFile),
-                                    met = cms.InputTag("slimmedMETs"),
+                                    met = cms.InputTag("slimmedMETsTypeICorr"),
                                     nEventsSample = cms.uint32(options.nEventsSample)
 )
 
@@ -34,7 +36,7 @@ process.baby_basic = cms.EDAnalyzer('bmaker_basic',
 process.load("FWCore.MessageService.MessageLogger_cfi")
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(options.nEvents) )
 ntot = options.nEvents if options.nEvents!=-1 else options.nEventsSample
-process.MessageLogger.cerr.FwkReport.reportEvery = min(int(math.pow(10,math.floor(math.log(ntot-0.5,10)))),10000)
+process.MessageLogger.cerr.FwkReport.reportEvery = min(int(math.pow(10,math.floor(math.log(ntot,10)))),10000)
 
 ###### Setting global tag 
 ## From https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookJetEnergyCorrections#JecGlobalTag
@@ -85,6 +87,27 @@ process.patJetsReapplyJEC = patJetsUpdated.clone(
 ## HBHE noise filter needs to be recomputed in early 2015 data
 process.load('CommonTools.RecoAlgos.HBHENoiseFilterResultProducer_cfi')
 process.HBHENoiseFilterResultProducer.minZeros = cms.int32(99999)
+
+###### Apply new JECs to MET 
+## From https://github.com/cms-met/cmssw/blob/METCorUnc74X/PhysicsTools/PatAlgos/test/corMETFromMiniAOD.py
+process.options = cms.untracked.PSet(
+    allowUnscheduled = cms.untracked.bool(True),
+    #wantSummary = cms.untracked.bool(True)
+)
+isData = False
+from PhysicsTools.PatUtils.tools.runMETCorrectionsAndUncertainties import runMetCorAndUncFromMiniAOD
+runMetCorAndUncFromMiniAOD(process,
+                           isData=isData,
+                           pfCandColl=cms.InputTag("packedPFCandidates"),
+                           postfix="TypeICorr"
+)
+if isData:
+    process.patPFMetT1T2CorrTypeICorr.jetCorrLabelRes = cms.InputTag("L3Absolute")
+    process.patPFMetT1T2SmearCorrTypeICorr.jetCorrLabelRes = cms.InputTag("L3Absolute")
+    process.patPFMetT2CorrTypeICorr.jetCorrLabelRes = cms.InputTag("L3Absolute")
+    process.patPFMetT2SmearCorrTypeICorr.jetCorrLabelRes = cms.InputTag("L3Absolute")
+    process.shiftedPatJetEnDownTypeICorr.jetCorrLabelUpToL3Res = cms.InputTag("ak4PFCHSL1FastL2L3Corrector")
+    process.shiftedPatJetEnUpTypeICorr.jetCorrLabelUpToL3Res = cms.InputTag("ak4PFCHSL1FastL2L3Corrector")
 
 ###### Path
 process.p = cms.Path(process.patJetCorrFactorsReapplyJEC*

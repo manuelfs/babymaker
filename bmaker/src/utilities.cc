@@ -1,7 +1,10 @@
 // Common utilities
  
 #include <cmath>
+#include <iostream>
 #include "babymaker/bmaker/interface/utilities.hh"
+
+using namespace std;
 
 namespace utilities{
 
@@ -11,6 +14,20 @@ namespace utilities{
 
   bool greaterM(const fastjet::PseudoJet &a, const fastjet::PseudoJet &b){
     return a.m() > b.m();
+  }
+
+  string execute(const string &cmd){
+    FILE *pipe = popen(cmd.c_str(), "r");
+    if(!pipe) throw runtime_error("Could not open pipe.");
+    const size_t buffer_size = 128;
+    char buffer[buffer_size];
+    string result = "";
+    while(!feof(pipe)){
+      if(fgets(buffer, buffer_size, pipe) != NULL) result += buffer;
+    }
+
+    pclose(pipe);
+    return result;
   }
 
   float crossSection(const TString &file){

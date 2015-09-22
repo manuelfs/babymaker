@@ -3,6 +3,7 @@
 
 
 // System include files
+#include <cmath>
 #include <memory>
 #include <iostream>
 
@@ -23,6 +24,7 @@
 
 // ROOT include files
 #include "TFile.h"
+#include "TROOT.h"
 
 // User include files
 #include "babymaker/bmaker/interface/bmaker_basic.hh"
@@ -36,6 +38,7 @@ using namespace utilities;
 ///////////////////////// analyze: METHOD CALLED EACH EVENT ///////////////////////////
 void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
   isData = iEvent.isRealData();
+  nevents++;
 
   ////////////////////// Event info /////////////////////
   baby.run() = iEvent.id().run();
@@ -50,7 +53,7 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
     edm::Handle<GenEventInfoProduct> gen_event_info;
     iEvent.getByLabel("generator", gen_event_info);
     if (gen_event_info->weight() < 0) baby.weight() *= -1.;
-    baby.weight() *= crossSection(outname)*luminosity / static_cast<double>(nevents_sample);
+    baby.weight() *= xsec*luminosity / static_cast<double>(nevents_sample);
 
   }
 
@@ -452,11 +455,16 @@ void bmaker_basic::writeGenInfo(edm::Handle<LHEEventProduct> lhe_info){
 bmaker_basic::bmaker_basic(const edm::ParameterSet& iConfig):
   outname(TString(iConfig.getParameter<string>("outputFile"))),
   met_label(iConfig.getParameter<edm::InputTag>("met")),
-  nevents_sample(iConfig.getParameter<unsigned int>("nEventsSample")){
+  nevents_sample(iConfig.getParameter<unsigned int>("nEventsSample")),
+  nevents(0){
+
+  time(&startTime);
 
   outfile = new TFile(outname, "recreate");
   outfile->cd();
   baby.tree_.SetDirectory(outfile);
+
+  xsec = crossSection(outname);
 
   trig_name = vector<TString>();
   trig_name.push_back("HLT_PFHT350_PFMET100_NoiseCleaned_v");     // 0
@@ -495,21 +503,38 @@ bmaker_basic::~bmaker_basic(){
   baby.tree_.SetDirectory(outfile);
   baby.Write();
 
+  time_t curTime;
+  time(&curTime);
+  double seconds(difftime(curTime,startTime));
+  TString minutes(""); minutes += floor(seconds/60.);
+  TString hours(""); hours += floor(seconds/3600.);
+  TString runtime(hours+":"+minutes+":"); runtime += floor(seconds+0.5);
+
+  string commit_s = execute("git rev-parse HEAD");
+  while(!commit_s.empty() && commit_s.at(commit_s.length()-1) == '\n') commit_s.erase(commit_s.length()-1);
+  TString commit = commit_s;
+  TString type = baby.Type();
+  TString root_version = gROOT->GetVersion();
+  TString root_tutorial_dir = gROOT->GetTutorialsDir();
   TTree treeglobal("treeglobal", "treeglobal");
-  // treeglobal.Branch("nev_file", &num_entries);
+  treeglobal.Branch("nev_file", &nevents);
   treeglobal.Branch("nev_total", &nevents_sample);
-  // treeglobal.Branch("commit", &commit);
+  treeglobal.Branch("commit", &commit);
   // treeglobal.Branch("model", &model);
-  // treeglobal.Branch("type", &type);
-  // treeglobal.Branch("root_version", &root_version);
-  // treeglobal.Branch("root_tutorial_dir", &root_tutorial_dir);
+  treeglobal.Branch("type", &type);
+  treeglobal.Branch("root_version", &root_version);
+  treeglobal.Branch("root_tutorial_dir", &root_tutorial_dir);
   treeglobal.Branch("trig_name", &trig_name);
+  treeglobal.Branch("xsec", &xsec);
+  treeglobal.Branch("runtime", &runtime);
   treeglobal.Fill();
   treeglobal.SetDirectory(outfile);
   treeglobal.Write();
   
   outfile->Close();
-  cout<<endl<<"Written baby in "<<outname<<endl<<endl;
+
+
+  cout<<endl<<"Written baby in "<<outname<<". It took "<<runtime<<endl<<endl;
   delete outfile;
 }
 

@@ -6,6 +6,7 @@
 // System include files
 #include <memory>
 #include <vector>
+#include <ctime>
 
 // FW include files
 #include "FWCore/Framework/interface/Frameworkfwd.h"
@@ -42,6 +43,7 @@ public:
   TFile *outfile;
   baby_basic baby;
   bool isData;
+  time_t startTime;
 
   // Functions that do the branch writing
   vCands writeJets(edm::Handle<pat::JetCollection> alljets, vCands &leptons);
@@ -83,6 +85,8 @@ public:
   TString outname;
   edm::InputTag met_label;
   unsigned int nevents_sample;
+  unsigned int nevents;
+  float xsec;
 
   static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 

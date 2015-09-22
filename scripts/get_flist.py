@@ -15,16 +15,12 @@ ROOT.gROOT.ProcessLine("gErrorIgnoreLevel = kError;")
 # or the dataset name as found in DAS, e.g:
 # /TTJets_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/MINIAODSIM
 datasets = []
-datasets.append('/store/mc/RunIISpring15DR74/TTJets_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v2/')
-# datasets.append('/store/mc/RunIISpring15DR74/TTJets_SingleLeptFromT_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v1')
-datasets.append('/store/mc/RunIISpring15DR74/TTJets_SingleLeptFromT_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9_ext1-v1')
-# datasets.append('/store/data/Run2015B/HTMHT/MINIAOD/PromptReco-v1')
-
-
-# Directory to dump all condor-related logs, schell and cmd files
-rundir = "run/"
-if not (os.path.exists(os.getcwd()+'/'+rundir)):
-    os.mkdir(os.getcwd()+'/'+rundir)
+# datasets.append('/store/mc/RunIISpring15DR74/TTJets_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v2/')
+# datasets.append('/store/mc/RunIISpring15DR74/TTJets_SingleLeptFromT_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9_ext1-v1')
+# datasets.append('/store/mc/RunIISpring15DR74/TTJets_SingleLeptFromTbar_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9_ext1-v1/')
+# datasets.append('/store/mc/RunIISpring15DR74/TTJets_DiLept_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v2/')
+# datasets.append('/store/mc/RunIISpring15DR74/TTJets_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v2/')
+datasets.append('/store/data/Run2015B/HTMHT/MINIAOD/PromptReco-v1')
 
 # Parsing where the files can be found depends on whether we run on UCSB or UCSD
 host = os.environ.get("HOSTNAME")
@@ -35,6 +31,14 @@ else: sys.exit("\033[91mERROR: Unknown host: "+host+" Exit. \033[0m")
 
 hadoop = '/mnt/hadoop/cms'
 if host=="sd": hadoop = '/hadoop/cms/phedex'
+
+# Directory to dump all condor-related logs, schell and cmd files
+flistdir = "run/"
+if host=="sd":
+    if not (os.path.exists(os.getcwd()+'/'+flistdir)):
+        os.mkdir(os.getcwd()+'/'+flistdir)
+else:
+    flistdir = "/net/cms2/cms2r0/babymaker/flist/"
 
 for ds in datasets:
     # parse the dataset name and guess the path on hadoop to create the input file list
@@ -62,7 +66,7 @@ for ds in datasets:
     
     fnm = '_'.join(['flist',dsname,campaign,reco+'.txt'])
     print "INFO: Finding number of events in:", '_'.join([dsname,campaign,reco])
-    f = open(rundir+'/'+fnm,"w")
+    f = open(flistdir+'/'+fnm,"w")
     tree = TChain("Events")
     for i,ifile in enumerate(filelist):
         tree.Add(ifile)
@@ -71,3 +75,4 @@ for ds in datasets:
     nent = tree.GetEntries()
     f.write('nEventsTotal: '+'{:<10}'.format(nent))
     f.close()
+    os.chmod(flistdir+'/'+fnm, 0777)

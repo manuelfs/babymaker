@@ -5,6 +5,13 @@ import glob
 import string
 import time
 
+#What to submit? Use substrings that would be found in the desired dataset
+# no mid-word wild cards enabled yet, 
+# e.g. if we want only 25ns TTJets, use a substring that contains it all:
+# "TTJets_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15DR74_Asympt25ns"
+wishlist = []
+wishlist.append("TTJets")
+
 print 
 
 # Maximum number of input MINIAOD files per condor job
@@ -39,7 +46,7 @@ if not (os.path.exists(os.path.realpath(outdir))):
     sys.exit("\033[91m ERROR: Directory "+outdir+" does not exist. Please either create a sym link or dir. \033[0m")
 outdir = os.path.join(os.path.realpath(outdir),sub_time)
 os.mkdir(outdir)
-logdir = os.path.join("logs",sub_time)
+logdir = os.path.join(outdir,"logs")
 if not os.path.exists(logdir):
     if (host=='sd') or (host=='sb' and ('hadoop' not in logdir)): 
         os.makedirs(logdir)
@@ -53,28 +60,37 @@ print "INFO: Logs will be written to:   ", logdir
 # read in datasets to run over based on the flist_*txt files present in the run directory
 # from there, read the filenames for each dataset and add up the number of events
 # firstly, bookkeep datasets that are not extensions
-flists_pd = [x for x in glob.glob("run/flist*.txt") if "_ext" not in x]
+flistdir = "run/" 
+# regardless of host, create the ./run/ directory if it doesn't exist since this is where auto-generated submission scripts are written
+if not (os.path.exists(os.getcwd()+'/'+flistdir)):
+        os.mkdir(os.getcwd()+'/'+flistdir)
+# the actual flist is stored centrally if running at UCSB and in ./run/ at UCSD
+if host=="sb": flistdir = "/net/cms2/cms2r0/babymaker/flist/"
+
+flists_pd = [x for x in glob.glob(os.path.join(flistdir,"flist*.txt")) if "_ext" not in x]
 files_dict = {}
 nent_dict = {}
 for fnm in flists_pd:
-    dsname = string.replace(string.replace(fnm,"run/flist_",""),".txt","")
-    print "INFO: Adding PD: ",dsname
-    with open(fnm) as f: files_dict[dsname] = f.readlines()
-    nent_dict[dsname] = int(files_dict[dsname].pop().split().pop())
+    if any(wish in fnm for wish in wishlist):
+        dsname = string.split(string.split(fnm,"flist_").pop(),".txt")[0]
+        print "INFO: Adding PD: ",dsname
+        with open(fnm) as f: files_dict[dsname] = f.read().splitlines()
+        nent_dict[dsname] = int(files_dict[dsname].pop().split().pop())
 # now add the extensions...
-flists_ext = glob.glob("run/flist*_ext*.txt")
+flists_ext = glob.glob(os.path.join(flistdir,"flist*_ext*.txt"))
 for fnm in flists_ext:
-    dsname = string.replace(string.replace(fnm,"run/flist_",""),".txt","")
-    print "INFO: Adding PD extension: ",dsname
-    #get name without the "_ext?" to check if we are already bookeeping some files from the original version of that dataset
-    split_dsname = string.split(dsname,"_ext")
-    orig_dsname = split_dsname[0] + split_dsname[1][1:] # skip one character after "_ext" which is the number of the extension
-    if (orig_dsname not in files_dict.keys()): # in case it was an extension of a dataset we are not running on
-        with open(fnm) as f: files_dict[orig_dsname] = f.readlines()
-        nent_dict[orig_dsname] = int(files_dict[orig_dsname].pop().split().pop())
-    else:
-        with open(fnm) as f: files_dict[orig_dsname].extend(f.readlines())
-        nent_dict[orig_dsname] = nent_dict[orig_dsname] + int(files_dict[orig_dsname].pop().split().pop())
+    if any(wish in fnm for wish in wishlist):
+        dsname = string.split(string.split(fnm,"flist_").pop(),".txt")[0]
+        print "INFO: Adding PD extension: ",dsname
+        #get name without the "_ext?" to check if we are already bookeeping some files from the original version of that dataset
+        split_dsname = string.split(dsname,"_ext")
+        orig_dsname = split_dsname[0] + split_dsname[1][1:] # skip one character after "_ext" which is the number of the extension
+        if (orig_dsname not in files_dict.keys()): # in case it was an extension of a dataset we are not running on
+            with open(fnm) as f: files_dict[orig_dsname] = f.read().splitlines()
+            nent_dict[orig_dsname] = int(files_dict[orig_dsname].pop().split().pop())
+        else:
+            with open(fnm) as f: files_dict[orig_dsname].extend(f.read().splitlines())
+            nent_dict[orig_dsname] = nent_dict[orig_dsname] + int(files_dict[orig_dsname].pop().split().pop())
     
 # add up number of events in each dataset 
 for ds in files_dict.keys():

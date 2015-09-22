@@ -1,6 +1,7 @@
 ###########################################################
 ### Configuration file to make basic babies from miniAOD
 ###########################################################
+import math
 
 ###### Input parameters parsing 
 import FWCore.ParameterSet.Config as cms
@@ -32,12 +33,8 @@ process.baby_basic = cms.EDAnalyzer('bmaker_basic',
 ###### Setting up number of events, and reporing frequency 
 process.load("FWCore.MessageService.MessageLogger_cfi")
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(options.nEvents) )
-if (options.nEvents <=100):
-  process.MessageLogger.cerr.FwkReport.reportEvery = 10
-elif (options.nEvents <=1000):
-  process.MessageLogger.cerr.FwkReport.reportEvery = 100
-else:
-  process.MessageLogger.cerr.FwkReport.reportEvery = 1000
+ntot = options.nEvents if options.nEvents!=-1 else options.nEventsSample
+process.MessageLogger.cerr.FwkReport.reportEvery = min(int(math.pow(10,math.floor(math.log(ntot,10)))),10000)
 
 ###### Setting global tag 
 ## From https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookJetEnergyCorrections#JecGlobalTag

@@ -39,6 +39,15 @@ using namespace utilities;
 void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
   isData = iEvent.isRealData();
   nevents++;
+  if(nevents<10 || (nevents<100&&nevents%10==0) || (nevents<1000&&nevents%100==0) 
+     || (nevents<10000&&nevents%1000==0) || nevents%10000==0) {
+    time_t curTime;
+    time(&curTime);
+    long seconds(floor(difftime(curTime,startTime)+0.5));
+    float hertz(nevents); hertz /= seconds;
+    cout<<"Run "<<iEvent.id().run()<<", Events "<< iEvent.id().event()<<", LumiSection "<< iEvent.luminosityBlock()
+	<<". Ran "<<nevents<<" events in "<<seconds<<" seconds -> "<<roundNumber(hertz,1)<<" Hz"<<endl;
+  }
 
   ////////////////////// Event info /////////////////////
   baby.run() = iEvent.id().run();
@@ -503,38 +512,44 @@ bmaker_basic::~bmaker_basic(){
   baby.tree_.SetDirectory(outfile);
   baby.Write();
 
-  time_t curTime;
-  time(&curTime);
-  double seconds(difftime(curTime,startTime));
-  TString minutes(""); minutes += floor(seconds/60.);
-  TString hours(""); hours += floor(seconds/3600.);
-  TString runtime(hours+":"+minutes+":"); runtime += floor(seconds+0.5);
-
   string commit_s = execute("git rev-parse HEAD");
   while(!commit_s.empty() && commit_s.at(commit_s.length()-1) == '\n') commit_s.erase(commit_s.length()-1);
   TString commit = commit_s;
   TString type = baby.Type();
   TString root_version = gROOT->GetVersion();
   TString root_tutorial_dir = gROOT->GetTutorialsDir();
+
+  time_t curTime;
+  time(&curTime);
+  long seconds(floor(difftime(curTime,startTime)+0.5));
   TTree treeglobal("treeglobal", "treeglobal");
+  treeglobal.Branch("nev_sample", &nevents_sample);
   treeglobal.Branch("nev_file", &nevents);
-  treeglobal.Branch("nev_total", &nevents_sample);
-  treeglobal.Branch("commit", &commit);
+  treeglobal.Branch("runtime_seconds", &seconds);
+  treeglobal.Branch("git_commit", &commit);
   // treeglobal.Branch("model", &model);
-  treeglobal.Branch("type", &type);
+  treeglobal.Branch("baby_type", &type);
   treeglobal.Branch("root_version", &root_version);
   treeglobal.Branch("root_tutorial_dir", &root_tutorial_dir);
-  treeglobal.Branch("trig_name", &trig_name);
+  treeglobal.Branch("trig_names", &trig_name);
   treeglobal.Branch("xsec", &xsec);
-  treeglobal.Branch("runtime", &runtime);
   treeglobal.Fill();
   treeglobal.SetDirectory(outfile);
   treeglobal.Write();
   
   outfile->Close();
 
-
-  cout<<endl<<"Written baby in "<<outname<<". It took "<<runtime<<endl<<endl;
+  int minutes((seconds/60)%6), hours(seconds/3600);
+  TString runtime("");
+  if(hours<10) runtime += "0";
+  runtime += hours; runtime += ":";
+  if(minutes<10) runtime += "0";
+  runtime += minutes; runtime += ":";
+  if((seconds%60)<10) runtime += "0";
+  runtime += seconds%60; 
+  float hertz(nevents); hertz /= seconds;
+  cout<<endl<<"Written "<<nevents<<" events in "<<outname<<". It took "<<seconds<<" seconds to run ("<<runtime<<"), "
+      <<roundNumber(hertz,2)<<" Hz."<<endl<<endl;
   delete outfile;
 }
 
@@ -544,9 +559,7 @@ void bmaker_basic::beginJob() {
 }
 
 // ------------ method called once each job just after ending the event loop  ------------
-void 
-bmaker_basic::endJob() 
-{
+void bmaker_basic::endJob() {
 }
 
 // ------------ method called when starting to processes a run  ------------

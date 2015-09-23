@@ -33,8 +33,7 @@ process.baby_basic = cms.EDAnalyzer('bmaker_basic',
 ###### Setting up number of events, and reporing frequency 
 process.load("FWCore.MessageService.MessageLogger_cfi")
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(options.nEvents) )
-ntot = options.nEvents if options.nEvents!=-1 else options.nEventsSample
-process.MessageLogger.cerr.FwkReport.reportEvery = min(int(math.pow(10,math.floor(math.log(ntot-0.5,10)))),10000)
+process.MessageLogger.cerr.FwkReport.reportEvery = 100000
 
 ###### Setting global tag 
 ## From https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookJetEnergyCorrections#JecGlobalTag

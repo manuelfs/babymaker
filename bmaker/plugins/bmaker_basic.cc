@@ -39,15 +39,6 @@ using namespace utilities;
 void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
   isData = iEvent.isRealData();
   nevents++;
-  if(nevents<10 || (nevents<100&&nevents%10==0) || (nevents<1000&&nevents%100==0) 
-     || (nevents<10000&&nevents%1000==0) || nevents%10000==0) {
-    time_t curTime;
-    time(&curTime);
-    long seconds(floor(difftime(curTime,startTime)+0.5));
-    float hertz(nevents); hertz /= seconds;
-    cout<<"Run "<<iEvent.id().run()<<", Events "<< iEvent.id().event()<<", LumiSection "<< iEvent.luminosityBlock()
-	<<". Ran "<<nevents<<" events in "<<seconds<<" seconds -> "<<roundNumber(hertz,1)<<" Hz"<<endl;
-  }
 
   ////////////////////// Event info /////////////////////
   baby.run() = iEvent.id().run();
@@ -154,6 +145,23 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 
   ////////////////// Filling the tree //////////////////
   baby.Fill();
+
+  // Time reporting
+  if(nevents==1) {
+    time_t curTime;
+    time(&curTime);
+    cout<<endl<<"Took "<<roundNumber(difftime(curTime,startTime),1)<<" seconds for set up and run first event"<<endl<<endl;
+    time(&startTime);
+  }
+  if(nevents<10 || (nevents<100&&nevents%10==0) || (nevents<1000&&nevents%100==0) 
+     || (nevents<10000&&nevents%1000==0) || nevents%10000==0) {
+    time_t curTime;
+    time(&curTime);
+    float seconds(difftime(curTime,startTime));
+    cout<<"Run "<<iEvent.id().run()<<", Events "<< iEvent.id().event()<<", LumiSection "<< iEvent.luminosityBlock()
+	<<". Ran "<<nevents<<" events in "<<seconds<<" seconds -> "<<roundNumber(nevents-1,1,seconds)<<" Hz and "
+	<<roundNumber(seconds*1000,2,nevents-1)<<" ms"<<endl;
+  }
 }
 
 
@@ -521,7 +529,7 @@ bmaker_basic::~bmaker_basic(){
 
   time_t curTime;
   time(&curTime);
-  long seconds(floor(difftime(curTime,startTime)+0.5));
+  int seconds(floor(difftime(curTime,startTime)+0.5));
   TTree treeglobal("treeglobal", "treeglobal");
   treeglobal.Branch("nev_sample", &nevents_sample);
   treeglobal.Branch("nev_file", &nevents);
@@ -539,7 +547,7 @@ bmaker_basic::~bmaker_basic(){
   
   outfile->Close();
 
-  int minutes((seconds/60)%6), hours(seconds/3600);
+  int minutes((seconds/60)%60), hours(seconds/3600);
   TString runtime("");
   if(hours<10) runtime += "0";
   runtime += hours; runtime += ":";
@@ -549,7 +557,7 @@ bmaker_basic::~bmaker_basic(){
   runtime += seconds%60; 
   float hertz(nevents); hertz /= seconds;
   cout<<endl<<"Written "<<nevents<<" events in "<<outname<<". It took "<<seconds<<" seconds to run ("<<runtime<<"), "
-      <<roundNumber(hertz,2)<<" Hz."<<endl<<endl;
+      <<roundNumber(hertz,1)<<" Hz and "<<roundNumber(1000,2,hertz)<<" ms."<<endl<<endl;
   delete outfile;
 }
 

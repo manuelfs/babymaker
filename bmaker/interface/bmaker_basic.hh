@@ -84,6 +84,7 @@ public:
   // Input parameters
   TString outname;
   edm::InputTag met_label;
+  edm::InputTag jets_label;
   unsigned int nevents_sample;
   unsigned int nevents;
   float xsec;

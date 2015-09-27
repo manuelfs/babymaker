@@ -6,13 +6,13 @@ CMSSW code to generate babies (small flat ntuples) from MINIAOD
 To set up the code and generate a file named `baby.root`, issue the following commands 
 on lxplus:
 
-    cmsrel CMSSW_7_4_6_patch6
-    cd CMSSW_7_4_6_patch6/src
+    cmsrel CMSSW_7_4_12_patch4
+    cd CMSSW_7_4_12_patch4/src
     cmsenv
     git clone git@github.com:manuelfs/babymaker
     cd babymaker
     ./compile.sh
-    cmsRun bmaker/python/bmaker_basic_cfg.py inputFiles=/store/mc/RunIISpring15DR74/TTJets_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v2/70000/36C96F13-700D-E511-B171-20CF300E9ECF.root outputFile=baby_TTJets_TuneCUETP8M1_13TeV-madgraphMLM-pythia8.root nEventsSample=100 nEvents=100
+    cmsRun bmaker/python/bmaker_basic_cfg.py inputFiles=/store/data/Run2015D/SingleMuon/MINIAOD/PromptReco-v3/000/256/675/00000/5E85670E-9C5F-E511-AD41-02163E011E80.root outputFile=baby_Run2015D_SingleMuon.root nEvents=100
 
 The `compile.sh` script first compiles the `babymaker/bmaker/genfiles` folder, which
 automatically generates the tree structure (see below), and then issues `scram b`

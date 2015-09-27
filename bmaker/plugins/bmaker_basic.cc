@@ -115,7 +115,7 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
   ////////////////////// Jets /////////////////////
   vCands jets;
   edm::Handle<pat::JetCollection> alljets;
-  iEvent.getByLabel("patJetsReapplyJEC", alljets);
+  iEvent.getByLabel(jets_label, alljets);
   jets = writeJets(alljets, leptons);
   writeFatJets(jets);
 
@@ -128,13 +128,13 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
   if(!filterBits.isValid() && isData) 
       iEvent.getByLabel(edm::InputTag("TriggerResults", "", "PAT"),filterBits);  
   const edm::TriggerNames &fnames = iEvent.triggerNames(*filterBits);
-  writeFilters(fnames, filterBits, vtx);
   // the HBHE noise filter needs to be recomputed in early 2015 data
   edm::Handle<bool> filter_hbhe;
   if(isData && iEvent.getByLabel("HBHENoiseFilterResultProducer","HBHENoiseFilterResult",filter_hbhe)) { 
     if(*filter_hbhe) baby.pass_hbhe() = true;
     else baby.pass_hbhe() = false;
   }
+  writeFilters(fnames, filterBits, vtx);
 
   ///////////////////// Truth Info ///////////////////////
   if (!isData) {
@@ -419,7 +419,7 @@ void bmaker_basic::writeFilters(const edm::TriggerNames &fnames,
     if (name=="Flag_goodVertices") baby.pass_goodv() = pass;
     else if (name=="Flag_CSCTightHaloFilter") baby.pass_cschalo() = pass;
     else if (name=="Flag_eeBadScFilter") baby.pass_eebadsc() = pass;
-    else if (name=="Flag_HBHENoiseFilter") baby.pass_hbhe() = pass;
+    //else if (name=="Flag_HBHENoiseFilter") baby.pass_hbhe() = pass;
   }
 
   baby.pass_goodv() &= hasGoodPV(vtx);
@@ -474,6 +474,7 @@ void bmaker_basic::writeGenInfo(edm::Handle<LHEEventProduct> lhe_info){
 bmaker_basic::bmaker_basic(const edm::ParameterSet& iConfig):
   outname(TString(iConfig.getParameter<string>("outputFile"))),
   met_label(iConfig.getParameter<edm::InputTag>("met")),
+  jets_label(iConfig.getParameter<edm::InputTag>("jets")),
   nevents_sample(iConfig.getParameter<unsigned int>("nEventsSample")),
   nevents(0){
 
@@ -486,33 +487,33 @@ bmaker_basic::bmaker_basic(const edm::ParameterSet& iConfig):
   xsec = crossSection(outname);
 
   trig_name = vector<TString>();
-  trig_name.push_back("HLT_PFHT350_PFMET100_NoiseCleaned_v");     // 0
-  trig_name.push_back("HLT_Mu15_IsoVVVL_PFHT350_PFMET70_v");      // 1
-  trig_name.push_back("HLT_Mu15_IsoVVVL_PFHT600_v");        // 2
-  trig_name.push_back("HLT_Mu15_IsoVVVL_BTagCSV0p72_PFHT400_v");    // 3
-  trig_name.push_back("HLT_Mu15_PFHT300_v");          // 4
-  trig_name.push_back("HLT_Ele15_IsoVVVL_PFHT350_PFMET70_v");     // 5
-  trig_name.push_back("HLT_Ele15_IsoVVVL_PFHT600_v");       // 6
-  trig_name.push_back("HLT_Ele15_IsoVVVL_BTagCSV0p72_PFHT400_v");   // 7
-  trig_name.push_back("HLT_Ele15_PFHT300_v");         // 8
-  trig_name.push_back("HLT_DoubleMu8_Mass8_PFHT300_v");       // 9
-  trig_name.push_back("HLT_DoubleEle8_CaloIdM_TrackIdM_Mass8_PFHT300_v"); // 10
-  trig_name.push_back("HLT_PFHT475_v");           // 11
-  trig_name.push_back("HLT_PFHT800_v");           // 12
-  trig_name.push_back("HLT_PFMET120_NoiseCleaned_Mu5_v");     // 13
-  trig_name.push_back("HLT_PFMET170_NoiseCleaned_v");       // 14
-  trig_name.push_back("HLT_DoubleIsoMu17_eta2p1_v");        // 15
-  trig_name.push_back("HLT_Mu17_TrkIsoVVL_v");          // 16
-  trig_name.push_back("HLT_IsoMu17_eta2p1_v");          // 17
-  trig_name.push_back("HLT_IsoMu20_v");           // 18
-  trig_name.push_back("HLT_IsoMu24_eta2p1_v");          // 19
-  trig_name.push_back("HLT_IsoMu27_v");           // 20
-  trig_name.push_back("HLT_Mu50_v");            // 21
-  trig_name.push_back("HLT_Ele27_eta2p1_WPLoose_Gsf_v");      // 22
-  trig_name.push_back("HLT_Ele32_eta2p1_WPLoose_Gsf_v");      // 23
-  trig_name.push_back("HLT_Ele105_CaloIdVT_GsfTrkIdT_v");     // 24
-  trig_name.push_back("HLT_DoubleEle33_CaloIdL_GsfTrkIdVL_MW_v");   // 25
-  trig_name.push_back("HLT_DoubleEle24_22_eta2p1_WPLoose_Gsf_v");   // 26
+  trig_name.push_back("HLT_PFHT350_PFMET100_JetIdCleaned_v");			// 0 
+  trig_name.push_back("HLT_Mu15_IsoVVVL_PFHT350_PFMET50_v");			// 1 
+  trig_name.push_back("HLT_Mu15_IsoVVVL_PFHT600_v");				// 2
+  trig_name.push_back("HLT_Mu15_IsoVVVL_BTagCSV0p72_PFHT400_v");		// 3
+  trig_name.push_back("HLT_Mu15_IsoVVVL_PFHT350_v");				// 4 
+  trig_name.push_back("HLT_Ele15_IsoVVVL_PFHT350_PFMET50_v");			// 5 
+  trig_name.push_back("HLT_Ele15_IsoVVVL_PFHT600_v");				// 6
+  trig_name.push_back("HLT_Ele15_IsoVVVL_BTagCSV0p72_PFHT400_v");		// 7
+  trig_name.push_back("HLT_Ele15_IsoVVVL_PFHT350_v");				// 8 
+  trig_name.push_back("HLT_DoubleMu8_Mass8_PFHT300_v");				// 9
+  trig_name.push_back("HLT_DoubleEle8_CaloIdM_TrackIdM_Mass8_PFHT300_v");	// 10
+  trig_name.push_back("HLT_PFHT475_v");						// 11
+  trig_name.push_back("HLT_PFHT800_v");						// 12
+  trig_name.push_back("HLT_PFMET120_NoiseCleaned_Mu5_v");			// 13
+  trig_name.push_back("HLT_PFMET170_NoiseCleaned_v");				// 14
+  trig_name.push_back("HLT_DoubleIsoMu17_eta2p1_v");				// 15
+  trig_name.push_back("HLT_Mu17_TrkIsoVVL_v");					// 16
+  trig_name.push_back("HLT_IsoMu17_eta2p1_v");					// 17
+  trig_name.push_back("HLT_IsoMu20_v");						// 18
+  trig_name.push_back("HLT_IsoMu24_eta2p1_v");					// 19
+  trig_name.push_back("HLT_IsoMu27_v");						// 20
+  trig_name.push_back("HLT_Mu50_v");						// 21
+  trig_name.push_back("HLT_Ele27_eta2p1_WPLoose_Gsf_v");			// 22
+  trig_name.push_back("HLT_Ele32_eta2p1_WPLoose_Gsf_v");			// 23
+  trig_name.push_back("HLT_Ele105_CaloIdVT_GsfTrkIdT_v");			// 24
+  trig_name.push_back("HLT_DoubleEle33_CaloIdL_GsfTrkIdVL_MW_v");		// 25
+  trig_name.push_back("HLT_DoubleEle24_22_eta2p1_WPLoose_Gsf_v");		// 26
 
 }
 

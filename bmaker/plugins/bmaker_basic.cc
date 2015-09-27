@@ -189,7 +189,8 @@ vCands bmaker_basic::writeJets(edm::Handle<pat::JetCollection> alljets, vCands &
     goodID = idJet(jet);
     goodPtEta = jet.pt() > JetPtCut && fabs(jet.eta()) <= JetEtaCut;
     goodJet = (!isLep) && goodID && goodPtEta;
-    if(goodPtEta && !isLep && !goodID) baby.pass_jets() = false;
+    if(goodPtEta && !isLep && !goodID) baby.pass_jets_nohf() = false;
+    if(jet.pt() > JetPtCut && !isLep && !goodID) baby.pass_jets() = false;
     if(!isLep && !goodJet) continue;
 
     // Filling branches
@@ -424,6 +425,7 @@ void bmaker_basic::writeFilters(const edm::TriggerNames &fnames,
   baby.pass_goodv() &= hasGoodPV(vtx);
 
   baby.pass() = baby.pass_hbhe() && baby.pass_goodv() && baby.pass_cschalo() && baby.pass_eebadsc() && baby.pass_jets();
+  baby.pass_nohf() = baby.pass_hbhe() && baby.pass_goodv() && baby.pass_cschalo() && baby.pass_eebadsc() && baby.pass_jets_nohf();
 }
 
 void bmaker_basic::writeVertices(edm::Handle<reco::VertexCollection> vtx,

@@ -72,12 +72,14 @@ float onmaxmu
 float onmaxel
 
 ###################   Quality   ##################
+bool pass_jets_nohf;
 bool pass_jets;
 bool pass_hbhe;
 bool pass_goodv;
 bool pass_cschalo;
 bool pass_eebadsc;
 bool pass;
+bool pass_nohf;
 
 ################  Fat Jets   ##################
 int nfjets

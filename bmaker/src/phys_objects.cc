@@ -115,7 +115,7 @@ namespace phys_objects{
   //////////////////// Electrons
   bool isSignalElectron(const pat::Electron &lep, edm::Handle<reco::VertexCollection> vtx, double lep_iso){
     // pT, eta cuts
-    if(lep.pt() <= VetoLeptonPtCut) return false;
+    if(lep.pt() <= SignalLeptonPtCut) return false;
     if(fabs(lep.superCluster()->position().eta()) > ElectronEtaCut) return false;
     // ID cuts (includes dz/dz0 cuts)
     if(!idElectron(lep, vtx, kMedium)) return false;

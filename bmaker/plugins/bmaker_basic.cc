@@ -44,6 +44,10 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
   baby.run() = iEvent.id().run();
   baby.event() = iEvent.id().event();
   baby.lumiblock() = iEvent.luminosityBlock();
+  if(isData){
+    if(!isInJSON("dcs", baby.run(), baby.lumiblock())) return;
+    baby.json() = isInJSON("golden", baby.run(), baby.lumiblock());
+  } else baby.json() = true;
 
   const float luminosity = 1000.;
 

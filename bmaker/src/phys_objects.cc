@@ -10,10 +10,21 @@
 
 // User include files
 #include "babymaker/bmaker/interface/phys_objects.hh"
+#include "babymaker/bmaker/interface/in_json.hh"
 
 using namespace std;
 
 namespace phys_objects{
+
+  const std::vector<std::vector<int> > VRunLumi2015golden(MakeVRunLumi("2015golden"));
+  const std::vector<std::vector<int> > VRunLumi2015dcs(MakeVRunLumi("2015dcs"));
+
+  bool isInJSON(string type, int run, int lumiblock){
+    if(type=="golden") return inJSON(VRunLumi2015golden, run, lumiblock);
+    if(type=="dcs") return inJSON(VRunLumi2015dcs, run, lumiblock);
+
+    return true;
+  }
 
   ////////////////////////////////////////////////////////////////////////////////
   ///////////////////////////////////// JETS /////////////////////////////////////

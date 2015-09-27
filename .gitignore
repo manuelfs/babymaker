@@ -8,6 +8,7 @@ baby*.cc
 *.o
 *.pyc
 *__init_*
+._*
 
 # Compiled Dynamic libraries
 *.so

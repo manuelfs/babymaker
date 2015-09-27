@@ -46,6 +46,8 @@ namespace phys_objects{
    return valVeto;
  }
 
+  bool isInJSON(std::string type, int run, int lumiblock);
+
   bool leptonInJet(const pat::Jet &jet, vCands leptons);
   bool idJet(const pat::Jet &jet);
 

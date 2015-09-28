@@ -17,10 +17,12 @@ using namespace std;
 namespace phys_objects{
 
   const std::vector<std::vector<int> > VRunLumi2015golden(MakeVRunLumi("2015golden"));
+  const std::vector<std::vector<int> > VRunLumi2015nohfgolden(MakeVRunLumi("2015nohfgolden"));
   const std::vector<std::vector<int> > VRunLumi2015dcs(MakeVRunLumi("2015dcs"));
 
   bool isInJSON(string type, int run, int lumiblock){
     if(type=="golden") return inJSON(VRunLumi2015golden, run, lumiblock);
+    if(type=="nohf_golden") return inJSON(VRunLumi2015nohfgolden, run, lumiblock);
     if(type=="dcs") return inJSON(VRunLumi2015dcs, run, lumiblock);
 
     return true;
@@ -123,6 +125,14 @@ namespace phys_objects{
     return true;
   }
 
+  double getRelIsolation(const pat::Muon &lep){
+    double ch_iso(lep.pfIsolationR04().sumChargedHadronPt);
+    double neu_iso(max(0., lep.pfIsolationR04().sumNeutralHadronEt + lep.pfIsolationR04().sumPhotonEt
+		       -0.5*lep.pfIsolationR04().sumPUPt));
+
+    return (ch_iso + neu_iso) / lep.pt();
+  }
+
   
   //////////////////// Electrons
   bool isSignalElectron(const pat::Electron &lep, edm::Handle<reco::VertexCollection> vtx, double lep_iso){
@@ -213,6 +223,13 @@ namespace phys_objects{
     if(fabs(dz) > 0.5 || fabs(d0) > 0.2) return false;
 
     return true;
+  }
+  double getRelIsolation(const pat::Electron &lep){
+    double ch_iso(lep.pfIsolationVariables().sumChargedHadronPt);
+    double neu_iso(max(0., lep.pfIsolationVariables().sumNeutralHadronEt + lep.pfIsolationVariables().sumPhotonEt
+		       -0.5*lep.pfIsolationVariables().sumPUPt));
+
+    return (ch_iso + neu_iso) / lep.pt();
   }
 
   double getPFIsolation(edm::Handle<pat::PackedCandidateCollection> pfcands,

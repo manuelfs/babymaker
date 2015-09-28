@@ -46,8 +46,9 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
   baby.event() = iEvent.id().event();
   baby.lumiblock() = iEvent.luminosityBlock();
   if(isData){
-    if(!isInJSON("dcs", baby.run(), baby.lumiblock())) return;
-    baby.json() = isInJSON("golden", baby.run(), baby.lumiblock());
+    bool golden(isInJSON("golden", baby.run(), baby.lumiblock()));
+    if(!isInJSON("nohf_golden", baby.run(), baby.lumiblock()) && !golden) return;
+    baby.json() = golden;
   } else baby.json() = true;
 
   ////////////////////// Trigger /////////////////////
@@ -167,7 +168,7 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
     cout<<endl<<"Took "<<roundNumber(difftime(curTime,startTime),1)<<" seconds for set up and run first event"<<endl<<endl;
     time(&startTime);
   }
-  if(nevents<10 || (nevents<100&&nevents%10==0) || (nevents<1000&&nevents%100==0) 
+  if((nevents<100&&nevents%10==0) || (nevents<1000&&nevents%100==0) 
      || (nevents<10000&&nevents%1000==0) || nevents%10000==0) {
     time_t curTime;
     time(&curTime);
@@ -344,6 +345,7 @@ vCands bmaker_basic::writeMuons(edm::Handle<pat::MuonCollection> muons,
     if(!isVetoMuon(lep, vtx, -99.)) continue; // Storing leptons that pass all veto cuts except for iso
 
     double lep_iso(getPFIsolation(pfcands, dynamic_cast<const reco::Candidate *>(&lep), 0.05, 0.2, 10., false));
+    double lep_reliso(getRelIsolation(lep));
     double dz(0.), d0(0.);
     vertexMuon(lep, vtx, dz, d0); // Calculating dz and d0
 
@@ -353,9 +355,10 @@ vCands bmaker_basic::writeMuons(edm::Handle<pat::MuonCollection> muons,
     baby.mus_dz().push_back(dz);
     baby.mus_d0().push_back(d0);
     baby.mus_charge().push_back(lep.charge());
-    baby.mus_medium().push_back(idMuon(lep, vtx, kMedium));
+    baby.mus_sigid().push_back(idMuon(lep, vtx, kMedium));
     baby.mus_tight().push_back(idMuon(lep, vtx, kTight));
     baby.mus_miniso().push_back(lep_iso);
+    baby.mus_reliso().push_back(lep_reliso);
 
     if(isVetoMuon(lep, vtx, lep_iso)) {
       baby.nvmus()++;
@@ -383,6 +386,7 @@ vCands bmaker_basic::writeElectrons(edm::Handle<pat::ElectronCollection> electro
     if(!isVetoElectron(lep, vtx, -99.)) continue; // Storing leptons that pass all veto cuts except for iso
 
     double lep_iso(getPFIsolation(pfcands, dynamic_cast<const reco::Candidate *>(&lep), 0.05, 0.2, 10., false));
+    double lep_reliso(getRelIsolation(lep));
     double dz(0.), d0(0.);
     vertexElectron(lep, vtx, dz, d0); // Calculating dz and d0
 
@@ -393,10 +397,11 @@ vCands bmaker_basic::writeElectrons(edm::Handle<pat::ElectronCollection> electro
     baby.els_dz().push_back(dz);
     baby.els_d0().push_back(d0);
     baby.els_charge().push_back(lep.charge());
-    baby.els_medium().push_back(idElectron(lep, vtx, kMedium));
+    baby.els_sigid().push_back(idElectron(lep, vtx, kMedium));
     baby.els_ispf().push_back(lep.numberOfSourceCandidatePtrs()==2 && abs(lep.sourceCandidatePtr(1)->pdgId())==11);
     baby.els_tight().push_back(idElectron(lep, vtx, kTight));
     baby.els_miniso().push_back(lep_iso);
+    baby.els_reliso().push_back(lep_reliso);
 
     if(isVetoElectron(lep, vtx, lep_iso)){
       baby.nvels()++;

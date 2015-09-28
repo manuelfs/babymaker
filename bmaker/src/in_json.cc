@@ -18,6 +18,8 @@ std::vector< std::vector<int> > MakeVRunLumi(std::string input){
   std::string fullpath =execute("printf ${CMSSW_BASE}/src/babymaker/");
   if(input == "2015golden"){
     fullpath += "txt/json/golden_Cert_246908-256869_13TeV_PromptReco_Collisions15_25ns.json";
+  } else if(input == "2015nohfgolden"){
+    fullpath += "txt/json/nohf_golden_Cert_246908-256869_13TeV_PromptReco_Collisions15_25ns.json";
   } else if(input == "2015dcs"){
     fullpath += "txt/json/dcs_DCSONLY_15_09_27.json";
   } else{

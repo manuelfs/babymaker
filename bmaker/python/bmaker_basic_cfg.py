@@ -2,6 +2,16 @@
 ### Configuration file to make basic babies from miniAOD
 ###########################################################
 import math
+from   os import environ
+from   os.path import exists, join
+
+def findFileInPath(theFile):
+    for s in environ["CMSSW_SEARCH_PATH"].split(":"):
+        attempt = join(s,theFile)
+        if exists(attempt):
+            return attempt
+    print "Could not find file "+theFile
+    return None
 
 ###### Input parameters parsing 
 import FWCore.ParameterSet.Config as cms
@@ -39,6 +49,11 @@ process = cms.Process("Baby")
 process.source = cms.Source("PoolSource",
                             fileNames = cms.untracked.vstring(options.inputFiles)
 )
+if isData: # Processing only lumis in JSON
+    import FWCore.PythonUtilities.LumiList as LumiList
+    jsonfile = findFileInPath('babymaker/txt/json/nohf_golden_Cert_246908-256869_13TeV_PromptReco_Collisions15_25ns.json')
+    process.source.lumisToProcess = LumiList.LumiList(filename = jsonfile).getVLuminosityBlockRange()
+
 process.baby_basic = cms.EDAnalyzer('bmaker_basic',
                                     outputFile = cms.string(options.outputFile),
                                     met = cms.InputTag("slimmedMETs"),

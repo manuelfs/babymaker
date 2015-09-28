@@ -52,9 +52,10 @@ std::vector<float> mus_pt
 std::vector<float> mus_eta
 std::vector<float> mus_phi
 std::vector<float> mus_miniso
+std::vector<float> mus_reliso
 std::vector<float> mus_dz
 std::vector<float> mus_d0
-std::vector<bool> mus_medium
+std::vector<bool> mus_sigid
 std::vector<bool> mus_tight
 std::vector<int> mus_charge
 
@@ -65,10 +66,11 @@ std::vector<float> els_eta
 std::vector<float> els_sceta
 std::vector<float> els_phi
 std::vector<float> els_miniso
+std::vector<float> els_reliso
 std::vector<float> els_dz
 std::vector<float> els_d0
 std::vector<bool> els_ispf
-std::vector<bool> els_medium
+std::vector<bool> els_sigid
 std::vector<bool> els_tight
 std::vector<int> els_charge
 

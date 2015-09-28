@@ -28,7 +28,7 @@ vpath %.o $(OBJDIR)
 vpath %.exe $(EXEDIR)
 vpath %.d $(MAKEDIR)
 
-all: $(EXECUTABLES)
+all: $(EXECUTABLES) $(CMSSW_BASE)/src/babymaker/bmaker/src/baby_base.cc $(CMSSW_BASE)/src/babymaker/bmaker/interface/baby_base.hh
 
 -include $(addsuffix .d,$(addprefix $(MAKEDIR)/,$(notdir $(basename $(wildcard $(SRCDIR)/*.cc)))))
 -include $(addsuffix .d,$(addprefix $(MAKEDIR)/,$(notdir $(basename $(wildcard $(SRCDIR)/*.cxx)))))
@@ -61,8 +61,8 @@ $(EXEDIR)/%.exe: $(OBJDIR)/%.o $(LIBFILE)
 .SECONDARY: dummy_baby.all 
 .PRECIOUS: generate_baby.o 
 
-$(SRCDIR)/baby.cc $(INCDIR)/baby.hh: dummy_baby.all
-dummy_baby.all: $(EXEDIR)/generate_baby.exe 
-	./$< 
+$(CMSSW_BASE)/src/babymaker/bmaker/src/baby_base.cc $(CMSSW_BASE)/src/babymaker/bmaker/interface/baby_base.hh: dummy_baby.all
+dummy_baby.all: $(EXEDIR)/generate_baby.exe $(shell find $(CMSSW_BASE)/src/babymaker/variables -type f)
+	./$<
 
 .DELETE_ON_ERROR:

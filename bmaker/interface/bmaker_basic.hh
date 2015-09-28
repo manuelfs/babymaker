@@ -34,6 +34,8 @@
 #include "babymaker/bmaker/interface/baby_basic.hh"
 #include "babymaker/bmaker/interface/utilities.hh"
 
+typedef float& (baby_base::*baby_float)() ;
+
 // Class declaration
 class bmaker_basic : public edm::EDAnalyzer {
 public:
@@ -46,7 +48,7 @@ public:
   time_t startTime;
 
   // Functions that do the branch writing
-  vCands writeJets(edm::Handle<pat::JetCollection> alljets, vCands &leptons);
+  vCands writeJets(edm::Handle<pat::JetCollection> alljets, vCands &sig_leps, vCands &veto_leps);
   void writeFatJets(vCands &jets);
   void clusterFatJets(int &nfjets, float &mj,
 		      std::vector<float> &fjets_pt, 
@@ -62,10 +64,14 @@ public:
 		      vCands &jets);
   vCands writeMuons(edm::Handle<pat::MuonCollection> muons, 
 		    edm::Handle<pat::PackedCandidateCollection> pfcands, 
-		    edm::Handle<reco::VertexCollection> vtx);
+		    edm::Handle<reco::VertexCollection> vtx,
+		    vCands &veto_mus);
   vCands writeElectrons(edm::Handle<pat::ElectronCollection> electrons, 
 			edm::Handle<pat::PackedCandidateCollection> pfcands, 
-			edm::Handle<reco::VertexCollection> vtx);
+			edm::Handle<reco::VertexCollection> vtx,
+			vCands &veto_els);
+  void writeDiLep(vCands &sig_mus, vCands &sig_els, vCands &veto_mus, vCands &veto_els);
+  void setDiLepMass(vCands leptons, baby_float ll_m, baby_float ll_pt1, baby_float ll_pt2, baby_float ll_zpt);
   void writeLeptons(vCands &leptons); 
   bool writeTriggers(const edm::TriggerNames &names, 
                      edm::Handle<edm::TriggerResults> triggerBits,
@@ -84,6 +90,7 @@ public:
   // Input parameters
   TString outname;
   edm::InputTag met_label;
+  edm::InputTag met_nohf_label;
   edm::InputTag jets_label;
   unsigned int nevents_sample;
   unsigned int nevents;

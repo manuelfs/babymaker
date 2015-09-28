@@ -42,6 +42,7 @@ process.source = cms.Source("PoolSource",
 process.baby_basic = cms.EDAnalyzer('bmaker_basic',
                                     outputFile = cms.string(options.outputFile),
                                     met = cms.InputTag("slimmedMETs"),
+                                    met_nohf = cms.InputTag("slimmedMETsNoHF"),
                                     jets = cms.InputTag(jets_label),
                                     nEventsSample = cms.uint32(options.nEventsSample)
 )

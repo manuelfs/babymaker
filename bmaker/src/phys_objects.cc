@@ -88,7 +88,8 @@ namespace phys_objects{
     if(lep.pt() <= VetoLeptonPtCut) return false;
     if(fabs(lep.eta()) > MuonEtaCut) return false;
     // ID cuts (includes dz/dz0 cuts)
-    if(!idMuon(lep, vtx, kLoose)) return false;
+    //if(!idMuon(lep, vtx, kLoose)) return false;
+    if(!idMuon(lep, vtx, kMedium)) return false; // Using RA2/b muons
     // Isolation cuts
     if(lep_iso >= 0 && lep_iso > MuonMiniIsoCut) return false;
 

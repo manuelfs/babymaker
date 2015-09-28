@@ -25,6 +25,7 @@
 // ROOT include files
 #include "TFile.h"
 #include "TROOT.h"
+#include "TLorentzVector.h"
 
 // User include files
 #include "babymaker/bmaker/interface/bmaker_basic.hh"
@@ -79,6 +80,10 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
   iEvent.getByLabel(met_label, mets);
   baby.met() = mets->at(0).pt();
   baby.met_phi() = mets->at(0).phi();
+  edm::Handle<pat::METCollection> mets_nohf;
+  iEvent.getByLabel(met_nohf_label, mets_nohf);
+  baby.met_nohf() = mets_nohf->at(0).pt();
+  baby.met_nohf_phi() = mets_nohf->at(0).phi();
 
   ////////////////////// Primary vertices /////////////////////
   edm::Handle<reco::VertexCollection> vtx;
@@ -92,27 +97,32 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
   iEvent.getByLabel("packedPFCandidates", pfcands);
 
   ////////////////////// Leptons /////////////////////
-  vCands leptons, muons, electrons;
+  vCands sig_leps, veto_leps, sig_mus, veto_mus, sig_els, veto_els;
   edm::Handle<pat::MuonCollection> allmuons;
   iEvent.getByLabel("slimmedMuons", allmuons);
-  muons = writeMuons(allmuons, pfcands, vtx);
+  sig_mus = writeMuons(allmuons, pfcands, vtx, veto_mus);
   edm::Handle<pat::ElectronCollection> allelectrons;
   iEvent.getByLabel("slimmedElectrons", allelectrons);
-  electrons = writeElectrons(allelectrons, pfcands, vtx);
+  sig_els = writeElectrons(allelectrons, pfcands, vtx, veto_els);
+  
+  writeDiLep(sig_mus, sig_els, veto_mus, veto_els);
 
   // Putting muons and electrons together
-  leptons = muons;
-  leptons.insert(leptons.end(), electrons.begin(), electrons.end());
-  writeLeptons(leptons);
+  sig_leps = sig_mus;
+  sig_leps.insert(sig_leps.end(), sig_els.begin(), sig_els.end());
+  writeLeptons(sig_leps);
+  veto_leps = veto_mus;
+  veto_leps.insert(veto_leps.end(), veto_els.begin(), veto_els.end());
 
   ////////////////////// mT, dphi /////////////////////
-  if(leptons.size()>0){
-    float wx = baby.met()*cos(baby.met_phi()) + leptons[0]->px();
-    float wy = baby.met()*sin(baby.met_phi()) + leptons[0]->py();
+  if(sig_leps.size()>0){
+    float wx = baby.met()*cos(baby.met_phi()) + sig_leps[0]->px();
+    float wy = baby.met()*sin(baby.met_phi()) + sig_leps[0]->py();
     float wphi = atan2(wy, wx);
+    baby.dphi_wlep() = deltaPhi(wphi, sig_leps[0]->phi());
 
-    baby.dphi_wlep() = deltaPhi(wphi, leptons[0]->phi());
-    baby.mt() = sqrt(2.*baby.met()*leptons[0]->pt()*(1.-cos(leptons[0]->phi()-baby.met_phi())));
+    baby.mt() = sqrt(2.*baby.met()*sig_leps[0]->pt()*(1.-cos(sig_leps[0]->phi()-baby.met_phi())));
+    baby.mt_nohf() = sqrt(2.*baby.met_nohf()*sig_leps[0]->pt()*(1.-cos(sig_leps[0]->phi()-baby.met_nohf_phi())));
   }   
     
 
@@ -120,7 +130,7 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
   vCands jets;
   edm::Handle<pat::JetCollection> alljets;
   iEvent.getByLabel(jets_label, alljets);
-  jets = writeJets(alljets, leptons);
+  jets = writeJets(alljets, sig_leps, veto_leps);
   writeFatJets(jets);
 
   ///////////////////// Filters ///////////////////////
@@ -162,9 +172,9 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
     time_t curTime;
     time(&curTime);
     float seconds(difftime(curTime,startTime));
-    cout<<"Run "<<iEvent.id().run()<<", Events "<< iEvent.id().event()<<", LumiSection "<< iEvent.luminosityBlock()
-	<<". Ran "<<nevents<<" events in "<<seconds<<" seconds -> "<<roundNumber(nevents-1,1,seconds)<<" Hz and "
-	<<roundNumber(seconds*1000,2,nevents-1)<<" ms"<<endl;
+    cout<<"Run "<<iEvent.id().run()<<", Event "<< iEvent.id().event()<<", LumiSection "<< iEvent.luminosityBlock()
+	<<". Ran "<<nevents<<" events in "<<seconds<<" seconds -> "<<roundNumber(nevents-1,1,seconds)<<" Hz, "
+	<<roundNumber(seconds*1000,2,nevents-1)<<" ms per event"<<endl;
   }
 }
 
@@ -179,24 +189,26 @@ ______                      _                     _ _   _
                                                                  __/ |
                                                                 |___/ 
 */
-vCands bmaker_basic::writeJets(edm::Handle<pat::JetCollection> alljets, vCands &leptons){
+vCands bmaker_basic::writeJets(edm::Handle<pat::JetCollection> alljets, vCands &sig_leps, vCands &veto_leps){
   vCands jets;
   baby.njets() = 0; baby.nbl() = 0; baby.nbm() = 0;  baby.nbt() = 0;  
   baby.ht() = 0.; baby.ht_hlt() = 0.;
   baby.njets_ra2() = 0; baby.nbm_ra2() = 0; baby.ht_ra2() = 0.; 
-  baby.pass_jets() = true; 
+  baby.pass_jets() = true; baby.pass_jets_nohf() = true; baby.pass_jets_ra2() = true; 
   float mht_px(0.), mht_py(0.);
   for (size_t ijet(0); ijet < alljets->size(); ijet++) {
     const pat::Jet &jet = (*alljets)[ijet];
 
     // Saving good jets and jets corresponding to signal leptons
-    bool isLep = leptonInJet(jet, leptons);
+    bool isLep = leptonInJet(jet, sig_leps);
+    bool isLep_ra2 = leptonInJet(jet, veto_leps);
     bool goodID = idJet(jet);
     bool goodPtEta = jet.pt() > JetPtCut && fabs(jet.eta()) <= JetEtaCut;
     bool goodJet = (!isLep) && goodID && goodPtEta;
     float csv(jet.bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags"));
     if(goodPtEta && !isLep && !goodID) baby.pass_jets_nohf() = false;
     if(jet.pt() > JetPtCut && !isLep && !goodID) baby.pass_jets() = false;
+    if(jet.pt() > JetPtCut && !isLep_ra2 && !goodID) baby.pass_jets_ra2() = false;
     if(goodID && goodPtEta) {
       baby.njets_ra2()++;
       baby.ht_ra2() += jet.pt();
@@ -321,8 +333,11 @@ void bmaker_basic::clusterFatJets(int &nfjets, float &mj,
 
 
 vCands bmaker_basic::writeMuons(edm::Handle<pat::MuonCollection> muons, 
-				edm::Handle<pat::PackedCandidateCollection> pfcands, edm::Handle<reco::VertexCollection> vtx){
-  vCands signalmuons; 
+				edm::Handle<pat::PackedCandidateCollection> pfcands, 
+				edm::Handle<reco::VertexCollection> vtx,
+				vCands &veto_mus){
+  vCands sig_mus; 
+  veto_mus.clear();
   baby.nmus() = 0; baby.nvmus() = 0;
   for (size_t ilep(0); ilep < muons->size(); ilep++) {
     const pat::Muon &lep = (*muons)[ilep];    
@@ -342,20 +357,26 @@ vCands bmaker_basic::writeMuons(edm::Handle<pat::MuonCollection> muons,
     baby.mus_tight().push_back(idMuon(lep, vtx, kTight));
     baby.mus_miniso().push_back(lep_iso);
 
-    if(isVetoMuon(lep, vtx, lep_iso))   baby.nvmus()++;
+    if(isVetoMuon(lep, vtx, lep_iso)) {
+      baby.nvmus()++;
+      veto_mus.push_back(dynamic_cast<const reco::Candidate *>(&lep));
+    }
     if(isSignalMuon(lep, vtx, lep_iso)) {
       baby.nmus()++;
-      signalmuons.push_back(dynamic_cast<const reco::Candidate *>(&lep));
+      sig_mus.push_back(dynamic_cast<const reco::Candidate *>(&lep));
     }
   } // Loop over muons
   
-  return signalmuons;
+  return sig_mus;
 }
 
 
 vCands bmaker_basic::writeElectrons(edm::Handle<pat::ElectronCollection> electrons, 
-				    edm::Handle<pat::PackedCandidateCollection> pfcands, edm::Handle<reco::VertexCollection> vtx){
-  vCands signalelectrons; 
+				    edm::Handle<pat::PackedCandidateCollection> pfcands, 
+				    edm::Handle<reco::VertexCollection> vtx,
+				    vCands &veto_els){
+  vCands sig_els; 
+  veto_els.clear();
   baby.nels() = 0; baby.nvels() = 0;
   for (size_t ilep(0); ilep < electrons->size(); ilep++) {
     const pat::Electron &lep = (*electrons)[ilep];    
@@ -377,14 +398,17 @@ vCands bmaker_basic::writeElectrons(edm::Handle<pat::ElectronCollection> electro
     baby.els_tight().push_back(idElectron(lep, vtx, kTight));
     baby.els_miniso().push_back(lep_iso);
 
-    if(isVetoElectron(lep, vtx, lep_iso))   baby.nvels()++;
+    if(isVetoElectron(lep, vtx, lep_iso)){
+      baby.nvels()++;
+      veto_els.push_back(dynamic_cast<const reco::Candidate *>(&lep));
+    }
     if(isSignalElectron(lep, vtx, lep_iso)) {
       baby.nels()++;
-      signalelectrons.push_back(dynamic_cast<const reco::Candidate *>(&lep));
+      sig_els.push_back(dynamic_cast<const reco::Candidate *>(&lep));
     }
   } // Loop over electrons
 
-  return signalelectrons;
+  return sig_els;
 }
 
 void bmaker_basic::writeLeptons(vCands &leptons){ 
@@ -397,6 +421,33 @@ void bmaker_basic::writeLeptons(vCands &leptons){
     baby.leps_phi().push_back(leptons[ind]->phi());
     baby.leps_id().push_back(leptons[ind]->pdgId());
   } // Loop over leptons
+}
+
+void bmaker_basic::writeDiLep(vCands &sig_mus, vCands &sig_els, vCands &veto_mus, vCands &veto_els){
+  setDiLepMass(sig_mus,  &baby_base::mumu_m,  &baby_base::mumu_pt1,  &baby_base::mumu_pt2,  &baby_base::mumu_zpt);
+  setDiLepMass(veto_mus, &baby_base::mumuv_m, &baby_base::mumuv_pt1, &baby_base::mumuv_pt2, &baby_base::mumuv_zpt);
+  setDiLepMass(sig_els,  &baby_base::elel_m,  &baby_base::elel_pt1,  &baby_base::elel_pt2,  &baby_base::elel_zpt);
+  setDiLepMass(veto_els, &baby_base::elelv_m, &baby_base::elelv_pt1, &baby_base::elelv_pt2, &baby_base::elelv_zpt);
+}
+
+void bmaker_basic::setDiLepMass(vCands leptons, baby_float ll_m, baby_float ll_pt1, baby_float ll_pt2, baby_float ll_zpt){
+  for(size_t lep1(0); lep1 < leptons.size(); lep1++){
+    for(size_t lep2(lep1+1); lep2 < leptons.size(); lep2++){
+      if(leptons[lep1]->charge()*leptons[lep2]->charge()<0){
+	TLorentzVector z_p4(leptons[lep1]->px(), leptons[lep1]->py(), leptons[lep1]->pz(), leptons[lep1]->energy()); 
+	TLorentzVector lep2_p4(leptons[lep2]->px(), leptons[lep2]->py(), leptons[lep2]->pz(), leptons[lep2]->energy()); 
+	z_p4 += lep2_p4;
+	// LorentzVector z_p4(leptons[lep1]->p4()); // Why can't I find LorentzVector? :o(
+	// z_p4 += leptons[lep2]->p4();
+	(baby.*ll_m)()   = z_p4.M();
+	(baby.*ll_zpt)() = z_p4.Pt();
+	(baby.*ll_pt1)() = max(leptons[lep1]->pt(), leptons[lep2]->pt()); 
+	(baby.*ll_pt2)() = min(leptons[lep1]->pt(), leptons[lep2]->pt());
+
+	return; // We only set it with the first good ll combination
+      }
+    } // Loop over lep2
+  } // Loop over lep1
 }
 
 
@@ -496,6 +547,7 @@ void bmaker_basic::writeGenInfo(edm::Handle<LHEEventProduct> lhe_info){
 bmaker_basic::bmaker_basic(const edm::ParameterSet& iConfig):
   outname(TString(iConfig.getParameter<string>("outputFile"))),
   met_label(iConfig.getParameter<edm::InputTag>("met")),
+  met_nohf_label(iConfig.getParameter<edm::InputTag>("met_nohf")),
   jets_label(iConfig.getParameter<edm::InputTag>("jets")),
   nevents_sample(iConfig.getParameter<unsigned int>("nEventsSample")),
   nevents(0){
@@ -582,7 +634,7 @@ bmaker_basic::~bmaker_basic(){
   runtime += seconds%60; 
   float hertz(nevents); hertz /= seconds;
   cout<<endl<<"Written "<<nevents<<" events in "<<outname<<". It took "<<seconds<<" seconds to run ("<<runtime<<"), "
-      <<roundNumber(hertz,1)<<" Hz and "<<roundNumber(1000,2,hertz)<<" ms."<<endl<<endl;
+      <<roundNumber(hertz,1)<<" Hz, "<<roundNumber(1000,2,hertz)<<" ms per event"<<endl<<endl;
   delete outfile;
 }
 

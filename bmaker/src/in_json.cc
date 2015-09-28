@@ -1,31 +1,29 @@
-#include "babymaker/bmaker/interface/in_json.hh"
-
-//root function to filter cfA using JSON File.
-//Usage: #include "/afs/cern.ch/user/w/wto/public/scripts/inJSON2012.h"
+//in_json: function to filter cfA using JSON File.
 //Create Vector of Run and Lumi by calling vector< vector<int> > VRunLumi = MakeVRunLumi("Golden") before the event loop.
 //You can print of a list of Lumiblock by calling CheckVRunLumi(VRunLumi);
 //Check if your run is inJSON by calling bool inJSON(VRunLumi,run,lumiblock) in the event loop..
-//  13Jul files contain most of 2012 A and B runs, while 06Aug files contain
-//      five runs only (namely 190782-190949) which suffered from data corruption 
-//      (different conditions needed for those runs, the corresponding lumi is 82/pb.)
 
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <vector>
+#include "babymaker/bmaker/interface/utilities.hh"
+#include "babymaker/bmaker/interface/in_json.hh"
 
-//using namespace std;
+using namespace std;
+using namespace utilities;
+
 std::vector< std::vector<int> > MakeVRunLumi(std::string input){
   std::ifstream orgJSON;
+  std::string fullpath =execute("printf ${CMSSW_BASE}/src/babymaker/");
   if(input == "2015golden"){
-    orgJSON.open("txt/json/golden_Cert_246908-256869_13TeV_PromptReco_Collisions15_25ns.json");
+    fullpath += "txt/json/golden_Cert_246908-256869_13TeV_PromptReco_Collisions15_25ns.json";
+  } else if(input == "2015dcs"){
+    fullpath += "txt/json/dcs_DCSONLY_15_09_27.json";
+  } else{
+    fullpath = input;
   }
-  else if(input == "2015dcs"){
-     orgJSON.open("txt/json/dcs_DCSONLY_15_09_27.json");
-  }
-  else{
-    orgJSON.open(input.c_str());
-  }
+  orgJSON.open(fullpath.c_str());
   std::vector<int> VRunLumi;
   if(orgJSON.is_open()){
     char inChar;

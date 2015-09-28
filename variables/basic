@@ -11,11 +11,14 @@ int ntrupv
 float ntrupv_mean
 float met
 float met_phi
+float met_nohf
+float met_nohf_phi
 float ht
 float ht_ra2
 float ht_hlt
 float mht_ra2
 float mt
+float mt_nohf
 float dphi_wlep
 
 ###################   Jets   ##################
@@ -69,6 +72,25 @@ std::vector<bool> els_medium
 std::vector<bool> els_tight
 std::vector<int> els_charge
 
+##################   Di-Leptons   ################
+float elel_m
+float elel_pt1
+float elel_pt2
+float elel_zpt
+float elelv_m
+float elelv_pt1
+float elelv_pt2
+float elelv_zpt
+
+float mumu_m
+float mumu_pt1
+float mumu_pt2
+float mumu_zpt
+float mumuv_m
+float mumuv_pt1
+float mumuv_pt2
+float mumuv_zpt
+
 ###################   Trigger   ##################
 std::vector<bool> trig;
 std::vector<float> trig_prescale;
@@ -78,8 +100,9 @@ float onmaxmu
 float onmaxel
 
 ###################   Quality   ##################
-bool pass_jets_nohf;
 bool pass_jets;
+bool pass_jets_nohf;
+bool pass_jets_ra2;
 bool pass_hbhe;
 bool pass_goodv;
 bool pass_cschalo;

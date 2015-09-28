@@ -17,6 +17,9 @@ namespace phys_objects{
   ///////////////// CUTS ///////////////////////
   float JetPtCut		= 30.0;
   float JetEtaCut               = 2.4;
+  float JetMHTEtaCut            = 5.0;
+  float JetHLTPtCut		= 40.0;
+  float JetHLTEtaCut            = 3.0;
   float CSVLoose                = 0.605;
   float CSVMedium               = 0.890;
   float CSVTight                = 0.970;

@@ -37,8 +37,8 @@ using namespace utilities;
 
 ///////////////////////// analyze: METHOD CALLED EACH EVENT ///////////////////////////
 void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
-  isData = iEvent.isRealData();
   nevents++;
+  isData = iEvent.isRealData();
 
   ////////////////////// Event info /////////////////////
   baby.run() = iEvent.id().run();
@@ -49,9 +49,22 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
     baby.json() = isInJSON("golden", baby.run(), baby.lumiblock());
   } else baby.json() = true;
 
-  const float luminosity = 1000.;
+  ////////////////////// Trigger /////////////////////
+  edm::Handle<edm::TriggerResults> triggerBits;
+  iEvent.getByLabel(edm::InputTag("TriggerResults","","HLT"),triggerBits);  
+  edm::Handle<pat::PackedTriggerPrescales> triggerPrescales;
+  iEvent.getByLabel("patTrigger",triggerPrescales);  
+  const edm::TriggerNames &names = iEvent.triggerNames(*triggerBits);
+  // Not saving data events that don't have triggers we care about
+  if(isData && !writeTriggers(names, triggerBits, triggerPrescales)) return;
 
-  
+  //////////////// HLT objects //////////////////
+  edm::Handle<pat::TriggerObjectStandAloneCollection> triggerObjects;
+  iEvent.getByLabel("selectedPatTrigger",triggerObjects);  
+  writeHLTObjects(names, triggerObjects);
+
+  //////////////// Weight //////////////////
+  const float luminosity = 1000.;
   baby.weight() = 1.;
   if(!isData) {
     edm::Handle<GenEventInfoProduct> gen_event_info;
@@ -73,19 +86,6 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
   edm::Handle<std::vector< PileupSummaryInfo > >  pu_info;
   if(!isData) iEvent.getByLabel("addPileupInfo", pu_info);
   writeVertices(vtx, pu_info);
-
-  ////////////////////// Trigger /////////////////////
-  edm::Handle<edm::TriggerResults> triggerBits;
-  iEvent.getByLabel(edm::InputTag("TriggerResults","","HLT"),triggerBits);  
-  edm::Handle<pat::PackedTriggerPrescales> triggerPrescales;
-  iEvent.getByLabel("patTrigger",triggerPrescales);  
-  const edm::TriggerNames &names = iEvent.triggerNames(*triggerBits);
-  writeTriggers(names, triggerBits, triggerPrescales);
-
-  //////////////// HLT objects //////////////////
-  edm::Handle<pat::TriggerObjectStandAloneCollection> triggerObjects;
-  iEvent.getByLabel("selectedPatTrigger",triggerObjects);  
-  writeHLTObjects(names, triggerObjects);
 
   //////////////////// pfcands  //////////////////////
   edm::Handle<pat::PackedCandidateCollection> pfcands;
@@ -182,19 +182,32 @@ ______                      _                     _ _   _
 vCands bmaker_basic::writeJets(edm::Handle<pat::JetCollection> alljets, vCands &leptons){
   vCands jets;
   baby.njets() = 0; baby.nbl() = 0; baby.nbm() = 0;  baby.nbt() = 0;  
-  baby.ht() = 0.;
+  baby.ht() = 0.; baby.ht_hlt() = 0.;
+  baby.njets_ra2() = 0; baby.nbm_ra2() = 0; baby.ht_ra2() = 0.; 
   baby.pass_jets() = true; 
-  bool goodPtEta, isLep, goodID, goodJet;
+  float mht_px(0.), mht_py(0.);
   for (size_t ijet(0); ijet < alljets->size(); ijet++) {
     const pat::Jet &jet = (*alljets)[ijet];
 
     // Saving good jets and jets corresponding to signal leptons
-    isLep = leptonInJet(jet, leptons);
-    goodID = idJet(jet);
-    goodPtEta = jet.pt() > JetPtCut && fabs(jet.eta()) <= JetEtaCut;
-    goodJet = (!isLep) && goodID && goodPtEta;
+    bool isLep = leptonInJet(jet, leptons);
+    bool goodID = idJet(jet);
+    bool goodPtEta = jet.pt() > JetPtCut && fabs(jet.eta()) <= JetEtaCut;
+    bool goodJet = (!isLep) && goodID && goodPtEta;
+    float csv(jet.bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags"));
     if(goodPtEta && !isLep && !goodID) baby.pass_jets_nohf() = false;
     if(jet.pt() > JetPtCut && !isLep && !goodID) baby.pass_jets() = false;
+    if(goodID && goodPtEta) {
+      baby.njets_ra2()++;
+      baby.ht_ra2() += jet.pt();
+      if(csv>CSVMedium) baby.nbm_ra2()++;
+    }
+    if(goodID && jet.pt() > JetPtCut && fabs(jet.eta()) <= JetMHTEtaCut){
+      mht_px -= jet.px();
+      mht_py -= jet.py();
+    }
+    if(jet.pt() > JetHLTPtCut && fabs(jet.eta()) <= JetHLTEtaCut) baby.ht_hlt() += jet.pt();
+
     if(!isLep && !goodJet) continue;
 
     // Filling branches
@@ -204,7 +217,6 @@ vCands bmaker_basic::writeJets(edm::Handle<pat::JetCollection> alljets, vCands &
     baby.jets_m().push_back(jet.mass());
     baby.jets_islep().push_back(isLep);
     
-    float csv(jet.bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags"));
     baby.jets_csv().push_back(csv);
 
     jets.push_back(dynamic_cast<const reco::Candidate *>(&jet));
@@ -218,6 +230,8 @@ vCands bmaker_basic::writeJets(edm::Handle<pat::JetCollection> alljets, vCands &
     }
   } // Loop over jets  
 
+  //baby.mht_ra2() = sqrt(pow(mht_px,2)+pow(mht_py,2));
+  baby.mht_ra2() = hypot(mht_px, mht_py);
   return jets; // Returning jets that pass acceptance and ID, regardless of whether they're leptons
 } 
 
@@ -386,9 +400,10 @@ void bmaker_basic::writeLeptons(vCands &leptons){
 }
 
 
-void bmaker_basic::writeTriggers(const edm::TriggerNames &names, 
+bool bmaker_basic::writeTriggers(const edm::TriggerNames &names, 
                                  edm::Handle<edm::TriggerResults> triggerBits, 
                                  edm::Handle<pat::PackedTriggerPrescales> triggerPrescales){
+  bool keep(false);
   baby.trig().resize(trig_name.size(), false);
   baby.trig_prescale().resize(trig_name.size(), -1.);
   for (size_t itrig(0); itrig < triggerBits->size(); itrig++) {
@@ -396,9 +411,12 @@ void bmaker_basic::writeTriggers(const edm::TriggerNames &names,
       if(names.triggerName(itrig).find(trig_name[itn])!=string::npos){
         baby.trig()[itn] = triggerBits->accept(itrig);
         baby.trig_prescale()[itn] = triggerPrescales->getPrescaleForIndex(itrig);
+	if(baby.trig()[itn]) keep = true;
       }
     }
   }
+
+  return keep;
 }
 
 void bmaker_basic::writeHLTObjects(const edm::TriggerNames &names, 
@@ -504,19 +522,19 @@ bmaker_basic::bmaker_basic(const edm::ParameterSet& iConfig):
   trig_name.push_back("HLT_DoubleEle8_CaloIdM_TrackIdM_Mass8_PFHT300_v");	// 10
   trig_name.push_back("HLT_PFHT475_v");						// 11
   trig_name.push_back("HLT_PFHT800_v");						// 12
-  trig_name.push_back("HLT_PFMET120_NoiseCleaned_Mu5_v");			// 13
-  trig_name.push_back("HLT_PFMET170_NoiseCleaned_v");				// 14
-  trig_name.push_back("HLT_DoubleIsoMu17_eta2p1_v");				// 15
-  trig_name.push_back("HLT_Mu17_TrkIsoVVL_v");					// 16
-  trig_name.push_back("HLT_IsoMu17_eta2p1_v");					// 17
+  trig_name.push_back("HLT_PFMET120_JetIdCleaned_Mu5_v");			// 13
+  trig_name.push_back("HLT_PFMET170_JetIdCleaned_v");				// 14
+  trig_name.push_back("HLT_DoubleIsoMu17_eta2p1_v");		        	// 15
+  trig_name.push_back("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v2 "); 	        // 16
+  trig_name.push_back("HLT_IsoMu18_v");					        // 17
   trig_name.push_back("HLT_IsoMu20_v");						// 18
   trig_name.push_back("HLT_IsoMu24_eta2p1_v");					// 19
   trig_name.push_back("HLT_IsoMu27_v");						// 20
   trig_name.push_back("HLT_Mu50_v");						// 21
   trig_name.push_back("HLT_Ele27_eta2p1_WPLoose_Gsf_v");			// 22
-  trig_name.push_back("HLT_Ele32_eta2p1_WPLoose_Gsf_v");			// 23
+  trig_name.push_back("HLT_Ele23_WPLoose_Gsf_v");         			// 23
   trig_name.push_back("HLT_Ele105_CaloIdVT_GsfTrkIdT_v");			// 24
-  trig_name.push_back("HLT_DoubleEle33_CaloIdL_GsfTrkIdVL_MW_v");		// 25
+  trig_name.push_back("HLT_DoubleEle33_CaloIdL_GsfTrkIdVL_v");		        // 25
   trig_name.push_back("HLT_DoubleEle24_22_eta2p1_WPLoose_Gsf_v");		// 26
 
 }

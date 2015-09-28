@@ -67,7 +67,7 @@ public:
 			edm::Handle<pat::PackedCandidateCollection> pfcands, 
 			edm::Handle<reco::VertexCollection> vtx);
   void writeLeptons(vCands &leptons); 
-  void writeTriggers(const edm::TriggerNames &names, 
+  bool writeTriggers(const edm::TriggerNames &names, 
                      edm::Handle<edm::TriggerResults> triggerBits,
                      edm::Handle<pat::PackedTriggerPrescales> triggerPrescales);
   void writeHLTObjects(const edm::TriggerNames &names, 

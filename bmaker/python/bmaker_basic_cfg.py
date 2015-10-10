@@ -36,7 +36,7 @@ if outName.find("Run2015") != -1:
     processRECO = "RECO"
 else:
     # This would be to run on MC, but pre-7_4_12 does not work
-    doJEC = True
+    doJEC = False
     isData = False
     globalTag = "74X_mcRun2_asymptotic_v2"
     processRECO = "PAT"
@@ -57,7 +57,7 @@ if isData: # Processing only lumis in JSON
 process.baby_basic = cms.EDAnalyzer('bmaker_basic',
                                     outputFile = cms.string(options.outputFile),
                                     met = cms.InputTag("slimmedMETs"),
-                                    met_nohf = cms.InputTag("slimmedMETsNoHF"),
+                                    met_nohf = cms.InputTag("slimmedMETs"),
                                     jets = cms.InputTag(jets_label),
                                     nEventsSample = cms.uint32(options.nEventsSample)
 )

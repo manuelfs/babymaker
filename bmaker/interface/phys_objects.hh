@@ -24,52 +24,10 @@ namespace phys_objects{
   float CSVMedium               = 0.890;
   float CSVTight                = 0.970;
 
-  float SignalLeptonPtCut	= 20.0;
-  float VetoLeptonPtCut		= 10.0;
-  float MuonEtaCut		= 2.4;
-  float ElectronEtaCut		= 2.5;
-  float MuonMiniIsoCut		= 0.2;
-  float ElectronMiniIsoCut	= 0.1;
-
-
-  enum CutLevel{kVeto, kLoose, kMedium, kTight};
-  template<class T>
-  T chooseVal(CutLevel threshold, T valVeto, T valLoose, T valMedium, T valTight){
-   switch(threshold){
-   default:
-   case kVeto:
-     return valVeto;
-   case kLoose:
-     return valLoose;
-   case kMedium:
-     return valMedium;
-   case kTight:
-     return valTight;
-   }
-   return valVeto;
- }
-
   bool isInJSON(std::string type, int run, int lumiblock);
 
   bool leptonInJet(const pat::Jet &jet, vCands leptons);
   bool idJet(const pat::Jet &jet);
-
-  bool isVetoMuon(const pat::Muon &lep, edm::Handle<reco::VertexCollection> vtx, double lep_iso);
-  bool isSignalMuon(const pat::Muon &lep, edm::Handle<reco::VertexCollection> vtx, double lep_iso);
-  bool idMuon(const pat::Muon &lep, edm::Handle<reco::VertexCollection> vtx, CutLevel threshold);
-  bool vertexMuon(const pat::Muon &lep, edm::Handle<reco::VertexCollection> vtx, double &dz, double &d0);
-  double getRelIsolation(const pat::Muon &lep);
-
-  bool isVetoElectron(const pat::Electron &lep, edm::Handle<reco::VertexCollection> vtx, double lep_iso);
-  bool isSignalElectron(const pat::Electron &lep, edm::Handle<reco::VertexCollection> vtx, double lep_iso);
-  bool idElectron(const pat::Electron &lep, edm::Handle<reco::VertexCollection> vtx, CutLevel threshold, bool do_iso=false);
-  bool vertexElectron(const pat::Electron &lep, edm::Handle<reco::VertexCollection> vtx, double &dz, double &d0);
-  double getRelIsolation(const pat::Electron &lep);
-
-  double getPFIsolation(edm::Handle<pat::PackedCandidateCollection> pfcands,
-			const reco::Candidate* ptcl,  
-			double r_iso_min, double r_iso_max, double kt_scale,
-			bool charged_only);
 
   bool hasGoodPV(edm::Handle<reco::VertexCollection> vtx);
 }

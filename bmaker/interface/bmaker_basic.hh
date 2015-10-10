@@ -32,9 +32,10 @@
 
 // User include files
 #include "babymaker/bmaker/interface/baby_basic.hh"
+#include "babymaker/bmaker/interface/lepton.hh"
 #include "babymaker/bmaker/interface/utilities.hh"
 
-typedef float& (baby_base::*baby_float)() ;
+typedef float& (baby_base::*baby_float)();
 
 // Class declaration
 class bmaker_basic : public edm::EDAnalyzer {
@@ -46,6 +47,9 @@ public:
   baby_basic baby;
   bool isData;
   time_t startTime;
+
+  //object classes
+  lepton *lep_tool;
 
   // Functions that do the branch writing
   vCands writeJets(edm::Handle<pat::JetCollection> alljets, vCands &sig_leps, vCands &veto_leps);
@@ -102,6 +106,8 @@ private:
   virtual void beginJob() override;
   virtual void analyze(const edm::Event&, const edm::EventSetup&) override;
   virtual void endJob() override;
+
+  double rho;
 
   //virtual void beginRun(edm::Run const&, edm::EventSetup const&) override;
   //virtual void endRun(edm::Run const&, edm::EventSetup const&) override;

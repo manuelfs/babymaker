@@ -1,11 +1,11 @@
 //// BMAKER_BASIC: Creates baby tree with basic branches
 //// Function names follow the first-lowercase, following words-uppercase. No underscores
 
-
 // System include files
 #include <cmath>
 #include <memory>
 #include <iostream>
+#include <stdlib.h>
 
 // FW include files
 #include "FWCore/Framework/interface/Frameworkfwd.h"
@@ -33,8 +33,8 @@
 #include "babymaker/bmaker/interface/phys_objects.hh"
 
 using namespace std;
-using namespace phys_objects;
 using namespace utilities;
+using namespace phys_objects;
 
 ///////////////////////// analyze: METHOD CALLED EACH EVENT ///////////////////////////
 void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
@@ -50,6 +50,11 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
     if(!isInJSON("nohf_golden", baby.run(), baby.lumiblock()) && !golden) return;
     baby.json() = golden;
   } else baby.json() = true;
+
+  //event energy density, to be used in calculating isolation
+  edm::Handle<double> rhoHandle;
+  iEvent.getByLabel("fixedGridRhoFastjetCentralNeutral", rhoHandle);
+  rho = static_cast<double>(*rhoHandle);
 
   ////////////////////// Trigger /////////////////////
   edm::Handle<edm::TriggerResults> triggerBits;
@@ -342,12 +347,12 @@ vCands bmaker_basic::writeMuons(edm::Handle<pat::MuonCollection> muons,
   baby.nmus() = 0; baby.nvmus() = 0;
   for (size_t ilep(0); ilep < muons->size(); ilep++) {
     const pat::Muon &lep = (*muons)[ilep];    
-    if(!isVetoMuon(lep, vtx, -99.)) continue; // Storing leptons that pass all veto cuts except for iso
+    if(!lep_tool->isVetoMuon(lep, vtx, -99.)) continue; // Storing leptons that pass all veto cuts except for iso
 
-    double lep_iso(getPFIsolation(pfcands, dynamic_cast<const reco::Candidate *>(&lep), 0.05, 0.2, 10., false));
-    double lep_reliso(getRelIsolation(lep));
+    double lep_iso(lep_tool->getPFIsolation(pfcands, dynamic_cast<const reco::Candidate *>(&lep), 0.05, 0.2, 10., rho, false));
+    double lep_reliso(lep_tool->getRelIsolation(lep, rho));
     double dz(0.), d0(0.);
-    vertexMuon(lep, vtx, dz, d0); // Calculating dz and d0
+    lep_tool->vertexMuon(lep, vtx, dz, d0); // Calculating dz and d0
 
     baby.mus_pt().push_back(lep.pt());
     baby.mus_eta().push_back(lep.eta());
@@ -355,16 +360,16 @@ vCands bmaker_basic::writeMuons(edm::Handle<pat::MuonCollection> muons,
     baby.mus_dz().push_back(dz);
     baby.mus_d0().push_back(d0);
     baby.mus_charge().push_back(lep.charge());
-    baby.mus_sigid().push_back(idMuon(lep, vtx, kMedium));
-    baby.mus_tight().push_back(idMuon(lep, vtx, kTight));
+    baby.mus_sigid().push_back(lep_tool->idMuon(lep, vtx, lep_tool->kMedium));
+    baby.mus_tight().push_back(lep_tool->idMuon(lep, vtx, lep_tool->kTight));
     baby.mus_miniso().push_back(lep_iso);
     baby.mus_reliso().push_back(lep_reliso);
 
-    if(isVetoMuon(lep, vtx, lep_iso)) {
+    if(lep_tool->isVetoMuon(lep, vtx, lep_iso)) {
       baby.nvmus()++;
       veto_mus.push_back(dynamic_cast<const reco::Candidate *>(&lep));
     }
-    if(isSignalMuon(lep, vtx, lep_iso)) {
+    if(lep_tool->isSignalMuon(lep, vtx, lep_iso)) {
       baby.nmus()++;
       sig_mus.push_back(dynamic_cast<const reco::Candidate *>(&lep));
     }
@@ -383,12 +388,12 @@ vCands bmaker_basic::writeElectrons(edm::Handle<pat::ElectronCollection> electro
   baby.nels() = 0; baby.nvels() = 0;
   for (size_t ilep(0); ilep < electrons->size(); ilep++) {
     const pat::Electron &lep = (*electrons)[ilep];    
-    if(!isVetoElectron(lep, vtx, -99.)) continue; // Storing leptons that pass all veto cuts except for iso
+    if(!lep_tool->isVetoElectron(lep, vtx, -99.)) continue; // Storing leptons that pass all veto cuts except for iso
 
-    double lep_iso(getPFIsolation(pfcands, dynamic_cast<const reco::Candidate *>(&lep), 0.05, 0.2, 10., false));
-    double lep_reliso(getRelIsolation(lep));
+    double lep_iso(lep_tool->getPFIsolation(pfcands, dynamic_cast<const reco::Candidate *>(&lep), 0.05, 0.2, 10., rho, false));
+    double lep_reliso(lep_tool->getRelIsolation(lep, rho));
     double dz(0.), d0(0.);
-    vertexElectron(lep, vtx, dz, d0); // Calculating dz and d0
+    lep_tool->vertexElectron(lep, vtx, dz, d0); // Calculating dz and d0
 
     baby.els_pt().push_back(lep.pt());
     baby.els_sceta().push_back(lep.superCluster()->position().eta());
@@ -397,17 +402,17 @@ vCands bmaker_basic::writeElectrons(edm::Handle<pat::ElectronCollection> electro
     baby.els_dz().push_back(dz);
     baby.els_d0().push_back(d0);
     baby.els_charge().push_back(lep.charge());
-    baby.els_sigid().push_back(idElectron(lep, vtx, kMedium));
+    baby.els_sigid().push_back(lep_tool->idElectron(lep, vtx, lep_tool->kMedium));
     baby.els_ispf().push_back(lep.numberOfSourceCandidatePtrs()==2 && abs(lep.sourceCandidatePtr(1)->pdgId())==11);
-    baby.els_tight().push_back(idElectron(lep, vtx, kTight));
+    baby.els_tight().push_back(lep_tool->idElectron(lep, vtx, lep_tool->kTight));
     baby.els_miniso().push_back(lep_iso);
     baby.els_reliso().push_back(lep_reliso);
 
-    if(isVetoElectron(lep, vtx, lep_iso)){
+    if(lep_tool->isVetoElectron(lep, vtx, lep_iso)){
       baby.nvels()++;
       veto_els.push_back(dynamic_cast<const reco::Candidate *>(&lep));
     }
-    if(isSignalElectron(lep, vtx, lep_iso)) {
+    if(lep_tool->isSignalElectron(lep, vtx, lep_iso)) {
       baby.nels()++;
       sig_els.push_back(dynamic_cast<const reco::Candidate *>(&lep));
     }
@@ -559,6 +564,8 @@ bmaker_basic::bmaker_basic(const edm::ParameterSet& iConfig):
 
   time(&startTime);
 
+  lep_tool = new lepton();
+
   outfile = new TFile(outname, "recreate");
   outfile->cd();
   baby.tree_.SetDirectory(outfile);
@@ -641,6 +648,8 @@ bmaker_basic::~bmaker_basic(){
   cout<<endl<<"Written "<<nevents<<" events in "<<outname<<". It took "<<seconds<<" seconds to run ("<<runtime<<"), "
       <<roundNumber(hertz,1)<<" Hz, "<<roundNumber(1000,2,hertz)<<" ms per event"<<endl<<endl;
   delete outfile;
+
+  delete lep_tool;
 }
 
 

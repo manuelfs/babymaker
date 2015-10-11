@@ -2,25 +2,13 @@
 
 import os, sys 
 import glob
-import string
+import string, pprint
 import ROOT
-from ROOT import TChain
+import das_client as das
 
-# silence ROOT
-ROOT.gROOT.ProcessLine("gErrorIgnoreLevel = kError;")
-
-# List of datasets to run over, could be either MC or data
-# Enter either the dataset path starting with "/store", e.g:
-# /store/mc/RunIISpring15DR74/TTJets_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v2/
-# or the dataset name as found in DAS, e.g:
-# /TTJets_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/MINIAODSIM
 datasets = []
-# datasets.append('/store/mc/RunIISpring15DR74/TTJets_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v2/')
-# datasets.append('/store/mc/RunIISpring15DR74/TTJets_SingleLeptFromT_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9_ext1-v1')
-# datasets.append('/store/mc/RunIISpring15DR74/TTJets_SingleLeptFromTbar_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9_ext1-v1/')
-# datasets.append('/store/mc/RunIISpring15DR74/TTJets_DiLept_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v2/')
-# datasets.append('/store/mc/RunIISpring15DR74/TTJets_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v2/')
-datasets.append('/store/data/Run2015B/HTMHT/MINIAOD/PromptReco-v1')
+with open("txt/dataset/mc.txt") as fmc:
+  datasets = [line for line in fmc.read().splitlines() if (len(line)>0 and line[0]=="/")]
 
 # Parsing where the files can be found depends on whether we run on UCSB or UCSD
 host = os.environ.get("HOSTNAME")
@@ -41,38 +29,45 @@ else:
     flistdir = "/net/cms2/cms2r0/babymaker/flist/"
 
 for ds in datasets:
-    # parse the dataset name and guess the path on hadoop to create the input file list
-    path,dsname,campaign,reco = '','','',''
-    if (ds[0:6]=='/store'):
-        tags = string.split(ds,'/')
-        dsname = tags[4]
-        campaign = tags[3]
-        reco = tags[6]
-        filetype = tags[5]
-    else:
-        tags = string.split(ds,'/')
-        dsname = tags[1]
-        campaign = (string.split(tags[2],'-'))[0]
-        reco = tags[2][len(campaign)+1:]
-        filetype = tags[3]
-    if 'Run2015' in ds: path = '/'.join([hadoop+'/store/data',campaign,dsname,filetype,reco,'*/*/*/*/*root'])
-    else: path = '/'.join([hadoop+'/store/mc',campaign,dsname,filetype,reco,'*/*root'])
+  # parse the dataset name and guess the path on hadoop to create the input file list
+  path,dsname,campaign,reco = '','','',''
+  tags = string.split(ds,'/')
+  dsname = tags[1]
+  campaign = (string.split(tags[2],'-'))[0]
+  reco = tags[2][len(campaign)+1:]
+  filetype = tags[3]
 
-    filelist = glob.glob(path)
-    nfiles = len(filelist)
-    if nfiles==0:
-        print "\033[93m WARNING: "+ds+" not found! Skip dataset. \033[0m"
-        continue
-    
-    fnm = '_'.join(['flist',dsname,campaign,reco+'.txt'])
-    print "INFO: Finding number of events in:", '_'.join([dsname,campaign,reco])
-    f = open(flistdir+'/'+fnm,"w")
-    tree = TChain("Events")
-    for i,ifile in enumerate(filelist):
-        tree.Add(ifile)
-        ifile = string.replace(ifile,hadoop,'')
-        f.write(ifile+'\n')
-    nent = tree.GetEntries()
-    f.write('nEventsTotal: '+'{:<10}'.format(nent))
-    f.close()
-    os.chmod(flistdir+'/'+fnm, 0777)
+  # query DAS, result is a list of dictionaries
+  # each dictionary has the name, size and nevents of a file
+  print "INFO: Query DAS for files in:", '_'.join([dsname,campaign,reco])
+  this_fdicts = das.getFilesInfo(ds, wanted_keys = ['name','size','nevents'])
+  nfiles = len(this_fdicts)
+  if nfiles==0:
+    print "\033[93m WARNING: "+ds+" not found! Skip dataset. \033[0m"
+    continue
+  
+  fnm = flistdir+'/'+'_'.join(['flist',dsname,campaign,reco+'.txt'])
+  do_chmod = True 
+  if os.path.exists(fnm): do_chmod = False
+
+  f = open(fnm,"w")
+  nent_local = 0 
+  nent = 0
+  nfiles_local = 0
+  for ifile in this_fdicts:
+    if os.path.exists(hadoop+ifile['name']):
+      if (os.path.getsize(hadoop+ifile['name'])==ifile['size']):
+        f.write("local  " + '{:<10}'.format(ifile['nevents']) + ifile['name'] + '\n')
+        nfiles_local = nfiles_local + 1
+        nent_local = nent_local + ifile['nevents']
+      else:
+        print "Encountered partial local file, will use xrootd instead"
+        f.write("xrootd " + '{:<10}'.format(ifile['nevents']) + ifile['name'] + '\n')
+    else:
+      f.write("xrootd " + '{:<10}'.format(ifile['nevents']) + ifile['name'] + '\n')
+    nent = nent + ifile['nevents']
+  f.write("nEventsTotal: "+'{:<10}'.format(nent)+ '\n')
+  f.write("stat events available locally: " + "%s%% %i/%i" % ('{:.0f}'.format(float(nent_local)/float(nent)*100.),nent_local,nent) + '\n')
+  f.write("stat files available locally: " + "%s%% %i/%i" % ('{:.0f}'.format(float(nfiles_local)/float(nfiles)*100.),nfiles_local,nfiles) + '\n')
+  f.close()
+  if (do_chmod): os.chmod(fnm, 0777)

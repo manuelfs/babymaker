@@ -1,7 +1,7 @@
-// jet_met: Functions related to jets, MET, and JECs
+// jet_met_tools: Functions related to jets, MET, and JECs
 
-#ifndef H_JET_MET
-#define H_JET_MET
+#ifndef H_JET_MET_TOOLS
+#define H_JET_MET_TOOLS
 
 // System include files
 #include <vector>
@@ -18,18 +18,18 @@
 // User include files
 #include "babymaker/bmaker/interface/utilities.hh"
 
-class jet_met{
+class jet_met_tools{
 public:
 
-  ///////////////// CUTS ///////////////////////
-  const float JetPtCut		      = 30.0;
-  const float JetEtaCut               = 2.4;
-  const float JetMHTEtaCut            = 5.0;
-  const float JetHLTPtCut	      = 40.0;
-  const float JetHLTEtaCut            = 3.0;
-  const float CSVLoose                = 0.605;
-  const float CSVMedium               = 0.890;
-  const float CSVTight                = 0.970;
+  ///////////////// JET CUTS ///////////////////////
+  const float JetPtCut	   = 30.0;
+  const float JetEtaCut    = 2.4;
+  const float JetMHTEtaCut = 5.0;
+  const float JetHLTPtCut  = 40.0;
+  const float JetHLTEtaCut = 3.0;
+  const float CSVLoose     = 0.605;
+  const float CSVMedium    = 0.890;
+  const float CSVTight     = 0.970;
 
   TString jecName;
   bool doJEC;
@@ -47,8 +47,8 @@ public:
   void getMETWithJEC(edm::Handle<pat::METCollection> mets, float &met, float &metPhi);
   void getJetCorrections(edm::Handle<pat::JetCollection> alljets, double rhoEvent);
 
-  jet_met(TString ijecName);
-  ~jet_met();
+  jet_met_tools(TString ijecName);
+  ~jet_met_tools();
 };
 
 

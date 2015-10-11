@@ -36,15 +36,17 @@ if doJEC: jets_label = "patJetsReapplyJEC"
 else: jets_label = "slimmedJets"
 
 if outName.find("Run2015") != -1:
-    jecLabel = 'Summer15_25nsV5_DATA'
     isData = True
+    jecLabel = 'Summer15_25nsV5_DATA'
     globalTag = "74X_dataRun2_v2"
     processRECO = "RECO"
+    jecLevels = ['L1FastJet', 'L2Relative', 'L3Absolute', 'L2L3Residual']
 else:
-    jecLabel = 'Summer15_25nsV2_MC'
     isData = False
+    jecLabel = 'Summer15_25nsV2_MC'
     globalTag = "74X_mcRun2_asymptotic_v2"
     processRECO = "PAT"
+    jecLevels = ['L1FastJet', 'L2Relative', 'L3Absolute']
 
 ###### Defining Baby process, input and output files 
 process = cms.Process("Baby")
@@ -108,10 +110,7 @@ if doJEC:
     from PhysicsTools.PatAlgos.producersLayer1.jetUpdater_cff import patJetCorrFactorsUpdated
     process.patJetCorrFactorsReapplyJEC = patJetCorrFactorsUpdated.clone(
         src = cms.InputTag("slimmedJets"),
-        levels = ['L1FastJet', 
-                  'L2Relative', 
-                  'L3Absolute',
-                  'L2L3Residual'],
+        levels = jecLevels,
         payload = 'AK4PFchs' ) # Make sure to choose the appropriate levels and payload here!
 
     from PhysicsTools.PatAlgos.producersLayer1.jetUpdater_cff import patJetsUpdated

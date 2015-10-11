@@ -16,6 +16,7 @@
 
 // FW physics include files
 #include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
+#include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include <fastjet/JetDefinition.hh>
 #include <fastjet/PseudoJet.hh>
 #include <fastjet/ClusterSequence.hh>
@@ -160,8 +161,12 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
   ///////////////////// Truth Info ///////////////////////
   if (!isData) {
     edm::Handle<LHEEventProduct> lhe_info;
-    iEvent.getByLabel( "externalLHEProducer", lhe_info);
+    iEvent.getByLabel("externalLHEProducer", lhe_info);
+    if(!lhe_info.isValid()) iEvent.getByLabel("source", lhe_info);
     writeGenInfo(lhe_info);
+    edm::Handle<reco::GenParticleCollection> genParticles;
+    iEvent.getByLabel("prunedGenParticles", genParticles);
+    writeMC(genParticles);
   }
 
   ////////////////// Filling the tree //////////////////
@@ -542,7 +547,7 @@ void bmaker_basic::writeVertices(edm::Handle<reco::VertexCollection> vtx,
 }
 
 void bmaker_basic::writeGenInfo(edm::Handle<LHEEventProduct> lhe_info){
-  baby.nisr_me()=0; baby.ht_isr_me()=0.; baby.ntruleps()=0;
+  baby.nisr_me()=0; baby.ht_isr_me()=0.; 
   for ( unsigned int icount = 0 ; icount < (unsigned int)lhe_info->hepeup().NUP; icount++ ) {
     unsigned int pdgid = abs(lhe_info->hepeup().IDUP[icount]);
     int status = lhe_info->hepeup().ISTUP[icount];
@@ -559,7 +564,59 @@ void bmaker_basic::writeGenInfo(edm::Handle<LHEEventProduct> lhe_info){
 
     if (status==1 && (pdgid==11 || pdgid==13 || pdgid==15)) baby.ntruleps()++;
   } // Loop over generator particles
-}
+} // writeGenInfo
+
+void bmaker_basic::writeMC(edm::Handle<reco::GenParticleCollection> genParticles){
+  LVector isr_p4;
+  baby.ntruleps()=0; baby.ntrumus()=0; baby.ntruels()=0; baby.ntrutaush()=0; baby.ntrutausl()=0;  
+  for (size_t imc(0); imc < genParticles->size(); imc++) {
+    const reco::GenParticle &mc = (*genParticles)[imc];
+
+    size_t id(abs(mc.pdgId())), momid(0);
+    if(mc.mother()) momid = abs(mc.mother()->pdgId());
+    bool lastTop(mcTool->isLast(mc,6));
+    bool lastGluino(mcTool->isLast(mc,1000021));
+    bool lastZ(mcTool->isLast(mc,23));
+    bool bFromTop(id==5 && momid==6);
+    bool eFromTopZ(id==11 && (momid==24 || momid==23));
+    bool muFromTopZ(id==13 && (momid==24 || momid==23));
+    bool tauFromTop(id==15 && momid==24);
+    bool fromW(momid==24);
+
+    // Finding p4 of ME ISR system
+    if((lastTop && outname.Contains("TTJets")) || (lastGluino && outname.Contains("SMS")) || 
+       (lastZ && outname.Contains("DY"))) isr_p4 -= mc.p4();
+
+    // Saving interesting true particles
+    if(lastTop || lastGluino || lastZ || bFromTop || eFromTopZ || muFromTopZ || tauFromTop || fromW) {
+      baby.mc_id().push_back(mc.pdgId());
+      baby.mc_pt().push_back(mc.pt());
+      baby.mc_eta().push_back(mc.eta());
+      baby.mc_phi().push_back(mc.phi());
+      baby.mc_mom().push_back(mc.mother()->pdgId());
+    }
+    // Counting true leptons
+    if(muFromTopZ) baby.ntrumus()++;
+    if(eFromTopZ) baby.ntruels()++;
+    if(tauFromTop){
+      const reco::GenParticle *tauDaughter(0);
+      if(mcTool->decaysTo(mc, 11, tauDaughter) || mcTool->decaysTo(mc, 13, tauDaughter)){
+	baby.mc_id().push_back(tauDaughter->pdgId());
+	baby.mc_pt().push_back(tauDaughter->pt());
+	baby.mc_eta().push_back(tauDaughter->eta());
+	baby.mc_phi().push_back(tauDaughter->phi());
+	baby.mc_mom().push_back(tauDaughter->mother()->pdgId());
+	baby.ntrutausl()++;
+      } else baby.ntrutaush()++;
+    }
+
+  } // Loop over genParticles
+  baby.isr_pt() = isr_p4.pt();
+  baby.isr_eta() = isr_p4.eta();
+  baby.isr_phi() = isr_p4.phi();
+
+  baby.ntruleps() = baby.ntrumus()+baby.ntruels()+baby.ntrutaush()+baby.ntrutausl();
+} // writeMC
 
 /*
  _____                 _                   _                 
@@ -581,8 +638,9 @@ bmaker_basic::bmaker_basic(const edm::ParameterSet& iConfig):
 
   time(&startTime);
 
-  lepTool = new lepton();
-  jetTool = new jet_met(jec_label);
+  lepTool = new lepton_tools();
+  jetTool = new jet_met_tools(jec_label);
+  mcTool  = new mc_tools();
 
   outfile = new TFile(outname, "recreate");
   outfile->cd();
@@ -670,6 +728,7 @@ bmaker_basic::~bmaker_basic(){
 
   delete lepTool;
   delete jetTool;
+  delete mcTool;
 }
 
 

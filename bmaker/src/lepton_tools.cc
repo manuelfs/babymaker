@@ -1,4 +1,4 @@
-//// LEPTON: Lepton selection and isolation
+//// LEPTON_TOOLS: Lepton selection and isolation
 //// Function names follow the first-lowercase, following words-uppercase. No underscores
 
 // System include files
@@ -9,25 +9,13 @@
 #include "DataFormats/Math/interface/deltaR.h"
 
 // User include files
-#include "babymaker/bmaker/interface/lepton.hh"
+#include "babymaker/bmaker/interface/lepton_tools.hh"
 
 using namespace std;
 using namespace utilities;
 
-lepton::lepton():
-  SignalLeptonPtCut(20.0),
-  VetoLeptonPtCut(10.0),
-  MuonEtaCut(2.4),
-  ElectronEtaCut(2.5),
-  MuonMiniIsoCut(0.2),
-  ElectronMiniIsoCut(0.1){
-}
-
-lepton::~lepton(){ 
-}
-
 //////////////////// Muons
-bool lepton::isSignalMuon(const pat::Muon &lep, edm::Handle<reco::VertexCollection> vtx, double lepIso){
+bool lepton_tools::isSignalMuon(const pat::Muon &lep, edm::Handle<reco::VertexCollection> vtx, double lepIso){
   // pT, eta cuts
   if(lep.pt() <= SignalLeptonPtCut) return false;
   if(fabs(lep.eta()) > MuonEtaCut) return false;
@@ -39,7 +27,7 @@ bool lepton::isSignalMuon(const pat::Muon &lep, edm::Handle<reco::VertexCollecti
   return true;
 }
 
-bool lepton::isVetoMuon(const pat::Muon &lep, edm::Handle<reco::VertexCollection> vtx, double lepIso){
+bool lepton_tools::isVetoMuon(const pat::Muon &lep, edm::Handle<reco::VertexCollection> vtx, double lepIso){
   // pT, eta cuts
   if(lep.pt() <= VetoLeptonPtCut) return false;
   if(fabs(lep.eta()) > MuonEtaCut) return false;
@@ -52,7 +40,7 @@ bool lepton::isVetoMuon(const pat::Muon &lep, edm::Handle<reco::VertexCollection
   return true;
 }
 
-bool lepton::idMuon(const pat::Muon &lep, edm::Handle<reco::VertexCollection> vtx, CutLevel threshold) {
+bool lepton_tools::idMuon(const pat::Muon &lep, edm::Handle<reco::VertexCollection> vtx, CutLevel threshold) {
   double dz(0.), d0(0.);
   if(!vertexMuon(lep, vtx, dz, d0)) return false;
 
@@ -68,7 +56,7 @@ bool lepton::idMuon(const pat::Muon &lep, edm::Handle<reco::VertexCollection> vt
   }
 }
   
-bool lepton::vertexMuon(const pat::Muon &lep, edm::Handle<reco::VertexCollection> vtx, double &dz, double &d0){
+bool lepton_tools::vertexMuon(const pat::Muon &lep, edm::Handle<reco::VertexCollection> vtx, double &dz, double &d0){
   dz = 0.; d0 = 0.;
   if(lep.track().isAvailable()){ // If the track is not available we probably don't want the muon
     dz = lep.track()->vz()-vtx->at(0).z();
@@ -79,7 +67,7 @@ bool lepton::vertexMuon(const pat::Muon &lep, edm::Handle<reco::VertexCollection
   return true;
 }
 
-double lepton::getEffAreaMuon(double eta){
+double lepton_tools::getEffAreaMuon(double eta){
   double abseta = fabs(eta);
   if (abseta < 0.8) return 0.0735;
   else if (abseta < 1.3) return 0.0619;
@@ -89,7 +77,7 @@ double lepton::getEffAreaMuon(double eta){
   else return 0;
 }
 
-double lepton::getRelIsolation(const pat::Muon &lep, double rho){
+double lepton_tools::getRelIsolation(const pat::Muon &lep, double rho){
   double ch_iso(lep.pfIsolationR04().sumChargedHadronPt);
   double neu_iso(max(0., lep.pfIsolationR04().sumNeutralHadronEt + lep.pfIsolationR04().sumPhotonEt
 	       -rho*getEffAreaMuon(lep.eta())));
@@ -99,7 +87,7 @@ double lepton::getRelIsolation(const pat::Muon &lep, double rho){
 
 
 //////////////////// Electrons
-bool lepton::isSignalElectron(const pat::Electron &lep, edm::Handle<reco::VertexCollection> vtx, double lepIso){
+bool lepton_tools::isSignalElectron(const pat::Electron &lep, edm::Handle<reco::VertexCollection> vtx, double lepIso){
   // pT, eta cuts
   if(lep.pt() <= SignalLeptonPtCut) return false;
   if(fabs(lep.superCluster()->position().eta()) > ElectronEtaCut) return false;
@@ -111,7 +99,7 @@ bool lepton::isSignalElectron(const pat::Electron &lep, edm::Handle<reco::Vertex
   return true;
 }
 
-bool lepton::isVetoElectron(const pat::Electron &lep, edm::Handle<reco::VertexCollection> vtx, double lepIso){
+bool lepton_tools::isVetoElectron(const pat::Electron &lep, edm::Handle<reco::VertexCollection> vtx, double lepIso){
   // pT, eta cuts
   if(lep.pt() <= VetoLeptonPtCut) return false;
   if(fabs(lep.superCluster()->position().eta()) > ElectronEtaCut) return false;
@@ -123,7 +111,7 @@ bool lepton::isVetoElectron(const pat::Electron &lep, edm::Handle<reco::VertexCo
   return true;
 }
 
-bool lepton::idElectron(const pat::Electron &lep, edm::Handle<reco::VertexCollection> vtx, CutLevel threshold, bool doIso) {
+bool lepton_tools::idElectron(const pat::Electron &lep, edm::Handle<reco::VertexCollection> vtx, CutLevel threshold, bool doIso) {
 
   bool barrel(lep.isEB());
   double deta_cut, dphi_cut, ieta_cut, hovere_cut, d0_cut, dz_cut,
@@ -178,7 +166,7 @@ bool lepton::idElectron(const pat::Electron &lep, edm::Handle<reco::VertexCollec
     && (misshits_cut >= mhits);
 }
 
-bool lepton::vertexElectron(const pat::Electron &lep, edm::Handle<reco::VertexCollection> vtx, double &dz, double &d0){
+bool lepton_tools::vertexElectron(const pat::Electron &lep, edm::Handle<reco::VertexCollection> vtx, double &dz, double &d0){
   dz = 0.; d0 = 0.;
   if(lep.gsfTrack().isAvailable()){ // If the track is not available we probably don't want the electron
     dz = lep.gsfTrack()->vz()-vtx->at(0).z();
@@ -189,7 +177,7 @@ bool lepton::vertexElectron(const pat::Electron &lep, edm::Handle<reco::VertexCo
   return true;
 }
 
-double lepton::getEffAreaElectron(double eta){
+double lepton_tools::getEffAreaElectron(double eta){
   double abseta = fabs(eta);
   if (abseta < 1) return 0.1752;
   else if (abseta < 1.479) return 0.1862;
@@ -201,7 +189,7 @@ double lepton::getEffAreaElectron(double eta){
   else return 0;
 }
 
-double lepton::getRelIsolation(const pat::Electron &lep, double rho){
+double lepton_tools::getRelIsolation(const pat::Electron &lep, double rho){
   double ch_iso(lep.pfIsolationVariables().sumChargedHadronPt);
   double neu_iso(max(0., lep.pfIsolationVariables().sumNeutralHadronEt + lep.pfIsolationVariables().sumPhotonEt
 	       -rho*getEffAreaElectron(lep.eta())));
@@ -209,7 +197,7 @@ double lepton::getRelIsolation(const pat::Electron &lep, double rho){
   return (ch_iso + neu_iso) / lep.pt();
 }
 
-double lepton::getPFIsolation(edm::Handle<pat::PackedCandidateCollection> pfcands,
+double lepton_tools::getPFIsolation(edm::Handle<pat::PackedCandidateCollection> pfcands,
                       const reco::Candidate* ptcl,  
                       double r_iso_min, double r_iso_max, double kt_scale,
                       double rho, bool charged_only) {
@@ -263,3 +251,10 @@ double lepton::getPFIsolation(edm::Handle<pat::PackedCandidateCollection> pfcand
 
   return iso/ptcl->pt();
 }
+
+lepton_tools::lepton_tools(){
+}
+
+lepton_tools::~lepton_tools(){ 
+}
+

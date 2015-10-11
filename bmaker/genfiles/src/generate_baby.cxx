@@ -183,7 +183,7 @@ void WriteBaseHeader(const set<Variable> &all_vars,
   file << "#include <string>\n\n";
 
   file << "#include \"TTree.h\"\n";
-  file << "#include \"TChain.h\"\n";
+  file << "#include \"TChain.h\"\n\n";
   //  file << "#include \"TTreeFormula.h\"\n\n";
 
   file << "class baby_base{\n";
@@ -337,14 +337,26 @@ void WriteBaseSource(const set<Variable> &all_vars,
     for(set<Variable>::const_iterator var = com_vars.begin();
         var != com_end_2;
         ++var){
-      file << "  " << var->name_ << "_(0),\n";
+      if(Contains(var->type_, "vector")){
+	file << "  " << var->name_ << "_(0),\n";
+      }else if(Contains(var->type_, "tring")){
+	file << "  " << var->name_ << "_(\"\"),\n";
+      }else{
+	file << "  " << var->name_ << "_(static_cast<" << var->type_ << ">(bad_val_)),\n";
+      }
       if(Contains(var->type_, "vector")){
         file << "  p_" << var->name_ << "_(&" << var->name_ << "_),\n";
       }
       file << "  b_" << var->name_ << "_(NULL),\n";
       file << "  c_" << var->name_ << "_(false),\n";
     }
-    file << "  " << com_end_2->name_ << "_(0),\n";
+    if(Contains(com_end_2->type_, "vector")){
+      file << "  " << com_end_2->name_ << "_(0),\n";
+    }else if(Contains(com_end_2->type_, "tring")){
+      file << "  " << com_end_2->name_ << "_(\"\"),\n";
+    }else{
+      file << "  " << com_end_2->name_ << "_(static_cast<" << com_end_2->type_ << ">(bad_val_)),\n";
+    }
     if(Contains(com_end_2->type_, "vector")){
       file << "  p_" << com_end_2->name_ << "_(&" << com_end_2->name_ << "_),\n";
     }
@@ -572,7 +584,13 @@ void WriteSepSource(const pair<string, set<Variable> > &sep_vars){
     for(set<Variable>::const_iterator var = vars.begin();
         var != vars_end_2;
         ++var){
-      file << "  " << var->name_ << "_(0),\n";
+      if(Contains(var->type_, "vector")){
+	file << "  " << var->name_ << "_(0),\n";
+      }else if(Contains(var->type_, "tring")){
+	file << "  " << var->name_ << "_(\"\"),\n";
+      }else{
+	file << "  " << var->name_ << "_(static_cast<" << var->type_ << ">(bad_val_)),\n";
+      }
       if(Contains(var->type_, "vector")){
         file << "  p_" << var->name_ << "_(&" << var->name_ << "_),\n";
         file << "  b_" << var->name_ << "_(tree_.Branch(\"" << var->name_ << "\", &p_" << var->name_ << "_)),\n";
@@ -581,7 +599,13 @@ void WriteSepSource(const pair<string, set<Variable> > &sep_vars){
       }
       file << "  c_" << var->name_ << "_(false),\n";
     }
-    file << "  " << vars_end_2->name_ << "_(0),\n";
+    if(Contains(vars_end_2->type_, "vector")){
+      file << "  " << vars_end_2->name_ << "_(0),\n";
+    }else if(Contains(vars_end_2->type_, "tring")){
+      file << "  " << vars_end_2->name_ << "_(\"\"),\n";
+    }else{
+      file << "  " << vars_end_2->name_ << "_(static_cast<" << vars_end_2->type_ << ">(bad_val_)),\n";
+    }
     if(Contains(vars_end_2->type_, "vector")){
       file << "  p_" << vars_end_2->name_ << "_(&" << vars_end_2->name_ << "_),\n";
       file << "  b_" << vars_end_2->name_ << "_(tree_.Branch(\"" << vars_end_2->name_ << "\", &p_" << vars_end_2->name_ << "_)),\n";
@@ -601,14 +625,26 @@ void WriteSepSource(const pair<string, set<Variable> > &sep_vars){
     for(set<Variable>::const_iterator var = vars.begin();
         var != vars_end_2;
         ++var){
-      file << "  " << var->name_ << "_(0),\n";
+      if(Contains(var->type_, "vector")){
+	file << "  " << var->name_ << "_(0),\n";
+      }else if(Contains(var->type_, "tring")){
+	file << "  " << var->name_ << "_(\"\"),\n";
+      }else{
+	file << "  " << var->name_ << "_(static_cast<" << var->type_ << ">(bad_val_)),\n";
+      }
       if(Contains(var->type_, "vector")){
         file << "  p_" << var->name_ << "_(&" << var->name_ << "_),\n";
       }
       file << "  b_" << var->name_ << "_(NULL),\n";
       file << "  c_" << var->name_ << "_(false),\n";
     }
-    file << "  " << vars_end_2->name_ << "_(0),\n";
+    if(Contains(vars_end_2->type_, "vector")){
+      file << "  " << vars_end_2->name_ << "_(0),\n";
+    }else if(Contains(vars_end_2->type_, "tring")){
+      file << "  " << vars_end_2->name_ << "_(\"\"),\n";
+    }else{
+      file << "  " << vars_end_2->name_ << "_(static_cast<" << vars_end_2->type_ << ">(bad_val_)),\n";
+    }
     if(Contains(vars_end_2->type_, "vector")){
       file << "  p_" << vars_end_2->name_ << "_(&" << vars_end_2->name_ << "_),\n";
     }

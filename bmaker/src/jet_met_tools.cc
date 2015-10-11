@@ -1,4 +1,4 @@
-// jet_met: Functions related to jets, MET, and JECs
+// jet_met_tools: Functions related to jets, MET, and JECs
 
 // System include files
 #include <iostream>
@@ -9,14 +9,14 @@
 #include "CommonTools/Utils/interface/StringCutObjectSelector.h"
 
 // User include files
-#include "babymaker/bmaker/interface/jet_met.hh"
+#include "babymaker/bmaker/interface/jet_met_tools.hh"
 #include "babymaker/bmaker/interface/release.hh"
 
 using namespace std;
 using namespace utilities;
 
 
-bool jet_met::leptonInJet(const pat::Jet &jet, vCands leptons){
+bool jet_met_tools::leptonInJet(const pat::Jet &jet, vCands leptons){
   for(unsigned ilep(0); ilep < leptons.size(); ilep++){
     int indpf(-1);
     unsigned npflep(leptons[ilep]->numberOfSourceCandidatePtrs());
@@ -34,7 +34,7 @@ bool jet_met::leptonInJet(const pat::Jet &jet, vCands leptons){
   return false;
 }
 
-bool jet_met::idJet(const pat::Jet &jet){
+bool jet_met_tools::idJet(const pat::Jet &jet){
   //LooseID from https://twiki.cern.ch/twiki/bin/view/CMS/JetID
   double eta = jet.eta();
   double NHF = jet.neutralHadronEnergyFraction();
@@ -53,7 +53,7 @@ bool jet_met::idJet(const pat::Jet &jet){
 }
 
 
-void jet_met::getJetCorrections(edm::Handle<pat::JetCollection> alljets, double rhoEvent){
+void jet_met_tools::getJetCorrections(edm::Handle<pat::JetCollection> alljets, double rhoEvent){
   jetTotCorrections.resize(alljets->size(), 1.);
   jetL1Corrections.resize(alljets->size(), 1.);
   corrJet.clear();
@@ -82,7 +82,7 @@ void jet_met::getJetCorrections(edm::Handle<pat::JetCollection> alljets, double 
     
 }
 
-void jet_met::getMETRaw(edm::Handle<pat::METCollection> mets, float &metRaw, float &metRawPhi){
+void jet_met_tools::getMETRaw(edm::Handle<pat::METCollection> mets, float &metRaw, float &metRawPhi){
 #ifdef PRE_7_4_12
   metRaw = mets->at(0).uncorrectedPt();
   metRawPhi = mets->at(0).uncorrectedPhi();
@@ -93,7 +93,7 @@ void jet_met::getMETRaw(edm::Handle<pat::METCollection> mets, float &metRaw, flo
 
 }
 
-void jet_met::getMETWithJEC(edm::Handle<pat::METCollection> mets, float &met, float &metPhi){
+void jet_met_tools::getMETWithJEC(edm::Handle<pat::METCollection> mets, float &met, float &metPhi){
   if(!doJEC) {
     met = mets->at(0).pt();
     metPhi = mets->at(0).phi();
@@ -143,22 +143,14 @@ void jet_met::getMETWithJEC(edm::Handle<pat::METCollection> mets, float &met, fl
   metPhi = atan2(mety,metx);
 }
 
-jet_met::jet_met(TString ijecName):
-  JetPtCut     (30.0),
-  JetEtaCut    (2.4),
-  JetMHTEtaCut (5.0),
-  JetHLTPtCut  (40.0),
-  JetHLTEtaCut (3.0),
-  CSVLoose     (0.605),
-  CSVMedium    (0.890),
-  CSVTight     (0.970),
+jet_met_tools::jet_met_tools(TString ijecName):
   jecName(ijecName){
 
   doJEC = !jecName.Contains("miniAOD");
   if(doJEC) {
     vector<JetCorrectorParameters> jecFiles;
     string basename(getenv("CMSSW_BASE")); basename += "/src/babymaker/txt/jec/"; basename += jecName.Data();
-    cout<<endl<<"jet_met: Applying JECs on-the-fly with files "<<basename.c_str()<<"*.txt"<<endl;
+    cout<<endl<<"jet_met_tools: Applying JECs on-the-fly with files "<<basename.c_str()<<"*.txt"<<endl;
     jecFiles.push_back(JetCorrectorParameters(basename+"_L1FastJet_AK4PFchs.txt"));
     jecFiles.push_back(JetCorrectorParameters(basename+"_L2Relative_AK4PFchs.txt"));
     jecFiles.push_back(JetCorrectorParameters(basename+"_L3Absolute_AK4PFchs.txt"));
@@ -167,7 +159,7 @@ jet_met::jet_met(TString ijecName):
   }
   }
 
-jet_met::~jet_met(){
+jet_met_tools::~jet_met_tools(){
   delete jetCorrector;
 }
 

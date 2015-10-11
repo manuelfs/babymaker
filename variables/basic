@@ -144,6 +144,18 @@ std::vector<int> fjets08_btags
 std::vector<int> fjets08_nconst
 
 ################  Truth   ##################
-int ntruleps
 int nisr_me
 float ht_isr_me
+std::vector<float> mc_pt
+std::vector<float> mc_eta
+std::vector<float> mc_phi
+std::vector<int>   mc_id
+std::vector<int>   mc_mom
+int ntruleps
+int ntrumus
+int ntruels
+int ntrutaush
+int ntrutausl
+float isr_pt
+float isr_eta
+float isr_phi

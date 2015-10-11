@@ -1,7 +1,7 @@
-// Common physics objects definitions
+// LEPTON_TOOLS: Functions to select analysis leptons
 
-#ifndef H_LEPTON
-#define H_LEPTON
+#ifndef H_LEPTON_TOOLS
+#define H_LEPTON_TOOLS
 
 #include "FWCore/Framework/interface/ESHandle.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
@@ -12,18 +12,19 @@
 
 #include "babymaker/bmaker/interface/utilities.hh"
 
-class lepton{
+class lepton_tools{
 
 public:
-  lepton();
-  ~lepton();
+  lepton_tools();
+  ~lepton_tools();
 
-  const float SignalLeptonPtCut;
-  const float VetoLeptonPtCut;
-  const float MuonEtaCut;
-  const float ElectronEtaCut;
-  const float MuonMiniIsoCut;
-  const float ElectronMiniIsoCut;
+  ///////////////// LEPTON CUTS ///////////////////////
+  const float SignalLeptonPtCut	 = 20.0;
+  const float VetoLeptonPtCut	 = 10.0;
+  const float MuonEtaCut	 = 2.4;
+  const float ElectronEtaCut	 = 2.5;
+  const float MuonMiniIsoCut	 = 0.2;
+  const float ElectronMiniIsoCut = 0.1;
 
   enum CutLevel{kVeto, kLoose, kMedium, kTight};
   template<class T>
@@ -57,7 +58,7 @@ public:
   double getRelIsolation(const pat::Electron &lep, double rho);
 
   double getPFIsolation(edm::Handle<pat::PackedCandidateCollection> pfcands,
-			                  const reco::Candidate* ptcl,  
+			const reco::Candidate* ptcl,  
                         double r_iso_min, double r_iso_max, double kt_scale,
                         double rho, bool charged_only);
 

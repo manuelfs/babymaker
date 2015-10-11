@@ -33,8 +33,9 @@
 
 // User include files
 #include "babymaker/bmaker/interface/baby_basic.hh"
-#include "babymaker/bmaker/interface/lepton.hh"
-#include "babymaker/bmaker/interface/jet_met.hh"
+#include "babymaker/bmaker/interface/lepton_tools.hh"
+#include "babymaker/bmaker/interface/jet_met_tools.hh"
+#include "babymaker/bmaker/interface/mc_tools.hh"
 #include "babymaker/bmaker/interface/utilities.hh"
 
 typedef float& (baby_base::*baby_float)();
@@ -51,8 +52,9 @@ public:
   time_t startTime;
 
   //object classes
-  lepton *lepTool;
-  jet_met *jetTool;
+  lepton_tools *lepTool;
+  jet_met_tools *jetTool;
+  mc_tools *mcTool;
 
   // Functions that do the branch writing
   void writeMET(edm::Handle<pat::METCollection> mets, edm::Handle<pat::METCollection> mets_nohf);
@@ -92,6 +94,7 @@ public:
   void writeVertices(edm::Handle<reco::VertexCollection> vtx,
 		     edm::Handle<std::vector< PileupSummaryInfo > >  pu_info);  
   void writeGenInfo(edm::Handle<LHEEventProduct> lhe_info);
+  void writeMC(edm::Handle<reco::GenParticleCollection> genParticles);
 
   std::vector<TString> trig_name;
 

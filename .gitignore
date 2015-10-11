@@ -1,6 +1,7 @@
 # Generated on compilation
 baby*.hh
 baby*.cc
+bmaker/interface/release.hh
 
 # Compiled Object files
 *.slo

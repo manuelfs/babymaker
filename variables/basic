@@ -9,10 +9,6 @@ bool json
 int npv
 int ntrupv
 float ntrupv_mean
-float met
-float met_phi
-float met_nohf
-float met_nohf_phi
 float ht
 float ht_ra2
 float ht_hlt
@@ -20,6 +16,18 @@ float mht_ra2
 float mt
 float mt_nohf
 float dphi_wlep
+
+###################   MET   ##################
+float met
+float met_phi
+float met_raw
+float met_raw_phi
+float met_mini
+float met_mini_phi
+float met_nohf
+float met_nohf_phi
+float met_tru
+float met_tru_phi
 
 ###################   Jets   ##################
 int njets

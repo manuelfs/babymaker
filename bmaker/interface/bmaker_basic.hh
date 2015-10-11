@@ -17,6 +17,7 @@
 // FW physics include files
 #include "DataFormats/PatCandidates/interface/Muon.h"
 #include "DataFormats/PatCandidates/interface/Electron.h"
+#include "DataFormats/PatCandidates/interface/MET.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/Common/interface/TriggerResults.h"
@@ -33,6 +34,7 @@
 // User include files
 #include "babymaker/bmaker/interface/baby_basic.hh"
 #include "babymaker/bmaker/interface/lepton.hh"
+#include "babymaker/bmaker/interface/jet_met.hh"
 #include "babymaker/bmaker/interface/utilities.hh"
 
 typedef float& (baby_base::*baby_float)();
@@ -49,11 +51,13 @@ public:
   time_t startTime;
 
   //object classes
-  lepton *lep_tool;
+  lepton *lepTool;
+  jet_met *jetTool;
 
   // Functions that do the branch writing
-  vCands writeJets(edm::Handle<pat::JetCollection> alljets, vCands &sig_leps, vCands &veto_leps);
-  void writeFatJets(vCands &jets);
+  void writeMET(edm::Handle<pat::METCollection> mets, edm::Handle<pat::METCollection> mets_nohf);
+  std::vector<LVector> writeJets(edm::Handle<pat::JetCollection> alljets, vCands &sig_leps, vCands &veto_leps);
+  void writeFatJets(std::vector<LVector> &jets);
   void clusterFatJets(int &nfjets, float &mj,
 		      std::vector<float> &fjets_pt, 
 		      std::vector<float> &fjets_eta,
@@ -65,15 +69,15 @@ public:
 		      std::vector<int> &fjets_btags,
 		      std::vector<int> &jets_fjet_index,
 		      double radius,
-		      vCands &jets);
+		      std::vector<LVector> &jets);
   vCands writeMuons(edm::Handle<pat::MuonCollection> muons, 
 		    edm::Handle<pat::PackedCandidateCollection> pfcands, 
 		    edm::Handle<reco::VertexCollection> vtx,
-		    vCands &veto_mus);
+		    vCands &veto_mus, double rhoEventCentral);
   vCands writeElectrons(edm::Handle<pat::ElectronCollection> electrons, 
 			edm::Handle<pat::PackedCandidateCollection> pfcands, 
 			edm::Handle<reco::VertexCollection> vtx,
-			vCands &veto_els);
+			vCands &veto_els, double rhoEventCentral);
   void writeDiLep(vCands &sig_mus, vCands &sig_els, vCands &veto_mus, vCands &veto_els);
   void setDiLepMass(vCands leptons, baby_float ll_m, baby_float ll_pt1, baby_float ll_pt2, baby_float ll_zpt);
   void writeLeptons(vCands &leptons); 
@@ -93,6 +97,7 @@ public:
 
   // Input parameters
   TString outname;
+  TString jec_label;
   edm::InputTag met_label;
   edm::InputTag met_nohf_label;
   edm::InputTag jets_label;
@@ -107,7 +112,6 @@ private:
   virtual void analyze(const edm::Event&, const edm::EventSetup&) override;
   virtual void endJob() override;
 
-  double rho;
 
   //virtual void beginRun(edm::Run const&, edm::EventSetup const&) override;
   //virtual void endRun(edm::Run const&, edm::EventSetup const&) override;

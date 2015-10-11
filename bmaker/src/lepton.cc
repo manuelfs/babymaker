@@ -27,19 +27,19 @@ lepton::~lepton(){
 }
 
 //////////////////// Muons
-bool lepton::isSignalMuon(const pat::Muon &lep, edm::Handle<reco::VertexCollection> vtx, double lep_iso){
+bool lepton::isSignalMuon(const pat::Muon &lep, edm::Handle<reco::VertexCollection> vtx, double lepIso){
   // pT, eta cuts
   if(lep.pt() <= SignalLeptonPtCut) return false;
   if(fabs(lep.eta()) > MuonEtaCut) return false;
   // ID cuts (includes dz/dz0 cuts)
   if(!idMuon(lep, vtx, kMedium)) return false;
   // Isolation cuts
-  if(lep_iso >= 0 && lep_iso > MuonMiniIsoCut) return false;
+  if(lepIso >= 0 && lepIso > MuonMiniIsoCut) return false;
 
   return true;
 }
 
-bool lepton::isVetoMuon(const pat::Muon &lep, edm::Handle<reco::VertexCollection> vtx, double lep_iso){
+bool lepton::isVetoMuon(const pat::Muon &lep, edm::Handle<reco::VertexCollection> vtx, double lepIso){
   // pT, eta cuts
   if(lep.pt() <= VetoLeptonPtCut) return false;
   if(fabs(lep.eta()) > MuonEtaCut) return false;
@@ -47,7 +47,7 @@ bool lepton::isVetoMuon(const pat::Muon &lep, edm::Handle<reco::VertexCollection
   //if(!idMuon(lep, vtx, kLoose)) return false;
   if(!idMuon(lep, vtx, kMedium)) return false; // Using RA2/b muons
   // Isolation cuts
-  if(lep_iso >= 0 && lep_iso > MuonMiniIsoCut) return false;
+  if(lepIso >= 0 && lepIso > MuonMiniIsoCut) return false;
 
   return true;
 }
@@ -99,31 +99,31 @@ double lepton::getRelIsolation(const pat::Muon &lep, double rho){
 
 
 //////////////////// Electrons
-bool lepton::isSignalElectron(const pat::Electron &lep, edm::Handle<reco::VertexCollection> vtx, double lep_iso){
+bool lepton::isSignalElectron(const pat::Electron &lep, edm::Handle<reco::VertexCollection> vtx, double lepIso){
   // pT, eta cuts
   if(lep.pt() <= SignalLeptonPtCut) return false;
   if(fabs(lep.superCluster()->position().eta()) > ElectronEtaCut) return false;
   // ID cuts (includes dz/dz0 cuts)
   if(!idElectron(lep, vtx, kMedium)) return false;
   // Isolation cuts
-  if(lep_iso >= 0 && lep_iso > ElectronMiniIsoCut) return false;
+  if(lepIso >= 0 && lepIso > ElectronMiniIsoCut) return false;
 
   return true;
 }
 
-bool lepton::isVetoElectron(const pat::Electron &lep, edm::Handle<reco::VertexCollection> vtx, double lep_iso){
+bool lepton::isVetoElectron(const pat::Electron &lep, edm::Handle<reco::VertexCollection> vtx, double lepIso){
   // pT, eta cuts
   if(lep.pt() <= VetoLeptonPtCut) return false;
   if(fabs(lep.superCluster()->position().eta()) > ElectronEtaCut) return false;
   // ID cuts (includes dz/dz0 cuts)
   if(!idElectron(lep, vtx, kVeto)) return false;
   // Isolation cuts
-  if(lep_iso >= 0 && lep_iso > ElectronMiniIsoCut) return false;
+  if(lepIso >= 0 && lepIso > ElectronMiniIsoCut) return false;
 
   return true;
 }
 
-bool lepton::idElectron(const pat::Electron &lep, edm::Handle<reco::VertexCollection> vtx, CutLevel threshold, bool do_iso) {
+bool lepton::idElectron(const pat::Electron &lep, edm::Handle<reco::VertexCollection> vtx, CutLevel threshold, bool doIso) {
 
   bool barrel(lep.isEB());
   double deta_cut, dphi_cut, ieta_cut, hovere_cut, d0_cut, dz_cut,
@@ -173,7 +173,7 @@ bool lepton::idElectron(const pat::Electron &lep, edm::Handle<reco::VertexCollec
     && d0_cut > fabs(d0)
     && dz_cut > fabs(dz)
     && ooeminusoop_cut > fabs((1.0-lep.eSuperClusterOverP())/lep.ecalEnergy())
-    && (!do_iso || reliso_cut > 0) // To be implemented if we want reliso
+    && (!doIso || reliso_cut > 0) // To be implemented if we want reliso
     && (!req_conv_veto || lep.passConversionVeto())
     && (misshits_cut >= mhits);
 }

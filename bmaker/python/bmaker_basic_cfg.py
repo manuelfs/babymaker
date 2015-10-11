@@ -29,20 +29,22 @@ options.register('nEvents',
                  "Number of events to run over.")
 options.parseArguments()
 outName = options.outputFile
+
+## This refers to the official JEC methods. To apply on-the-fly, just set jecLabel to something different from miniAOD
+doJEC = False  
+if doJEC: jets_label = "patJetsReapplyJEC"
+else: jets_label = "slimmedJets"
+
 if outName.find("Run2015") != -1:
-    doJEC = False
+    jecLabel = 'Summer15_25nsV5_DATA'
     isData = True
     globalTag = "74X_dataRun2_v2"
     processRECO = "RECO"
 else:
-    # This would be to run on MC, but pre-7_4_12 does not work
-    doJEC = False
+    jecLabel = 'Summer15_25nsV2_MC'
     isData = False
     globalTag = "74X_mcRun2_asymptotic_v2"
     processRECO = "PAT"
-
-if doJEC: jets_label = "patJetsReapplyJEC"
-else: jets_label = "slimmedJets"
 
 ###### Defining Baby process, input and output files 
 process = cms.Process("Baby")
@@ -56,8 +58,9 @@ if isData: # Processing only lumis in JSON
 
 process.baby_basic = cms.EDAnalyzer('bmaker_basic',
                                     outputFile = cms.string(options.outputFile),
+                                    jec = cms.string(jecLabel),
                                     met = cms.InputTag("slimmedMETs"),
-                                    met_nohf = cms.InputTag("slimmedMETs"),
+                                    met_nohf = cms.InputTag("slimmedMETsNoHF"),
                                     jets = cms.InputTag(jets_label),
                                     nEventsSample = cms.uint32(options.nEventsSample)
 )
@@ -72,6 +75,26 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 100000
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff")
 process.GlobalTag.globaltag = globalTag
+###### Setting sqlite file for the JECs that are in newer global tags 
+## From https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookJetEnergyCorrections#JecSqliteFile
+process.load("CondCore.DBCommon.CondDBCommon_cfi")
+from CondCore.DBCommon.CondDBSetup_cfi import CondDBSetup
+process.jec = cms.ESSource("PoolDBESSource",CondDBSetup,
+                           connect = cms.string('sqlite_file:txt/jec/'+jecLabel+'.db'),
+                           toGet   = cms.VPSet(
+                               cms.PSet(
+                                   record = cms.string("JetCorrectionsRecord"),
+                                   tag    = cms.string("JetCorrectorParametersCollection_"+jecLabel+"_AK4PFchs"),
+                                   label  = cms.untracked.string("AK4PFchs")
+                               ),
+                cms.PSet(
+                    record = cms.string("JetCorrectionsRecord"),
+                    tag    = cms.string("JetCorrectorParametersCollection_"+jecLabel+"_AK4PF"),
+                    label  = cms.untracked.string("AK4PF")
+                )
+        )
+)
+process.es_prefer_jec = cms.ESPrefer("PoolDBESSource","jec")
 
 
 ###### HBHE
@@ -87,7 +110,8 @@ if doJEC:
         src = cms.InputTag("slimmedJets"),
         levels = ['L1FastJet', 
                   'L2Relative', 
-                  'L3Absolute'],
+                  'L3Absolute',
+                  'L2L3Residual'],
         payload = 'AK4PFchs' ) # Make sure to choose the appropriate levels and payload here!
 
     from PhysicsTools.PatAlgos.producersLayer1.jetUpdater_cff import patJetsUpdated

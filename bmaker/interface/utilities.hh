@@ -10,6 +10,7 @@
 #include "TString.h"
 
 typedef std::vector<const reco::Candidate*> vCands;
+typedef reco::Candidate::LorentzVector LVector;
 
 namespace utilities{
 

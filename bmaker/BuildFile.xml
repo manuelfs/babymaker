@@ -4,6 +4,8 @@
 <use name="FWCore/ParameterSet"/>
 <use name="DataFormats/PatCandidates"/>
 <use name="PhysicsTools/PatAlgos"/>
+<use name="CondFormats/JetMETObjects"/>
+<use name="CommonTools/Utils"/>
 <use name="fastjet"/>
 <use name="fastjet-contrib"/>
 <export>

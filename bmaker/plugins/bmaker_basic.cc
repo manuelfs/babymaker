@@ -6,6 +6,7 @@
 #include <memory>
 #include <iostream>
 #include <stdlib.h>
+#include <iomanip>  // put_time
 
 // FW include files
 #include "FWCore/Framework/interface/Frameworkfwd.h"
@@ -629,13 +630,14 @@ void bmaker_basic::writeMC(edm::Handle<reco::GenParticleCollection> genParticles
 
 bmaker_basic::bmaker_basic(const edm::ParameterSet& iConfig):
   outname(TString(iConfig.getParameter<string>("outputFile"))),
+  inputfiles(iConfig.getParameter<vector<string> >("inputFiles")),
   jec_label(iConfig.getParameter<string>("jec")),
   met_label(iConfig.getParameter<edm::InputTag>("met")),
   met_nohf_label(iConfig.getParameter<edm::InputTag>("met_nohf")),
   jets_label(iConfig.getParameter<edm::InputTag>("jets")),
   nevents_sample(iConfig.getParameter<unsigned int>("nEventsSample")),
   nevents(0){
-
+  
   time(&startTime);
 
   lepTool = new lepton_tools();
@@ -691,9 +693,15 @@ bmaker_basic::~bmaker_basic(){
   TString type = baby.Type();
   TString root_version = gROOT->GetVersion();
   TString root_tutorial_dir = gROOT->GetTutorialsDir();
-
+  TString user(getenv("USER"));
+  TString cmssw(getenv("CMSSW_BASE"));
   time_t curTime;
   time(&curTime);
+  char time_c[100];
+  struct tm * timeinfo = localtime(&curTime);
+  strftime(time_c,100,"%Y-%m-%d %I:%M:%S",timeinfo);
+  TString date(time_c);
+
   int seconds(floor(difftime(curTime,startTime)+0.5));
   TTree treeglobal("treeglobal", "treeglobal");
   treeglobal.Branch("nev_sample", &nevents_sample);
@@ -706,6 +714,11 @@ bmaker_basic::~bmaker_basic(){
   treeglobal.Branch("root_tutorial_dir", &root_tutorial_dir);
   treeglobal.Branch("trig_names", &trig_name);
   treeglobal.Branch("xsec", &xsec);
+  treeglobal.Branch("user", &user);
+  treeglobal.Branch("cmssw", &cmssw);
+  treeglobal.Branch("jec", &jec_label);
+  treeglobal.Branch("date", &date);
+  treeglobal.Branch("inputfiles", &inputfiles);
   treeglobal.Fill();
   treeglobal.SetDirectory(outfile);
   treeglobal.Write();
@@ -721,7 +734,7 @@ bmaker_basic::~bmaker_basic(){
   if((seconds%60)<10) runtime += "0";
   runtime += seconds%60; 
   float hertz(nevents); hertz /= seconds;
-  cout<<endl<<"Written "<<nevents<<" events in "<<outname<<". It took "<<seconds<<" seconds to run ("<<runtime<<"), "
+  cout<<endl<<"BABYMAKER: Written "<<nevents<<" events in "<<outname<<". It took "<<seconds<<" seconds to run ("<<runtime<<"), "
       <<roundNumber(hertz,1)<<" Hz, "<<roundNumber(1000,2,hertz)<<" ms per event"<<endl<<endl;
 
   delete outfile;

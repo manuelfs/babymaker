@@ -150,7 +150,7 @@ jet_met_tools::jet_met_tools(TString ijecName):
   if(doJEC) {
     vector<JetCorrectorParameters> jecFiles;
     string basename(getenv("CMSSW_BASE")); basename += "/src/babymaker/txt/jec/"; basename += jecName.Data();
-    cout<<endl<<"jet_met_tools: Applying JECs on-the-fly with files "<<basename.c_str()<<"*.txt"<<endl;
+    cout<<endl<<"jet_met_tools: Applying JECs on-the-fly with files "<<basename.c_str()<<"*.txt"<<endl<<endl;
     jecFiles.push_back(JetCorrectorParameters(basename+"_L1FastJet_AK4PFchs.txt"));
     jecFiles.push_back(JetCorrectorParameters(basename+"_L2Relative_AK4PFchs.txt"));
     jecFiles.push_back(JetCorrectorParameters(basename+"_L3Absolute_AK4PFchs.txt"));

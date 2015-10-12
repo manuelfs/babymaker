@@ -34,7 +34,7 @@ outName = options.outputFile
 doJEC = False  
 if doJEC: jets_label = "patJetsReapplyJEC"
 else: jets_label = "slimmedJets"
-
+jecLabel = 'miniAOD'
 if outName.find("Run2015") != -1:
     isData = True
     jecLabel = 'Summer15_25nsV5_DATA'
@@ -60,6 +60,7 @@ if isData: # Processing only lumis in JSON
 
 process.baby_basic = cms.EDAnalyzer('bmaker_basic',
                                     outputFile = cms.string(options.outputFile),
+                                    inputFiles = cms.vstring(options.inputFiles),
                                     jec = cms.string(jecLabel),
                                     met = cms.InputTag("slimmedMETs"),
                                     met_nohf = cms.InputTag("slimmedMETsNoHF"),
@@ -77,26 +78,6 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 100000
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff")
 process.GlobalTag.globaltag = globalTag
-###### Setting sqlite file for the JECs that are in newer global tags 
-## From https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookJetEnergyCorrections#JecSqliteFile
-process.load("CondCore.DBCommon.CondDBCommon_cfi")
-from CondCore.DBCommon.CondDBSetup_cfi import CondDBSetup
-process.jec = cms.ESSource("PoolDBESSource",CondDBSetup,
-                           connect = cms.string('sqlite_file:txt/jec/'+jecLabel+'.db'),
-                           toGet   = cms.VPSet(
-                               cms.PSet(
-                                   record = cms.string("JetCorrectionsRecord"),
-                                   tag    = cms.string("JetCorrectorParametersCollection_"+jecLabel+"_AK4PFchs"),
-                                   label  = cms.untracked.string("AK4PFchs")
-                               ),
-                cms.PSet(
-                    record = cms.string("JetCorrectionsRecord"),
-                    tag    = cms.string("JetCorrectorParametersCollection_"+jecLabel+"_AK4PF"),
-                    label  = cms.untracked.string("AK4PF")
-                )
-        )
-)
-process.es_prefer_jec = cms.ESPrefer("PoolDBESSource","jec")
 
 
 ###### HBHE
@@ -105,6 +86,26 @@ process.load('CommonTools.RecoAlgos.HBHENoiseFilterResultProducer_cfi')
 process.HBHENoiseFilterResultProducer.minZeros = cms.int32(99999)
 
 if doJEC:
+    ###### Setting sqlite file for the JECs that are in newer global tags 
+    ## From https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookJetEnergyCorrections#JecSqliteFile
+    process.load("CondCore.DBCommon.CondDBCommon_cfi")
+    from CondCore.DBCommon.CondDBSetup_cfi import CondDBSetup
+    process.jec = cms.ESSource("PoolDBESSource",CondDBSetup,
+                               connect = cms.string('sqlite_file:txt/jec/'+jecLabel+'.db'),
+                               toGet   = cms.VPSet(
+                                   cms.PSet(
+                                       record = cms.string("JetCorrectionsRecord"),
+                                       tag    = cms.string("JetCorrectorParametersCollection_"+jecLabel+"_AK4PFchs"),
+                                       label  = cms.untracked.string("AK4PFchs")
+                                   ),
+	                cms.PSet(
+                            record = cms.string("JetCorrectionsRecord"),
+                            tag    = cms.string("JetCorrectorParametersCollection_"+jecLabel+"_AK4PF"),
+                            label  = cms.untracked.string("AK4PF")
+                        )
+	        )
+    )
+    process.es_prefer_jec = cms.ESPrefer("PoolDBESSource","jec")
     ###### Jets 
     ## From https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookJetEnergyCorrections#CorrPatJets
     from PhysicsTools.PatAlgos.producersLayer1.jetUpdater_cff import patJetCorrFactorsUpdated

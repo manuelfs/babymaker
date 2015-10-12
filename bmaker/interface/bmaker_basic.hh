@@ -96,6 +96,8 @@ public:
   void writeGenInfo(edm::Handle<LHEEventProduct> lhe_info);
   void writeMC(edm::Handle<reco::GenParticleCollection> genParticles);
 
+  void reportTime(const edm::Event& iEvent);
+
   std::vector<TString> trig_name;
 
   // Input parameters

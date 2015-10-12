@@ -59,7 +59,11 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
   iEvent.getByLabel("patTrigger",triggerPrescales);  
   const edm::TriggerNames &names = iEvent.triggerNames(*triggerBits);
   // Not saving data events that don't have triggers we care about
-  if(isData && !writeTriggers(names, triggerBits, triggerPrescales)) return;
+  bool triggerFired(writeTriggers(names, triggerBits, triggerPrescales));
+  if(!triggerFired && isData) {
+    reportTime(iEvent);
+    return;
+  }
 
   //////////////// HLT objects //////////////////
   edm::Handle<pat::TriggerObjectStandAloneCollection> triggerObjects;
@@ -174,22 +178,8 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
   ////////////////// Filling the tree //////////////////
   baby.Fill();
 
-  // Time reporting
-  if(nevents==1) {
-    time_t curTime;
-    time(&curTime);
-    cout<<endl<<"Took "<<roundNumber(difftime(curTime,startTime),1)<<" seconds for set up and run first event"<<endl<<endl;
-    time(&startTime);
-  }
-  if((nevents<100&&nevents%10==0) || (nevents<1000&&nevents%100==0) 
-     || (nevents<10000&&nevents%1000==0) || nevents%10000==0) {
-    time_t curTime;
-    time(&curTime);
-    float seconds(difftime(curTime,startTime));
-    cout<<"Run "<<iEvent.id().run()<<", Event "<< iEvent.id().event()<<", LumiSection "<< iEvent.luminosityBlock()
-	<<". Ran "<<nevents<<" events in "<<seconds<<" seconds -> "<<roundNumber(nevents-1,1,seconds)<<" Hz, "
-	<<roundNumber(seconds*1000,2,nevents-1)<<" ms per event"<<endl;
-  }
+  reportTime(iEvent);
+
 }
 
 
@@ -550,6 +540,7 @@ void bmaker_basic::writeVertices(edm::Handle<reco::VertexCollection> vtx,
 
 void bmaker_basic::writeGenInfo(edm::Handle<LHEEventProduct> lhe_info){
   baby.nisr_me()=0; baby.ht_isr_me()=0.; 
+  cout<<endl<<"Entry "<<nevents<<endl;
   for ( unsigned int icount = 0 ; icount < (unsigned int)lhe_info->hepeup().NUP; icount++ ) {
     unsigned int pdgid = abs(lhe_info->hepeup().IDUP[icount]);
     int status = lhe_info->hepeup().ISTUP[icount];
@@ -564,7 +555,6 @@ void bmaker_basic::writeGenInfo(edm::Handle<LHEEventProduct> lhe_info){
        baby.ht_isr_me() += pt;
     }
 
-    if (status==1 && (pdgid==11 || pdgid==13 || pdgid==15)) baby.ntruleps()++;
   } // Loop over generator particles
 } // writeGenInfo
 
@@ -652,33 +642,63 @@ bmaker_basic::bmaker_basic(const edm::ParameterSet& iConfig):
   xsec = crossSection(outname);
 
   trig_name = vector<TString>();
-  trig_name.push_back("HLT_PFHT350_PFMET100_JetIdCleaned_v");			// 0 
-  trig_name.push_back("HLT_Mu15_IsoVVVL_PFHT350_PFMET50_v");			// 1 
-  trig_name.push_back("HLT_Mu15_IsoVVVL_PFHT600_v");				// 2
-  trig_name.push_back("HLT_Mu15_IsoVVVL_BTagCSV0p72_PFHT400_v");		// 3
-  trig_name.push_back("HLT_Mu15_IsoVVVL_PFHT350_v");				// 4 
-  trig_name.push_back("HLT_Ele15_IsoVVVL_PFHT350_PFMET50_v");			// 5 
-  trig_name.push_back("HLT_Ele15_IsoVVVL_PFHT600_v");				// 6
-  trig_name.push_back("HLT_Ele15_IsoVVVL_BTagCSV0p72_PFHT400_v");		// 7
-  trig_name.push_back("HLT_Ele15_IsoVVVL_PFHT350_v");				// 8 
-  trig_name.push_back("HLT_DoubleMu8_Mass8_PFHT300_v");				// 9
-  trig_name.push_back("HLT_DoubleEle8_CaloIdM_TrackIdM_Mass8_PFHT300_v");	// 10
-  trig_name.push_back("HLT_PFHT475_v");						// 11
-  trig_name.push_back("HLT_PFHT800_v");						// 12
-  trig_name.push_back("HLT_PFMET120_JetIdCleaned_Mu5_v");			// 13
-  trig_name.push_back("HLT_PFMET170_JetIdCleaned_v");				// 14
-  trig_name.push_back("HLT_DoubleIsoMu17_eta2p1_v");		        	// 15
-  trig_name.push_back("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v2 "); 	        // 16
-  trig_name.push_back("HLT_IsoMu18_v");					        // 17
-  trig_name.push_back("HLT_IsoMu20_v");						// 18
-  trig_name.push_back("HLT_IsoMu24_eta2p1_v");					// 19
-  trig_name.push_back("HLT_IsoMu27_v");						// 20
-  trig_name.push_back("HLT_Mu50_v");						// 21
-  trig_name.push_back("HLT_Ele27_eta2p1_WPLoose_Gsf_v");			// 22
-  trig_name.push_back("HLT_Ele23_WPLoose_Gsf_v");         			// 23
-  trig_name.push_back("HLT_Ele105_CaloIdVT_GsfTrkIdT_v");			// 24
-  trig_name.push_back("HLT_DoubleEle33_CaloIdL_GsfTrkIdVL_v");		        // 25
-  trig_name.push_back("HLT_DoubleEle24_22_eta2p1_WPLoose_Gsf_v");		// 26
+  if(outname.Contains("Run201")){
+    trig_name.push_back("HLT_PFHT350_PFMET100_JetIdCleaned_v");			// 0 
+    trig_name.push_back("HLT_Mu15_IsoVVVL_PFHT350_PFMET50_v");			// 1 
+    trig_name.push_back("HLT_Mu15_IsoVVVL_PFHT600_v");				// 2
+    trig_name.push_back("HLT_Mu15_IsoVVVL_BTagCSV0p72_PFHT400_v");		// 3
+    trig_name.push_back("HLT_Mu15_IsoVVVL_PFHT350_v");				// 4 
+    trig_name.push_back("HLT_Ele15_IsoVVVL_PFHT350_PFMET50_v");			// 5 
+    trig_name.push_back("HLT_Ele15_IsoVVVL_PFHT600_v");				// 6
+    trig_name.push_back("HLT_Ele15_IsoVVVL_BTagCSV0p72_PFHT400_v");		// 7
+    trig_name.push_back("HLT_Ele15_IsoVVVL_PFHT350_v");				// 8 
+    trig_name.push_back("HLT_DoubleMu8_Mass8_PFHT300_v");			// 9
+    trig_name.push_back("HLT_DoubleEle8_CaloIdM_TrackIdM_Mass8_PFHT300_v");	// 10
+    trig_name.push_back("HLT_PFHT475_v");					// 11
+    trig_name.push_back("HLT_PFHT800_v");					// 12
+    trig_name.push_back("HLT_PFMET120_JetIdCleaned_Mu5_v");			// 13
+    trig_name.push_back("HLT_PFMET170_JetIdCleaned_v");				// 14
+    trig_name.push_back("HLT_DoubleIsoMu17_eta2p1_v");		        	// 15
+    trig_name.push_back("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v"); 	        // 16
+    trig_name.push_back("HLT_IsoMu18_v");					// 17
+    trig_name.push_back("HLT_IsoMu20_v");					// 18
+    trig_name.push_back("HLT_IsoMu24_eta2p1_v");				// 19
+    trig_name.push_back("HLT_IsoMu27_v");					// 20
+    trig_name.push_back("HLT_Mu50_v");						// 21
+    trig_name.push_back("HLT_Ele27_eta2p1_WPLoose_Gsf_v");			// 22
+    trig_name.push_back("HLT_Ele23_WPLoose_Gsf_v");         			// 23
+    trig_name.push_back("HLT_Ele105_CaloIdVT_GsfTrkIdT_v");			// 24
+    trig_name.push_back("HLT_DoubleEle33_CaloIdL_GsfTrkIdVL_v");		// 25
+    trig_name.push_back("HLT_DoubleEle24_22_eta2p1_WPLoose_Gsf_v");		// 26
+  } else {
+    trig_name.push_back("HLT_PFHT350_PFMET120_NoiseCleaned_v");			// 0 
+    trig_name.push_back("HLT_Mu15_IsoVVVL_PFHT400_PFMET70_v");			// 1 
+    trig_name.push_back("HLT_Mu15_IsoVVVL_PFHT600_v");				// 2
+    trig_name.push_back("HLT_Mu15_IsoVVVL_BTagCSV07_PFHT400_v");		// 3
+    trig_name.push_back("HLT_Mu15_PFHT300_v");				        // 4 
+    trig_name.push_back("HLT_Ele15_IsoVVVL_PFHT400_PFMET70_v");			// 5 
+    trig_name.push_back("HLT_Ele15_IsoVVVL_PFHT600_v");				// 6
+    trig_name.push_back("HLT_Ele15_IsoVVVL_BTagtop8CSV07_PFHT400_v");		// 7
+    trig_name.push_back("HLT_Ele15_PFHT300_v");				        // 8 
+    trig_name.push_back("HLT_DoubleMu8_Mass8_PFHT300_v");			// 9
+    trig_name.push_back("HLT_DoubleEle8_CaloIdM_TrackIdM_Mass8_PFHT300_v");	// 10
+    trig_name.push_back("HLT_PFHT350_v");					// 11
+    trig_name.push_back("HLT_PFHT900_v");					// 12
+    trig_name.push_back("HLT_PFMET120_NoiseCleaned_Mu5_v");			// 13
+    trig_name.push_back("HLT_PFMET170_NoiseCleaned_v");				// 14
+    trig_name.push_back("HLT_DoubleIsoMu17_eta2p1_v");		        	// 15
+    trig_name.push_back("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v"); 	        // 16
+    trig_name.push_back("HLT_IsoMu17_eta2p1_v");        			// 17
+    trig_name.push_back("HLT_IsoMu20_v");					// 18
+    trig_name.push_back("HLT_IsoMu24_eta2p1_v");				// 19
+    trig_name.push_back("HLT_IsoMu27_v");					// 20
+    trig_name.push_back("HLT_Mu50_v");						// 21
+    trig_name.push_back("HLT_Ele27_eta2p1_WP75_Gsf_v");	        		// 22
+    trig_name.push_back("HLT_Ele22_eta2p1_WP75_Gsf_v");        			// 23
+    trig_name.push_back("HLT_Ele105_CaloIdVT_GsfTrkIdT_v");			// 24
+    trig_name.push_back("HLT_DoubleEle33_CaloIdL_GsfTrkIdVL_v");		// 25
+    trig_name.push_back("HLT_DoubleEle24_22_eta2p1_WP75_Gsf_v");		// 26
+  }
 
 }
 
@@ -737,6 +757,7 @@ bmaker_basic::~bmaker_basic(){
   float hertz(nevents); hertz /= seconds;
   cout<<endl<<"BABYMAKER: Written "<<nevents<<" events in "<<outname<<". It took "<<seconds<<" seconds to run ("<<runtime<<"), "
       <<roundNumber(hertz,1)<<" Hz, "<<roundNumber(1000,2,hertz)<<" ms per event"<<endl<<endl;
+  cout<<"BABYMAKER: *********** List of input files ***********"<<endl;
   for(size_t ifile(0); ifile < inputfiles.size(); ifile++)
     cout<<"BABYMAKER: "<<inputfiles[ifile].c_str()<<endl;
   cout<<endl;
@@ -748,6 +769,26 @@ bmaker_basic::~bmaker_basic(){
   delete mcTool;
 }
 
+void bmaker_basic::reportTime(const edm::Event& iEvent){
+  // Time reporting
+  if(nevents==1) {
+    time_t curTime;
+    time(&curTime);
+    cout<<endl<<"BABYMAKER: Took "<<roundNumber(difftime(curTime,startTime),1)<<" seconds for set up and run first event"
+	<<endl<<endl;
+    time(&startTime);
+  }
+  if((nevents<100&&nevents%10==0) || (nevents<1000&&nevents%100==0) 
+     || (nevents<10000&&nevents%1000==0) || nevents%10000==0) {
+    time_t curTime;
+    time(&curTime);
+    float seconds(difftime(curTime,startTime));
+    cout<<"BABYMAKER: Run "<<iEvent.id().run()<<", Event "<< setw(7)<<iEvent.id().event()
+	<<", LumiSection "<< setw(4)<< iEvent.luminosityBlock()
+	<<". Ran "<<nevents<<" events in "<<seconds<<" seconds -> "<<roundNumber(nevents-1,1,seconds)<<" Hz, "
+	<<roundNumber(seconds*1000,2,nevents-1)<<" ms per event"<<endl;
+  }
+}
 
 // ------------ method called once each job just before starting event loop  ------------
 void bmaker_basic::beginJob() {

@@ -540,7 +540,6 @@ void bmaker_basic::writeVertices(edm::Handle<reco::VertexCollection> vtx,
 
 void bmaker_basic::writeGenInfo(edm::Handle<LHEEventProduct> lhe_info){
   baby.nisr_me()=0; baby.ht_isr_me()=0.; 
-  cout<<endl<<"Entry "<<nevents<<endl;
   for ( unsigned int icount = 0 ; icount < (unsigned int)lhe_info->hepeup().NUP; icount++ ) {
     unsigned int pdgid = abs(lhe_info->hepeup().IDUP[icount]);
     int status = lhe_info->hepeup().ISTUP[icount];

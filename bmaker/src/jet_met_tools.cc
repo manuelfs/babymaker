@@ -160,6 +160,6 @@ jet_met_tools::jet_met_tools(TString ijecName):
   }
 
 jet_met_tools::~jet_met_tools(){
-  delete jetCorrector;
+  if(doJEC) delete jetCorrector;
 }
 

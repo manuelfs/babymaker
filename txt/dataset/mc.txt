@@ -1,4 +1,4 @@
-# List of datasets to run over
+# List of datasets: one flist file will be created for each line
 # Lines starting with # are ignored
 
 # ----------- Signal ---------------

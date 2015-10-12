@@ -2,13 +2,16 @@
 
 import os, sys 
 import glob
+import json
 import string, pprint
 import ROOT
 import das_client as das
 
 datasets = []
-with open("txt/dataset/mc.txt") as fmc:
-  datasets = [line for line in fmc.read().splitlines() if (len(line)>0 and line[0]=="/")]
+# with open("txt/dataset/mc.txt") as fmc:
+#   datasets = [line for line in fmc.read().splitlines() if (len(line)>0 and line[0]=="/")]
+with open("txt/dataset/data.txt") as fdata:
+  datasets.extend([line for line in fdata.read().splitlines() if (len(line)>0 and line[0]=="/")])
 
 # Parsing where the files can be found depends on whether we run on UCSB or UCSD
 host = os.environ.get("HOSTNAME")
@@ -55,16 +58,23 @@ for ds in datasets:
   nent = 0
   nfiles_local = 0
   for ifile in this_fdicts:
+    runlist = ''
+    if "Run2015" in ds: 
+      runlist = ','.join([str(irun) for irun in das.getFileRunInfo(ifile['name'])])
+    # check if file is available locally
     if os.path.exists(hadoop+ifile['name']):
       if (os.path.getsize(hadoop+ifile['name'])==ifile['size']):
-        f.write("local  " + '{:<10}'.format(ifile['nevents']) + ifile['name'] + '\n')
+        if runlist=='': f.write("local  " + '{:<10}'.format(ifile['nevents']) + ifile['name'] + '\n')
+        else: f.write("local  " + '{:<10}'.format(ifile['nevents']) + ifile['name'] + " " + runlist + '\n')
         nfiles_local = nfiles_local + 1
         nent_local = nent_local + ifile['nevents']
       else:
         print "Encountered partial local file, will use xrootd instead"
-        f.write("xrootd " + '{:<10}'.format(ifile['nevents']) + ifile['name'] + '\n')
+        if runlist=='': f.write("xrootd " + '{:<10}'.format(ifile['nevents']) + ifile['name'] + '\n')
+        else: f.write("xrootd " + '{:<10}'.format(ifile['nevents']) + ifile['name'] + " " + runlist + '\n')
     else:
-      f.write("xrootd " + '{:<10}'.format(ifile['nevents']) + ifile['name'] + '\n')
+      if runlist=='': f.write("xrootd " + '{:<10}'.format(ifile['nevents']) + ifile['name'] + '\n')
+      else: f.write("xrootd " + '{:<10}'.format(ifile['nevents']) + ifile['name'] + " " + runlist + '\n')
     nent = nent + ifile['nevents']
   f.write("nEventsTotal: "+'{:<10}'.format(nent)+ '\n')
   f.write("stat events available locally: " + "%s%% %i/%i" % ('{:.0f}'.format(float(nent_local)/float(nent)*100.),nent_local,nent) + '\n')

@@ -46,9 +46,10 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
   baby.event() = iEvent.id().event();
   baby.lumiblock() = iEvent.luminosityBlock();
   if(isData){
-    bool golden(isInJSON("golden", baby.run(), baby.lumiblock()));
-    if(!isInJSON("nohf_golden", baby.run(), baby.lumiblock()) && !golden) return;
-    baby.json() = golden;
+    // We are applying the golden JSON with lumisToProcess in bmaker_basic_cfg.py
+    bool nonblind(isInJSON("nonblind", baby.run(), baby.lumiblock()));
+    //if(!isInJSON("golden", baby.run(), baby.lumiblock()) && !nonblind) return;
+    baby.json() = nonblind;
   } else baby.json() = true;
 
   ////////////////////// Trigger /////////////////////
@@ -699,7 +700,7 @@ bmaker_basic::~bmaker_basic(){
   time(&curTime);
   char time_c[100];
   struct tm * timeinfo = localtime(&curTime);
-  strftime(time_c,100,"%Y-%m-%d %I:%M:%S",timeinfo);
+  strftime(time_c,100,"%Y-%m-%d %H:%M:%S",timeinfo);
   TString date(time_c);
 
   int seconds(floor(difftime(curTime,startTime)+0.5));
@@ -736,6 +737,9 @@ bmaker_basic::~bmaker_basic(){
   float hertz(nevents); hertz /= seconds;
   cout<<endl<<"BABYMAKER: Written "<<nevents<<" events in "<<outname<<". It took "<<seconds<<" seconds to run ("<<runtime<<"), "
       <<roundNumber(hertz,1)<<" Hz, "<<roundNumber(1000,2,hertz)<<" ms per event"<<endl<<endl;
+  for(size_t ifile(0); ifile < inputfiles.size(); ifile++)
+    cout<<"BABYMAKER: "<<inputfiles[ifile].c_str()<<endl;
+  cout<<endl;
 
   delete outfile;
 

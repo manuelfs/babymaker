@@ -55,7 +55,7 @@ process.source = cms.Source("PoolSource",
 )
 if isData: # Processing only lumis in JSON
     import FWCore.PythonUtilities.LumiList as LumiList
-    jsonfile = findFileInPath('babymaker/txt/json/nohf_golden_Cert_246908-256869_13TeV_PromptReco_Collisions15_25ns.json')
+    jsonfile = findFileInPath('babymaker/txt/json/nonblind_Cert_246908-258159_13TeV_PromptReco_Collisions15_25ns_JSON_v3.json')
     process.source.lumisToProcess = LumiList.LumiList(filename = jsonfile).getVLuminosityBlockRange()
 
 process.baby_basic = cms.EDAnalyzer('bmaker_basic',

@@ -16,14 +16,12 @@ using namespace std;
 
 namespace phys_objects{
 
-  const std::vector<std::vector<int> > VRunLumi2015golden(MakeVRunLumi("2015golden"));
-  const std::vector<std::vector<int> > VRunLumi2015nohfgolden(MakeVRunLumi("2015nohfgolden"));
-  const std::vector<std::vector<int> > VRunLumi2015dcs(MakeVRunLumi("2015dcs"));
+  const std::vector<std::vector<int> > VRunLumi2015golden(MakeVRunLumi("golden"));
+  const std::vector<std::vector<int> > VRunLumi2015nonblind(MakeVRunLumi("nonblind"));
 
   bool isInJSON(string type, int run, int lumiblock){
     if(type=="golden") return inJSON(VRunLumi2015golden, run, lumiblock);
-    if(type=="nohf_golden") return inJSON(VRunLumi2015nohfgolden, run, lumiblock);
-    if(type=="dcs") return inJSON(VRunLumi2015dcs, run, lumiblock);
+    if(type=="nonblind") return inJSON(VRunLumi2015nonblind, run, lumiblock);
 
     return true;
   }

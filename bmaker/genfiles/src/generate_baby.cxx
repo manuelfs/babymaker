@@ -310,7 +310,13 @@ void WriteBaseSource(const set<Variable> &all_vars,
     for(set<Variable>::const_iterator var = com_vars.begin();
         var != com_end_2;
         ++var){
-      file << "  " << var->name_ << "_(0),\n";
+      if(Contains(var->type_, "vector")){
+	file << "  " << var->name_ << "_(0),\n";
+      }else if(Contains(var->type_, "tring")){
+	file << "  " << var->name_ << "_(\"\"),\n";
+      }else{
+	file << "  " << var->name_ << "_(static_cast<" << var->type_ << ">(bad_val_)),\n";
+      }
       if(Contains(var->type_, "vector")){
         file << "  p_" << var->name_ << "_(&" << var->name_ << "_),\n";
         file << "  b_" << var->name_ << "_(tree_.Branch(\"" << var->name_ << "\", &p_" << var->name_ << "_)),\n";

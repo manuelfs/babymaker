@@ -18,6 +18,24 @@ bool mc_tools::hasDaughter(const reco::GenParticle &mc, size_t id){
 bool mc_tools::isLast(const reco::GenParticle &mc, size_t id){
   return (abs(mc.pdgId())==id && !hasDaughter(mc, id));
 }
+// Checks if "mc" comes from a W or a tau from a W
+bool mc_tools::fromW(const reco::GenParticle &mc){
+  const reco::GenParticle *mcMom;
+  int momId = abs(mom(mc, mcMom));
+  if(momId == 24) return true;
+  if(momId == 15 && abs(mom(*mcMom, mcMom)) == 24) return true;
+  return false;
+}
+
+// Returns the id and the pointer to the mother of "mc" not being itself
+int mc_tools::mom(const reco::GenParticle &mc, const reco::GenParticle *&mcMom){
+  mcMom = static_cast<const reco::GenParticle *>(mc.mother());
+  if(mcMom){
+    if(mcMom->pdgId() == mc.pdgId()) return mom(*mcMom, mcMom);
+    else return mcMom->pdgId();
+  } else return 0;
+}
+
 
 // Checks if "mc" eventually decays to "id" (after it stops decays to itself)
 bool mc_tools::decaysTo(const reco::GenParticle &mc, size_t id, const reco::GenParticle *&mcDau){

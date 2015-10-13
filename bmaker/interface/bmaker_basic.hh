@@ -75,11 +75,11 @@ public:
   vCands writeMuons(edm::Handle<pat::MuonCollection> muons, 
 		    edm::Handle<pat::PackedCandidateCollection> pfcands, 
 		    edm::Handle<reco::VertexCollection> vtx,
-		    vCands &veto_mus, double rhoEventCentral);
+		    vCands &veto_mus, vCands &all_mus, double rhoEventCentral);
   vCands writeElectrons(edm::Handle<pat::ElectronCollection> electrons, 
 			edm::Handle<pat::PackedCandidateCollection> pfcands, 
 			edm::Handle<reco::VertexCollection> vtx,
-			vCands &veto_els, double rhoEventCentral);
+			vCands &veto_els, vCands &all_els, double rhoEventCentral);
   void writeDiLep(vCands &sig_mus, vCands &sig_els, vCands &veto_mus, vCands &veto_els);
   void setDiLepMass(vCands leptons, baby_float ll_m, baby_float ll_pt1, baby_float ll_pt2, baby_float ll_zpt);
   void writeLeptons(vCands &leptons); 
@@ -94,7 +94,7 @@ public:
   void writeVertices(edm::Handle<reco::VertexCollection> vtx,
 		     edm::Handle<std::vector< PileupSummaryInfo > >  pu_info);  
   void writeGenInfo(edm::Handle<LHEEventProduct> lhe_info);
-  void writeMC(edm::Handle<reco::GenParticleCollection> genParticles);
+  void writeMC(edm::Handle<reco::GenParticleCollection> genParticles, vCands &all_mus, vCands &all_els);
 
   void reportTime(const edm::Event& iEvent);
 

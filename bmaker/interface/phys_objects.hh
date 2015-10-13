@@ -16,6 +16,7 @@ namespace phys_objects{
 
   bool isInJSON(std::string type, int run, int lumiblock);
   bool hasGoodPV(edm::Handle<reco::VertexCollection> vtx);
+  float getMT(float pt1, float phi1, float pt2, float phi2);
 }
 
 #endif

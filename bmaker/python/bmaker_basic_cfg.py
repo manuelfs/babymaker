@@ -28,7 +28,7 @@ options.register('nEvents',
                  VarParsing.varType.int,
                  "Number of events to run over.")
 options.register('json',
-                 'babymaker/txt/json/nonblind_Cert_246908-258159_13TeV_PromptReco_Collisions15_25ns_JSON_v3.json',
+                 'babybaker/txt/json/nonblind_Cert_246908-258159_13TeV_PromptReco_Collisions15_25ns_JSON_v3.json',
                  VarParsing.multiplicity.singleton,
                  VarParsing.varType.string,
                  "Path to json starting with babymaker/...")
@@ -42,13 +42,15 @@ else: jets_label = "slimmedJets"
 jecLabel = 'miniAOD'
 if outName.find("Run2015") != -1:
     isData = True
-    # jecLabel = 'Summer15_25nsV5_DATA'
+    jecLabel = 'miniAOD'  # The re-miniAOD already has V5 JECs with the new prescription
+    # These only used for the official application of JECs
     globalTag = "74X_dataRun2_v2"
     processRECO = "RECO"
     jecLevels = ['L1FastJet', 'L2Relative', 'L3Absolute', 'L2L3Residual']
 else:
     isData = False
-    jecLabel = 'Summer15_25nsV2_MC'
+    jecLabel = 'Summer15_25nsV2_MC'  # Once we move to re-miniAOD, won't be needed
+    # These only used for the official application of JECs
     globalTag = "74X_mcRun2_asymptotic_v2"
     processRECO = "PAT"
     jecLevels = ['L1FastJet', 'L2Relative', 'L3Absolute']

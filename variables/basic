@@ -15,6 +15,9 @@ float ht_hlt
 float mht_ra2
 float mt
 float mt_nohf
+float mt_tru
+float mt_tru_nu
+float mt_tru_nuw
 float dphi_wlep
 
 ###################   MET   ##################
@@ -28,6 +31,10 @@ float met_nohf
 float met_nohf_phi
 float met_tru
 float met_tru_phi
+float met_tru_nu
+float met_tru_nu_phi
+float met_tru_nuw
+float met_tru_nuw_phi
 
 ###################   Jets   ##################
 int njets
@@ -49,6 +56,7 @@ std::vector<int>   jets_fjet08_index
 ##################   Leptons   ################
 int nleps
 int nvleps
+int nleps_tm
 std::vector<float> leps_pt
 std::vector<float> leps_eta
 std::vector<float> leps_phi
@@ -63,8 +71,10 @@ std::vector<float> mus_miniso
 std::vector<float> mus_reliso
 std::vector<float> mus_dz
 std::vector<float> mus_d0
+std::vector<bool> mus_sig
 std::vector<bool> mus_sigid
 std::vector<bool> mus_tight
+std::vector<bool> mus_tru_tm
 std::vector<int> mus_charge
 
 int nels
@@ -78,8 +88,10 @@ std::vector<float> els_reliso
 std::vector<float> els_dz
 std::vector<float> els_d0
 std::vector<bool> els_ispf
+std::vector<bool> els_sig
 std::vector<bool> els_sigid
 std::vector<bool> els_tight
+std::vector<bool> els_tru_tm
 std::vector<int> els_charge
 
 ##################   Di-Leptons   ################

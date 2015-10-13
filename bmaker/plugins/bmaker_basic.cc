@@ -99,12 +99,13 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
   double rhoEventCentral = static_cast<double>(*rhoEventCentral_h);
 
   vCands sig_leps, veto_leps, sig_mus, veto_mus, sig_els, veto_els;
+  vCands all_mus, all_els;
   edm::Handle<pat::MuonCollection> allmuons;
   iEvent.getByLabel("slimmedMuons", allmuons);
-  sig_mus = writeMuons(allmuons, pfcands, vtx, veto_mus, rhoEventCentral);
+  sig_mus = writeMuons(allmuons, pfcands, vtx, veto_mus, all_mus, rhoEventCentral);
   edm::Handle<pat::ElectronCollection> allelectrons;
   iEvent.getByLabel("slimmedElectrons", allelectrons);
-  sig_els = writeElectrons(allelectrons, pfcands, vtx, veto_els, rhoEventCentral);
+  sig_els = writeElectrons(allelectrons, pfcands, vtx, veto_els, all_els, rhoEventCentral);
   
   writeDiLep(sig_mus, sig_els, veto_mus, veto_els);
 
@@ -142,9 +143,9 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
     float wphi = atan2(wy, wx);
     baby.dphi_wlep() = deltaPhi(wphi, sig_leps[0]->phi());
 
-    baby.mt() = sqrt(2.*baby.met()*sig_leps[0]->pt()*(1.-cos(sig_leps[0]->phi()-baby.met_phi())));
-    baby.mt_nohf() = sqrt(2.*baby.met_nohf()*sig_leps[0]->pt()*(1.-cos(sig_leps[0]->phi()-baby.met_nohf_phi())));
-  }   
+    baby.mt() = getMT(baby.met(), baby.met_phi(),  sig_leps[0]->pt(), sig_leps[0]->phi());
+    baby.mt_nohf() = getMT(baby.met_nohf(), baby.met_nohf_phi(),  sig_leps[0]->pt(), sig_leps[0]->phi());
+   }   
     
 
   ///////////////////// Filters ///////////////////////
@@ -172,7 +173,7 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
     writeGenInfo(lhe_info);
     edm::Handle<reco::GenParticleCollection> genParticles;
     iEvent.getByLabel("prunedGenParticles", genParticles);
-    writeMC(genParticles);
+    writeMC(genParticles, all_mus, all_els);
   }
 
   ////////////////// Filling the tree //////////////////
@@ -357,9 +358,9 @@ void bmaker_basic::clusterFatJets(int &nfjets, float &mj,
 vCands bmaker_basic::writeMuons(edm::Handle<pat::MuonCollection> muons, 
 				edm::Handle<pat::PackedCandidateCollection> pfcands, 
 				edm::Handle<reco::VertexCollection> vtx,
-				vCands &veto_mus, double rhoEventCentral){
+				vCands &veto_mus, vCands &all_mus, double rhoEventCentral){
   vCands sig_mus; 
-  veto_mus.clear();
+  veto_mus.clear(); all_mus.clear();
   baby.nmus() = 0; baby.nvmus() = 0;
   for (size_t ilep(0); ilep < muons->size(); ilep++) {
     const pat::Muon &lep = (*muons)[ilep];    
@@ -380,6 +381,8 @@ vCands bmaker_basic::writeMuons(edm::Handle<pat::MuonCollection> muons,
     baby.mus_tight().push_back(lepTool->idMuon(lep, vtx, lepTool->kTight));
     baby.mus_miniso().push_back(lep_iso);
     baby.mus_reliso().push_back(lep_reliso);
+    baby.mus_tru_tm().push_back(false); // Filled in writeMC
+    all_mus.push_back(dynamic_cast<const reco::Candidate *>(&lep)); // For truth-matching in writeMC
 
     if(lepTool->isVetoMuon(lep, vtx, lep_iso)) {
       baby.nvmus()++;
@@ -388,7 +391,8 @@ vCands bmaker_basic::writeMuons(edm::Handle<pat::MuonCollection> muons,
     if(lepTool->isSignalMuon(lep, vtx, lep_iso)) {
       baby.nmus()++;
       sig_mus.push_back(dynamic_cast<const reco::Candidate *>(&lep));
-    }
+      baby.mus_sig().push_back(true); 
+    } else baby.mus_sig().push_back(false); 
   } // Loop over muons
   
   return sig_mus;
@@ -398,9 +402,9 @@ vCands bmaker_basic::writeMuons(edm::Handle<pat::MuonCollection> muons,
 vCands bmaker_basic::writeElectrons(edm::Handle<pat::ElectronCollection> electrons, 
 				    edm::Handle<pat::PackedCandidateCollection> pfcands, 
 				    edm::Handle<reco::VertexCollection> vtx,
-				    vCands &veto_els, double rhoEventCentral){
+				    vCands &veto_els, vCands &all_els, double rhoEventCentral){
   vCands sig_els; 
-  veto_els.clear();
+  veto_els.clear(); all_els.clear();
   baby.nels() = 0; baby.nvels() = 0;
   for (size_t ilep(0); ilep < electrons->size(); ilep++) {
     const pat::Electron &lep = (*electrons)[ilep];    
@@ -423,6 +427,8 @@ vCands bmaker_basic::writeElectrons(edm::Handle<pat::ElectronCollection> electro
     baby.els_tight().push_back(lepTool->idElectron(lep, vtx, lepTool->kTight));
     baby.els_miniso().push_back(lep_iso);
     baby.els_reliso().push_back(lep_reliso);
+    baby.els_tru_tm().push_back(false); // Filled in writeMC
+    all_els.push_back(dynamic_cast<const reco::Candidate *>(&lep)); // For truth-matching in writeMC
 
     if(lepTool->isVetoElectron(lep, vtx, lep_iso)){
       baby.nvels()++;
@@ -431,7 +437,8 @@ vCands bmaker_basic::writeElectrons(edm::Handle<pat::ElectronCollection> electro
     if(lepTool->isSignalElectron(lep, vtx, lep_iso)) {
       baby.nels()++;
       sig_els.push_back(dynamic_cast<const reco::Candidate *>(&lep));
-    }
+      baby.els_sig().push_back(true); 
+    } else baby.els_sig().push_back(false); 
   } // Loop over electrons
 
   return sig_els;
@@ -557,9 +564,12 @@ void bmaker_basic::writeGenInfo(edm::Handle<LHEEventProduct> lhe_info){
   } // Loop over generator particles
 } // writeGenInfo
 
-void bmaker_basic::writeMC(edm::Handle<reco::GenParticleCollection> genParticles){
+void bmaker_basic::writeMC(edm::Handle<reco::GenParticleCollection> genParticles, vCands &all_mus, vCands &all_els){
   LVector isr_p4;
-  baby.ntruleps()=0; baby.ntrumus()=0; baby.ntruels()=0; baby.ntrutaush()=0; baby.ntrutausl()=0;  
+  float met_tru_x(0.), met_tru_y(0.), metw_tru_x(0.), metw_tru_y(0.);
+  float lep_tru_pt(0.), lep_tru_phi(0.);
+  baby.ntruleps()=0; baby.ntrumus()=0; baby.ntruels()=0; baby.ntrutaush()=0; baby.ntrutausl()=0;
+  baby.nleps_tm()=0;
   for (size_t imc(0); imc < genParticles->size(); imc++) {
     const reco::GenParticle &mc = (*genParticles)[imc];
 
@@ -574,11 +584,11 @@ void bmaker_basic::writeMC(edm::Handle<reco::GenParticleCollection> genParticles
     bool tauFromTop(id==15 && momid==24);
     bool fromW(momid==24);
 
-    // Finding p4 of ME ISR system
+    //////// Finding p4 of ME ISR system
     if((lastTop && outname.Contains("TTJets")) || (lastGluino && outname.Contains("SMS")) || 
        (lastZ && outname.Contains("DY"))) isr_p4 -= mc.p4();
 
-    // Saving interesting true particles
+    //////// Saving interesting true particles
     if(lastTop || lastGluino || lastZ || bFromTop || eFromTopZ || muFromTopZ || tauFromTop || fromW) {
       baby.mc_id().push_back(mc.pdgId());
       baby.mc_pt().push_back(mc.pt());
@@ -586,9 +596,9 @@ void bmaker_basic::writeMC(edm::Handle<reco::GenParticleCollection> genParticles
       baby.mc_phi().push_back(mc.phi());
       baby.mc_mom().push_back(mc.mother()->pdgId());
     }
-    // Counting true leptons
+    //////// Counting true leptons
     if(muFromTopZ) baby.ntrumus()++;
-    if(eFromTopZ) baby.ntruels()++;
+    if(eFromTopZ)  baby.ntruels()++;
     if(tauFromTop){
       const reco::GenParticle *tauDaughter(0);
       if(mcTool->decaysTo(mc, 11, tauDaughter) || mcTool->decaysTo(mc, 13, tauDaughter)){
@@ -600,11 +610,72 @@ void bmaker_basic::writeMC(edm::Handle<reco::GenParticleCollection> genParticles
 	baby.ntrutausl()++;
       } else baby.ntrutaush()++;
     }
+    if((muFromTopZ || eFromTopZ) && lep_tru_pt < mc.pt()){
+      lep_tru_pt = mc.pt();
+      lep_tru_phi = mc.phi();
+    }
+
+    //////// Finding truth-matched leptons
+    const float relptThreshold(0.3), drThreshold(0.1);      
+    if(id==11 && mcTool->fromW(mc)){
+      double mindr(999.);
+      int minind(-1);
+      for(size_t ind(0); ind < all_els.size(); ind++) {
+	double dr(deltaR(mc, *(all_els[ind])));
+	double drelpt(fabs((all_els[ind]->pt() - mc.pt())/mc.pt()));
+	if(dr > drThreshold || drelpt > relptThreshold) continue;
+	if(dr < mindr){
+	  mindr = dr;
+	  minind = ind;
+	}
+      } // Loop over all_els
+      if(minind >= 0) {
+	baby.els_tru_tm()[minind] = true;
+	if(eFromTopZ && baby.els_sig()[minind]) baby.nleps_tm()++;
+      }
+    } // If it is an electron
+    if(id==13 && mcTool->fromW(mc)){
+      double mindr(999.);
+      int minind(-1);
+      for(size_t ind(0); ind < all_mus.size(); ind++) {
+	double dr(deltaR(mc, *(all_mus[ind])));
+	double drelpt(fabs((all_mus[ind]->pt() - mc.pt())/mc.pt()));
+	if(dr > drThreshold || drelpt > relptThreshold) continue;
+	if(dr < mindr){
+	  mindr = dr;
+	  minind = ind;
+	}
+      } // Loop over all_mus
+      if(minind >= 0) {
+	baby.mus_tru_tm()[minind] = true;
+	if(muFromTopZ && baby.mus_sig()[minind]) baby.nleps_tm()++;
+      }
+    } // If it is a muon
+
+    //////// Finding true MET
+    if(id==12 || id==14 || id==16 || id==18 || id==1000012 || id==1000014 || id==1000016
+       || id==1000022 || id==1000023 || id==1000025 || id==1000035 || id==1000039){
+      met_tru_x += mc.px();
+      met_tru_y += mc.py();
+      if(mcTool->fromW(mc)) {
+	metw_tru_x += mc.px();
+	metw_tru_y += mc.py();
+      }
+    } // If undetected neutral particle
 
   } // Loop over genParticles
   baby.isr_pt() = isr_p4.pt();
   baby.isr_eta() = isr_p4.eta();
   baby.isr_phi() = isr_p4.phi();
+
+  baby.met_tru_nu() = hypot(met_tru_x, met_tru_y);
+  baby.met_tru_nu_phi() = atan2(met_tru_y, met_tru_x);
+  baby.met_tru_nuw() = hypot(metw_tru_x, metw_tru_y);
+  baby.met_tru_nuw_phi() = atan2(metw_tru_y, metw_tru_x);
+
+  baby.mt_tru()     = getMT(baby.met_tru(),     baby.met_tru_phi(),     lep_tru_pt, lep_tru_phi);
+  baby.mt_tru_nu()  = getMT(baby.met_tru_nu(),  baby.met_tru_nu_phi(),  lep_tru_pt, lep_tru_phi);
+  baby.mt_tru_nuw() = getMT(baby.met_tru_nuw(), baby.met_tru_nuw_phi(), lep_tru_pt, lep_tru_phi);
 
   baby.ntruleps() = baby.ntrumus()+baby.ntruels()+baby.ntrutaush()+baby.ntrutausl();
 } // writeMC
@@ -783,10 +854,11 @@ void bmaker_basic::reportTime(const edm::Event& iEvent){
     time_t curTime;
     time(&curTime);
     float seconds(difftime(curTime,startTime));
-    cout<<"BABYMAKER: Run "<<iEvent.id().run()<<", Event "<< setw(7)<<iEvent.id().event()
-	<<", LumiSection "<< setw(4)<< iEvent.luminosityBlock()
-	<<". Ran "<<nevents<<" events in "<<seconds<<" seconds -> "<<roundNumber(nevents-1,1,seconds)<<" Hz, "
-	<<roundNumber(seconds*1000,2,nevents-1)<<" ms per event"<<endl;
+    cout<<"BABYMAKER: Run "<<iEvent.id().run()<<", Event "<< setw(8)<<iEvent.id().event()
+	<<", LumiSection "<< setw(5)<< iEvent.luminosityBlock()
+	<<". Ran "<<setw(7)<<nevents<<" events in "<<setw(7)<<seconds<<" seconds -> "
+	<<setw(5)<<roundNumber(nevents-1,1,seconds)<<" Hz, "
+	<<setw(5)<<roundNumber(seconds*1000,2,nevents-1)<<" ms per event"<<endl;
   }
 }
 

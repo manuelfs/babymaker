@@ -6,22 +6,29 @@ import json
 import string
 import time
 
-#What to submit? Use substrings that would be found in the desired dataset
-# no mid-word wild cards enabled yet, 
+#What to submit? Use substrings that would be found in the desired dataset, no wild cards!
 # e.g. if we want only 25ns TTJets, use a substring that contains it all:
 # "TTJets_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15DR74_Asympt25ns"
+# if we want all the HT-binned TTJets append:
+# "TTJets_HT-"
 wishlist = []
-wishlist.append("TTJets")
-wishlist.append("WJets")
-wishlist.append("DYJets")
-wishlist.append("QCD_")
-wishlist.append("ST_")
-wishlist.append("ttHJetTobb")
-wishlist.append("WWTo2L2Nu")
-wishlist.append("WWToLNuQQ")
-wishlist.append("ggZH_HToBB")
+#------------ MC ------------------
+# wishlist.append("TTJets")
+# wishlist.append("WJetsToLNu_HT-200To400")
+# wishlist.append("TTJets_HT-1200to2500")
+# wishlist.append("DYJets")
+# wishlist.append("QCD_")
+# wishlist.append("ST_")
+# wishlist.append("ttHJetTobb")
+# wishlist.append("WWTo2L2Nu")
+# wishlist.append("WWToLNuQQ")
+# wishlist.append("ggZH_HToBB")
 
-# wishlist.append("HTMHT")
+wishlist.append("HTMHT")
+wishlist.append("MET")
+wishlist.append("SingleElectron")
+wishlist.append("SingleMuon")
+
 print 
 
 # for data get the golden runs
@@ -42,19 +49,21 @@ comb_keys = ['RunIISpring15DR74_Asympt25ns_MCRUN2_74_V9', 'Run2015D', 'Run2015C'
 
 # for testing... otherwise set to -1
 maxjobs = -1
+maxds = -1
 maxevents_perjob = -1
 istest = 'n'
-if (maxjobs!=-1 or maxevents_perjob!=-1): 
-  istest = raw_input('Running in test mode with %s jobs and %s events per job. Enter \'y\' to continue: ' % (maxjobs, maxevents_perjob))
-if (istest!='y'):
-  sys.exit("No jobs submitted. Edit sub_cond.py to exit test mode.")
+if (maxjobs!=-1 or maxevents_perjob!=-1 or maxds!=-1): 
+  istest = raw_input('Running in test mode with %i jobs, %i events per job, over %i datasets. Enter \'y\' to continue: ' % (maxjobs, maxevents_perjob, maxds))
+  if (istest!='y'):
+    sys.exit("No jobs submitted. Edit sub_cond.py to exit test mode.")
 
 # Only matters if running on UCSD:
 # To run on multiple T2's use, e.g:
-# whitelist = "T2_US_UCSD,T2_US_Wisconsin,T2_US_Nebraska,T2_US_Caltech"
+whitelist = "T2_US_UCSD,T2_US_WISCONSIN,T2_US_FLORIDA,T2_US_PURDUE,T2_US_NEBRASKA,T2_US_CALTECH"
+# whitelist = "T2_US_WISCONSIN,T2_US_FLORIDA,T2_US_PURDUE,T2_US_NEBRASKA,T2_US_CALTECH"
 # Need to check which is better, running on remote T2 or xrootd-ing the data...
 # To run only at UCSD use:
-whitelist = "T2_US_UCSD"
+# whitelist = "T2_US_UCSD"
 
 # Condor set up depends on whether we run on UCSB or UCSD
 host = os.environ.get("HOSTNAME")
@@ -63,6 +72,8 @@ elif host=="cms0.physics.ucsb.edu": host = "sb"
 elif ("ucsb" in host) or ("compute" in host): sys.exit("\033[91mERROR: Submission must be done from cms0. \033[0m")
 else: sys.exit("\033[91mERROR: Unknown host: "+host+" Exit. \033[0m")
 print "INFO: Setting up job submission at",('UCSB.' if host=='sb' else 'UCSD.')
+hadoop = '/mnt/hadoop/cms'
+if host=="sd": hadoop = '/hadoop/cms/phedex'
 
 # Job submission should be done from the babymaker directory, which is under a valid CMSSW release
 codedir = os.getcwd()
@@ -95,7 +106,7 @@ if not (os.path.exists(os.path.realpath(outdir))):
 outdir = os.path.join(os.path.realpath(outdir),sub_time)
 os.mkdir(outdir)
 
-logdir = os.path.join(os.getcwd(),"logs")
+logdir = os.path.join(os.getcwd(),"logs", sub_time)
 if not os.path.exists(logdir):
   os.makedirs(logdir)
 print "INFO: Babies will be written to: ", outdir
@@ -134,22 +145,24 @@ for fnm in flists_pd:
       for line in f:
         if "/store" not in line: continue
         col = line.split()
+        redirector = 'root://cmsxrootd.fnal.gov//' if col[0]=='xrootd' else ('file:'+hadoop)
         # add them up manually in case I dedice to run only on some files, e.g. local only
         nent_dict[dsname] = nent_dict[dsname] + int(col[1]) 
         # if data, filter on json
         if 'Run2015' in dsname:
           runlist = [int(irun) for irun in string.split(col[3],",")]
           if any(irun in goldruns for irun in runlist):
-            files_dict[dsname].append('root://cmsxrootd.fnal.gov//' + col[2])
+            files_dict[dsname].append(redirector + col[2])
         else:
-          files_dict[dsname].append('root://cmsxrootd.fnal.gov//' + col[2])
+          files_dict[dsname].append(redirector + col[2])
 
 # If on UCSD prep also tarball
 if (host=="sd"): 
   print "INFO: Creating babymaker tarball to transfer to work node..."
-  os.system("tar --directory=../ --exclude=\"babymaker/out\" --exclude=\"babymaker/run\" --exclude=\"bmaker/interface/release.hh\" -c babymaker | xz > ../babymaker.tar.xz")
+  os.system("tar --directory=../ --exclude=\"babymaker/out\" --exclude=\"babymaker/run\" --exclude=\"babymaker/logs\" --exclude=\"bmaker/interface/release.hh\" -c babymaker | xz > ../babymaker.tar.xz")
 
-for ds in files_dict.keys():
+for ids, ds in enumerate(files_dict.keys()):
+  if (maxds!=-1 and ids>=maxds): break
 
   #release
   cmssw = "CMSSW_7_4_6_patch6"
@@ -187,6 +200,7 @@ for ds in files_dict.keys():
       fexe.write("source /cvmfs/cms.cern.ch/cmsset_default.sh\n")
       fexe.write("cd "+codedir+"\n")
       fexe.write("eval `scramv1 runtime -sh`\n")
+      fexe.write("export ORIGIN_USER="+os.getenv("USER")+"\n")
       fexe.write("cmsRun bmaker/python/bmaker_basic_cfg.py \\\n"+" \\\n".join(args)+"\n")
     else: 
       fexe.write("#! /bin/bash\n")
@@ -195,6 +209,7 @@ for ds in files_dict.keys():
       fexe.write("eval `scramv1 project CMSSW "+cmssw+"`\n")
       fexe.write("cd "+cmssw+"/src\n")
       fexe.write("eval `scramv1 runtime -sh`\n")
+      fexe.write("export ORIGIN_USER="+os.getenv("USER")+"\n")
       fexe.write("tar -xf ../../babymaker.tar.xz\n")
       fexe.write("cd babymaker\n")
       fexe.write("./compile.sh\n")

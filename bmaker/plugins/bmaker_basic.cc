@@ -713,7 +713,8 @@ bmaker_basic::~bmaker_basic(){
   TString type = baby.Type();
   TString root_version = gROOT->GetVersion();
   TString root_tutorial_dir = gROOT->GetTutorialsDir();
-  TString user(getenv("USER"));
+  TString user(getenv("ORIGIN_USER"));
+  if (user=="") user = getenv("USER");
   TString cmssw(getenv("CMSSW_BASE"));
   time_t curTime;
   time(&curTime);

@@ -28,7 +28,7 @@ options.register('nEvents',
                  VarParsing.varType.int,
                  "Number of events to run over.")
 options.register('json',
-                 'txt/json/nonblind_Cert_246908-258159_13TeV_PromptReco_Collisions15_25ns_JSON_v3.json',
+                 'babymaker/txt/json/nonblind_Cert_246908-258159_13TeV_PromptReco_Collisions15_25ns_JSON_v3.json',
                  VarParsing.multiplicity.singleton,
                  VarParsing.varType.string,
                  "Path to json starting with babymaker/...")
@@ -42,7 +42,7 @@ else: jets_label = "slimmedJets"
 jecLabel = 'miniAOD'
 if outName.find("Run2015") != -1:
     isData = True
-    jecLabel = 'Summer15_25nsV5_DATA'
+    # jecLabel = 'Summer15_25nsV5_DATA'
     globalTag = "74X_dataRun2_v2"
     processRECO = "RECO"
     jecLevels = ['L1FastJet', 'L2Relative', 'L3Absolute', 'L2L3Residual']

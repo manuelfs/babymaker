@@ -73,6 +73,9 @@ std::vector<bool> mus_sig
 std::vector<bool> mus_sigid
 std::vector<bool> mus_tight
 std::vector<bool> mus_tru_tm
+std::vector<bool> mus_vvvl
+std::vector<bool> mus_isomu18
+std::vector<bool> mus_mu50
 std::vector<int> mus_charge
 
 int nels
@@ -90,6 +93,9 @@ std::vector<bool> els_sig
 std::vector<bool> els_sigid
 std::vector<bool> els_tight
 std::vector<bool> els_tru_tm
+std::vector<bool> els_vvvl
+std::vector<bool> els_ele23
+std::vector<bool> els_ele105
 std::vector<int> els_charge
 
 ##################   Di-Leptons   ################
@@ -116,8 +122,12 @@ std::vector<bool> trig;
 std::vector<float> trig_prescale;
 float onht
 float onmet
-float onmaxmu
-float onmaxel
+float onmu_vvvl
+float onmu_isomu18
+float onmu_mu50
+float onel_vvvl
+float onel_ele23
+float onel_ele105
 
 ###################   Quality   ##################
 bool pass_jets;

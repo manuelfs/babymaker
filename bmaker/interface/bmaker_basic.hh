@@ -87,7 +87,8 @@ public:
                      edm::Handle<edm::TriggerResults> triggerBits,
                      edm::Handle<pat::PackedTriggerPrescales> triggerPrescales);
   void writeHLTObjects(const edm::TriggerNames &names, 
-                       edm::Handle<pat::TriggerObjectStandAloneCollection> triggerObjects);
+                       edm::Handle<pat::TriggerObjectStandAloneCollection> triggerObjects,
+		       vCands &all_mus, vCands &all_els);
   void writeFilters(const edm::TriggerNames &fnames,
                     edm::Handle<edm::TriggerResults> filterBits,
                     edm::Handle<reco::VertexCollection> vtx);

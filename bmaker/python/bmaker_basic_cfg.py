@@ -10,7 +10,7 @@ def findFileInPath(theFile):
         attempt = join(s,theFile)
         if exists(attempt):
             return attempt
-    print "Could not find file "+theFile
+    print "BABYMAKER: Could not find file "+theFile+". Not pre-applying JSON"
     return None
 
 ###### Input parameters parsing 
@@ -28,7 +28,7 @@ options.register('nEvents',
                  VarParsing.varType.int,
                  "Number of events to run over.")
 options.register('json',
-                 'babybaker/txt/json/nonblind_Cert_246908-258159_13TeV_PromptReco_Collisions15_25ns_JSON_v3.json',
+                 'babymaker/txt/json/nonblind_Cert_246908-258159_13TeV_PromptReco_Collisions15_25ns_JSON_v3.json',
                  VarParsing.multiplicity.singleton,
                  VarParsing.varType.string,
                  "Path to json starting with babymaker/...")

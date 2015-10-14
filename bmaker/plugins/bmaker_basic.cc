@@ -65,11 +65,6 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
     return;
   }
 
-  //////////////// HLT objects //////////////////
-  edm::Handle<pat::TriggerObjectStandAloneCollection> triggerObjects;
-  iEvent.getByLabel("selectedPatTrigger",triggerObjects);  
-  writeHLTObjects(names, triggerObjects);
-
   //////////////// Weight //////////////////
   const float luminosity = 1000.;
   baby.weight() = 1.;
@@ -164,6 +159,12 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
     else baby.pass_hbhe() = false;
   }
   writeFilters(fnames, filterBits, vtx);
+
+  //////////////// HLT objects //////////////////
+  edm::Handle<pat::TriggerObjectStandAloneCollection> triggerObjects;
+  iEvent.getByLabel("selectedPatTrigger",triggerObjects);  
+  // Requires having called writeMuons and writeElectrons for truth-matching
+  writeHLTObjects(names, triggerObjects, all_mus, all_els);
 
   ///////////////////// Truth Info ///////////////////////
   if (!isData) {
@@ -381,7 +382,10 @@ vCands bmaker_basic::writeMuons(edm::Handle<pat::MuonCollection> muons,
     baby.mus_tight().push_back(lepTool->idMuon(lep, vtx, lepTool->kTight));
     baby.mus_miniso().push_back(lep_iso);
     baby.mus_reliso().push_back(lep_reliso);
-    baby.mus_tru_tm().push_back(false); // Filled in writeMC
+    baby.mus_tru_tm().push_back(false);    // Filled in writeMC
+    baby.mus_vvvl().push_back(false);      // Filled in writeHLTObjects
+    baby.mus_isomu18().push_back(false);   // Filled in writeHLTObjects
+    baby.mus_mu50().push_back(false);      // Filled in writeHLTObjects
     all_mus.push_back(dynamic_cast<const reco::Candidate *>(&lep)); // For truth-matching in writeMC
 
     if(lepTool->isVetoMuon(lep, vtx, lep_iso)) {
@@ -427,7 +431,10 @@ vCands bmaker_basic::writeElectrons(edm::Handle<pat::ElectronCollection> electro
     baby.els_tight().push_back(lepTool->idElectron(lep, vtx, lepTool->kTight));
     baby.els_miniso().push_back(lep_iso);
     baby.els_reliso().push_back(lep_reliso);
-    baby.els_tru_tm().push_back(false); // Filled in writeMC
+    baby.els_tru_tm().push_back(false);   // Filled in writeMC
+    baby.els_vvvl().push_back(false);     // Filled in writeHLTObjects
+    baby.els_ele23().push_back(false);    // Filled in writeHLTObjects
+    baby.els_ele105().push_back(false);   // Filled in writeHLTObjects
     all_els.push_back(dynamic_cast<const reco::Candidate *>(&lep)); // For truth-matching in writeMC
 
     if(lepTool->isVetoElectron(lep, vtx, lep_iso)){
@@ -501,16 +508,69 @@ bool bmaker_basic::writeTriggers(const edm::TriggerNames &names,
 }
 
 void bmaker_basic::writeHLTObjects(const edm::TriggerNames &names, 
-                                   edm::Handle<pat::TriggerObjectStandAloneCollection> triggerObjects){
+                                   edm::Handle<pat::TriggerObjectStandAloneCollection> triggerObjects, 
+				   vCands &all_mus, vCands &all_els){
+  const float relptThreshold(0.3), drThreshold(0.1);      
   for (pat::TriggerObjectStandAlone obj : *triggerObjects) {
     obj.unpackPathNames(names);
     TString name(obj.collection());
     float objpt(obj.pt());
     if(name=="hltPFMETProducer::HLT") baby.onmet() = objpt;
-    else if(name=="hltPFHT::HLT") baby.onht() = objpt; // There's 2 of these, and we want the last one
-    else if(name=="hltL3MuonCandidates::HLT" && baby.onmaxmu()<objpt) baby.onmaxmu() = objpt;
-    else if(name=="hltEgammaCandidates::HLT" && baby.onmaxel()<objpt) baby.onmaxel() = objpt;
-  }
+    if(name=="hltPFHT::HLT") baby.onht() = objpt; // There's 2 of these, and we want the last one
+
+    if(name=="hltL3MuonCandidates::HLT"){
+      bool vvvl(obj.hasFilterLabel("hltL3MuVVVLIsoFIlter"));
+      bool isomu18(obj.hasFilterLabel("hltL3crIsoL1sMu16L1f0L2f10QL3f18QL3trkIsoFiltered0p09") );
+      bool mu50(obj.hasFilterLabel("hltL3fL1sMu16orMu25L1f0L2f10QL3Filtered50Q"));
+      if(vvvl && baby.onmu_vvvl()<objpt) baby.onmu_vvvl() = objpt;
+      if(isomu18 && baby.onmu_isomu18()<objpt) baby.onmu_isomu18() = objpt;
+      if(mu50 && baby.onmu_mu50()<objpt) baby.onmu_mu50() = objpt;
+      double mindr(999.);
+      int minind(-1);
+      if(vvvl || isomu18 || mu50){
+	for(size_t ind(0); ind < all_mus.size(); ind++) {
+	  double dr(deltaR(obj, *(all_mus[ind])));
+	  double drelpt(fabs((all_mus[ind]->pt() - objpt)/objpt));
+	  if(dr > drThreshold || drelpt > relptThreshold) continue;
+	  if(dr < mindr){
+	    mindr = dr;
+	    minind = ind;
+	  }
+	} // Loop over reco muons
+	if(minind>=0){
+	  baby.mus_vvvl()[minind] = vvvl;
+	  baby.mus_isomu18()[minind] = isomu18;
+	  baby.mus_mu50()[minind] = mu50;
+	}
+      } // At least one match
+    }
+    if(name=="hltEgammaCandidates::HLT"){
+      bool vvvl(obj.hasFilterLabel("hltEle15VVVLGsfTrackIsoFilter"));
+      bool ele23(obj.hasFilterLabel("hltEle23WPLooseGsfTrackIsoFilter") );
+      bool ele105(obj.hasFilterLabel("hltEle105CaloIdVTGsfTrkIdTGsfDphiFilter"));
+      if(vvvl && baby.onel_vvvl()<objpt) baby.onel_vvvl() = objpt;
+      if(ele23 && baby.onel_ele23()<objpt) baby.onel_ele23() = objpt;
+      if(ele105 && baby.onel_ele105()<objpt) baby.onel_ele105() = objpt;
+      double mindr(999.);
+      int minind(-1);
+      if(vvvl || ele23 || ele105){
+	for(size_t ind(0); ind < all_els.size(); ind++) {
+	  double dr(deltaR(obj, *(all_els[ind])));
+	  double drelpt(fabs((all_els[ind]->pt() - objpt)/objpt));
+	  if(dr > drThreshold || drelpt > relptThreshold) continue;
+	  if(dr < mindr){
+	    mindr = dr;
+	    minind = ind;
+	  }
+	} // Loop over reco muons
+	if(minind>=0){
+	  baby.els_vvvl()[minind] = vvvl;
+	  baby.els_ele23()[minind] = ele23;
+	  baby.els_ele105()[minind] = ele105;
+	}
+      } // At least one match
+    }
+  } // Loop over trigger objects
 }
 
 void bmaker_basic::writeFilters(const edm::TriggerNames &fnames,
@@ -730,8 +790,8 @@ bmaker_basic::bmaker_basic(const edm::ParameterSet& iConfig):
     trig_name.push_back("HLT_PFMET170_JetIdCleaned_v");				// 14
     trig_name.push_back("HLT_DoubleIsoMu17_eta2p1_v");		        	// 15
     trig_name.push_back("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v"); 	        // 16
-    trig_name.push_back("HLT_IsoMu18_v");					// 17
-    trig_name.push_back("HLT_IsoMu20_v");					// 18
+    trig_name.push_back("HLT_IsoMu20_v");					// 17
+    trig_name.push_back("HLT_IsoMu18_v");					// 18
     trig_name.push_back("HLT_IsoMu24_eta2p1_v");				// 19
     trig_name.push_back("HLT_IsoMu27_v");					// 20
     trig_name.push_back("HLT_Mu50_v");						// 21
@@ -758,8 +818,8 @@ bmaker_basic::bmaker_basic(const edm::ParameterSet& iConfig):
     trig_name.push_back("HLT_PFMET170_NoiseCleaned_v");				// 14
     trig_name.push_back("HLT_DoubleIsoMu17_eta2p1_v");		        	// 15
     trig_name.push_back("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v"); 	        // 16
-    trig_name.push_back("HLT_IsoMu17_eta2p1_v");        			// 17
-    trig_name.push_back("HLT_IsoMu20_v");					// 18
+    trig_name.push_back("HLT_IsoMu20_v");					// 17
+    trig_name.push_back("HLT_IsoMu17_eta2p1_v");        			// 18
     trig_name.push_back("HLT_IsoMu24_eta2p1_v");				// 19
     trig_name.push_back("HLT_IsoMu27_v");					// 20
     trig_name.push_back("HLT_Mu50_v");						// 21

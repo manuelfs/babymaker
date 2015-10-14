@@ -3,7 +3,7 @@
 ###########################################################
 import math
 from   os import environ
-from   os.path import exists, join
+from   os.path import exists, join, basename
 
 def findFileInPath(theFile):
     for s in environ["CMSSW_SEARCH_PATH"].split(":"):
@@ -34,6 +34,9 @@ options.register('json',
                  "Path to json starting with babymaker/...")
 options.parseArguments()
 outName = options.outputFile
+if outName == "output.root": # output filename not set
+    rootfile = basename(options.inputFiles[0])
+    outName = "baby_"+rootfile
 
 ## This refers to the official JEC methods. To apply on-the-fly, just set jecLabel to something different from miniAOD
 doJEC = False  
@@ -42,18 +45,22 @@ else: jets_label = "slimmedJets"
 jecLabel = 'miniAOD'
 if outName.find("Run2015") != -1:
     isData = True
-    jecLabel = 'miniAOD'  # The re-miniAOD already has V5 JECs with the new prescription
+    jecLabel = 'Summer15_25nsV5_DATA'    # This is for pre-7.4.14 data
     # These only used for the official application of JECs
     globalTag = "74X_dataRun2_v2"
     processRECO = "RECO"
     jecLevels = ['L1FastJet', 'L2Relative', 'L3Absolute', 'L2L3Residual']
 else:
     isData = False
-    jecLabel = 'Summer15_25nsV2_MC'  # Once we move to re-miniAOD, won't be needed
+    jecLabel = 'Summer15_25nsV2_MC'    # This is for pre-7.4.14 MC
     # These only used for the official application of JECs
     globalTag = "74X_mcRun2_asymptotic_v2"
     processRECO = "PAT"
     jecLevels = ['L1FastJet', 'L2Relative', 'L3Absolute']
+
+# The 7.4.14 re-miniAOD already has V5 JECs with the new prescription
+cmsswRel = environ["CMSSW_BASE"]
+if cmsswRel.find("CMSSW_7_4_14") != -1: jecLabel = 'miniAOD' 
 
 ###### Defining Baby process, input and output files 
 process = cms.Process("Baby")
@@ -66,7 +73,7 @@ if isData: # Processing only lumis in JSON
     process.source.lumisToProcess = LumiList.LumiList(filename = jsonfile).getVLuminosityBlockRange()
 
 process.baby_basic = cms.EDAnalyzer('bmaker_basic',
-                                    outputFile = cms.string(options.outputFile),
+                                    outputFile = cms.string(outName),
                                     inputFiles = cms.vstring(options.inputFiles),
                                     jec = cms.string(jecLabel),
                                     met = cms.InputTag("slimmedMETs"),

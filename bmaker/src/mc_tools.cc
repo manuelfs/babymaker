@@ -19,7 +19,7 @@ bool mc_tools::isLast(const reco::GenParticle &mc, size_t id){
   return (abs(mc.pdgId())==id && !hasDaughter(mc, id));
 }
 // Checks if "mc" comes from a W or a tau from a W
-bool mc_tools::fromW(const reco::GenParticle &mc){
+bool mc_tools::fromWOrWTau(const reco::GenParticle &mc){
   const reco::GenParticle *mcMom;
   int momId = abs(mom(mc, mcMom));
   if(momId == 24) return true;

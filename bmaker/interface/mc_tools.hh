@@ -16,7 +16,7 @@ public:
   bool isLast(const reco::GenParticle &mc, size_t id);
   bool decaysTo(const reco::GenParticle &mc, size_t id, const reco::GenParticle *&mcDau);
   void printParticle(const reco::GenParticle &mc);
-  bool fromW(const reco::GenParticle &mc);
+  bool fromWOrWTau(const reco::GenParticle &mc);
   int mom(const reco::GenParticle &mc, const reco::GenParticle *&mcMom);
 
   mc_tools();

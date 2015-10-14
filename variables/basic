@@ -31,8 +31,6 @@ float met_nohf
 float met_nohf_phi
 float met_tru
 float met_tru_phi
-float met_tru_nu
-float met_tru_nu_phi
 float met_tru_nuw
 float met_tru_nuw_phi
 

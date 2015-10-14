@@ -556,7 +556,8 @@ void bmaker_basic::writeGenInfo(edm::Handle<LHEEventProduct> lhe_info){
     float py = (lhe_info->hepeup().PUP[icount])[1];
     float pt = sqrt(px*px+py*py);
 
-    if(status==1 && (pdgid<6 || pdgid==21) && mom1id!=6 && mom1id!=24 && mom2id!=6 && mom2id!=24) {
+    if(status==1 && (pdgid<6 || pdgid==21) && mom1id!=6 && mom2id!=6 && mom1id!=24 && mom2id!=24 
+       && mom1id!=23 && mom2id!=23 && mom1id!=25 && mom2id!=25) {
        baby.nisr_me()++;
        baby.ht_isr_me() += pt;
     }
@@ -566,7 +567,7 @@ void bmaker_basic::writeGenInfo(edm::Handle<LHEEventProduct> lhe_info){
 
 void bmaker_basic::writeMC(edm::Handle<reco::GenParticleCollection> genParticles, vCands &all_mus, vCands &all_els){
   LVector isr_p4;
-  float met_tru_x(0.), met_tru_y(0.), metw_tru_x(0.), metw_tru_y(0.);
+  float metw_tru_x(0.), metw_tru_y(0.);
   float lep_tru_pt(0.), lep_tru_phi(0.);
   baby.ntruleps()=0; baby.ntrumus()=0; baby.ntruels()=0; baby.ntrutaush()=0; baby.ntrutausl()=0;
   baby.nleps_tm()=0;
@@ -610,14 +611,10 @@ void bmaker_basic::writeMC(edm::Handle<reco::GenParticleCollection> genParticles
 	baby.ntrutausl()++;
       } else baby.ntrutaush()++;
     }
-    if((muFromTopZ || eFromTopZ) && lep_tru_pt < mc.pt()){
-      lep_tru_pt = mc.pt();
-      lep_tru_phi = mc.phi();
-    }
 
     //////// Finding truth-matched leptons
     const float relptThreshold(0.3), drThreshold(0.1);      
-    if(id==11 && mcTool->fromW(mc)){
+    if(id==11 && mcTool->fromWOrWTau(mc)){
       double mindr(999.);
       int minind(-1);
       for(size_t ind(0); ind < all_els.size(); ind++) {
@@ -631,10 +628,14 @@ void bmaker_basic::writeMC(edm::Handle<reco::GenParticleCollection> genParticles
       } // Loop over all_els
       if(minind >= 0) {
 	baby.els_tru_tm()[minind] = true;
-	if(eFromTopZ && baby.els_sig()[minind]) baby.nleps_tm()++;
+	if(baby.els_sig()[minind]) baby.nleps_tm()++;
       }
+      if(lep_tru_pt < mc.pt()){
+	lep_tru_pt = mc.pt();
+	lep_tru_phi = mc.phi();
+      } // Lepton pt to find mt_tru
     } // If it is an electron
-    if(id==13 && mcTool->fromW(mc)){
+    if(id==13 && mcTool->fromWOrWTau(mc)){
       double mindr(999.);
       int minind(-1);
       for(size_t ind(0); ind < all_mus.size(); ind++) {
@@ -648,36 +649,35 @@ void bmaker_basic::writeMC(edm::Handle<reco::GenParticleCollection> genParticles
       } // Loop over all_mus
       if(minind >= 0) {
 	baby.mus_tru_tm()[minind] = true;
-	if(muFromTopZ && baby.mus_sig()[minind]) baby.nleps_tm()++;
+	if(baby.mus_sig()[minind]) baby.nleps_tm()++;
       }
+      if(lep_tru_pt < mc.pt()){
+	lep_tru_pt = mc.pt();
+	lep_tru_phi = mc.phi();
+      } // Lepton pt to find mt_tru
     } // If it is a muon
 
     //////// Finding true MET
-    if(id==12 || id==14 || id==16 || id==18 || id==1000012 || id==1000014 || id==1000016
-       || id==1000022 || id==1000023 || id==1000025 || id==1000035 || id==1000039){
-      met_tru_x += mc.px();
-      met_tru_y += mc.py();
-      if(mcTool->fromW(mc)) {
+    if((id==12 || id==14 || id==16 || id==18 || id==1000012 || id==1000014 || id==1000016
+	|| id==1000022 || id==1000023 || id==1000025 || id==1000035 || id==1000039) &&
+       id != momid){ // neutrinos decay to themselves
+      if(mcTool->fromWOrWTau(mc)) {
 	metw_tru_x += mc.px();
 	metw_tru_y += mc.py();
       }
     } // If undetected neutral particle
 
   } // Loop over genParticles
+  baby.ntruleps() = baby.ntrumus()+baby.ntruels()+baby.ntrutaush()+baby.ntrutausl();
   baby.isr_pt() = isr_p4.pt();
   baby.isr_eta() = isr_p4.eta();
   baby.isr_phi() = isr_p4.phi();
 
-  baby.met_tru_nu() = hypot(met_tru_x, met_tru_y);
-  baby.met_tru_nu_phi() = atan2(met_tru_y, met_tru_x);
   baby.met_tru_nuw() = hypot(metw_tru_x, metw_tru_y);
   baby.met_tru_nuw_phi() = atan2(metw_tru_y, metw_tru_x);
 
-  baby.mt_tru()     = getMT(baby.met_tru(),     baby.met_tru_phi(),     lep_tru_pt, lep_tru_phi);
-  baby.mt_tru_nu()  = getMT(baby.met_tru_nu(),  baby.met_tru_nu_phi(),  lep_tru_pt, lep_tru_phi);
   baby.mt_tru_nuw() = getMT(baby.met_tru_nuw(), baby.met_tru_nuw_phi(), lep_tru_pt, lep_tru_phi);
 
-  baby.ntruleps() = baby.ntrumus()+baby.ntruels()+baby.ntrutaush()+baby.ntrutausl();
 } // writeMC
 
 /*

@@ -60,7 +60,7 @@ else:
 
 # The 7.4.14 re-miniAOD already has V5 JECs with the new prescription
 cmsswRel = environ["CMSSW_BASE"]
-if cmsswRel.find("CMSSW_7_4_14") != -1: jecLabel = 'miniAOD' 
+# if cmsswRel.find("CMSSW_7_4_14") != -1: jecLabel = 'miniAOD' 
 
 ###### Defining Baby process, input and output files 
 process = cms.Process("Baby")

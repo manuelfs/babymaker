@@ -13,9 +13,8 @@ import time
 # "TTJets_HT-"
 wishlist = []
 #------------ MC ------------------
-# wishlist.append("TTJets")
-# wishlist.append("WJetsToLNu_HT-200To400")
-# wishlist.append("TTJets_HT-1200to2500")
+# wishlist.append("TTJets_SingleLeptFromTbar_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15DR74_Asympt25ns_MCRUN2_74_V9-v2")
+# wishlist.append("WJets")
 # wishlist.append("DYJets")
 # wishlist.append("QCD_")
 # wishlist.append("ST_")
@@ -24,15 +23,16 @@ wishlist = []
 # wishlist.append("WWToLNuQQ")
 # wishlist.append("ggZH_HToBB")
 
-wishlist.append("HTMHT")
-wishlist.append("MET")
-wishlist.append("SingleElectron")
-wishlist.append("SingleMuon")
+wishlist.append("JetHT_Run2015D_PromptReco-v3")
+# wishlist.append("HTMHT")
+# wishlist.append("MET")
+# wishlist.append("SingleElectron")
+# wishlist.append("SingleMuon")
 
 print 
 
 # for data get the golden runs
-json_name = "txt/json/nonblind_Cert_246908-258159_13TeV_PromptReco_Collisions15_25ns_JSON_v3.json"
+json_name = "txt/json/Cert_246908-257599_13TeV_PromptReco_Collisions15_25ns_JSON_v3.txt"
 with open(json_name) as jfile:
   jdata = json.load(jfile)
 goldruns = [int(i) for i in jdata.keys()]
@@ -137,17 +137,19 @@ for fnm in flists_pd:
           break
     else:
       sys.exit("ERROR: None of the combination keys (%s) were found in this flist:%s\n" % (comb_keys,fnm))
+
     print "INFO: Adding PD: ",dsname
+
     if dsname not in files_dict.keys():
       nent_dict[dsname] = 0
       files_dict[dsname] = []
     with open(fnm) as f: 
       for line in f:
+        if ("nEventsTotal" in line): # this is read instead of calculated to make resubmission simpler
+          nent_dict[dsname] = nent_dict[dsname] + int(line.split().pop())
         if "/store" not in line: continue
         col = line.split()
         redirector = 'root://cmsxrootd.fnal.gov//' if col[0]=='xrootd' else ('file:'+hadoop)
-        # add them up manually in case I dedice to run only on some files, e.g. local only
-        nent_dict[dsname] = nent_dict[dsname] + int(col[1]) 
         # if data, filter on json
         if 'Run2015' in dsname:
           runlist = [int(irun) for irun in string.split(col[3],",")]
@@ -161,6 +163,7 @@ if (host=="sd"):
   print "INFO: Creating babymaker tarball to transfer to work node..."
   os.system("tar --directory=../ --exclude=\"babymaker/out\" --exclude=\"babymaker/run\" --exclude=\"babymaker/logs\" --exclude=\"bmaker/interface/release.hh\" -c babymaker | xz > ../babymaker.tar.xz")
 
+total_jobs = 0
 for ids, ds in enumerate(files_dict.keys()):
   if (maxds!=-1 and ids>=maxds): break
 
@@ -251,3 +254,6 @@ for ids, ds in enumerate(files_dict.keys()):
     cmd = "condor_submit " + cmdfile
     print "INFO: Submitting", cmdfile
     os.system(cmd)
+    total_jobs = total_jobs + 1
+
+print "Submitted ", total_jobs

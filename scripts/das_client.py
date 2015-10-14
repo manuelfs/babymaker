@@ -69,26 +69,28 @@ def findKeyValue(data, key):
       if key in data[i].keys():
         if found_key and value!=data[i][key]: 
           pprint.pprint(data)
-          print "ERROR: Found multiple instances of key \'%s\'. See full dictionary above." % key
+          print "ERROR: Found multiple instances of key \'%s\'." % key
           sys.exit(0)
         else:
           found_key = True
           value = data[i][key]
     if not found_key:   
-      pprint.pprint(data)
-      print "ERROR: Could not find key \'%s\'. See full dictionary above." % key
-      sys.exit(0)       
+      # pprint.pprint(data)
+      print "WARNING: Returning NULL. Could not find key \'%s\' in list." % key
+      value = "NULL"
+      # sys.exit(0)       
   elif isinstance(data, dict):
     if key in data.keys():
       value = data[key]
     else:   
-      pprint.pprint(data)
-      print "ERROR: Could not find key \'%s\'. See full dictionary above." % key
-      sys.exit(0)    
+      # pprint.pprint(data)
+      print "WARNING: Returning NULL. Could not find key \'%s\' in dict." % key
+      value = "NULL"
+      # sys.exit(0)    
   else:
-    pprint.pprint(data)
-    print "ERROR: Dictionary is of neither type list or dict:"
-    sys.exit(0)    
+    # pprint.pprint(data)
+    print "WARNING: Returning NULL. Dictionary is of neither type list or dict:"
+    value = "NULL"    
   return value
 
 def getFileRunInfo(file, getlumis = False, verbose = False):
@@ -101,14 +103,15 @@ def getFileRunInfo(file, getlumis = False, verbose = False):
   for idata in data: 
     orig_lumidict = findKeyValue(idata, 'lumi')
     run_number = findKeyValue(orig_lumidict,'run_number')
-    if not isinstance(run_number, int): 
-      print "ERROR: Run number is not an int. It is:"
-      pprint.pprint(run_number)
-    if (verbose): print "Found run %i in file %s." % (run_number, file)
+    if (run_number=="NULL"): run_number = -1 #expecting an int
+    if (verbose): print "Found run %s in file %s." % (run_number, file)
     rundict[run_number] = []
     lumis = findKeyValue(orig_lumidict, 'number')
-    for ll in lumis:
-      rundict[run_number].extend([i for i in range(ll[0],ll[1]+1)])
+    if (lumis=="NULL"): 
+      rundict[run_number].append(-1)
+    else:
+      for ll in lumis:
+        rundict[run_number].extend([i for i in range(ll[0],ll[1]+1)])
 
   if verbose: 
     print "Contents of %s" % file
@@ -124,9 +127,12 @@ def getFilesInfo(dataset, wanted_keys = ['name','size','nevents'], verbose = Fal
   fdicts = []
   for entry in jsondict['data']:
     orig_fdict = entry['file']
+    # if (orig_fdict['name'] = '/store/data/Run2015D/HTMHT/MINIAOD/PromptReco-v4/000/258/706/00000/90EEB778-5271-E511-B309-02163E014364.root'):
+    #   print "asdgdfgadfgafdg"
     skim_fdict = {}
     for key in wanted_keys: 
       skim_fdict[key] = findKeyValue(orig_fdict, key)
+      if (key=='size' or key=='nevents') and skim_fdict[key]=="NULL": skim_fdict[key] = -1
       if verbose: print skim_fdict[key],
     if verbose: print 
     fdicts.append(skim_fdict)
@@ -135,7 +141,7 @@ def getFilesInfo(dataset, wanted_keys = ['name','size','nevents'], verbose = Fal
 
 def getDatasetInfo(dataset, wanted_keys = ['name','size','nevents','nfiles'], verbose = False):
   jsondict_ds = get_data('dataset='+dataset)
-  # pprint.pprint(jsondict_ds['data'])
+  # pprint.pprint(jsondict_ds)
   # what file attributes do we want to keep track of
   orig_dsdict = findKeyValue(jsondict_ds['data'],'dataset')
   skim_dsdict = {}

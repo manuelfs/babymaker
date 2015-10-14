@@ -1,22 +1,23 @@
 # List of datasets: one flist file will be created for each line
 # Lines not starting with "/" are ignored
 
-# /HTMHT/Run2015D-05Oct2015-v1/MINIAOD
-# /HTMHT/Run2015D-PromptReco-v3/MINIAOD
+/HTMHT/Run2015D-05Oct2015-v1/MINIAOD
+# /HTMHT/Run2015D-PromptReco-v4/MINIAOD
 
-# /MET/Run2015D-05Oct2015-v1/MINIAOD
-# /MET/Run2015D-PromptReco-v3/MINIAOD
+/MET/Run2015D-05Oct2015-v1/MINIAOD
+# /MET/Run2015D-PromptReco-v4/MINIAOD
 
 /SingleElectron/Run2015D-05Oct2015-v1/MINIAOD
-/SingleElectron/Run2015D-PromptReco-v3/MINIAOD
+# /SingleElectron/Run2015D-PromptReco-v4/MINIAOD
 
 /SingleMuon/Run2015D-05Oct2015-v1/MINIAOD
-/SingleMuon/Run2015D-PromptReco-v3/MINIAOD
+# /SingleMuon/Run2015D-PromptReco-v4/MINIAOD
 
-# /JetHT/Run2015D-PromptReco-v3/MINIAOD
+/JetHT/Run2015D-PromptReco-v3/MINIAOD
+# /JetHT/Run2015D-PromptReco-v4/MINIAOD
 
 # /DoubleEG/Run2015D-05Oct2015-v1/MINIAOD
-# /DoubleEG/Run2015D-PromptReco-v3/MINIAOD
+# /DoubleEG/Run2015D-PromptReco-v4/MINIAOD
 
 # /DoubleMuon/Run2015D-05Oct2015-v1/MINIAOD
-# /DoubleMuon/Run2015D-PromptReco-v3/MINIAOD
+# /DoubleMuon/Run2015D-PromptReco-v4/MINIAOD

@@ -45,7 +45,8 @@ maxfiles = int(raw_input('Enter max number of files per job: '))
 # they are considered extensions of each other and combined
 # i.e. the output babies and logs are labeled by 'substring-before-key'+'key'
 # the sub-string following the key is dropped and forgotten!
-comb_keys = ['RunIISpring15DR74_Asympt25ns_MCRUN2_74_V9', 'Run2015D', 'Run2015C', 'Run2015B']
+# in this example, 'Run2015D-PromptReco-v3' will be separated from the rest of Run D so that different corrections can be applied
+comb_keys = ['RunIISpring15DR74_Asympt25ns_MCRUN2_74_V9', 'Run2015D-PromptReco-v3', 'Run2015D', 'Run2015C', 'Run2015B']
 
 # for testing... otherwise set to -1
 maxjobs = -1
@@ -169,7 +170,7 @@ for ids, ds in enumerate(files_dict.keys()):
 
   #release
   cmssw = "CMSSW_7_4_6_patch6"
-  if "Run2015" in ds: cmssw = "CMSSW_7_4_14"
+  if ("Run2015" in ds) or ("RunIISpring15MiniAODv2" in ds): cmssw = "CMSSW_7_4_14"
 
   # with the list of files in hand, determine the number of condor jobs     
   nfiles = len(files_dict[ds])

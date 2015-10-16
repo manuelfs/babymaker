@@ -42,17 +42,19 @@ if outName == "output.root": # output filename not set
 doJEC = False  
 if doJEC: jets_label = "patJetsReapplyJEC"
 else: jets_label = "slimmedJets"
-jecLabel = 'miniAOD'
-if outName.find("Run2015") != -1:
+
+jecLabel = 'miniAOD' # for 7.4.14 data and mc
+if "Run2015D-PromptReco-v3" in outName: jecLabel = 'Summer15_25nsV5_DATA' # for 7.4.12 data
+elif "RunIISpring15DR74" in outName: jecLabel = 'Summer15_25nsV2_MC' # for 7.4.6.patch4 mc
+
+if "Run2015" in outName:
     isData = True
-    jecLabel = 'Summer15_25nsV5_DATA'    # This is for pre-7.4.14 data
     # These only used for the official application of JECs
     globalTag = "74X_dataRun2_v2"
     processRECO = "RECO"
     jecLevels = ['L1FastJet', 'L2Relative', 'L3Absolute', 'L2L3Residual']
 else:
     isData = False
-    jecLabel = 'Summer15_25nsV2_MC'    # This is for pre-7.4.14 MC
     # These only used for the official application of JECs
     globalTag = "74X_mcRun2_asymptotic_v2"
     processRECO = "PAT"

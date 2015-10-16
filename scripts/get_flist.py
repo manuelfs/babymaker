@@ -8,10 +8,12 @@ import ROOT
 import das_client as das
 
 datasets = []
-# with open("txt/dataset/mc.txt") as fmc:
-#   datasets = [line for line in fmc.read().splitlines() if (len(line)>0 and line[0]=="/")]
-with open("txt/dataset/data.txt") as fdata:
-  datasets.extend([line for line in fdata.read().splitlines() if (len(line)>0 and line[0]=="/")])
+with open("txt/dataset/mc.txt") as fmc:
+  datasets = [line for line in fmc.read().splitlines() if (len(line)>0 and line[0]=="/")]
+# with open("txt/dataset/mc_miniaod_v2.txt") as fmc:
+#   datasets.extend([line for line in fmc.read().splitlines() if (len(line)>0 and line[0]=="/")])
+# with open("txt/dataset/data.txt") as fdata:
+#   datasets.extend([line for line in fdata.read().splitlines() if (len(line)>0 and line[0]=="/")])
 
 # Parsing where the files can be found depends on whether we run on UCSB or UCSD
 host = os.environ.get("HOSTNAME")
@@ -24,12 +26,10 @@ hadoop = '/mnt/hadoop/cms'
 if host=="sd": hadoop = '/hadoop/cms/phedex'
 
 # Directory to dump all condor-related logs, schell and cmd files
-flistdir = "run/"
-if host=="sd":
-    if not (os.path.exists(os.getcwd()+'/'+flistdir)):
-        os.mkdir(os.getcwd()+'/'+flistdir)
-else:
-    flistdir = "/net/cms2/cms2r0/babymaker/flist/"
+flistdir = os.path.join(os.getenv("CMSSW_BASE"),"src/flists/")
+if not os.path.exists(flistdir):
+  sys.exit("ERROR: flists repository not found.")
+
 
 for ds in datasets:
   # parse the dataset name and guess the path on hadoop to create the input file list

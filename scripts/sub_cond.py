@@ -13,7 +13,7 @@ import time
 # "TTJets_HT-"
 wishlist = []
 #------------ MC ------------------
-# wishlist.append("TTJets_SingleLeptFromTbar_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15DR74_Asympt25ns_MCRUN2_74_V9-v2")
+wishlist.append("TTJets")
 # wishlist.append("WJets")
 # wishlist.append("DYJets")
 # wishlist.append("QCD_")
@@ -23,7 +23,7 @@ wishlist = []
 # wishlist.append("WWToLNuQQ")
 # wishlist.append("ggZH_HToBB")
 
-wishlist.append("JetHT_Run2015D_PromptReco-v3")
+# wishlist.append("JetHT_Run2015D_PromptReco-v3")
 # wishlist.append("HTMHT")
 # wishlist.append("MET")
 # wishlist.append("SingleElectron")
@@ -32,7 +32,7 @@ wishlist.append("JetHT_Run2015D_PromptReco-v3")
 print 
 
 # for data get the golden runs
-json_name = "txt/json/Cert_246908-257599_13TeV_PromptReco_Collisions15_25ns_JSON_v3.txt"
+json_name = "txt/json/nonblind_Cert_246908-258159_13TeV_PromptReco_Collisions15_25ns_JSON_v3.json"
 with open(json_name) as jfile:
   jdata = json.load(jfile)
 goldruns = [int(i) for i in jdata.keys()]
@@ -46,7 +46,7 @@ maxfiles = int(raw_input('Enter max number of files per job: '))
 # i.e. the output babies and logs are labeled by 'substring-before-key'+'key'
 # the sub-string following the key is dropped and forgotten!
 # in this example, 'Run2015D-PromptReco-v3' will be separated from the rest of Run D so that different corrections can be applied
-comb_keys = ['RunIISpring15DR74_Asympt25ns_MCRUN2_74_V9', 'Run2015D-PromptReco-v3', 'Run2015D', 'Run2015C', 'Run2015B']
+comb_keys = ['RunIISpring15DR74_Asympt25ns_MCRUN2_74_V9', 'RunIISpring15MiniAODv2_74X_mcRun2_asymptotic_v2', 'Run2015D-PromptReco-v3', 'Run2015D', 'Run2015C', 'Run2015B']
 
 # for testing... otherwise set to -1
 maxjobs = -1
@@ -113,15 +113,17 @@ if not os.path.exists(logdir):
 print "INFO: Babies will be written to: ", outdir
 print "INFO: Logs will be written to:   ", logdir
 
-# read in datasets to run over based on the flist_*txt files present in the run directory
-# from there, read the filenames for each dataset and add up the number of events
-# firstly, bookkeep datasets that are not extensions
-flistdir = "run/" 
-# regardless of host, create the ./run/ directory if it doesn't exist since this is where auto-generated submission scripts are written
-if not (os.path.exists(os.getcwd()+'/'+flistdir)):
-        os.mkdir(os.getcwd()+'/'+flistdir)
-# the actual flist is stored centrally if running at UCSB and in ./run/ at UCSD
-if host=="sb": flistdir = "/net/cms2/cms2r0/babymaker/flist/"
+# this is where the condor submission script and job executable are stored
+if not (os.path.exists(os.getcwd()+'/run')):
+        os.mkdir(os.getcwd()+'/run')
+rundir = os.path.join(os.path.realpath(os.getcwd()+'/run'),sub_time)
+os.mkdir(rundir)
+
+# read in datasets to run over based on the flist_*txt files
+# where to find the flists
+flistdir = os.path.join(os.getenv("CMSSW_BASE"),"src/flists/")
+if not os.path.exists(flistdir):
+  sys.exit("ERROR: flists repository not found.")
 
 flists_pd = glob.glob(os.path.join(flistdir,"flist*.txt"))
 files_dict = {}
@@ -180,6 +182,7 @@ for ids, ds in enumerate(files_dict.keys()):
   for job in range(0,njobs):
     # name the baby
     bname = "_".join(["baby",ds,"mf"+str(maxfiles),"batch"+str(job)])
+    # print(bname)
 
     # check if job had already succeeded on previous submission
     outpath = os.path.join(outdir,bname+".root")
@@ -197,7 +200,7 @@ for ids, ds in enumerate(files_dict.keys()):
     else: args.append("outputFile="+bname+".root")
 
     # Create executable that will be transfered to the work node by condor
-    exefile ="run/"+bname+".sh"
+    exefile =rundir+"/"+bname+".sh"
     fexe = open(exefile,"w")
     if (host=="sb"):
       fexe.write("#! /bin/bash\n")
@@ -225,7 +228,7 @@ for ids, ds in enumerate(files_dict.keys()):
     os.system("chmod u+x "+exefile)
 
     # Create condor submission cmd file
-    cmdfile = "run/"+bname+".cmd"
+    cmdfile = rundir+"/"+bname+".cmd"
     fcmd = open(cmdfile,"w")
     if (host=="sb"):
       fcmd.write("Executable   = "+exefile+"\n")

@@ -13,7 +13,7 @@ LDFLAGS := $(shell root-config --ldflags)
 LDLIBS := $(shell root-config --libs) -lMinuit -lRooStats -lTreePlayer 
 
 EXECUTABLES := $(addprefix $(EXEDIR)/, $(addsuffix .exe, $(notdir $(basename $(wildcard $(SRCDIR)/*.cxx))))) 
-OBJECTS := $(addprefix $(OBJDIR)/, $(addsuffix .o, $(notdir $(basename $(wildcard $(SRCDIR)/*.cc))))) $(OBJDIR)/baby.o 
+OBJECTS := $(addprefix $(OBJDIR)/, $(addsuffix .o, $(notdir $(basename $(wildcard $(SRCDIR)/*.cc)))))
 
 FIND_DEPS = $(CXX) $(CXXFLAGS) -MM -MG -MF $@ $<
 EXPAND_DEPS = perl -pi -e 's|$*.o|$(OBJDIR)/$*.o $(MAKEDIR)/$*.d|g' $@

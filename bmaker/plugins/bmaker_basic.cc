@@ -643,14 +643,14 @@ void bmaker_basic::writeMC(edm::Handle<reco::GenParticleCollection> genParticles
     bool eFromTopZ(id==11 && (momid==24 || momid==23));
     bool muFromTopZ(id==13 && (momid==24 || momid==23));
     bool tauFromTop(id==15 && momid==24);
-    bool fromW(momid==24);
+    bool fromWOrWTau(mcTool->fromWOrWTau(mc));
 
     //////// Finding p4 of ME ISR system
     if((lastTop && outname.Contains("TTJets")) || (lastGluino && outname.Contains("SMS")) || 
        (lastZ && outname.Contains("DY"))) isr_p4 -= mc.p4();
 
     //////// Saving interesting true particles
-    if(lastTop || lastGluino || lastZ || bFromTop || eFromTopZ || muFromTopZ || tauFromTop || fromW) {
+    if(lastTop || lastGluino || lastZ || bFromTop || eFromTopZ || muFromTopZ || tauFromTop || fromWOrWTau) {
       baby.mc_id().push_back(mc.pdgId());
       baby.mc_pt().push_back(mc.pt());
       baby.mc_eta().push_back(mc.eta());

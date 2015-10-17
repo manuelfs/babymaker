@@ -41,7 +41,7 @@ public:
   std::vector<LVector> corrJet;
 
   bool leptonInJet(const pat::Jet &jet, vCands leptons);
-  bool idJet(const pat::Jet &jet);
+  bool idJet(const pat::Jet &jet, bool doRa2=false);
 
   void getMETRaw(edm::Handle<pat::METCollection> mets, float &metRaw, float &metRawPhi);
   void getMETWithJEC(edm::Handle<pat::METCollection> mets, float &met, float &metPhi);

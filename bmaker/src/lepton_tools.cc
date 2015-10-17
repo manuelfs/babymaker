@@ -244,7 +244,7 @@ double lepton_tools::getPFIsolation(edm::Handle<pat::PackedCandidateCollection> 
   } // Loop over pf cands
 
   double effarea = ptcl->isElectron() ? getEffAreaElectron(ptcl->eta()) : getEffAreaMuon(ptcl->eta());
-  double pu_corr = rho*effarea*pow(r_mini,2)/(0.3*0.3);
+  double pu_corr = rho*effarea*pow(r_iso/0.3, 2);
   double iso(0.);
   if (charged_only) iso = iso_ch;
   else iso = iso_ch + max(0.,iso_ph + iso_nh - pu_corr);

@@ -34,7 +34,7 @@ bool jet_met_tools::leptonInJet(const pat::Jet &jet, vCands leptons){
   return false;
 }
 
-bool jet_met_tools::idJet(const pat::Jet &jet){
+bool jet_met_tools::idJet(const pat::Jet &jet, bool doRa2){
   //LooseID from https://twiki.cern.ch/twiki/bin/view/CMS/JetID
   double eta = jet.eta();
   double NHF = jet.neutralHadronEnergyFraction();
@@ -49,7 +49,11 @@ bool jet_met_tools::idJet(const pat::Jet &jet){
   bool eta_leq_3 = (NHF<0.99 && NEMF<0.99 && NumConst>1) && ((fabs(eta)<=2.4 && CHF>0 && CHM>0 && CEMF<0.99) || fabs(eta)>2.4);
   bool eta_g_3 = NEMF<0.90 && NumNeutralParticles>10;
 
-  return  (eta_leq_3 && fabs(eta)<=3.) || (eta_g_3 && fabs(eta)>3.);
+  bool eta_l_2p4 =  NumConst>=2 && NHF<0.9 && NEMF<0.95 && CHM>0 && CHF>0 && CEMF<0.99;
+  bool eta_geq_2p4 =  NHF<0.9 && NEMF<0.95 && NumConst>=2;
+
+  if(!doRa2) return  (eta_leq_3 && fabs(eta)<=3.) || (eta_g_3 && fabs(eta)>3.);  // Official recommendation
+  else return (eta_l_2p4 && fabs(eta)<2.4) || (fabs(eta)>=2.4 && eta_geq_2p4);   // RA2/b's PBNR and old Jet ID
 }
 
 

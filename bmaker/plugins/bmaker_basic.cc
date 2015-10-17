@@ -228,12 +228,13 @@ vector<LVector> bmaker_basic::writeJets(edm::Handle<pat::JetCollection> alljets,
     bool isLep = jetTool->leptonInJet(jet, sig_leps);
     bool isLep_ra2 = jetTool->leptonInJet(jet, veto_leps);
     bool goodID = jetTool->idJet(jet);
+    bool goodID_ra2 = jetTool->idJet(jet, true);
     bool goodPtEta = jetp4.pt() > jetTool->JetPtCut && fabs(jet.eta()) <= jetTool->JetEtaCut;
     bool goodJet = (!isLep) && goodID && goodPtEta;
     float csv(jet.bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags"));
     if(goodPtEta && !isLep && !goodID) baby.pass_jets_nohf() = false;
     if(jetp4.pt() > jetTool->JetPtCut && !isLep && !goodID) baby.pass_jets() = false;
-    if(jetp4.pt() > jetTool->JetPtCut && !isLep_ra2 && !goodID) baby.pass_jets_ra2() = false;
+    if(jetp4.pt() > jetTool->JetPtCut && !isLep_ra2 && !goodID_ra2) baby.pass_jets_ra2() = false;
     if(goodID && goodPtEta) {
       baby.njets_ra2()++;
       baby.ht_ra2() += jetp4.pt();
@@ -588,6 +589,7 @@ void bmaker_basic::writeFilters(const edm::TriggerNames &fnames,
   baby.pass_goodv() &= hasGoodPV(vtx);
 
   baby.pass() = baby.pass_goodv() && baby.pass_eebadsc() && baby.pass_jets();
+  baby.pass_ra2() = baby.pass_goodv() && baby.pass_eebadsc() && baby.pass_jets_ra2();
   baby.pass_nohf() = baby.pass_goodv() && baby.pass_eebadsc() && baby.pass_jets_nohf();
 }
 

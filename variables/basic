@@ -16,7 +16,6 @@ float mht_ra2
 float mt
 float mt_nohf
 float mt_tru
-float mt_tru_nu
 float mt_tru_nuw
 float dphi_wlep
 
@@ -72,7 +71,7 @@ std::vector<float> mus_d0
 std::vector<bool> mus_sig
 std::vector<bool> mus_sigid
 std::vector<bool> mus_tight
-std::vector<bool> mus_tru_tm
+std::vector<bool> mus_tm
 std::vector<bool> mus_vvvl
 std::vector<bool> mus_isomu18
 std::vector<bool> mus_mu50
@@ -92,7 +91,7 @@ std::vector<bool> els_ispf
 std::vector<bool> els_sig
 std::vector<bool> els_sigid
 std::vector<bool> els_tight
-std::vector<bool> els_tru_tm
+std::vector<bool> els_tm
 std::vector<bool> els_vvvl
 std::vector<bool> els_ele23
 std::vector<bool> els_ele105
@@ -117,6 +116,14 @@ float mumuv_pt1
 float mumuv_pt2
 float mumuv_zpt
 
+##################   Photons   ################
+int nph
+std::vector<float> ph_pt
+std::vector<float> ph_eta
+std::vector<float> ph_phi
+std::vector<bool>  ph_tm
+std::vector<bool>  ph_ph90
+
 ###################   Trigger   ##################
 std::vector<bool> trig;
 std::vector<float> trig_prescale;
@@ -128,6 +135,7 @@ float onmu_mu50
 float onel_vvvl
 float onel_ele23
 float onel_ele105
+float onph_ph90
 
 ###################   Quality   ##################
 bool pass_jets;

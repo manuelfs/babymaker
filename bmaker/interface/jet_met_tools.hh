@@ -31,6 +31,8 @@ public:
   const float CSVMedium    = 0.890;
   const float CSVTight     = 0.970;
 
+  const float sizeJet      = 0.4;
+
   TString jecName;
   bool doJEC;
   double rhoEvent_;
@@ -41,6 +43,7 @@ public:
   std::vector<LVector> corrJet;
 
   bool leptonInJet(const pat::Jet &jet, vCands leptons);
+  bool jetMatched(const pat::Jet &jet, vCands objects);
   bool idJet(const pat::Jet &jet, bool doRa2=false);
 
   void getMETRaw(edm::Handle<pat::METCollection> mets, float &metRaw, float &metRawPhi);

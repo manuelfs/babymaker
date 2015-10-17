@@ -111,11 +111,22 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
   veto_leps = veto_mus;
   veto_leps.insert(veto_leps.end(), veto_els.begin(), veto_els.end());
 
+  ///////////////////////////////// Photons ////////////////////////////////
+  vCands photons;
+  edm::Handle<double> rhoEvent_h;
+  iEvent.getByLabel( "fixedGridRhoFastjetAll", rhoEvent_h);
+  edm::Handle<reco::BeamSpot> beamspot;
+  iEvent.getByLabel("offlineBeamSpot", beamspot);
+  edm::Handle<pat::PhotonCollection> allphotons;
+  iEvent.getByLabel("slimmedPhotons", allphotons);
+  edm::Handle<vector<reco::Conversion> > conversions;
+  edm::InputTag converstionsTag("reducedEgamma","reducedConversions");
+  iEvent.getByLabel(converstionsTag, conversions);
+  photons = writePhotons(allphotons, allelectrons, conversions, beamspot, *rhoEvent_h);
+
   //////////////////////////// MET/JETs with JECs ///////////////////////////
   edm::Handle<pat::JetCollection> alljets;
   iEvent.getByLabel(jets_label, alljets);
-  edm::Handle<double> rhoEvent_h;
-  iEvent.getByLabel( "fixedGridRhoFastjetAll", rhoEvent_h);
   jetTool->getJetCorrections(alljets, *rhoEvent_h);
 
   /// MET
@@ -127,7 +138,7 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 
   /// Jets
   vector<LVector> jets;
-  jets = writeJets(alljets, sig_leps, veto_leps);
+  jets = writeJets(alljets, sig_leps, veto_leps, photons);
   writeFatJets(jets);
 
   ////////////////////// mT, dphi /////////////////////
@@ -164,7 +175,7 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
   edm::Handle<pat::TriggerObjectStandAloneCollection> triggerObjects;
   iEvent.getByLabel("selectedPatTrigger",triggerObjects);  
   // Requires having called writeMuons and writeElectrons for truth-matching
-  writeHLTObjects(names, triggerObjects, all_mus, all_els);
+  writeHLTObjects(names, triggerObjects, all_mus, all_els, photons);
 
   ///////////////////// Truth Info ///////////////////////
   if (!isData) {
@@ -174,7 +185,7 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
     writeGenInfo(lhe_info);
     edm::Handle<reco::GenParticleCollection> genParticles;
     iEvent.getByLabel("prunedGenParticles", genParticles);
-    writeMC(genParticles, all_mus, all_els);
+    writeMC(genParticles, all_mus, all_els, photons);
   }
 
   ////////////////// Filling the tree //////////////////
@@ -213,7 +224,8 @@ void bmaker_basic::writeMET(edm::Handle<pat::METCollection> mets, edm::Handle<pa
 }
 
 // Requires having called jetTool->getJetCorrections(alljets, rhoEvent_) beforehand
-vector<LVector> bmaker_basic::writeJets(edm::Handle<pat::JetCollection> alljets, vCands &sig_leps, vCands &veto_leps){
+vector<LVector> bmaker_basic::writeJets(edm::Handle<pat::JetCollection> alljets, vCands &sig_leps, 
+					vCands &veto_leps, vCands &photons){
   vector<LVector> jets;
   baby.njets() = 0; baby.nbl() = 0; baby.nbm() = 0;  baby.nbt() = 0;  
   baby.ht() = 0.; baby.ht_hlt() = 0.;
@@ -227,6 +239,7 @@ vector<LVector> bmaker_basic::writeJets(edm::Handle<pat::JetCollection> alljets,
     // Saving good jets and jets corresponding to signal leptons
     bool isLep = jetTool->leptonInJet(jet, sig_leps);
     bool isLep_ra2 = jetTool->leptonInJet(jet, veto_leps);
+    bool isPhoton = jetTool->jetMatched(jet, photons); // Uses RA2/b's loose matching, dpt/pt < 100%, dR < 0.4
     bool goodID = jetTool->idJet(jet);
     bool goodID_ra2 = jetTool->idJet(jet, true);
     bool goodPtEta = jetp4.pt() > jetTool->JetPtCut && fabs(jet.eta()) <= jetTool->JetEtaCut;
@@ -234,7 +247,7 @@ vector<LVector> bmaker_basic::writeJets(edm::Handle<pat::JetCollection> alljets,
     float csv(jet.bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags"));
     if(goodPtEta && !isLep && !goodID) baby.pass_jets_nohf() = false;
     if(jetp4.pt() > jetTool->JetPtCut && !isLep && !goodID) baby.pass_jets() = false;
-    if(jetp4.pt() > jetTool->JetPtCut && !isLep_ra2 && !goodID_ra2) baby.pass_jets_ra2() = false;
+    if(jetp4.pt() > jetTool->JetPtCut && !isLep_ra2 && !isPhoton && !goodID_ra2) baby.pass_jets_ra2() = false;
     if(goodID && goodPtEta) {
       baby.njets_ra2()++;
       baby.ht_ra2() += jetp4.pt();
@@ -383,7 +396,7 @@ vCands bmaker_basic::writeMuons(edm::Handle<pat::MuonCollection> muons,
     baby.mus_tight().push_back(lepTool->idMuon(lep, vtx, lepTool->kTight));
     baby.mus_miniso().push_back(lep_iso);
     baby.mus_reliso().push_back(lep_reliso);
-    baby.mus_tru_tm().push_back(false);    // Filled in writeMC
+    baby.mus_tm().push_back(false);    // Filled in writeMC
     baby.mus_vvvl().push_back(false);      // Filled in writeHLTObjects
     baby.mus_isomu18().push_back(false);   // Filled in writeHLTObjects
     baby.mus_mu50().push_back(false);      // Filled in writeHLTObjects
@@ -432,7 +445,7 @@ vCands bmaker_basic::writeElectrons(edm::Handle<pat::ElectronCollection> electro
     baby.els_tight().push_back(lepTool->idElectron(lep, vtx, lepTool->kTight));
     baby.els_miniso().push_back(lep_iso);
     baby.els_reliso().push_back(lep_reliso);
-    baby.els_tru_tm().push_back(false);   // Filled in writeMC
+    baby.els_tm().push_back(false);   // Filled in writeMC
     baby.els_vvvl().push_back(false);     // Filled in writeHLTObjects
     baby.els_ele23().push_back(false);    // Filled in writeHLTObjects
     baby.els_ele105().push_back(false);   // Filled in writeHLTObjects
@@ -489,6 +502,32 @@ void bmaker_basic::setDiLepMass(vCands leptons, baby_float ll_m, baby_float ll_p
 }
 
 
+vCands bmaker_basic::writePhotons(edm::Handle<pat::PhotonCollection> allphotons, 
+				  edm::Handle<std::vector<pat::Electron> > &electrons,
+				  edm::Handle<reco::ConversionCollection> &conversions,
+				  edm::Handle<reco::BeamSpot> &beamspot, double rho){
+  vCands photons;
+  baby.nph() = 0;
+
+  for (size_t ind(0); ind < allphotons->size(); ind++) {
+    const pat::Photon &photon = (*allphotons)[ind];    
+
+    if(photon.pt() < 50) continue;
+    if(!photonTool->idPhoton(photon, electrons, conversions, beamspot, rho)) continue;
+
+    if(photon.pt() < photonTool->PhotonPtCut) baby.nph()++;
+    baby.ph_pt().push_back(photon.pt());
+    baby.ph_eta().push_back(photon.eta());
+    baby.ph_phi().push_back(photon.phi());
+    baby.ph_tm().push_back(false);          // Filled in writeMC
+    baby.ph_ph90().push_back(false);    // Filled in writeHLTObjects    
+
+    photons.push_back(dynamic_cast<const reco::Candidate *>(&photon)); 
+  } // Loop over allphotons
+
+  return photons;
+} // writePhotons
+
 bool bmaker_basic::writeTriggers(const edm::TriggerNames &names, 
                                  edm::Handle<edm::TriggerResults> triggerBits, 
                                  edm::Handle<pat::PackedTriggerPrescales> triggerPrescales){
@@ -510,7 +549,7 @@ bool bmaker_basic::writeTriggers(const edm::TriggerNames &names,
 
 void bmaker_basic::writeHLTObjects(const edm::TriggerNames &names, 
                                    edm::Handle<pat::TriggerObjectStandAloneCollection> triggerObjects, 
-				   vCands &all_mus, vCands &all_els){
+				   vCands &all_mus, vCands &all_els, vCands &photons){
   const float relptThreshold(0.3), drThreshold(0.1);      
   for (pat::TriggerObjectStandAlone obj : *triggerObjects) {
     obj.unpackPathNames(names);
@@ -552,9 +591,9 @@ void bmaker_basic::writeHLTObjects(const edm::TriggerNames &names,
       if(vvvl && baby.onel_vvvl()<objpt) baby.onel_vvvl() = objpt;
       if(ele23 && baby.onel_ele23()<objpt) baby.onel_ele23() = objpt;
       if(ele105 && baby.onel_ele105()<objpt) baby.onel_ele105() = objpt;
-      double mindr(999.);
-      int minind(-1);
       if(vvvl || ele23 || ele105){
+	double mindr(999.);
+	int minind(-1);
 	for(size_t ind(0); ind < all_els.size(); ind++) {
 	  double dr(deltaR(obj, *(all_els[ind])));
 	  double drelpt(fabs((all_els[ind]->pt() - objpt)/objpt));
@@ -563,13 +602,31 @@ void bmaker_basic::writeHLTObjects(const edm::TriggerNames &names,
 	    mindr = dr;
 	    minind = ind;
 	  }
-	} // Loop over reco muons
+	} // Loop over reco elecrons
 	if(minind>=0){
 	  baby.els_vvvl()[minind] = vvvl;
 	  baby.els_ele23()[minind] = ele23;
 	  baby.els_ele105()[minind] = ele105;
 	}
-      } // At least one match
+      } // At least one electron match
+      bool ph90(obj.hasFilterLabel("hltEG90L1SingleEG40HEFilter"));
+      if(ph90 && baby.onph_ph90()<objpt) baby.onph_ph90() = objpt;
+      if(ph90){
+	double mindr(999.);
+	int minind(-1);
+	for(size_t ind(0); ind < photons.size(); ind++) {
+	  double dr(deltaR(obj, *(photons[ind])));
+	  double drelpt(fabs((photons[ind]->pt() - objpt)/objpt));
+	  if(dr > drThreshold || drelpt > relptThreshold) continue;
+	  if(dr < mindr){
+	    mindr = dr;
+	    minind = ind;
+	  }
+	} // Loop over reco photons
+	if(minind>=0){
+	  baby.ph_ph90()[minind] = ph90;
+	}
+      } // At least one photon match
     }
   } // Loop over trigger objects
 }
@@ -627,7 +684,8 @@ void bmaker_basic::writeGenInfo(edm::Handle<LHEEventProduct> lhe_info){
   } // Loop over generator particles
 } // writeGenInfo
 
-void bmaker_basic::writeMC(edm::Handle<reco::GenParticleCollection> genParticles, vCands &all_mus, vCands &all_els){
+void bmaker_basic::writeMC(edm::Handle<reco::GenParticleCollection> genParticles, 
+			   vCands &all_mus, vCands &all_els, vCands &photons){
   LVector isr_p4;
   float metw_tru_x(0.), metw_tru_y(0.);
   float lep_tru_pt(0.), lep_tru_phi(0.);
@@ -689,7 +747,7 @@ void bmaker_basic::writeMC(edm::Handle<reco::GenParticleCollection> genParticles
 	}
       } // Loop over all_els
       if(minind >= 0) {
-	baby.els_tru_tm()[minind] = true;
+	baby.els_tm()[minind] = true;
 	if(baby.els_sig()[minind]) baby.nleps_tm()++;
       }
       if(lep_tru_pt < mc.pt()){
@@ -710,7 +768,7 @@ void bmaker_basic::writeMC(edm::Handle<reco::GenParticleCollection> genParticles
 	}
       } // Loop over all_mus
       if(minind >= 0) {
-	baby.mus_tru_tm()[minind] = true;
+	baby.mus_tm()[minind] = true;
 	if(baby.mus_sig()[minind]) baby.nleps_tm()++;
       }
       if(lep_tru_pt < mc.pt()){
@@ -718,6 +776,20 @@ void bmaker_basic::writeMC(edm::Handle<reco::GenParticleCollection> genParticles
 	lep_tru_phi = mc.phi();
       } // Lepton pt to find mt_tru
     } // If it is a muon
+    if(id==22){
+      double mindr(999.);
+      int minind(-1);
+      for(size_t ind(0); ind < photons.size(); ind++) {
+	double dr(deltaR(mc, *(photons[ind])));
+	double drelpt(fabs((photons[ind]->pt() - mc.pt())/mc.pt()));
+	if(dr > drThreshold || drelpt > relptThreshold) continue;
+	if(dr < mindr){
+	  mindr = dr;
+	  minind = ind;
+	}
+      } // Loop over photons
+      if(minind >= 0) baby.ph_tm()[minind] = true;
+    } // If it is a photon
 
     //////// Finding true MET
     if((id==12 || id==14 || id==16 || id==18 || id==1000012 || id==1000014 || id==1000016
@@ -738,6 +810,7 @@ void bmaker_basic::writeMC(edm::Handle<reco::GenParticleCollection> genParticles
   baby.met_tru_nuw() = hypot(metw_tru_x, metw_tru_y);
   baby.met_tru_nuw_phi() = atan2(metw_tru_y, metw_tru_x);
 
+  baby.mt_tru()     = getMT(baby.met_tru(),     baby.met_tru_phi(),     lep_tru_pt, lep_tru_phi);
   baby.mt_tru_nuw() = getMT(baby.met_tru_nuw(), baby.met_tru_nuw_phi(), lep_tru_pt, lep_tru_phi);
 
 } // writeMC
@@ -763,9 +836,10 @@ bmaker_basic::bmaker_basic(const edm::ParameterSet& iConfig):
   
   time(&startTime);
 
-  lepTool = new lepton_tools();
-  jetTool = new jet_met_tools(jec_label);
-  mcTool  = new mc_tools();
+  lepTool    = new lepton_tools();
+  jetTool    = new jet_met_tools(jec_label);
+  photonTool = new photon_tools();
+  mcTool     = new mc_tools();
 
   outfile = new TFile(outname, "recreate");
   outfile->cd();
@@ -802,6 +876,7 @@ bmaker_basic::bmaker_basic(const edm::ParameterSet& iConfig):
     trig_name.push_back("HLT_Ele105_CaloIdVT_GsfTrkIdT_v");			// 24
     trig_name.push_back("HLT_DoubleEle33_CaloIdL_GsfTrkIdVL_v");		// 25
     trig_name.push_back("HLT_DoubleEle24_22_eta2p1_WPLoose_Gsf_v");		// 26
+    trig_name.push_back("HLT_Photon90_CaloIdL_PFHT500_v");		        // 27
   } else {
     trig_name.push_back("HLT_PFHT350_PFMET120_NoiseCleaned_v");			// 0 
     trig_name.push_back("HLT_Mu15_IsoVVVL_PFHT400_PFMET70_v");			// 1 
@@ -830,6 +905,7 @@ bmaker_basic::bmaker_basic(const edm::ParameterSet& iConfig):
     trig_name.push_back("HLT_Ele105_CaloIdVT_GsfTrkIdT_v");			// 24
     trig_name.push_back("HLT_DoubleEle33_CaloIdL_GsfTrkIdVL_v");		// 25
     trig_name.push_back("HLT_DoubleEle24_22_eta2p1_WP75_Gsf_v");		// 26
+    trig_name.push_back("HLT_Photon90_CaloIdL_PFHT500_v");		        // 27
   }
 
 }
@@ -898,6 +974,7 @@ bmaker_basic::~bmaker_basic(){
   delete outfile;
 
   delete lepTool;
+  delete photonTool;
   delete jetTool;
   delete mcTool;
 }

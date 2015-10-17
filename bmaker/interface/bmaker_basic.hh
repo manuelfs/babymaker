@@ -17,8 +17,11 @@
 // FW physics include files
 #include "DataFormats/PatCandidates/interface/Muon.h"
 #include "DataFormats/PatCandidates/interface/Electron.h"
+#include "DataFormats/PatCandidates/interface/Photon.h"
 #include "DataFormats/PatCandidates/interface/MET.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
+#include "DataFormats/PatCandidates/interface/Conversion.h"
+#include "DataFormats/BeamSpot/interface/BeamSpot.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/Common/interface/TriggerResults.h"
 #include "DataFormats/PatCandidates/interface/PackedTriggerPrescales.h"
@@ -34,6 +37,7 @@
 // User include files
 #include "babymaker/bmaker/interface/baby_basic.hh"
 #include "babymaker/bmaker/interface/lepton_tools.hh"
+#include "babymaker/bmaker/interface/photon_tools.hh"
 #include "babymaker/bmaker/interface/jet_met_tools.hh"
 #include "babymaker/bmaker/interface/mc_tools.hh"
 #include "babymaker/bmaker/interface/utilities.hh"
@@ -54,11 +58,12 @@ public:
   //object classes
   lepton_tools *lepTool;
   jet_met_tools *jetTool;
+  photon_tools *photonTool;
   mc_tools *mcTool;
 
   // Functions that do the branch writing
   void writeMET(edm::Handle<pat::METCollection> mets, edm::Handle<pat::METCollection> mets_nohf);
-  std::vector<LVector> writeJets(edm::Handle<pat::JetCollection> alljets, vCands &sig_leps, vCands &veto_leps);
+  std::vector<LVector> writeJets(edm::Handle<pat::JetCollection> alljets, vCands &sig_leps, vCands &veto_leps, vCands &photons);
   void writeFatJets(std::vector<LVector> &jets);
   void clusterFatJets(int &nfjets, float &mj,
 		      std::vector<float> &fjets_pt, 
@@ -83,19 +88,23 @@ public:
   void writeDiLep(vCands &sig_mus, vCands &sig_els, vCands &veto_mus, vCands &veto_els);
   void setDiLepMass(vCands leptons, baby_float ll_m, baby_float ll_pt1, baby_float ll_pt2, baby_float ll_zpt);
   void writeLeptons(vCands &leptons); 
+
+  vCands writePhotons(edm::Handle<pat::PhotonCollection> allphotons, edm::Handle<std::vector<pat::Electron> > &electrons,
+		      edm::Handle<reco::ConversionCollection> &conversions, edm::Handle<reco::BeamSpot> &beamspot, double rho);
+
   bool writeTriggers(const edm::TriggerNames &names, 
                      edm::Handle<edm::TriggerResults> triggerBits,
                      edm::Handle<pat::PackedTriggerPrescales> triggerPrescales);
   void writeHLTObjects(const edm::TriggerNames &names, 
                        edm::Handle<pat::TriggerObjectStandAloneCollection> triggerObjects,
-		       vCands &all_mus, vCands &all_els);
+		       vCands &all_mus, vCands &all_els, vCands &photons);
   void writeFilters(const edm::TriggerNames &fnames,
                     edm::Handle<edm::TriggerResults> filterBits,
                     edm::Handle<reco::VertexCollection> vtx);
   void writeVertices(edm::Handle<reco::VertexCollection> vtx,
 		     edm::Handle<std::vector< PileupSummaryInfo > >  pu_info);  
   void writeGenInfo(edm::Handle<LHEEventProduct> lhe_info);
-  void writeMC(edm::Handle<reco::GenParticleCollection> genParticles, vCands &all_mus, vCands &all_els);
+  void writeMC(edm::Handle<reco::GenParticleCollection> genParticles, vCands &all_mus, vCands &all_els, vCands &photons);
 
   void reportTime(const edm::Event& iEvent);
 

@@ -6,6 +6,7 @@
 <use name="PhysicsTools/PatAlgos"/>
 <use name="CondFormats/JetMETObjects"/>
 <use name="CommonTools/Utils"/>
+<use name="RecoEgamma/EgammaTools"/>
 <use name="fastjet"/>
 <use name="fastjet-contrib"/>
 <export>

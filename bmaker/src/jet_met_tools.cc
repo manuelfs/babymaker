@@ -27,10 +27,20 @@ bool jet_met_tools::leptonInJet(const pat::Jet &jet, vCands leptons){
 	if(jet.sourceCandidatePtr(ijet) == leptons[ilep]->sourceCandidatePtr(indpf))
 	  return true;
     } else { // The lepton is not PF, matching with deltaR
-      if(deltaR(jet, *leptons[ilep]) < 0.4) return true;
+      if(deltaR(jet, *leptons[ilep]) < sizeJet) return true;
     }
   } // Loop over leptons
 
+  return false;
+}
+
+// Loose jet matching from RA2/b just for cleaning
+bool jet_met_tools::jetMatched(const pat::Jet &jet, vCands objects){
+  for(unsigned ind(0); ind < objects.size(); ind++){
+    double dr(deltaR(jet, *(objects[ind])));
+    double drelpt(fabs((objects[ind]->pt() - jet.pt())/objects[ind]->pt()));
+    if(drelpt < 1. && dr < sizeJet) return true;
+  } // Loop over objects
   return false;
 }
 

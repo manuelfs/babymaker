@@ -8,6 +8,7 @@
 
 // FW physics include files
 #include "DataFormats/PatCandidates/interface/Jet.h"
+#include "DataFormats/JetReco/interface/GenJet.h"
 #include "DataFormats/PatCandidates/interface/MET.h"
 #include "CondFormats/JetMETObjects/interface/FactorizedJetCorrector.h"
 #include "CondFormats/JetMETObjects/interface/JetCorrectorParameters.h"
@@ -33,6 +34,8 @@ public:
 
   const float sizeJet      = 0.4;
 
+  enum CutLevel{kLoose, kTight, kPBNR};
+
   TString jecName;
   bool doJEC;
   double rhoEvent_;
@@ -44,7 +47,10 @@ public:
 
   bool leptonInJet(const pat::Jet &jet, vCands leptons);
   bool jetMatched(const pat::Jet &jet, vCands objects);
-  bool idJet(const pat::Jet &jet, bool doRa2=false);
+  bool idJet(const pat::Jet &jet, CutLevel cut);
+
+  float mismeasurement(const pat::Jet &jet, edm::Handle<edm::View <reco::GenJet> > genjets);
+  float trueHT(edm::Handle<edm::View <reco::GenJet> > genjets);
 
   void getMETRaw(edm::Handle<pat::METCollection> mets, float &metRaw, float &metRawPhi);
   void getMETWithJEC(edm::Handle<pat::METCollection> mets, float &met, float &metPhi);

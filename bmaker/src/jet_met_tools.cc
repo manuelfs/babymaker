@@ -44,26 +44,76 @@ bool jet_met_tools::jetMatched(const pat::Jet &jet, vCands objects){
   return false;
 }
 
-bool jet_met_tools::idJet(const pat::Jet &jet, bool doRa2){
-  //LooseID from https://twiki.cern.ch/twiki/bin/view/CMS/JetID
+float jet_met_tools::mismeasurement(const pat::Jet &jet, edm::Handle<edm::View <reco::GenJet> > genjets){
+  for (size_t ijet(0); ijet < genjets->size(); ijet++) {
+    const reco::GenJet &genjet = (*genjets)[ijet];
+    double dr(deltaR(jet, genjet));
+    if(dr < 0.1) return (jet.pt() - genjet.pt());
+  }
+  return -99999.;    
+}
+
+float jet_met_tools::trueHT(edm::Handle<edm::View <reco::GenJet> > genjets){
+  float ht(0.);
+  for (size_t ijet(0); ijet < genjets->size(); ijet++) {
+    const reco::GenJet &jet = (*genjets)[ijet];
+    if(jet.pt() > JetHLTPtCut && fabs(jet.eta()) <= JetHLTEtaCut) ht += jet.pt();
+  }
+  return ht;
+}
+
+bool jet_met_tools::idJet(const pat::Jet &jet, CutLevel cut){
+  // From https://twiki.cern.ch/twiki/bin/view/CMS/JetID
   double eta = jet.eta();
   double NHF = jet.neutralHadronEnergyFraction();
   double NEMF = jet.neutralEmEnergyFraction();
-  double CHF = jet.chargedHadronEnergyFraction();
-  double CEMF = jet.chargedEmEnergyFraction();
   double NumConst = jet.chargedMultiplicity()+jet.neutralMultiplicity();
   double NumNeutralParticles =jet.neutralMultiplicity();
+
+  double CHF = jet.chargedHadronEnergyFraction();
   double CHM = jet.chargedMultiplicity(); 
-  //double MUF = jet.muonEnergyFraction(); //Only used in TightID
+  double CEMF = jet.chargedEmEnergyFraction();
+  
+  if(cut == kPBNR){  // RA2/b's PBNR and old Jet ID
+    bool eta_l_2p4 =  NumConst>=2 && NHF<0.9 && NEMF<0.95 && CHM>0 && CHF>0 && CEMF<0.99;
+    bool eta_geq_2p4 =  NHF<0.9 && NEMF<0.95 && NumConst>=2;
+    return (eta_l_2p4 && fabs(eta)<2.4) || (fabs(eta)>=2.4 && eta_geq_2p4);   
+  }
+
+  double NHFCut, NEMFCut, NumConstCut, CHFCut, CHMCut, CEMFCut, NEMFCut_HF, NumNeuCut;
+  switch(cut){
+  case kTight:
+    NHFCut	= 0.9;
+    NEMFCut	= 0.9;
+    NumConstCut = 1;
+
+    CHFCut	= 0;
+    CHMCut	= 0;
+    CEMFCut	= 0.99;
+
+    NEMFCut_HF	= 0.9;
+    NumNeuCut	= 10;
+    break;
+  case kLoose:
+  default:
+    NHFCut	= 0.99;
+    NEMFCut	= 0.99;
+    NumConstCut = 1;
+
+    CHFCut	= 0;
+    CHMCut	= 0;
+    CEMFCut	= 0.99;
+
+    NEMFCut_HF	= 0.9;
+    NumNeuCut	= 10;
+    break;
+  }
     
-  bool eta_leq_3 = (NHF<0.99 && NEMF<0.99 && NumConst>1) && ((fabs(eta)<=2.4 && CHF>0 && CHM>0 && CEMF<0.99) || fabs(eta)>2.4);
-  bool eta_g_3 = NEMF<0.90 && NumNeutralParticles>10;
+  bool eta_leq_3 = (NHF<NHFCut && NEMF<NEMFCut && NumConst>NumConstCut) && 
+    ((fabs(eta)<=2.4 && CHF>CHFCut && CHM>CHMCut && CEMF<CEMFCut) || fabs(eta)>2.4);
+  bool eta_g_3 = NEMF<NEMFCut_HF && NumNeutralParticles>NumNeuCut;
 
-  bool eta_l_2p4 =  NumConst>=2 && NHF<0.9 && NEMF<0.95 && CHM>0 && CHF>0 && CEMF<0.99;
-  bool eta_geq_2p4 =  NHF<0.9 && NEMF<0.95 && NumConst>=2;
-
-  if(!doRa2) return  (eta_leq_3 && fabs(eta)<=3.) || (eta_g_3 && fabs(eta)>3.);  // Official recommendation
-  else return (eta_l_2p4 && fabs(eta)<2.4) || (fabs(eta)>=2.4 && eta_geq_2p4);   // RA2/b's PBNR and old Jet ID
+  return  (eta_leq_3 && fabs(eta)<=3.) || (eta_g_3 && fabs(eta)>3.);  // Official recommendation
 }
 
 

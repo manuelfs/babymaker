@@ -138,7 +138,9 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 
   /// Jets
   vector<LVector> jets;
-  jets = writeJets(alljets, sig_leps, veto_leps, photons);
+  edm::Handle<edm::View<reco::GenJet> > genjets;
+  iEvent.getByLabel("slimmedGenJets", genjets) ;
+  jets = writeJets(alljets, genjets, sig_leps, veto_leps, photons);
   writeFatJets(jets);
 
   ////////////////////// mT, dphi /////////////////////
@@ -224,13 +226,13 @@ void bmaker_basic::writeMET(edm::Handle<pat::METCollection> mets, edm::Handle<pa
 }
 
 // Requires having called jetTool->getJetCorrections(alljets, rhoEvent_) beforehand
-vector<LVector> bmaker_basic::writeJets(edm::Handle<pat::JetCollection> alljets, vCands &sig_leps, 
-					vCands &veto_leps, vCands &photons){
+vector<LVector> bmaker_basic::writeJets(edm::Handle<pat::JetCollection> alljets, edm::Handle<edm::View <reco::GenJet> > genjets,
+					vCands &sig_leps, vCands &veto_leps, vCands &photons){
   vector<LVector> jets;
   baby.njets() = 0; baby.nbl() = 0; baby.nbm() = 0;  baby.nbt() = 0;  
   baby.ht() = 0.; baby.ht_hlt() = 0.;
   baby.njets_ra2() = 0; baby.nbm_ra2() = 0; baby.ht_ra2() = 0.; 
-  baby.pass_jets() = true; baby.pass_jets_nohf() = true; baby.pass_jets_ra2() = true; 
+  baby.pass_jets() = true; baby.pass_jets_nohf() = true; baby.pass_jets_ra2() = true; baby.pass_jets_tight() = true; 
   float mht_px(0.), mht_py(0.);
   for (size_t ijet(0); ijet < alljets->size(); ijet++) {
     const pat::Jet &jet = (*alljets)[ijet];
@@ -240,20 +242,24 @@ vector<LVector> bmaker_basic::writeJets(edm::Handle<pat::JetCollection> alljets,
     bool isLep = jetTool->leptonInJet(jet, sig_leps);
     bool isLep_ra2 = jetTool->leptonInJet(jet, veto_leps);
     bool isPhoton = jetTool->jetMatched(jet, photons); // Uses RA2/b's loose matching, dpt/pt < 100%, dR < 0.4
-    bool goodID = jetTool->idJet(jet);
-    bool goodID_ra2 = jetTool->idJet(jet, true);
+
+    bool looseID = jetTool->idJet(jet, jetTool->kLoose);
+    bool tightID = jetTool->idJet(jet, jetTool->kTight);
+
     bool goodPtEta = jetp4.pt() > jetTool->JetPtCut && fabs(jet.eta()) <= jetTool->JetEtaCut;
-    bool goodJet = (!isLep) && goodID && goodPtEta;
+    bool goodJet = (!isLep) && looseID && goodPtEta;
+
     float csv(jet.bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags"));
-    if(goodPtEta && !isLep && !goodID) baby.pass_jets_nohf() = false;
-    if(jetp4.pt() > jetTool->JetPtCut && !isLep && !goodID) baby.pass_jets() = false;
-    if(jetp4.pt() > jetTool->JetPtCut && !isLep_ra2 && !isPhoton && !goodID_ra2) baby.pass_jets_ra2() = false;
-    if(goodID && goodPtEta) {
+    if(goodPtEta && !isLep && !looseID) baby.pass_jets_nohf() = false;
+    if(jetp4.pt() > jetTool->JetPtCut && !isLep && !looseID) baby.pass_jets() = false;
+    if(jetp4.pt() > jetTool->JetPtCut && !isLep && !tightID) baby.pass_jets_tight() = false;
+    if(jetp4.pt() > jetTool->JetPtCut && !isLep_ra2 && !isPhoton && !looseID) baby.pass_jets_ra2() = false;
+    if(looseID && goodPtEta) {
       baby.njets_ra2()++;
       baby.ht_ra2() += jetp4.pt();
       if(csv > jetTool->CSVMedium) baby.nbm_ra2()++;
     }
-    if(goodID && jetp4.pt() > jetTool->JetPtCut && fabs(jet.eta()) <= jetTool->JetMHTEtaCut){
+    if(looseID && jetp4.pt() > jetTool->JetPtCut && fabs(jet.eta()) <= jetTool->JetMHTEtaCut){
       mht_px -= jet.px();
       mht_py -= jet.py();
     }
@@ -267,6 +273,7 @@ vector<LVector> bmaker_basic::writeJets(edm::Handle<pat::JetCollection> alljets,
     baby.jets_phi().push_back(jet.phi());
     baby.jets_m().push_back(jetp4.mass());
     baby.jets_islep().push_back(isLep);
+    baby.jets_dpt().push_back(jetTool->mismeasurement(jet, genjets));
     
     baby.jets_csv().push_back(csv);
 
@@ -281,6 +288,7 @@ vector<LVector> bmaker_basic::writeJets(edm::Handle<pat::JetCollection> alljets,
     }
   } // Loop over jets  
 
+  baby.ht_tru() = jetTool->trueHT(genjets);
   baby.mht_ra2() = hypot(mht_px, mht_py);
   return jets; // Returning jets that pass acceptance and ID, regardless of whether they're leptons
 } 

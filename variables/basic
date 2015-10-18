@@ -12,6 +12,7 @@ float ntrupv_mean
 float ht
 float ht_ra2
 float ht_hlt
+float ht_tru
 float mht_ra2
 float mt
 float mt_nohf
@@ -46,6 +47,7 @@ std::vector<float> jets_eta
 std::vector<float> jets_phi
 std::vector<float> jets_m
 std::vector<float> jets_csv
+std::vector<float> jets_dpt
 std::vector<bool>  jets_islep
 std::vector<int>   jets_fjet_index
 std::vector<int>   jets_fjet08_index
@@ -139,6 +141,7 @@ float onph_ph90
 
 ###################   Quality   ##################
 bool pass_jets;
+bool pass_jets_tight;
 bool pass_jets_nohf;
 bool pass_jets_ra2;
 bool pass_hbhe;

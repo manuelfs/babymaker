@@ -20,6 +20,7 @@
 #include "DataFormats/PatCandidates/interface/Photon.h"
 #include "DataFormats/PatCandidates/interface/MET.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
+#include "DataFormats/JetReco/interface/GenJet.h"
 #include "DataFormats/PatCandidates/interface/Conversion.h"
 #include "DataFormats/BeamSpot/interface/BeamSpot.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
@@ -63,7 +64,8 @@ public:
 
   // Functions that do the branch writing
   void writeMET(edm::Handle<pat::METCollection> mets, edm::Handle<pat::METCollection> mets_nohf);
-  std::vector<LVector> writeJets(edm::Handle<pat::JetCollection> alljets, vCands &sig_leps, vCands &veto_leps, vCands &photons);
+  std::vector<LVector> writeJets(edm::Handle<pat::JetCollection> alljets, edm::Handle<edm::View <reco::GenJet> > genjets, 
+				 vCands &sig_leps, vCands &veto_leps, vCands &photons);
   void writeFatJets(std::vector<LVector> &jets);
   void clusterFatJets(int &nfjets, float &mj,
 		      std::vector<float> &fjets_pt, 

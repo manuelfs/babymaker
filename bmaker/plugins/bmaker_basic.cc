@@ -136,11 +136,18 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
   iEvent.getByLabel(met_nohf_label, mets_nohf);
   writeMET(mets, mets_nohf);
 
+  /// isolated tracks need to be after MET calculation and before jets cleaning
+  vCands tks;
+  if (hasGoodPV(vtx)){
+    tks = lepTool->getIsoTracks(pfcands, baby.met(), baby.met_phi());
+    baby.ntks() = tks.size();
+  }  
+
   /// Jets
   vector<LVector> jets;
   edm::Handle<edm::View<reco::GenJet> > genjets;
   iEvent.getByLabel("slimmedGenJets", genjets) ;
-  jets = writeJets(alljets, genjets, sig_leps, veto_leps, photons);
+  jets = writeJets(alljets, genjets, sig_leps, veto_leps, photons, tks);
   writeFatJets(jets);
 
   ////////////////////// mT, dphi /////////////////////
@@ -153,8 +160,7 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 
     baby.mt() = getMT(baby.met(), baby.met_phi(),  sig_leps[0]->pt(), sig_leps[0]->phi());
     baby.mt_nohf() = getMT(baby.met_nohf(), baby.met_nohf_phi(),  sig_leps[0]->pt(), sig_leps[0]->phi());
-   }   
-    
+  }   
 
   ///////////////////// Filters ///////////////////////
   edm::Handle<edm::TriggerResults> filterBits;
@@ -227,7 +233,7 @@ void bmaker_basic::writeMET(edm::Handle<pat::METCollection> mets, edm::Handle<pa
 
 // Requires having called jetTool->getJetCorrections(alljets, rhoEvent_) beforehand
 vector<LVector> bmaker_basic::writeJets(edm::Handle<pat::JetCollection> alljets, edm::Handle<edm::View <reco::GenJet> > genjets,
-					vCands &sig_leps, vCands &veto_leps, vCands &photons){
+					vCands &sig_leps, vCands &veto_leps, vCands &photons, vCands &tks){
   vector<LVector> jets;
   baby.njets() = 0; baby.nbl() = 0; baby.nbm() = 0;  baby.nbt() = 0;  
   baby.ht() = 0.; baby.ht_hlt() = 0.;
@@ -242,6 +248,7 @@ vector<LVector> bmaker_basic::writeJets(edm::Handle<pat::JetCollection> alljets,
     bool isLep = jetTool->leptonInJet(jet, sig_leps);
     bool isLep_ra2 = jetTool->leptonInJet(jet, veto_leps);
     bool isPhoton = jetTool->jetMatched(jet, photons); // Uses RA2/b's loose matching, dpt/pt < 100%, dR < 0.4
+    bool isIsoTrack = jetTool->jetMatched(jet, tks); // Uses RA2/b's loose matching, dpt/pt < 100%, dR < 0.4
 
     bool looseID = jetTool->idJet(jet, jetTool->kLoose);
     bool tightID = jetTool->idJet(jet, jetTool->kTight);
@@ -253,7 +260,7 @@ vector<LVector> bmaker_basic::writeJets(edm::Handle<pat::JetCollection> alljets,
     if(goodPtEta && !isLep && !looseID) baby.pass_jets_nohf() = false;
     if(jetp4.pt() > jetTool->JetPtCut && !isLep && !looseID) baby.pass_jets() = false;
     if(jetp4.pt() > jetTool->JetPtCut && !isLep && !tightID) baby.pass_jets_tight() = false;
-    if(jetp4.pt() > jetTool->JetPtCut && !isLep_ra2 && !isPhoton && !looseID) baby.pass_jets_ra2() = false;
+    if(jetp4.pt() > jetTool->JetPtCut && !isLep_ra2 && !isPhoton && !isIsoTrack && !looseID) baby.pass_jets_ra2() = false;
     if(looseID && goodPtEta) {
       baby.njets_ra2()++;
       baby.ht_ra2() += jetp4.pt();

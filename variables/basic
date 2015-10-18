@@ -118,13 +118,16 @@ float mumuv_pt1
 float mumuv_pt2
 float mumuv_zpt
 
-##################   Photons   ################
+##################   Photons   ###################
 int nph
 std::vector<float> ph_pt
 std::vector<float> ph_eta
 std::vector<float> ph_phi
 std::vector<bool>  ph_tm
 std::vector<bool>  ph_ph90
+
+###################   Tracks    ##################
+int ntks
 
 ###################   Trigger   ##################
 std::vector<bool> trig;

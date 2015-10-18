@@ -10,9 +10,11 @@
 
 // User include files
 #include "babymaker/bmaker/interface/lepton_tools.hh"
+#include "babymaker/bmaker/interface/phys_objects.hh"
 
 using namespace std;
 using namespace utilities;
+using namespace phys_objects;
 
 //////////////////// Muons
 bool lepton_tools::isSignalMuon(const pat::Muon &lep, edm::Handle<reco::VertexCollection> vtx, double lepIso){
@@ -250,6 +252,50 @@ double lepton_tools::getPFIsolation(edm::Handle<pat::PackedCandidateCollection> 
   else iso = iso_ch + max(0.,iso_ph + iso_nh - pu_corr);
 
   return iso/ptcl->pt();
+}
+
+vCands lepton_tools::getIsoTracks(edm::Handle<pat::PackedCandidateCollection> pfcands, double met, double met_phi){
+
+  vCands tks;
+  //common parameters
+  float mt_max = 100.;
+  float eta_max = 2.5;
+  float dz_max = 0.1;
+  float cone_size = 0.3;
+
+  for (size_t i(0); i < pfcands->size(); i++) {
+    const pat::PackedCandidate &tk = (*pfcands)[i];
+    unsigned int id = abs(tk.pdgId());
+
+    //id-specific parameters
+    float pt_min = id==211 ? 10. : 5.;
+    float iso_max = id==211 ? 0.1 : 0.2;
+
+    // track selection
+    if (tk.charge()==0) continue;
+    if (id!=11 && id!=13 && id!=211) continue;
+    if (tk.pt() < pt_min) continue;
+    if (fabs(tk.eta()) > eta_max) continue;
+    if (fabs(tk.dz()) > dz_max) continue;
+    if (mt_max>0.01 && getMT(met, met_phi,  tk.pt(), tk.phi())>mt_max) continue;
+
+    // calculate track isolation
+    double iso = 0.;
+    for (size_t j(0); j < pfcands->size(); j++) {
+      if (i==j) continue;
+      const pat::PackedCandidate &pfc = (*pfcands)[j];
+
+      if (pfc.charge()==0) continue;
+      if (deltaR(tk,pfc) > cone_size) continue;
+      if (fabs(pfc.dz()) > dz_max) continue;
+      iso += pfc.pt();
+    }
+    if (iso/tk.pt()>iso_max) continue;
+
+    tks.push_back(dynamic_cast<const reco::Candidate *>(&tk));
+  }
+
+  return tks;
 }
 
 lepton_tools::lepton_tools(){

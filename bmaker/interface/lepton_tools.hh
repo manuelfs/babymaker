@@ -62,6 +62,8 @@ public:
                         double r_iso_min, double r_iso_max, double kt_scale,
                         double rho, bool charged_only);
 
+  vCands getIsoTracks(edm::Handle<pat::PackedCandidateCollection> pfcands, double met, double met_phi);
+
 };
 
 #endif

@@ -65,7 +65,7 @@ public:
   // Functions that do the branch writing
   void writeMET(edm::Handle<pat::METCollection> mets, edm::Handle<pat::METCollection> mets_nohf);
   std::vector<LVector> writeJets(edm::Handle<pat::JetCollection> alljets, edm::Handle<edm::View <reco::GenJet> > genjets, 
-				 vCands &sig_leps, vCands &veto_leps, vCands &photons);
+				 vCands &sig_leps, vCands &veto_leps, vCands &photons, vCands &tks);
   void writeFatJets(std::vector<LVector> &jets);
   void clusterFatJets(int &nfjets, float &mj,
 		      std::vector<float> &fjets_pt, 

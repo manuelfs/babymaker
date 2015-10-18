@@ -136,7 +136,6 @@ for fnm in flists_pd:
       for ikey in comb_keys: 
         if ikey in fnm:
           dsname = string.split(string.split(fnm,"flist_").pop(),ikey)[0] + ikey
-          print dsname
           break
     else:
       sys.exit("ERROR: None of the combination keys (%s) were found in this flist:%s\n" % (comb_keys,fnm))
@@ -167,7 +166,7 @@ if (host=="sd"):
   os.system("tar --directory=../ --exclude=\"babymaker/out\" --exclude=\"babymaker/run\" --exclude=\"babymaker/logs\" --exclude=\"bmaker/interface/release.hh\" -c babymaker | xz > ../babymaker.tar.xz")
 
 total_jobs = 0
-for ids, ds in enumerate(files_dict.keys()):
+for ids, ds in enumerate(sorted(files_dict.keys())):
   if (maxds!=-1 and ids>=maxds): break
 
   #release

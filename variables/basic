@@ -3,7 +3,7 @@ int run
 int lumiblock
 int event
 float weight
-bool json
+bool nonblind
 
 ####################   Global   ###################
 int npv

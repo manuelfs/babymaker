@@ -28,7 +28,7 @@ options.register('nEvents',
                  VarParsing.varType.int,
                  "Number of events to run over.")
 options.register('json',
-                 'babymaker/txt/json/nonblind_Cert_246908-258159_13TeV_PromptReco_Collisions15_25ns_JSON_v3.json',
+                 'babymaker/txt/json/golden_Cert_246908-258714_13TeV_PromptReco_Collisions15_25ns_JSON.json',
                  VarParsing.multiplicity.singleton,
                  VarParsing.varType.string,
                  "Path to json starting with babymaker/...")

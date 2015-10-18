@@ -48,8 +48,8 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
     // We are applying the golden JSON with lumisToProcess in bmaker_basic_cfg.py
     bool nonblind(isInJSON("nonblind", baby.run(), baby.lumiblock()));
     //if(!isInJSON("golden", baby.run(), baby.lumiblock()) && !nonblind) return;
-    baby.json() = nonblind;
-  } else baby.json() = true;
+    baby.nonblind() = nonblind;
+  } else baby.nonblind() = true;
 
   ////////////////////// Trigger /////////////////////
   edm::Handle<edm::TriggerResults> triggerBits;
@@ -292,8 +292,8 @@ vector<LVector> bmaker_basic::writeJets(edm::Handle<pat::JetCollection> alljets,
     baby.jets_phi().push_back(jet.phi());
     baby.jets_m().push_back(jetp4.mass());
     baby.jets_islep().push_back(isLep);
-    baby.jets_dpt().push_back(jetTool->mismeasurement(jet, genjets));
-    
+    if(!isData) baby.jets_dpt().push_back(jetTool->mismeasurement(jet, genjets));
+    else baby.jets_dpt().push_back(-9999.);
     baby.jets_csv().push_back(csv);
 
     jets.push_back(jetp4);
@@ -307,7 +307,7 @@ vector<LVector> bmaker_basic::writeJets(edm::Handle<pat::JetCollection> alljets,
     }
   } // Loop over jets  
 
-  baby.ht_tru() = jetTool->trueHT(genjets);
+  if(!isData) baby.ht_tru() = jetTool->trueHT(genjets);
   baby.mht() = hypot(mht_px, mht_py);
   baby.mht_phi() = atan2(mht_py, mht_px);
   baby.low_dphi() = jetTool->isLowDphi(jets_ra2, baby.mht_phi(), baby.dphi1(), baby.dphi2(), baby.dphi3(), baby.dphi4());

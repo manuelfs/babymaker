@@ -32,7 +32,7 @@ wishlist.append("TTJets")
 print 
 
 # for data get the golden runs
-json_name = "txt/json/nonblind_Cert_246908-258159_13TeV_PromptReco_Collisions15_25ns_JSON_v3.json"
+json_name = "txt/json/golden_Cert_246908-258714_13TeV_PromptReco_Collisions15_25ns_JSON.json"
 with open(json_name) as jfile:
   jdata = json.load(jfile)
 goldruns = [int(i) for i in jdata.keys()]

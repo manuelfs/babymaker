@@ -13,7 +13,8 @@ float ht
 float ht_ra2
 float ht_hlt
 float ht_tru
-float mht_ra2
+float mht
+float mht_phi
 float mt
 float mt_nohf
 float mt_tru
@@ -41,6 +42,11 @@ int nbm
 int nbt
 int njets_ra2
 int nbm_ra2
+float dphi1
+float dphi2
+float dphi3
+float dphi4
+bool low_dphi
 
 std::vector<float> jets_pt
 std::vector<float> jets_eta
@@ -147,6 +153,7 @@ bool pass_jets;
 bool pass_jets_tight;
 bool pass_jets_nohf;
 bool pass_jets_ra2;
+bool pass_jets_tight_ra2;
 bool pass_hbhe;
 bool pass_goodv;
 bool pass_cschalo;

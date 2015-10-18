@@ -7,6 +7,7 @@
 #include <stdlib.h>
 
 #include "CommonTools/Utils/interface/StringCutObjectSelector.h"
+#include <DataFormats/Math/interface/deltaR.h>
 
 // User include files
 #include "babymaker/bmaker/interface/jet_met_tools.hh"
@@ -36,9 +37,16 @@ bool jet_met_tools::leptonInJet(const pat::Jet &jet, vCands leptons){
 
 // Loose jet matching from RA2/b just for cleaning
 bool jet_met_tools::jetMatched(const pat::Jet &jet, vCands objects){
+  int nph(0); // Just cleaning the first photon with 100 GeV
   for(unsigned ind(0); ind < objects.size(); ind++){
     double dr(deltaR(jet, *(objects[ind])));
     double drelpt(fabs((objects[ind]->pt() - jet.pt())/objects[ind]->pt()));
+    if(objects[ind]->pdgId()==22) {
+      if(objects[ind]->pt()>100){
+	nph++;
+	if(nph>1) continue;
+      } else continue;
+    } // If it is a photon
     if(drelpt < 1. && dr < sizeJet) return true;
   } // Loop over objects
   return false;
@@ -51,6 +59,14 @@ float jet_met_tools::mismeasurement(const pat::Jet &jet, edm::Handle<edm::View <
     if(dr < 0.1) return (jet.pt() - genjet.pt());
   }
   return -99999.;    
+}
+
+bool jet_met_tools::isLowDphi(vCands jets, float mht_phi, float &dphi1, float &dphi2, float &dphi3, float &dphi4){
+  dphi1 = 10.; dphi2 = 10.; dphi3 = 10.; dphi4 = 10.; 
+  float *dphi[] = {&dphi1, &dphi2, &dphi3, &dphi4}; 
+  for(unsigned ind(0); ind < jets.size() && ind < 4; ind++)
+    *(dphi[ind]) = abs(reco::deltaPhi(jets[ind]->phi(), mht_phi));
+  return (dphi1<0.5 || dphi2<0.5 || dphi3<0.3 || dphi4<0.3);
 }
 
 float jet_met_tools::trueHT(edm::Handle<edm::View <reco::GenJet> > genjets){

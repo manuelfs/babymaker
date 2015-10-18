@@ -40,8 +40,7 @@ using namespace phys_objects;
 void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
   nevents++;
   isData = iEvent.isRealData();
-
-  ////////////////////// Event info /////////////////////
+   ////////////////////// Event info /////////////////////
   baby.run() = iEvent.id().run();
   baby.event() = iEvent.id().event();
   baby.lumiblock() = iEvent.luminosityBlock();
@@ -235,38 +234,51 @@ void bmaker_basic::writeMET(edm::Handle<pat::METCollection> mets, edm::Handle<pa
 vector<LVector> bmaker_basic::writeJets(edm::Handle<pat::JetCollection> alljets, edm::Handle<edm::View <reco::GenJet> > genjets,
 					vCands &sig_leps, vCands &veto_leps, vCands &photons, vCands &tks){
   vector<LVector> jets;
+  vCands jets_ra2;
   baby.njets() = 0; baby.nbl() = 0; baby.nbm() = 0;  baby.nbt() = 0;  
   baby.ht() = 0.; baby.ht_hlt() = 0.;
   baby.njets_ra2() = 0; baby.nbm_ra2() = 0; baby.ht_ra2() = 0.; 
-  baby.pass_jets() = true; baby.pass_jets_nohf() = true; baby.pass_jets_ra2() = true; baby.pass_jets_tight() = true; 
+  baby.pass_jets() = true; baby.pass_jets_nohf() = true; baby.pass_jets_tight() = true; 
+  baby.pass_jets_ra2() = true; baby.pass_jets_tight_ra2() = true; 
   float mht_px(0.), mht_py(0.);
   for (size_t ijet(0); ijet < alljets->size(); ijet++) {
     const pat::Jet &jet = (*alljets)[ijet];
 
+    if(fabs(jet.eta()) > 5) continue;
+
     LVector jetp4(jetTool->corrJet[ijet]);
     // Saving good jets and jets corresponding to signal leptons
     bool isLep = jetTool->leptonInJet(jet, sig_leps);
-    bool isLep_ra2 = jetTool->leptonInJet(jet, veto_leps);
-    bool isPhoton = jetTool->jetMatched(jet, photons); // Uses RA2/b's loose matching, dpt/pt < 100%, dR < 0.4
-    bool isIsoTrack = jetTool->jetMatched(jet, tks); // Uses RA2/b's loose matching, dpt/pt < 100%, dR < 0.4
+    bool isLep_ra2 = jetTool->jetMatched(jet, veto_leps); // Uses RA2/b's loose matching, dpt/pt < 100%, dR < 0.4
+    bool isPhoton = jetTool->jetMatched(jet, photons);    // Uses RA2/b's loose matching, dpt/pt < 100%, dR < 0.4
+    bool isIsoTrack = jetTool->jetMatched(jet, tks);      // Uses RA2/b's loose matching, dpt/pt < 100%, dR < 0.4
+    bool applyId_ra2 = !isLep_ra2 && !isPhoton && !isIsoTrack; // Only check ID if jet not matched
 
     bool looseID = jetTool->idJet(jet, jetTool->kLoose);
     bool tightID = jetTool->idJet(jet, jetTool->kTight);
 
     bool goodPtEta = jetp4.pt() > jetTool->JetPtCut && fabs(jet.eta()) <= jetTool->JetEtaCut;
     bool goodJet = (!isLep) && looseID && goodPtEta;
+    bool goodJet_ra2 = (looseID || !applyId_ra2);
+    bool tightJet_ra2 = (tightID || !applyId_ra2);
 
+    if(jetp4.pt() > jetTool->JetPtCut) { // Check jet ID on 30 GeV jets
+      if(!isLep) { // RA4 IDs
+	if(goodPtEta && !looseID) baby.pass_jets_nohf() = false;
+	if(!looseID) baby.pass_jets() = false;
+	if(!tightID) baby.pass_jets_tight() = false;
+      }
+      if(!goodJet_ra2) baby.pass_jets_ra2() = false;
+      if(!tightJet_ra2) baby.pass_jets_tight_ra2() = false;
+    }
     float csv(jet.bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags"));
-    if(goodPtEta && !isLep && !looseID) baby.pass_jets_nohf() = false;
-    if(jetp4.pt() > jetTool->JetPtCut && !isLep && !looseID) baby.pass_jets() = false;
-    if(jetp4.pt() > jetTool->JetPtCut && !isLep && !tightID) baby.pass_jets_tight() = false;
-    if(jetp4.pt() > jetTool->JetPtCut && !isLep_ra2 && !isPhoton && !isIsoTrack && !looseID) baby.pass_jets_ra2() = false;
-    if(looseID && goodPtEta) {
+    if(goodPtEta && goodJet_ra2) {
       baby.njets_ra2()++;
       baby.ht_ra2() += jetp4.pt();
+      jets_ra2.push_back(dynamic_cast<const reco::Candidate *>(&jet)); 
       if(csv > jetTool->CSVMedium) baby.nbm_ra2()++;
     }
-    if(looseID && jetp4.pt() > jetTool->JetPtCut && fabs(jet.eta()) <= jetTool->JetMHTEtaCut){
+    if(goodJet_ra2 && jetp4.pt() > jetTool->JetPtCut && fabs(jet.eta()) <= jetTool->JetMHTEtaCut){
       mht_px -= jet.px();
       mht_py -= jet.py();
     }
@@ -296,7 +308,10 @@ vector<LVector> bmaker_basic::writeJets(edm::Handle<pat::JetCollection> alljets,
   } // Loop over jets  
 
   baby.ht_tru() = jetTool->trueHT(genjets);
-  baby.mht_ra2() = hypot(mht_px, mht_py);
+  baby.mht() = hypot(mht_px, mht_py);
+  baby.mht_phi() = atan2(mht_py, mht_px);
+  baby.low_dphi() = jetTool->isLowDphi(jets_ra2, baby.mht_phi(), baby.dphi1(), baby.dphi2(), baby.dphi3(), baby.dphi4());
+
   return jets; // Returning jets that pass acceptance and ID, regardless of whether they're leptons
 } 
 

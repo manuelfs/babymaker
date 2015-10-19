@@ -44,6 +44,8 @@
 #include "babymaker/bmaker/interface/utilities.hh"
 
 typedef float& (baby_base::*baby_float)();
+typedef std::vector<float>& (baby_base::*baby_vfloat)();
+typedef std::vector<bool>& (baby_base::*baby_vbool)();
 
 // Class declaration
 class bmaker_basic : public edm::EDAnalyzer {
@@ -88,7 +90,10 @@ public:
 			edm::Handle<reco::VertexCollection> vtx,
 			vCands &veto_els, vCands &all_els, double rhoEventCentral);
   void writeDiLep(vCands &sig_mus, vCands &sig_els, vCands &veto_mus, vCands &veto_els);
-  void setDiLepMass(vCands leptons, baby_float ll_m, baby_float ll_pt1, baby_float ll_pt2, baby_float ll_zpt);
+  void setDiLepMass(vCands leptons, baby_float ll_m, baby_float ll_pt1, baby_float ll_pt2, baby_float ll_pt, 
+		    baby_float ll_eta, baby_float ll_phi, baby_vfloat l_pt, baby_vbool l_inz);
+  void setElMuMass(vCands leptons1, vCands leptons2, baby_float ll_m, baby_float ll_pt1, baby_float ll_pt2, 
+		   baby_float ll_pt, baby_float ll_eta, baby_float ll_phi);
   void writeLeptons(vCands &leptons); 
 
   vCands writePhotons(edm::Handle<pat::PhotonCollection> allphotons, edm::Handle<std::vector<pat::Electron> > &electrons,

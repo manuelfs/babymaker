@@ -40,6 +40,20 @@ using namespace phys_objects;
 void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
   nevents++;
   isData = iEvent.isRealData();
+
+  ///////////////////// MC hard scatter info ///////////////////////
+  if (!isData) {
+    edm::Handle<LHEEventProduct> lhe_info;
+    iEvent.getByLabel("externalLHEProducer", lhe_info);
+    if(!lhe_info.isValid()) iEvent.getByLabel("source", lhe_info);
+    writeGenInfo(lhe_info);
+    if(outname.Contains("TTJets") && outname.Contains("Lept") && baby.ht_isr_me()>600) {
+      reportTime(iEvent);
+      return;
+    }
+  }
+
+
    ////////////////////// Event info /////////////////////
   baby.run() = iEvent.id().run();
   baby.event() = iEvent.id().event();
@@ -162,20 +176,21 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
   }   
 
   ///////////////////// Filters ///////////////////////
+  // the HBHE noise filter needs to be recomputed in early 2015 data
+  edm::Handle<bool> filter_hbhe;
+  if(iEvent.getByLabel("HBHENoiseFilterResultProducer","HBHENoiseFilterResult",filter_hbhe)) { 
+    baby.pass_hbhe() = *filter_hbhe;
+    iEvent.getByLabel("HBHENoiseFilterResultProducer","HBHEIsoNoiseFilterResult",filter_hbhe);
+    baby.pass_hbheiso() = *filter_hbhe;
+  }
   edm::Handle<edm::TriggerResults> filterBits;
   std::string processLabel = isData ? "RECO":"PAT"; // prompt reco runs in the "RECO" process
   iEvent.getByLabel(edm::InputTag("TriggerResults","",processLabel),filterBits);  
   // re-recoed data will have the process label "PAT" rather than "RECO";
   // if the attempt to find data with "RECO" process fails, try "PAT"
   if(!filterBits.isValid() && isData) 
-      iEvent.getByLabel(edm::InputTag("TriggerResults", "", "PAT"),filterBits);  
+    iEvent.getByLabel(edm::InputTag("TriggerResults", "", "PAT"),filterBits);  
   const edm::TriggerNames &fnames = iEvent.triggerNames(*filterBits);
-  // the HBHE noise filter needs to be recomputed in early 2015 data
-  edm::Handle<bool> filter_hbhe;
-  if(isData && iEvent.getByLabel("HBHENoiseFilterResultProducer","HBHENoiseFilterResult",filter_hbhe)) { 
-    if(*filter_hbhe) baby.pass_hbhe() = true;
-    else baby.pass_hbhe() = false;
-  }
   writeFilters(fnames, filterBits, vtx);
 
   //////////////// HLT objects //////////////////
@@ -184,12 +199,8 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
   // Requires having called writeMuons and writeElectrons for truth-matching
   writeHLTObjects(names, triggerObjects, all_mus, all_els, photons);
 
-  ///////////////////// Truth Info ///////////////////////
+  ////////////////// MC particles and Truth-matching //////////////////
   if (!isData) {
-    edm::Handle<LHEEventProduct> lhe_info;
-    iEvent.getByLabel("externalLHEProducer", lhe_info);
-    if(!lhe_info.isValid()) iEvent.getByLabel("source", lhe_info);
-    writeGenInfo(lhe_info);
     edm::Handle<reco::GenParticleCollection> genParticles;
     iEvent.getByLabel("prunedGenParticles", genParticles);
     writeMC(genParticles, all_mus, all_els, photons);
@@ -235,6 +246,7 @@ vector<LVector> bmaker_basic::writeJets(edm::Handle<pat::JetCollection> alljets,
 					vCands &sig_leps, vCands &veto_leps, vCands &photons, vCands &tks){
   vector<LVector> jets;
   vCands jets_ra2;
+  LVector jetsys_p4, jetsys_nob_p4;
   baby.njets() = 0; baby.nbl() = 0; baby.nbm() = 0;  baby.nbt() = 0;  
   baby.ht() = 0.; baby.ht_hlt() = 0.;
   baby.njets_ra2() = 0; baby.nbm_ra2() = 0; baby.ht_ra2() = 0.; 
@@ -299,10 +311,12 @@ vector<LVector> bmaker_basic::writeJets(edm::Handle<pat::JetCollection> alljets,
     jets.push_back(jetp4);
 
     if(goodJet){
+      jetsys_p4 += jet.p4();
       baby.njets()++;
       baby.ht() += jetp4.pt();
       if(csv > jetTool->CSVLoose)  baby.nbl()++;
       if(csv > jetTool->CSVMedium) baby.nbm()++;
+      else jetsys_nob_p4 += jet.p4();
       if(csv > jetTool->CSVTight)  baby.nbt()++;
     }
   } // Loop over jets  
@@ -312,8 +326,16 @@ vector<LVector> bmaker_basic::writeJets(edm::Handle<pat::JetCollection> alljets,
   baby.mht_phi() = atan2(mht_py, mht_px);
   baby.low_dphi() = jetTool->isLowDphi(jets_ra2, baby.mht_phi(), baby.dphi1(), baby.dphi2(), baby.dphi3(), baby.dphi4());
 
+  // ISR system for Z->ll and tt->llbb configurations
+  baby.jetsys_pt()  = jetsys_p4.pt();
+  baby.jetsys_eta() = jetsys_p4.eta();
+  baby.jetsys_phi() = jetsys_p4.phi();
+  baby.jetsys_nob_pt()  = jetsys_nob_p4.pt();
+  baby.jetsys_nob_eta() = jetsys_nob_p4.eta();
+  baby.jetsys_nob_phi() = jetsys_nob_p4.phi();
+
   return jets; // Returning jets that pass acceptance and ID, regardless of whether they're leptons
-} 
+}
 
 void bmaker_basic::writeFatJets(vector<LVector> &jets){
   clusterFatJets(baby.nfjets(), baby.mj(),
@@ -426,7 +448,9 @@ vCands bmaker_basic::writeMuons(edm::Handle<pat::MuonCollection> muons,
     baby.mus_tight().push_back(lepTool->idMuon(lep, vtx, lepTool->kTight));
     baby.mus_miniso().push_back(lep_iso);
     baby.mus_reliso().push_back(lep_reliso);
-    baby.mus_tm().push_back(false);    // Filled in writeMC
+    baby.mus_tm().push_back(false);        // Filled in writeMC
+    baby.mus_inz().push_back(false);       // Filled in writeDiLep
+    baby.mus_inzv().push_back(false);      // Filled in writeDiLep
     baby.mus_vvvl().push_back(false);      // Filled in writeHLTObjects
     baby.mus_isomu18().push_back(false);   // Filled in writeHLTObjects
     baby.mus_mu50().push_back(false);      // Filled in writeHLTObjects
@@ -475,7 +499,9 @@ vCands bmaker_basic::writeElectrons(edm::Handle<pat::ElectronCollection> electro
     baby.els_tight().push_back(lepTool->idElectron(lep, vtx, lepTool->kTight));
     baby.els_miniso().push_back(lep_iso);
     baby.els_reliso().push_back(lep_reliso);
-    baby.els_tm().push_back(false);   // Filled in writeMC
+    baby.els_tm().push_back(false);       // Filled in writeMC
+    baby.els_inz().push_back(false);      // Filled in writeDiLep
+    baby.els_inzv().push_back(false);     // Filled in writeDiLep
     baby.els_vvvl().push_back(false);     // Filled in writeHLTObjects
     baby.els_ele23().push_back(false);    // Filled in writeHLTObjects
     baby.els_ele105().push_back(false);   // Filled in writeHLTObjects
@@ -508,23 +534,58 @@ void bmaker_basic::writeLeptons(vCands &leptons){
 }
 
 void bmaker_basic::writeDiLep(vCands &sig_mus, vCands &sig_els, vCands &veto_mus, vCands &veto_els){
-  setDiLepMass(sig_mus,  &baby_base::mumu_m,  &baby_base::mumu_pt1,  &baby_base::mumu_pt2,  &baby_base::mumu_zpt);
-  setDiLepMass(veto_mus, &baby_base::mumuv_m, &baby_base::mumuv_pt1, &baby_base::mumuv_pt2, &baby_base::mumuv_zpt);
-  setDiLepMass(sig_els,  &baby_base::elel_m,  &baby_base::elel_pt1,  &baby_base::elel_pt2,  &baby_base::elel_zpt);
-  setDiLepMass(veto_els, &baby_base::elelv_m, &baby_base::elelv_pt1, &baby_base::elelv_pt2, &baby_base::elelv_zpt);
+  setDiLepMass(sig_mus,  &baby_base::mumu_m,  &baby_base::mumu_pt1,  &baby_base::mumu_pt2,  &baby_base::mumu_pt,
+	       &baby_base::mumu_eta,  &baby_base::mumu_phi, &baby_base::mus_pt, &baby_base::mus_inz);
+  setDiLepMass(veto_mus, &baby_base::mumuv_m, &baby_base::mumuv_pt1, &baby_base::mumuv_pt2, &baby_base::mumuv_pt,
+	       &baby_base::mumuv_eta,  &baby_base::mumuv_phi, &baby_base::mus_pt, &baby_base::mus_inzv);
+  setDiLepMass(sig_els,  &baby_base::elel_m,  &baby_base::elel_pt1,  &baby_base::elel_pt2,  &baby_base::elel_pt,
+	       &baby_base::elel_eta,  &baby_base::elel_phi, &baby_base::els_pt, &baby_base::els_inz);
+  setDiLepMass(veto_els, &baby_base::elelv_m, &baby_base::elelv_pt1, &baby_base::elelv_pt2, &baby_base::elelv_pt,
+	       &baby_base::elelv_eta,  &baby_base::elelv_phi, &baby_base::els_pt, &baby_base::els_inzv);
+  setElMuMass(sig_els, sig_mus, &baby_base::elmu_m, &baby_base::elmu_pt1, &baby_base::elmu_pt2, &baby_base::elmu_pt,
+	      &baby_base::elmu_eta,  &baby_base::elmu_phi);
+  // setElMuMass(veto_els, veto_mus, &baby_base::elmuv_m, &baby_base::elmuv_pt1, &baby_base::elmuv_pt2, &baby_base::elmuv_pt,
+  // 	      &baby_base::elmuv_eta,  &baby_base::elmuv_phi);
 }
 
-void bmaker_basic::setDiLepMass(vCands leptons, baby_float ll_m, baby_float ll_pt1, baby_float ll_pt2, baby_float ll_zpt){
+void bmaker_basic::setDiLepMass(vCands leptons, baby_float ll_m, baby_float ll_pt1, baby_float ll_pt2, 
+				baby_float ll_pt, baby_float ll_eta, baby_float ll_phi, baby_vfloat l_pt, baby_vbool l_inz){
   for(size_t lep1(0); lep1 < leptons.size(); lep1++){
     for(size_t lep2(lep1+1); lep2 < leptons.size(); lep2++){
       if(leptons[lep1]->charge()*leptons[lep2]->charge()<0){
 	LVector z_p4(leptons[lep1]->p4()); 
 	z_p4 += leptons[lep2]->p4();
 	(baby.*ll_m)()   = z_p4.mass();
-	(baby.*ll_zpt)() = z_p4.pt();
-	(baby.*ll_pt1)() = max(leptons[lep1]->pt(), leptons[lep2]->pt()); 
-	(baby.*ll_pt2)() = min(leptons[lep1]->pt(), leptons[lep2]->pt());
+	(baby.*ll_pt)()  = z_p4.pt();
+	(baby.*ll_eta)() = z_p4.eta();
+	(baby.*ll_phi)() = z_p4.phi();
+	float pt1(leptons[lep1]->pt()), pt2(leptons[lep2]->pt());
+	(baby.*ll_pt1)() = max(pt1, pt2); 
+	(baby.*ll_pt2)() = min(pt1, pt2);
+	for(size_t ilep(0); ilep < (baby.*l_pt)().size(); ilep++){
+	  if(fabs(pt1 - (baby.*l_pt)()[ilep]) < 1e-7) (baby.*l_inz)()[ilep] = true;
+	  if(fabs(pt2 - (baby.*l_pt)()[ilep]) < 1e-7) (baby.*l_inz)()[ilep] = true;
+	}
+	return; // We only set it with the first good ll combination
+      }
+    } // Loop over lep2
+  } // Loop over lep1
+}
 
+void bmaker_basic::setElMuMass(vCands leptons1, vCands leptons2, baby_float ll_m, baby_float ll_pt1, baby_float ll_pt2, 
+			       baby_float ll_pt, baby_float ll_eta, baby_float ll_phi){
+  for(size_t lep1(0); lep1 < leptons1.size(); lep1++){
+    for(size_t lep2(0); lep2 < leptons2.size(); lep2++){
+      if(leptons1[lep1]->charge()*leptons2[lep2]->charge()<0){
+	LVector z_p4(leptons1[lep1]->p4()); 
+	z_p4 += leptons2[lep2]->p4();
+	(baby.*ll_m)()   = z_p4.mass();
+	(baby.*ll_pt)()  = z_p4.pt();
+	(baby.*ll_eta)() = z_p4.eta();
+	(baby.*ll_phi)() = z_p4.phi();
+	float pt1(leptons1[lep1]->pt()), pt2(leptons2[lep2]->pt());
+	(baby.*ll_pt1)() = pt1; 
+	(baby.*ll_pt2)() = pt2;
 	return; // We only set it with the first good ll combination
       }
     } // Loop over lep2
@@ -661,23 +722,25 @@ void bmaker_basic::writeHLTObjects(const edm::TriggerNames &names,
   } // Loop over trigger objects
 }
 
+// From https://twiki.cern.ch/twiki/bin/viewauth/CMS/MissingETOptionalFiltersRun2
 void bmaker_basic::writeFilters(const edm::TriggerNames &fnames,
                                   edm::Handle<edm::TriggerResults> filterBits,
                                   edm::Handle<reco::VertexCollection> vtx){
+  baby.pass_goodv() = true; baby.pass_cschalo() = true; baby.pass_eebadsc() = true;
   for (size_t i(0); i < filterBits->size(); ++i) {
     string name = fnames.triggerName(i);
     bool pass = static_cast<bool>(filterBits->accept(i));
     if (name=="Flag_goodVertices") baby.pass_goodv() = pass;
-    else if (name=="Flag_CSCTightHaloFilter") baby.pass_cschalo() = pass;
+    //else if (name=="Flag_CSCTightHaloFilter") baby.pass_cschalo() = pass; // Requires reading it from txt file
     else if (name=="Flag_eeBadScFilter") baby.pass_eebadsc() = pass;
-    //else if (name=="Flag_HBHENoiseFilter") baby.pass_hbhe() = pass;
+    //else if (name=="Flag_HBHENoiseFilter") baby.pass_hbhe() = pass; // Requires re-running in 2015
   }
 
-  baby.pass_goodv() &= hasGoodPV(vtx);
+  //baby.pass_goodv() &= hasGoodPV(vtx); // We needed to re-run it for Run2015B
 
-  baby.pass() = baby.pass_goodv() && baby.pass_eebadsc() && baby.pass_jets();
-  baby.pass_ra2() = baby.pass_goodv() && baby.pass_eebadsc() && baby.pass_jets_ra2();
-  baby.pass_nohf() = baby.pass_goodv() && baby.pass_eebadsc() && baby.pass_jets_nohf();
+  baby.pass() = baby.pass_goodv() && baby.pass_eebadsc() && baby.pass_cschalo() && baby.pass_hbhe() && baby.pass_jets();
+  baby.pass_ra2() = baby.pass_goodv() && baby.pass_eebadsc() && baby.pass_cschalo() && baby.pass_hbhe() && baby.pass_jets_ra2();
+  baby.pass_nohf() = baby.pass_goodv() && baby.pass_eebadsc() && baby.pass_cschalo() && baby.pass_hbhe() && baby.pass_jets_nohf();
 }
 
 void bmaker_basic::writeVertices(edm::Handle<reco::VertexCollection> vtx,
@@ -833,9 +896,9 @@ void bmaker_basic::writeMC(edm::Handle<reco::GenParticleCollection> genParticles
 
   } // Loop over genParticles
   baby.ntruleps() = baby.ntrumus()+baby.ntruels()+baby.ntrutaush()+baby.ntrutausl();
-  baby.isr_pt() = isr_p4.pt();
-  baby.isr_eta() = isr_p4.eta();
-  baby.isr_phi() = isr_p4.phi();
+  baby.isr_tru_pt() = isr_p4.pt();
+  baby.isr_tru_eta() = isr_p4.eta();
+  baby.isr_tru_phi() = isr_p4.phi();
 
   baby.met_tru_nuw() = hypot(metw_tru_x, metw_tru_y);
   baby.met_tru_nuw_phi() = atan2(metw_tru_y, metw_tru_x);

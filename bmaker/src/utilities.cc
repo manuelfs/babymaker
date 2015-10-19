@@ -101,17 +101,10 @@ namespace utilities{
     if(file.Contains("WJetsToLNu") && file.Contains("amcatnloFXFX")) xsec=61526.7; //NNLO from Lesya's summary table 
 
     //cross-section per slice changed due to change in genHT definition
-    if (file.Contains("RunIISpring15DR74")){
-      if(file.Contains("WJetsToLNu_HT-100To200"))  xsec = 1347.*1.21; //updated based on MCM
-      if(file.Contains("WJetsToLNu_HT-200To400"))  xsec = 360.*1.21;
-      if(file.Contains("WJetsToLNu_HT-400To600"))  xsec = 48.9*1.21;
-      if(file.Contains("WJetsToLNu_HT-600ToInf"))  xsec = 18.77*1.21;
-    } else {
-      if(file.Contains("WJetsToLNu_HT-100to200"))  xsec = 1817.0*1.23;
-      if(file.Contains("WJetsToLNu_HT-200to400"))  xsec = 471.6*1.23;
-      if(file.Contains("WJetsToLNu_HT-400to600"))  xsec = 55.61*1.23;
-      if(file.Contains("WJetsToLNu_HT-600toInf"))  xsec = 18.81*1.23;
-    }
+    if(file.Contains("WJetsToLNu_HT-100To200"))  xsec = 1347.*1.21; //updated based on MCM
+    if(file.Contains("WJetsToLNu_HT-200To400"))  xsec = 360.*1.21;
+    if(file.Contains("WJetsToLNu_HT-400To600"))  xsec = 48.98*1.21;
+    if(file.Contains("WJetsToLNu_HT-600ToInf"))  xsec = 18.77*1.21;
     if(file.Contains("WToENu"))   xsec = 16000.0;
     if(file.Contains("WToMuNu"))  xsec = 16100.0;
 
@@ -153,36 +146,19 @@ namespace utilities{
 
     // Cross sections from https://twiki.cern.ch/twiki/bin/view/LHCPhysics/SingleTopRefXsec
     // multiplied by BF(W->mu,e,tau) = 0.324
-    if (file.Contains("RunIISpring15DR74")){
-      if (file.Contains("ST_s-channel_4f_leptonDecays_13TeV-amcatnlo-pythia8"))     xsec = 3.34;
-      if (file.Contains("ST_t-channel_antitop_4f_leptonDecays_13TeV-powheg-pythia8")) xsec = 26.23;
-      if (file.Contains("ST_t-channel_top_4f_leptonDecays_13TeV-powheg-pythia8"))     xsec = 44.07;
-      if (file.Contains("ST_tW_antitop_5f_inclusiveDecays_13TeV-powheg-pythia8"))     xsec = 35.8;
-      if (file.Contains("ST_tW_top_5f_inclusiveDecays_13TeV-powheg-pythia8"))     xsec = 35.8; 
-    } else {
-      if(file.Contains("TBarToLeptons_s-channel"))    xsec = 1.29;
-      if(file.Contains("TToLeptons_s-channel"))       xsec = 2.06;
-      if(file.Contains("TBarToLeptons_t-channel"))    xsec = 26.23;
-      if(file.Contains("TToLeptons_t-channel"))       xsec = 44.07;
-      if(file.Contains("Tbar_tW-channel-DR"))         xsec = 35.8; 
-      if(file.Contains("T_tW-channel-DR"))            xsec = 35.8; 
-    }
+    if (file.Contains("ST_s-channel_4f_leptonDecays_13TeV-amcatnlo-pythia8"))     xsec = 3.34;
+    if (file.Contains("ST_t-channel_antitop_4f_leptonDecays_13TeV-powheg-pythia8")) xsec = 26.23;
+    if (file.Contains("ST_t-channel_top_4f_leptonDecays_13TeV-powheg-pythia8"))     xsec = 44.07;
+    if (file.Contains("ST_tW_antitop_5f_inclusiveDecays_13TeV-powheg-pythia8"))     xsec = 35.8;
+    if (file.Contains("ST_tW_top_5f_inclusiveDecays_13TeV-powheg-pythia8"))     xsec = 35.8; 
 
-    if(file.Contains("DYJetsToLL_M-10to50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8")) xsec = 18610;
-    if(file.Contains("DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8"))     xsec = 6104;
+    if(file.Contains("DYJetsToLL_M-10to50_TuneCUETP8M1_13TeV")) xsec = 18610*1.23;
+    if(file.Contains("DYJetsToLL_M-50_TuneCUETP8M1_13TeV"))     xsec = 4895*1.23;
 
-    if(file.Contains("madgraphMLM")){
-        if(file.Contains("DYJetsToLL_M-50_HT-100to200"))    xsec = 171.46;
-        if(file.Contains("DYJetsToLL_M-50_HT-200to400"))    xsec = 52.58;
-        if(file.Contains("DYJetsToLL_M-50_HT-400to600"))    xsec = 6.761;
-        if(file.Contains("DYJetsToLL_M-50_HT-600toInf"))    xsec = 2.713;
-      }
-      else{
-        if(file.Contains("DYJetsToLL_M-50_HT-100to200"))    xsec = 194.3*1.27;
-        if(file.Contains("DYJetsToLL_M-50_HT-200to400"))    xsec = 52.24*1.27;
-        if(file.Contains("DYJetsToLL_M-50_HT-400to600"))    xsec = 6.546*1.27;
-        if(file.Contains("DYJetsToLL_M-50_HT-600toInf"))    xsec = 2.179*1.27;
-      }
+    if(file.Contains("DYJetsToLL_M-50_HT-100to200"))    xsec = 139.4*1.23;
+    if(file.Contains("DYJetsToLL_M-50_HT-200to400"))    xsec = 42.75*1.23;
+    if(file.Contains("DYJetsToLL_M-50_HT-400to600"))    xsec = 5.497*1.23;
+    if(file.Contains("DYJetsToLL_M-50_HT-600toInf"))    xsec = 2.21*1.23;
 
     if(file.Contains("ZJetsToNuNu_HT-100to200_Tune4C_13TeV-madgraph-tauola"))  xsec =372.6*1.27;
     if(file.Contains("ZJetsToNuNu_HT-200to400_Tune4C_13TeV-madgraph-tauola"))  xsec =100.8*1.27;

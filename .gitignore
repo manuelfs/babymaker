@@ -40,7 +40,6 @@ bin/*
 gmon.out
 out
 logs
-run
 archive
 .nfs*
 .#-emacs*

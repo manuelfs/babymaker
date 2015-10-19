@@ -6,6 +6,7 @@ from pprint import pprint
 import ROOT
 
 timestamp = "151018_021857"
+# timestamp = "151018_021557"
 onePerJob = False
 
 redirector = "root://cmsxrootd.fnal.gov//"
@@ -18,7 +19,7 @@ logdir = os.path.join(bdir,'logs',timestamp)
 if not os.path.exists(logdir):
   sys.exit("Can't find log directory %s" %logdir)
 
-loglist = glob.glob(logdir+"/*.log")
+loglist = [x for x in glob.glob(logdir+"/*.log") if "_rs" not in x] 
 print "Found %i logs" %(len(loglist))
 
 failed = set()
@@ -28,7 +29,8 @@ for flog in loglist:
   ferr = flog.rstrip(".log") + ".err"
   fout = flog.rstrip(".log") + ".out"
   bname = flog.split("/").pop().rstrip(".log")
-  if os.path.getsize(ferr)==0 or os.path.getsize(ferr)==0:
+  # if os.path.getsize(ferr)==0 or os.path.getsize(ferr)==0:
+  if "ttHJetTobb_M125_" in fout:
     unfinished.add(bname)
   else:
     if "BABYMAKER: Written" not in open(fout).read():
@@ -69,6 +71,9 @@ for old_baby in failed:
   fcmd = os.path.join(logdir.replace("/logs/","/run/"), old_baby+".cmd")
 
   if not onePerJob:
+    old_exe = open(fexe).read()
+    new_exe = old_exe.replace("file:/hadoop/cms/phedex", redirector)
+    with open(fexe,'w') as f: f.write(new_exe)
     sys_cmd = "condor_submit " + fcmd
     print "INFO: Submitting", fcmd
     os.system(sys_cmd)
@@ -97,7 +102,7 @@ for old_baby in failed:
       new_baby = old_baby + "_rs"+str(i)
       new_exe_lines = [line for line in old_exe if ("/store/" not in line or "lcg-cp" in line)]
       ind = new_exe_lines.index('inputFiles=\\\n')
-      new_exe_lines.insert(ind+1, redirector + infile + '\\\n')
+      new_exe_lines.insert(ind+1, redirector + infile + ' \\\n')
       new_exe = ''.join(new_exe_lines)
       new_exe = new_exe.replace(old_baby, new_baby)
       with open(fexe.replace(old_baby,new_baby),'w') as f1: f1.write(new_exe)

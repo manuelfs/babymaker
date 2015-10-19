@@ -14,20 +14,20 @@ import time
 wishlist = []
 #------------ MC ------------------
 wishlist.append("TTJets")
-# wishlist.append("WJets")
-# wishlist.append("DYJets")
-# wishlist.append("QCD_")
-# wishlist.append("ST_")
-# wishlist.append("ttHJetTobb")
-# wishlist.append("WWTo2L2Nu")
-# wishlist.append("WWToLNuQQ")
-# wishlist.append("ggZH_HToBB")
+wishlist.append("WJets")
+wishlist.append("DYJets")
+wishlist.append("QCD_")
+wishlist.append("ST_")
+wishlist.append("ttHJetTobb")
+wishlist.append("WWTo2L2Nu")
+wishlist.append("WWToLNuQQ")
+wishlist.append("ggZH_HToBB")
 
-# wishlist.append("JetHT_Run2015D_PromptReco-v3")
-# wishlist.append("HTMHT")
-# wishlist.append("MET")
-# wishlist.append("SingleElectron")
-# wishlist.append("SingleMuon")
+wishlist.append("JetHT")
+wishlist.append("HTMHT")
+wishlist.append("MET")
+wishlist.append("SingleElectron")
+wishlist.append("SingleMuon")
 
 print 
 
@@ -151,7 +151,7 @@ for fnm in flists_pd:
           nent_dict[dsname] = nent_dict[dsname] + int(line.split().pop())
         if "/store" not in line: continue
         col = line.split()
-        redirector = 'root://cmsxrootd.fnal.gov//' if col[0]=='xrootd' else ('file:'+hadoop)
+        redirector = ('file:'+hadoop) if os.path.exists(hadoop + col[2]) else 'root://cmsxrootd.fnal.gov//'
         # if data, filter on json
         if 'Run2015' in dsname:
           runlist = [int(irun) for irun in string.split(col[3],",")]

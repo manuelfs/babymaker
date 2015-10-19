@@ -6,14 +6,23 @@ import json
 import string, pprint
 import ROOT
 import das_client as das
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument("-d","--datasets")
+parser.add_argument("-f","--files")
+args = parser.parse_args()
 
 datasets = []
-with open("txt/dataset/mc.txt") as fmc:
-  datasets = [line for line in fmc.read().splitlines() if (len(line)>0 and line[0]=="/")]
-# with open("txt/dataset/mc_miniaod_v2.txt") as fmc:
-#   datasets.extend([line for line in fmc.read().splitlines() if (len(line)>0 and line[0]=="/")])
-# with open("txt/dataset/data.txt") as fdata:
-#   datasets.extend([line for line in fdata.read().splitlines() if (len(line)>0 and line[0]=="/")])
+if (args.datasets):
+  datasets = args.datasets.split(",")
+elif (args.files):
+  for fnm in args.files.split(","):
+    with open(fnm) as f:
+      datasets.extend([line for line in f.read().splitlines() if (len(line)>0 and line[0]=="/")])
+
+print "Processing datasets:"
+pprint.pprint(datasets)
 
 # Parsing where the files can be found depends on whether we run on UCSB or UCSD
 host = os.environ.get("HOSTNAME")

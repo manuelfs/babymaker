@@ -167,6 +167,11 @@ namespace utilities{
 
     if(file.Contains("TTZJets_Tune4C_13TeV-madgraph-tauola"))    xsec = 0.7598;
     if(file.Contains("TTWJets_Tune4C_13TeV-madgraph-tauola"))    xsec = 0.5662;
+    if(file.Contains("TTZToQQ"))		xsec = 0.5297;
+    if(file.Contains("TTZToLLNuNu_M-10"))	xsec = 0.2529;
+    if(file.Contains("TTWJetsToQQ"))		xsec = 0.4062;
+    if(file.Contains("TTWJetsToLNu"))		xsec = 0.2043;
+   
     // Calculated at 13 TeV in
     // https://twiki.cern.ch/twiki/bin/view/LHCPhysics/CERNYellowReportPageAt1314TeV
     // Higgs branching ratios from

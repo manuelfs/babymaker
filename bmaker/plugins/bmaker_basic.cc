@@ -231,6 +231,8 @@ void bmaker_basic::writeMET(edm::Handle<pat::METCollection> mets, edm::Handle<pa
   jetTool->getMETRaw(mets, baby.met_raw(), baby.met_raw_phi());
   baby.met_mini() = mets->at(0).pt();
   baby.met_mini_phi() = mets->at(0).phi();
+  baby.met_calo() = mets->at(0).caloMETPt();
+  baby.met_calo_phi() = mets->at(0).caloMETPhi();
   if(mets_nohf.isValid()){
     baby.met_nohf() = mets_nohf->at(0).pt();
     baby.met_nohf_phi() = mets_nohf->at(0).phi();
@@ -322,6 +324,8 @@ vector<LVector> bmaker_basic::writeJets(edm::Handle<pat::JetCollection> alljets,
   } // Loop over jets  
 
   if(!isData) baby.ht_tru() = jetTool->trueHT(genjets);
+  baby.ht_noph() = baby.ht_ra2();
+  if(baby.nph() >= 1 && baby.ph_pt()[0]>100) baby.ht_noph() -= baby.ph_pt()[0];
   baby.mht() = hypot(mht_px, mht_py);
   baby.mht_phi() = atan2(mht_py, mht_px);
   baby.low_dphi() = jetTool->isLowDphi(jets_ra2, baby.mht_phi(), baby.dphi1(), baby.dphi2(), baby.dphi3(), baby.dphi4());
@@ -738,9 +742,12 @@ void bmaker_basic::writeFilters(const edm::TriggerNames &fnames,
 
   //baby.pass_goodv() &= hasGoodPV(vtx); // We needed to re-run it for Run2015B
 
-  baby.pass() = baby.pass_goodv() && baby.pass_eebadsc() && baby.pass_cschalo() && baby.pass_hbhe() && baby.pass_jets();
-  baby.pass_ra2() = baby.pass_goodv() && baby.pass_eebadsc() && baby.pass_cschalo() && baby.pass_hbhe() && baby.pass_jets_ra2();
-  baby.pass_nohf() = baby.pass_goodv() && baby.pass_eebadsc() && baby.pass_cschalo() && baby.pass_hbhe() && baby.pass_jets_nohf();
+  baby.pass() = baby.pass_goodv() && baby.pass_eebadsc() && baby.pass_cschalo() && baby.pass_hbhe() && baby.pass_hbheiso() 
+    && baby.pass_jets();
+  baby.pass_ra2() = baby.pass_goodv() && baby.pass_eebadsc() && baby.pass_cschalo() && baby.pass_hbhe() && baby.pass_hbheiso()  
+    && baby.pass_jets_ra2();
+  baby.pass_nohf() = baby.pass_goodv() && baby.pass_eebadsc() && baby.pass_cschalo() && baby.pass_hbhe() && baby.pass_hbheiso()  
+    && baby.pass_jets_nohf();
 }
 
 void bmaker_basic::writeVertices(edm::Handle<reco::VertexCollection> vtx,
@@ -974,6 +981,7 @@ bmaker_basic::bmaker_basic(const edm::ParameterSet& iConfig):
     trig_name.push_back("HLT_DoubleEle33_CaloIdL_GsfTrkIdVL_v");		// 25
     trig_name.push_back("HLT_DoubleEle24_22_eta2p1_WPLoose_Gsf_v");		// 26
     trig_name.push_back("HLT_Photon90_CaloIdL_PFHT500_v");		        // 27
+    trig_name.push_back("HLT_PFMETNoMu90_JetIdCleaned_PFMHTNoMu90_IDTight_v");	// 28
   } else {
     trig_name.push_back("HLT_PFHT350_PFMET120_NoiseCleaned_v");			// 0 
     trig_name.push_back("HLT_Mu15_IsoVVVL_PFHT400_PFMET70_v");			// 1 
@@ -1003,6 +1011,7 @@ bmaker_basic::bmaker_basic(const edm::ParameterSet& iConfig):
     trig_name.push_back("HLT_DoubleEle33_CaloIdL_GsfTrkIdVL_v");		// 25
     trig_name.push_back("HLT_DoubleEle24_22_eta2p1_WP75_Gsf_v");		// 26
     trig_name.push_back("HLT_Photon90_CaloIdL_PFHT500_v");		        // 27
+    trig_name.push_back("HLT_PFMETNoMu90_JetIdCleaned_PFMHTNoMu90_IDTight_v");	// 28
   }
 
 }

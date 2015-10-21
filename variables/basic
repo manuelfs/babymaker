@@ -11,6 +11,7 @@ int ntrupv
 float ntrupv_mean
 float ht
 float ht_ra2
+float ht_noph
 float ht_hlt
 float ht_tru
 float mht
@@ -24,6 +25,8 @@ float dphi_wlep
 ###################   MET   ##################
 float met
 float met_phi
+float met_calo
+float met_calo_phi
 float met_raw
 float met_raw_phi
 float met_mini

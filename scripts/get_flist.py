@@ -49,8 +49,9 @@ for ds in datasets:
   reco = tags[2][len(campaign)+1:]
   filetype = tags[3]
 
-  # query DAS, result is a list of dictionaries
+  # query DAS; the result is a list of dictionaries; one dict per file
   # each dictionary has the name, size and nevents of a file
+  # this is a per-dataset level query, so it's quick
   print "INFO: Query DAS for files in:", '_'.join([dsname,campaign,reco])
   this_fdicts = das.getFilesInfo(ds, wanted_keys = ['name','size','nevents'])
   nfiles = len(this_fdicts)
@@ -69,7 +70,14 @@ for ds in datasets:
   for ifile in this_fdicts:
     runlist = ''
     if "Run2015" in ds: 
-      runlist = ','.join([str(irun) for irun in das.getFileRunInfo(ifile['name'])])
+      # we need to ask DAS for what runs are in each file if it's reprocessed data
+      # for prompt reco, the run number can be parsed from the file path
+      if "PromptReco" in ds:
+        runlist = ifile['name'].split("/000/").pop().split("/00000/")[0].replace("/","")
+      else: 
+        # this is a per-file query, so it's slow
+        runlist = ','.join([str(irun) for irun in das.getFileRunInfo(ifile['name'])])
+
     # check if file is available locally
     if os.path.exists(hadoop+ifile['name']):
       if (os.path.getsize(hadoop+ifile['name'])==ifile['size']):

@@ -39,6 +39,7 @@ bin/*
 *.aux
 gmon.out
 out
+run
 logs
 archive
 .nfs*

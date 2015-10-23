@@ -113,6 +113,7 @@ namespace utilities{
     if(file.Contains("QCD_HT-500To1000_13TeV-madgraph")) xsec = 26740.0;
     if(file.Contains("QCD_HT_1000ToInf_13TeV-madgraph")) xsec = 769.7;
 
+    if(file.Contains("QCD_HT100to200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8")) xsec = 27540000;
     if(file.Contains("QCD_HT200to300_TuneCUETP8M1_13TeV-madgraphMLM-pythia8"))   xsec = 1735000;
     if(file.Contains("QCD_HT300to500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8"))   xsec = 366800;
     if(file.Contains("QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8"))   xsec = 29370;
@@ -172,6 +173,11 @@ namespace utilities{
     if(file.Contains("TTWJetsToQQ"))		xsec = 0.4062;
     if(file.Contains("TTWJetsToLNu"))		xsec = 0.2043;
    
+    //https://twiki.cern.ch/twiki/bin/viewauth/CMS/SummaryTable1G25ns#Diboson
+    if(file.Contains("WWTo2L2Nu_13TeV-powheg"))   xsec = 12.178; //NNLO
+    if(file.Contains("WWToLNuQQ_13TeV-powheg"))   xsec = 49.997; //NNLO
+    if(file.Contains("ttHJetTobb_M125_13TeV_amcatnloFXFX"))   xsec = 0.2934;
+
     // Calculated at 13 TeV in
     // https://twiki.cern.ch/twiki/bin/view/LHCPhysics/CERNYellowReportPageAt1314TeV
     // Higgs branching ratios from

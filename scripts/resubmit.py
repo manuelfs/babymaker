@@ -4,9 +4,20 @@ import glob
 import string
 from pprint import pprint
 import ROOT
+import argparse
 
-timestamp = "151018_021857"
-# timestamp = "151018_021557"
+parser = argparse.ArgumentParser()
+parser.add_argument("-p","--logpath")
+parser.add_argument("-t","--timestamp")
+args = parser.parse_args()
+
+if (args.timestamp):
+  timestamp = args.timestamp
+elif (args.logpath):
+  timestamp = args.logpath.rstrip("/").split("/")[-1]
+else:
+  sys.exist("Please provide a timestamp either as, e.g. 151019_011440, or a path ending with the timestamp")
+
 onePerJob = False
 
 redirector = "root://cmsxrootd.fnal.gov//"
@@ -29,8 +40,7 @@ for flog in loglist:
   ferr = flog.rstrip(".log") + ".err"
   fout = flog.rstrip(".log") + ".out"
   bname = flog.split("/").pop().rstrip(".log")
-  # if os.path.getsize(ferr)==0 or os.path.getsize(ferr)==0:
-  if "ttHJetTobb_M125_" in fout:
+  if os.path.getsize(fout)==0 or os.path.getsize(ferr)==0:
     unfinished.add(bname)
   else:
     if "BABYMAKER: Written" not in open(fout).read():

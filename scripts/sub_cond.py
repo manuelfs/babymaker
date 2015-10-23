@@ -5,6 +5,7 @@ import glob
 import json
 import string
 import time
+import argparse
 
 #What to submit? Use substrings that would be found in the desired dataset, no wild cards!
 # e.g. if we want only 25ns TTJets, use a substring that contains it all:
@@ -13,26 +14,36 @@ import time
 # "TTJets_HT-"
 wishlist = []
 #------------ MC ------------------
-wishlist.append("TTJets")
-wishlist.append("WJets")
-wishlist.append("DYJets")
-wishlist.append("QCD_")
-wishlist.append("ST_")
-wishlist.append("ttHJetTobb")
-wishlist.append("WWTo2L2Nu")
-wishlist.append("WWToLNuQQ")
-wishlist.append("ggZH_HToBB")
+# wishlist.append("T1tttt_mGluino-1500_mLSP-100_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15DR74_Asympt25ns_MCRUN2_74_V9")
+# wishlist.append("T1tttt_mGluino-1200_mLSP-800_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15DR74_Asympt25ns_MCRUN2_74_V9")
+
+# wishlist.append("TTJets")
+# wishlist.append("WJets")
+# wishlist.append("DYJets")
+# wishlist.append("DYJetsToLL_M-50_TuneCUETP8M1_13TeV")
+# wishlist.append("QCD_")
+# wishlist.append("ST_")
+# wishlist.append("ttHJetTobb")
+# wishlist.append("WWTo2L2Nu")
+# wishlist.append("WWToLNuQQ")
+# wishlist.append("ggZH_HToBB")
 
 wishlist.append("JetHT")
 wishlist.append("HTMHT")
 wishlist.append("MET")
 wishlist.append("SingleElectron")
 wishlist.append("SingleMuon")
+wishlist.append("DoubleEG")
+wishlist.append("DoubleMuon")
+
+parser = argparse.ArgumentParser()
+parser.add_argument("-j","--json")
+args = parser.parse_args()
 
 print 
 
 # for data get the golden runs
-json_name = "txt/json/golden_Cert_246908-258714_13TeV_PromptReco_Collisions15_25ns_JSON.json"
+json_name = "txt/json/" + args.json
 with open(json_name) as jfile:
   jdata = json.load(jfile)
 goldruns = [int(i) for i in jdata.keys()]

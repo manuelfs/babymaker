@@ -251,10 +251,10 @@ vector<LVector> bmaker_basic::writeJets(edm::Handle<pat::JetCollection> alljets,
   LVector jetsys_p4, jetsys_nob_p4;
   baby.njets() = 0; baby.nbl() = 0; baby.nbm() = 0;  baby.nbt() = 0;  
   baby.ht() = 0.; baby.ht_hlt() = 0.;
-  baby.njets_ra2() = 0; baby.nbm_ra2() = 0; baby.ht_ra2() = 0.; 
+  baby.njets_ra2() = 0; baby.njets_clean() = 0; baby.nbm_ra2() = 0; baby.ht_ra2() = 0.; baby.ht_clean() = 0.; 
   baby.pass_jets() = true; baby.pass_jets_nohf() = true; baby.pass_jets_tight() = true; 
   baby.pass_jets_ra2() = true; baby.pass_jets_tight_ra2() = true; 
-  float mht_px(0.), mht_py(0.);
+  float mht_px(0.), mht_py(0.), mht_clean_px(0.), mht_clean_py(0.);
   for (size_t ijet(0); ijet < alljets->size(); ijet++) {
     const pat::Jet &jet = (*alljets)[ijet];
 
@@ -291,10 +291,18 @@ vector<LVector> bmaker_basic::writeJets(edm::Handle<pat::JetCollection> alljets,
       baby.ht_ra2() += jetp4.pt();
       jets_ra2.push_back(dynamic_cast<const reco::Candidate *>(&jet)); 
       if(csv > jetTool->CSVMedium) baby.nbm_ra2()++;
+      if(!isLep_ra2 && !isPhoton) {
+	baby.njets_clean()++;
+	baby.ht_clean() += jetp4.pt();
+      }
     }
     if(goodJet_ra2 && jetp4.pt() > jetTool->JetPtCut && fabs(jet.eta()) <= jetTool->JetMHTEtaCut){
       mht_px -= jet.px();
       mht_py -= jet.py();
+      if(!isLep_ra2 && !isPhoton) {
+	mht_clean_px -= jet.px();
+	mht_clean_py -= jet.py();
+      }
     }
     if(jetp4.pt() > jetTool->JetHLTPtCut && fabs(jet.eta()) <= jetTool->JetHLTEtaCut) baby.ht_hlt() += jetp4.pt();
 
@@ -324,10 +332,10 @@ vector<LVector> bmaker_basic::writeJets(edm::Handle<pat::JetCollection> alljets,
   } // Loop over jets  
 
   if(!isData) baby.ht_tru() = jetTool->trueHT(genjets);
-  baby.ht_noph() = baby.ht_ra2();
-  if(baby.nph() >= 1 && baby.ph_pt()[0]>100) baby.ht_noph() -= baby.ph_pt()[0];
   baby.mht() = hypot(mht_px, mht_py);
   baby.mht_phi() = atan2(mht_py, mht_px);
+  baby.mht_clean() = hypot(mht_clean_px, mht_clean_py);
+  baby.mht_clean_phi() = atan2(mht_clean_py, mht_clean_px);
   baby.low_dphi() = jetTool->isLowDphi(jets_ra2, baby.mht_phi(), baby.dphi1(), baby.dphi2(), baby.dphi3(), baby.dphi4());
 
   // ISR system for Z->ll and tt->llbb configurations
@@ -458,6 +466,7 @@ vCands bmaker_basic::writeMuons(edm::Handle<pat::MuonCollection> muons,
     baby.mus_vvvl().push_back(false);      // Filled in writeHLTObjects
     baby.mus_isomu18().push_back(false);   // Filled in writeHLTObjects
     baby.mus_mu50().push_back(false);      // Filled in writeHLTObjects
+    baby.mus_mu8().push_back(false);       // Filled in writeHLTObjects
     all_mus.push_back(dynamic_cast<const reco::Candidate *>(&lep)); // For truth-matching in writeMC
 
     if(lepTool->isVetoMuon(lep, vtx, lep_iso)) {
@@ -509,6 +518,7 @@ vCands bmaker_basic::writeElectrons(edm::Handle<pat::ElectronCollection> electro
     baby.els_vvvl().push_back(false);     // Filled in writeHLTObjects
     baby.els_ele23().push_back(false);    // Filled in writeHLTObjects
     baby.els_ele105().push_back(false);   // Filled in writeHLTObjects
+    baby.els_ele8().push_back(false);     // Filled in writeHLTObjects
     all_els.push_back(dynamic_cast<const reco::Candidate *>(&lep)); // For truth-matching in writeMC
 
     if(lepTool->isVetoElectron(lep, vtx, lep_iso)){
@@ -657,12 +667,14 @@ void bmaker_basic::writeHLTObjects(const edm::TriggerNames &names,
       bool vvvl(obj.hasFilterLabel("hltL3MuVVVLIsoFIlter"));
       bool isomu18(obj.hasFilterLabel("hltL3crIsoL1sMu16L1f0L2f10QL3f18QL3trkIsoFiltered0p09") );
       bool mu50(obj.hasFilterLabel("hltL3fL1sMu16orMu25L1f0L2f10QL3Filtered50Q"));
+      bool mu8(obj.hasFilterLabel("hltDoubleMu8Mass8L3Filtered"));
       if(vvvl && baby.onmu_vvvl()<objpt) baby.onmu_vvvl() = objpt;
       if(isomu18 && baby.onmu_isomu18()<objpt) baby.onmu_isomu18() = objpt;
       if(mu50 && baby.onmu_mu50()<objpt) baby.onmu_mu50() = objpt;
+      if(mu8 && baby.onmu_mu8()<objpt) baby.onmu_mu8() = objpt;
       double mindr(999.);
       int minind(-1);
-      if(vvvl || isomu18 || mu50){
+      if(vvvl || isomu18 || mu50 || mu8){
 	for(size_t ind(0); ind < all_mus.size(); ind++) {
 	  double dr(deltaR(obj, *(all_mus[ind])));
 	  double drelpt(fabs((all_mus[ind]->pt() - objpt)/objpt));
@@ -676,17 +688,20 @@ void bmaker_basic::writeHLTObjects(const edm::TriggerNames &names,
 	  baby.mus_vvvl()[minind] = vvvl;
 	  baby.mus_isomu18()[minind] = isomu18;
 	  baby.mus_mu50()[minind] = mu50;
+	  baby.mus_mu8()[minind] = mu8;
 	}
       } // At least one match
     }
-    if(name=="hltEgammaCandidates::HLT"){
+    if(name=="hltEgammaCandidates::HLT" || name=="hltDoubleEle8HLTPixelMatchElectronProducer::HLT"){
       bool vvvl(obj.hasFilterLabel("hltEle15VVVLGsfTrackIsoFilter"));
       bool ele23(obj.hasFilterLabel("hltEle23WPLooseGsfTrackIsoFilter") );
       bool ele105(obj.hasFilterLabel("hltEle105CaloIdVTGsfTrkIdTGsfDphiFilter"));
+      bool ele8(obj.hasFilterLabel("hltDoubleEle8Mass8Filter"));
       if(vvvl && baby.onel_vvvl()<objpt) baby.onel_vvvl() = objpt;
       if(ele23 && baby.onel_ele23()<objpt) baby.onel_ele23() = objpt;
       if(ele105 && baby.onel_ele105()<objpt) baby.onel_ele105() = objpt;
-      if(vvvl || ele23 || ele105){
+      if(ele8 && baby.onel_ele8()<objpt) baby.onel_ele8() = objpt;
+      if(vvvl || ele23 || ele105 || ele8){
 	double mindr(999.);
 	int minind(-1);
 	for(size_t ind(0); ind < all_els.size(); ind++) {
@@ -702,6 +717,7 @@ void bmaker_basic::writeHLTObjects(const edm::TriggerNames &names,
 	  baby.els_vvvl()[minind] = vvvl;
 	  baby.els_ele23()[minind] = ele23;
 	  baby.els_ele105()[minind] = ele105;
+	  baby.els_ele8()[minind] = ele8;
 	}
       } // At least one electron match
       bool ph90(obj.hasFilterLabel("hltEG90L1SingleEG40HEFilter"));

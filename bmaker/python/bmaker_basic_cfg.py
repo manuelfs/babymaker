@@ -77,6 +77,7 @@ if isData: # Processing only lumis in JSON
 process.baby_basic = cms.EDAnalyzer('bmaker_basic',
                                     outputFile = cms.string(outName),
                                     inputFiles = cms.vstring(options.inputFiles),
+                                    json = cms.string(options.json),
                                     jec = cms.string(jecLabel),
                                     met = cms.InputTag("slimmedMETs"),
                                     met_nohf = cms.InputTag("slimmedMETsNoHF"),

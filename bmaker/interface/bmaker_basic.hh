@@ -120,6 +120,7 @@ public:
   // Input parameters
   TString outname;
   std::vector<std::string> inputfiles;
+  TString jsonfile;
   TString jec_label;
   edm::InputTag met_label;
   edm::InputTag met_nohf_label;

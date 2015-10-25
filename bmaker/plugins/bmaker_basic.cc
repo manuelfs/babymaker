@@ -943,6 +943,7 @@ void bmaker_basic::writeMC(edm::Handle<reco::GenParticleCollection> genParticles
 bmaker_basic::bmaker_basic(const edm::ParameterSet& iConfig):
   outname(TString(iConfig.getParameter<string>("outputFile"))),
   inputfiles(iConfig.getParameter<vector<string> >("inputFiles")),
+  jsonfile(iConfig.getParameter<string>("json")),
   jec_label(iConfig.getParameter<string>("jec")),
   met_label(iConfig.getParameter<edm::InputTag>("met")),
   met_nohf_label(iConfig.getParameter<edm::InputTag>("met_nohf")),
@@ -1069,6 +1070,7 @@ bmaker_basic::~bmaker_basic(){
   treeglobal.Branch("user", &user);
   treeglobal.Branch("cmssw", &cmssw);
   treeglobal.Branch("jec", &jec_label);
+  treeglobal.Branch("json", &jsonfile);
   treeglobal.Branch("date", &date);
   treeglobal.Branch("inputfiles", &inputfiles);
   treeglobal.Fill();

@@ -1,4 +1,4 @@
-// combine_datasets: Finds all unique events in a list of cfA files
+// combine_datasets: Finds all unique events in a list of datasets
 
 #include <ctime>
 
@@ -8,11 +8,15 @@
 #include <set>
 #include <map>
 #include <unistd.h>  // getopt
+#include <iomanip>   // setw
 
 #include "TString.h"
 #include "TChain.h"
 #include "TTree.h"
 #include "TFile.h"
+#include "TSystem.h"
+
+#include "utilities.hh"
 
 using namespace std; 
 
@@ -20,12 +24,15 @@ int main(int argc, char *argv[]){
   time_t startTime, curTime;
   time(&startTime);
 
-  TString file_datasets("txt/datasamples/alldata.txt"), infolder("");
+  TString file_datasets("txt/singlelep.txt"), infolder(""), outfolder("out/");
   int c(0);
-  while((c=getopt(argc, argv, "f:i:"))!=-1){
+  while((c=getopt(argc, argv, "f:i:o:"))!=-1){
     switch(c){
     case 'i':
       infolder=optarg;
+      break;
+    case 'o':
+      outfolder=optarg;
       break;
     case 'f':
       file_datasets=optarg;
@@ -36,7 +43,7 @@ int main(int argc, char *argv[]){
   }
   if(file_datasets=="" || infolder==""){
     cout<<endl<<"Specify input folder and datasets: "
-	<<"./run/combine_datasets.exe -i <infolder> -f <file_datasets>"<<endl<<endl;
+	<<"./run/combine_datasets.exe -i <infolder> -o <outfolder=out> -f <file_datasets=txt/singlelep.txt>"<<endl<<endl;
     return 1;
   }
 
@@ -63,7 +70,8 @@ int main(int argc, char *argv[]){
       continue;
     }
     treeglobal.Add(filename);
-    TString outname("out/baby_"+basename+"_");
+    gSystem->mkdir(outfolder, kTRUE);
+    TString outname(outfolder+"/baby_"+basename+"_");
     outname += idata; outname += ".root";
     TFile outfile(outname, "RECREATE");
     outfile.cd();
@@ -80,7 +88,12 @@ int main(int argc, char *argv[]){
     for(int entry(0); entry<entries; entry++){
       chain.GetEntry(entry);
       if(entry!=0 && entry%250000==0) {
-	cout<<"Doing entry "<<entry<<" of "<<entries<<endl;
+	time(&curTime);
+	int seconds(difftime(curTime,startTime));
+	
+	cout<<"Doing entry "<<setw(10)<<addCommas(entry)<<" of "<<addCommas(entries)
+	    <<"    Took "<<setw(6)<<seconds<<" seconds at "
+	    <<setw(4)<<roundNumber(entry,1,seconds*1000.)<<" kHz"<<endl;
       }
       
       if(events.find(run) == events.end()) events[run] = set<int>(); // New run
@@ -98,6 +111,25 @@ int main(int argc, char *argv[]){
     time(&startTime);
 
   } // Loop over datasets
+
+  // for(auto it = events.cbegin(); it != events.cend(); ++it) {
+  //   cout << it->first  <<", ";
+  // } // Needs c++11
+
+  TString txtname(outfolder+"/runs_"+basename+".txt");
+  ofstream txtfile(txtname);
+  int prevrun(0);
+  for(map<int, set<int> >::const_iterator it = events.begin(); it != events.end(); ++it) {
+    run = it->first;
+    if(run/1000 != prevrun){
+      prevrun = run/1000;
+      txtfile<<endl;
+    }
+    txtfile << run << "  ";
+  }
+  txtfile<<endl;
+  txtfile.close();
+  cout<<endl<<"Written run numbers in "<<txtname<<endl;
 
   cout<<endl<<endl;
 

@@ -51,6 +51,15 @@ namespace utilities{
     return result;
   }
 
+  TString addCommas(double num){
+    TString result(""); result += num;
+    int posdot(result.First('.'));
+    if(posdot==-1) posdot = result.Length();
+    for(int ind(posdot-3); ind > 0; ind -= 3)
+      result.Insert(ind, ",");
+    return result;
+  }
+
   float crossSection(const TString &file){
     float xsec(0.);
 

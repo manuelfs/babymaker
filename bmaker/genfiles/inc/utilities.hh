@@ -31,7 +31,8 @@ bool dd_small2big(const double_double& left, const double_double& right);
 long double DeltaPhi(long double phi1, long double phi2);
 long double SignedDeltaPhi(long double phi1, long double phi2);
 float dR(float eta1, float eta2, float phi1, float phi2);
-TString RoundNumber(double num, int decimals, double denom=1.);
+TString roundNumber(double num, int decimals, double denom=1.);
+TString addCommas(double num);
 long double AddInQuadrature(long double x, long double y);
 long double GetMass(long double e, long double px, long double py, long double pz);
 long double GetMT(long double m1, long double pt1, long double phi1,

@@ -242,7 +242,7 @@ float dR(float eta1, float eta2, float phi1, float phi2) {
   return AddInQuadrature(eta1-eta2, DeltaPhi(phi1,phi2));
 }
 
-TString RoundNumber(double num, int decimals, double denom){
+TString roundNumber(double num, int decimals, double denom){
   if(denom==0) return " - ";
   double neg = 1; if(num*denom<0) neg = -1;
   num /= neg*denom; num += 0.5*pow(10.,-decimals);
@@ -260,6 +260,15 @@ TString RoundNumber(double num, int decimals, double denom){
   afterdot.Remove(0,afterdot.First(".")+1);
   for(int i=0; i<decimals-afterdot.Length(); i++)
     result += "0";
+  return result;
+}
+
+TString addCommas(double num){
+  TString result(""); result += num;
+  int posdot(result.First('.'));
+  if(posdot==-1) posdot = result.Length();
+  for(int ind(posdot-3); ind > 0; ind -= 3)
+    result.Insert(ind, ",");
   return result;
 }
 

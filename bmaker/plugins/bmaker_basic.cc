@@ -620,7 +620,7 @@ vCands bmaker_basic::writePhotons(edm::Handle<pat::PhotonCollection> allphotons,
     if(photon.pt() < 50) continue;
     if(!photonTool->idPhoton(photon, electrons, conversions, beamspot, rho)) continue;
 
-    if(photon.pt() < photonTool->PhotonPtCut) baby.nph()++;
+    if(photon.pt() > photonTool->PhotonPtCut) baby.nph()++;
     baby.ph_pt().push_back(photon.pt());
     baby.ph_eta().push_back(photon.eta());
     baby.ph_phi().push_back(photon.phi());
@@ -655,7 +655,7 @@ bool bmaker_basic::writeTriggers(const edm::TriggerNames &names,
 void bmaker_basic::writeHLTObjects(const edm::TriggerNames &names, 
                                    edm::Handle<pat::TriggerObjectStandAloneCollection> triggerObjects, 
 				   vCands &all_mus, vCands &all_els, vCands &photons){
-  const float relptThreshold(0.3), drThreshold(0.1);      
+  const float relptThreshold(1), drThreshold(0.3);      
   for (pat::TriggerObjectStandAlone obj : *triggerObjects) {
     obj.unpackPathNames(names);
     TString name(obj.collection());
@@ -677,8 +677,9 @@ void bmaker_basic::writeHLTObjects(const edm::TriggerNames &names,
       if(vvvl || isomu18 || mu50 || mu8){
 	for(size_t ind(0); ind < all_mus.size(); ind++) {
 	  double dr(deltaR(obj, *(all_mus[ind])));
-	  double drelpt(fabs((all_mus[ind]->pt() - objpt)/objpt));
-	  if(dr > drThreshold || drelpt > relptThreshold) continue;
+	  //double drelpt(fabs((all_mus[ind]->pt() - objpt)/objpt));
+	  //if(dr > drThreshold || drelpt > relptThreshold) continue;
+	  if(dr > drThreshold) continue;
 	  if(dr < mindr){
 	    mindr = dr;
 	    minind = ind;

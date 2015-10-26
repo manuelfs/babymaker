@@ -25,7 +25,7 @@ then
     outName="outputFile="$3
 fi
 
-if [[ $inputFiles == *"store"* ]]
+if [[ $inFile == *"store"* ]]
 then
     cmsRun bmaker/python/bmaker_basic_cfg.py inputFiles=$inFile nEvents=$nEvents json=$json $outName 2>&1 | tee logout.log
 else 

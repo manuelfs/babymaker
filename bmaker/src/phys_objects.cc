@@ -16,11 +16,12 @@ using namespace std;
 
 namespace phys_objects{
 
-  const std::vector<std::vector<int> > VRunLumi2015golden(MakeVRunLumi("golden"));
+  // const std::vector<std::vector<int> > VRunLumi2015golden(MakeVRunLumi("golden"));
   const std::vector<std::vector<int> > VRunLumi2015nonblind(MakeVRunLumi("nonblind"));
 
   bool isInJSON(string type, int run, int lumiblock){
-    if(type=="golden") return inJSON(VRunLumi2015golden, run, lumiblock);
+    //if(type=="golden") return inJSON(VRunLumi2015golden, run, lumiblock);
+    if(type=="golden") return true; // Applying this in bmaker_*_cfg.py
     if(type=="nonblind") return inJSON(VRunLumi2015nonblind, run, lumiblock);
 
     return true;

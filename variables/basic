@@ -65,7 +65,7 @@ std::vector<float> jets_eta
 std::vector<float> jets_phi
 std::vector<float> jets_m
 std::vector<float> jets_csv
-std::vector<float> jets_dpt
+std::vector<float> jets_pt_res
 std::vector<bool>  jets_islep
 std::vector<int>   jets_fjet_index
 std::vector<int>   jets_fjet08_index

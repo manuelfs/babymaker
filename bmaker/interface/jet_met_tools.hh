@@ -44,18 +44,21 @@ public:
   FactorizedJetCorrectorCalculator::VariableValues jetValues;
   std::vector<float> jetTotCorrections, jetL1Corrections;
   std::vector<LVector> corrJet;
+  std::vector<float> genJetPt;
 
   bool leptonInJet(const pat::Jet &jet, vCands leptons);
   bool jetMatched(const pat::Jet &jet, vCands objects);
   bool idJet(const pat::Jet &jet, CutLevel cut);
   bool isLowDphi(vCands jets, float mht_phi, float &dphi1, float &dphi2, float &dphi3, float &dphi4);
 
-  float mismeasurement(const pat::Jet &jet, edm::Handle<edm::View <reco::GenJet> > genjets);
+  float getGenPt(const pat::Jet &jet, edm::Handle<edm::View <reco::GenJet> > genjets);
   float trueHT(edm::Handle<edm::View <reco::GenJet> > genjets);
 
   void getMETRaw(edm::Handle<pat::METCollection> mets, float &metRaw, float &metRawPhi);
   void getMETWithJEC(edm::Handle<pat::METCollection> mets, float &met, float &metPhi);
-  void getJetCorrections(edm::Handle<pat::JetCollection> alljets, double rhoEvent);
+  void getJetCorrections(edm::Handle<edm::View <reco::GenJet> > genjets, edm::Handle<pat::JetCollection> alljets, double rhoEvent);
+
+  float getJetResolutionSF(float jet_eta);
 
   jet_met_tools(TString ijecName);
   ~jet_met_tools();

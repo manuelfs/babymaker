@@ -140,7 +140,9 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
   //////////////////////////// MET/JETs with JECs ///////////////////////////
   edm::Handle<pat::JetCollection> alljets;
   iEvent.getByLabel(jets_label, alljets);
-  jetTool->getJetCorrections(alljets, *rhoEvent_h);
+  edm::Handle<edm::View<reco::GenJet> > genjets;
+  iEvent.getByLabel("slimmedGenJets", genjets) ;
+  jetTool->getJetCorrections(genjets, alljets, *rhoEvent_h);
 
   /// MET
   edm::Handle<pat::METCollection> mets;
@@ -158,8 +160,6 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 
   /// Jets
   vector<LVector> jets;
-  edm::Handle<edm::View<reco::GenJet> > genjets;
-  iEvent.getByLabel("slimmedGenJets", genjets) ;
   jets = writeJets(alljets, genjets, sig_leps, veto_leps, photons, tks);
   writeFatJets(jets);
 
@@ -314,8 +314,11 @@ vector<LVector> bmaker_basic::writeJets(edm::Handle<pat::JetCollection> alljets,
     baby.jets_phi().push_back(jet.phi());
     baby.jets_m().push_back(jetp4.mass());
     baby.jets_islep().push_back(isLep);
-    if(!isData) baby.jets_dpt().push_back(jetTool->mismeasurement(jet, genjets));
-    else baby.jets_dpt().push_back(-9999.);
+    if(!isData) {
+      float genjet_pt = jetTool->genJetPt[ijet];
+      if (genjet_pt>0.) baby.jets_pt_res().push_back(jetp4.pt()/genjet_pt);
+      else baby.jets_pt_res().push_back(-99999.);
+    } else baby.jets_pt_res().push_back(-99999.);
     baby.jets_csv().push_back(csv);
 
     jets.push_back(jetp4);

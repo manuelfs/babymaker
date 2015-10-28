@@ -17,8 +17,9 @@ wishlist = []
 # wishlist.append("T1tttt_mGluino-1500_mLSP-100_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15DR74_Asympt25ns_MCRUN2_74_V9")
 # wishlist.append("T1tttt_mGluino-1200_mLSP-800_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15DR74_Asympt25ns_MCRUN2_74_V9")
 
-wishlist.append("TTJets_*HT*")
-wishlist.append("TTJets*Lept*")
+wishlist.append("TTJets_HT")
+wishlist.append("TTJets_SingleLep")
+wishlist.append("TTJets_DiLep")
 # wishlist.append("WJets")
 # wishlist.append("DYJets")
 # wishlist.append("DYJetsToLL_M-50_TuneCUETP8M1_13TeV")
@@ -44,10 +45,12 @@ args = parser.parse_args()
 print 
 
 # for data get the golden runs
-json_name = "txt/json/" + args.json
-with open(json_name) as jfile:
-  jdata = json.load(jfile)
-goldruns = [int(i) for i in jdata.keys()]
+goldruns = []
+if (args.json):
+  json_name = "txt/json/" + args.json
+  with open(json_name) as jfile:
+    jdata = json.load(jfile)
+  goldruns = [int(i) for i in jdata.keys()]
 
 # Maximum number of input MINIAOD files per condor job
 maxfiles = int(raw_input('Enter max number of files per job: '))
@@ -202,13 +205,13 @@ for ids, ds in enumerate(sorted(files_dict.keys())):
       continue
 
     # list of arguments to the cmsRun job
-    args = []
-    args.append("nEvents="+str(maxevents_perjob))
-    args.append("nEventsSample="+str(nent_dict[ds]))
-    args.append("json=babymaker/"+json_name)
-    args.append("inputFiles=\\\n"+",\\\n".join(files_dict[ds][(job*maxfiles):((job+1)*maxfiles)]))
-    if (host=="sb"): args.append("outputFile="+outpath)
-    else: args.append("outputFile="+bname+".root")
+    condor_args = []
+    condor_args.append("nEvents="+str(maxevents_perjob))
+    condor_args.append("nEventsSample="+str(nent_dict[ds]))
+    if (args.json): condor_args.append("json=babymaker/"+json_name)
+    condor_args.append("inputFiles=\\\n"+",\\\n".join(files_dict[ds][(job*maxfiles):((job+1)*maxfiles)]))
+    if (host=="sb"): condor_args.append("outputFile="+outpath)
+    else: condor_args.append("outputFile="+bname+".root")
 
     # Create executable that will be transfered to the work node by condor
     exefile =rundir+"/"+bname+".sh"
@@ -219,7 +222,7 @@ for ids, ds in enumerate(sorted(files_dict.keys())):
       fexe.write("cd "+codedir+"\n")
       fexe.write("eval `scramv1 runtime -sh`\n")
       fexe.write("export ORIGIN_USER="+os.getenv("USER")+"\n")
-      fexe.write("cmsRun bmaker/python/bmaker_basic_cfg.py \\\n"+" \\\n".join(args)+"\n")
+      fexe.write("cmsRun bmaker/python/bmaker_basic_cfg.py \\\n"+" \\\n".join(condor_args)+"\n")
     else: 
       fexe.write("#! /bin/bash\n")
       fexe.write("source /code/osgcode/cmssoft/cmsset_default.sh\n")
@@ -231,7 +234,7 @@ for ids, ds in enumerate(sorted(files_dict.keys())):
       fexe.write("tar -xf ../../babymaker.tar.xz\n")
       fexe.write("cd babymaker\n")
       fexe.write("./compile.sh\n")
-      fexe.write("cmsRun bmaker/python/bmaker_basic_cfg.py \\\n"+" \\\n".join(args)+"\n")
+      fexe.write("cmsRun bmaker/python/bmaker_basic_cfg.py \\\n"+" \\\n".join(condor_args)+"\n")
       fexe.write("lcg-cp -b -D srmv2 --vo cms -t 2400 --verbose file:"+bname+".root srm://bsrm-3.t2.ucsd.edu:8443/srm/v2/server?SFN="+outpath+"\n")
       fexe.write("cd ../../..\n")
       fexe.write("rm -rf "+cmssw+"\n")

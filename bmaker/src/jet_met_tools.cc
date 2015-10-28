@@ -161,12 +161,13 @@ void jet_met_tools::getJetCorrections(edm::Handle<edm::View <reco::GenJet> > gen
     jetL1Corrections[ijet] = corr_vals.at(0);                        // L1 PU correction (offset)
     
     //smear jets
-    bool doSmearJets = true;
+    bool doSmearJets = false;
     genJetPt.push_back(getGenPt(jet, genjets));
     if (doSmearJets){
       if (genJetPt[ijet]>0.) {
         float corr_pt = jet.p4().pt()*rawFactor*jetTotCorrections[ijet];
-        float smeared_pt = genJetPt[ijet] + getJetResolutionSF(jet.eta())*(corr_pt - genJetPt[ijet]);
+        float smeared_pt = corr_pt;
+        if (genJetPt[ijet]>0) smeared_pt = genJetPt[ijet] + getJetResolutionSF(jet.eta())*(corr_pt - genJetPt[ijet]);
         if (smeared_pt < 0.) smeared_pt = 0.;
         jetTotCorrections[ijet] *= smeared_pt/corr_pt;
       }

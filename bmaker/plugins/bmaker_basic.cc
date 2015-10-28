@@ -40,6 +40,7 @@ using namespace phys_objects;
 void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
   nevents++;
   isData = iEvent.isRealData();
+  baby.Clear();
 
   ///////////////////// MC hard scatter info ///////////////////////
   if (!isData) {
@@ -121,6 +122,7 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
   sig_leps = sig_mus;
   sig_leps.insert(sig_leps.end(), sig_els.begin(), sig_els.end());
   writeLeptons(sig_leps);
+  // if (baby.nleps()<1) return;
   veto_leps = veto_mus;
   veto_leps.insert(veto_leps.end(), veto_els.begin(), veto_els.end());
 
@@ -150,6 +152,7 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
   edm::Handle<pat::METCollection> mets_nohf;
   iEvent.getByLabel(met_nohf_label, mets_nohf);
   writeMET(mets, mets_nohf);
+  // if (baby.met()<200.) return;
 
   /// isolated tracks need to be after MET calculation and before jets cleaning
   vCands tks;
@@ -161,6 +164,7 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
   /// Jets
   vector<LVector> jets;
   jets = writeJets(alljets, genjets, sig_leps, veto_leps, photons, tks);
+  // if (baby.ht()<500.) return;
   writeFatJets(jets);
 
   ////////////////////// mT, dphi /////////////////////

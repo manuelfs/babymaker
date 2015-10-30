@@ -210,6 +210,20 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
     writeMC(genParticles, all_mus, all_els, photons);
   }
 
+  baby.jetmismeas() = false;
+  if(doMetRebalancing && sig_leps.size()==1) {
+    double temp_met = baby.met();
+    double temp_met_phi = baby.met_phi();
+    rebalancedMET(temp_met, temp_met_phi);
+    baby.met_rebal() = temp_met;
+    baby.mt_rebal() = getMT(temp_met, temp_met_phi, sig_leps[0]->pt(), sig_leps[0]->phi());
+    if(baby.met_rebal()/baby.met()<0.2 && baby.mt_rebal()<150) baby.jetmismeas()=true;
+  } else {
+    // use default values for events that do not have exactly one lepton
+    baby.mt_rebal() = baby.mt();
+    baby.met_rebal() = baby.met();
+  }
+
   ////////////////// Filling the tree //////////////////
   baby.Fill();
 
@@ -939,6 +953,60 @@ void bmaker_basic::writeMC(edm::Handle<reco::GenParticleCollection> genParticles
 
 } // writeMC
 
+// Finds the jet that minimizes the MET when a variation is performed
+void bmaker_basic::rebalancedMET( double& minMET, double& minMETPhi)
+{
+  for(unsigned int iJet=0; iJet<baby.jets_pt().size(); iJet++) {
+    // calculate best rescaling factor for this jet
+    double rescalingFactor=calculateRescalingFactor(iJet);
+    double newMETPhi=0;
+    double newMET=calculateRebalancedMET(iJet, rescalingFactor, newMETPhi);
+    if(newMET<minMET) {
+      minMET=newMET;
+      minMETPhi=newMETPhi;
+    }
+  }
+}
+
+// calculate a rebalancing of the jet momentum that minimizes MET
+double bmaker_basic::calculateRescalingFactor(unsigned int jetIdx)
+{
+  
+  // don't allow jet pt to be scaled by more than this factor
+  const double scaleCutoff=2;
+  
+  TVector3 jet, metVector;
+  jet.SetPtEtaPhi(baby.jets_pt().at(jetIdx), baby.jets_eta().at(jetIdx), baby.jets_phi().at(jetIdx));
+  metVector.SetPtEtaPhi(baby.met(), 0, baby.met_phi());
+  
+  double denominator = -jet.Px()*jet.Px()-jet.Py()*jet.Py();
+  double numerator = jet.Px()*metVector.Px()+jet.Py()+metVector.Py();
+  
+  double rescalingFactor=1e6;
+  if(denominator!=0) rescalingFactor = numerator/denominator;
+  if(fabs(rescalingFactor)>scaleCutoff) rescalingFactor=scaleCutoff*rescalingFactor/fabs(rescalingFactor);
+  // the resolution tail is on the _low_ side, not the high side
+  // so we always need to subtract pT
+  if(rescalingFactor>0) rescalingFactor=0;
+  
+  return rescalingFactor;
+}
+
+double bmaker_basic::calculateRebalancedMET(unsigned int jetIdx, double mu, double& METPhi)
+{
+  TVector3 jet, metVector;
+  jet.SetPtEtaPhi(baby.jets_pt().at(jetIdx), baby.jets_eta().at(jetIdx), baby.jets_phi().at(jetIdx));
+  metVector.SetPtEtaPhi(baby.met(), 0, baby.met_phi());
+ 
+  double sumPx = metVector.Px()+mu*jet.Px();
+  double sumPy = metVector.Py()+mu*jet.Py();
+
+  METPhi=atan(sumPy/sumPx);
+
+  return sqrt(sumPx*sumPx+sumPy*sumPy);
+}
+
+
 /*
  _____                 _                   _                 
 /  __ \               | |                 | |                
@@ -957,7 +1025,9 @@ bmaker_basic::bmaker_basic(const edm::ParameterSet& iConfig):
   met_nohf_label(iConfig.getParameter<edm::InputTag>("met_nohf")),
   jets_label(iConfig.getParameter<edm::InputTag>("jets")),
   nevents_sample(iConfig.getParameter<unsigned int>("nEventsSample")),
-  nevents(0){
+  nevents(0),
+  doMetRebalancing(iConfig.getParameter<bool>("doMetRebalancing"))
+{
   
   time(&startTime);
 

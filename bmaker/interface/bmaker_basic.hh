@@ -115,6 +115,11 @@ public:
 
   void reportTime(const edm::Event& iEvent);
 
+  // functions for calculating rebalanced MET
+  void rebalancedMET(double& MET, double& METPhi);
+  double calculateRescalingFactor(unsigned int jetIdx);
+  double calculateRebalancedMET(unsigned int jetIdx, double mu, double& METPhi);
+
   std::vector<TString> trig_name;
 
   // Input parameters
@@ -127,6 +132,7 @@ public:
   edm::InputTag jets_label;
   unsigned int nevents_sample;
   unsigned int nevents;
+  bool doMetRebalancing;
   float xsec;
 
   static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);

@@ -82,7 +82,8 @@ process.baby_basic = cms.EDAnalyzer('bmaker_basic',
                                     met = cms.InputTag("slimmedMETs"),
                                     met_nohf = cms.InputTag("slimmedMETsNoHF"),
                                     jets = cms.InputTag(jets_label),
-                                    nEventsSample = cms.uint32(options.nEventsSample)
+                                    nEventsSample = cms.uint32(options.nEventsSample),
+                                    doMetRebalancing = cms.bool(True)
 )
 
 ###### Setting up number of events, and reporing frequency 

@@ -210,6 +210,7 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
     writeMC(genParticles, all_mus, all_els, photons);
   }
 
+  ////////////////// resolution-corrected MET /////////////////////////
   baby.jetmismeas() = false;
   if(doMetRebalancing && sig_leps.size()==1) {
     double temp_met = baby.met();
@@ -223,6 +224,11 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
     baby.mt_rebal() = baby.mt();
     baby.met_rebal() = baby.met();
   }
+
+  ////////////////// Systematic weights ////////////////
+
+  weightTool->getWeights(iEvent);
+  fillWeights();
 
   ////////////////// Filling the tree //////////////////
   baby.Fill();
@@ -1006,6 +1012,13 @@ double bmaker_basic::calculateRebalancedMET(unsigned int jetIdx, double mu, doub
   return sqrt(sumPx*sumPx+sumPy*sumPy);
 }
 
+void bmaker_basic::fillWeights()
+{
+  baby.weight_muRup() = weightTool->weight(weight_tools::muRup);
+  baby.weight_muRdown() = weightTool->weight(weight_tools::muRdown);
+  baby.weight_muFup() = weightTool->weight(weight_tools::muFup);
+  baby.weight_muFdown() = weightTool->weight(weight_tools::muFdown);
+}
 
 /*
  _____                 _                   _                 
@@ -1035,6 +1048,7 @@ bmaker_basic::bmaker_basic(const edm::ParameterSet& iConfig):
   jetTool    = new jet_met_tools(jec_label);
   photonTool = new photon_tools();
   mcTool     = new mc_tools();
+  weightTool     = new weight_tools();
 
   outfile = new TFile(outname, "recreate");
   outfile->cd();
@@ -1179,6 +1193,7 @@ bmaker_basic::~bmaker_basic(){
   delete photonTool;
   delete jetTool;
   delete mcTool;
+  delete weightTool;
 }
 
 void bmaker_basic::reportTime(const edm::Event& iEvent){

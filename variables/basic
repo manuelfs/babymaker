@@ -26,6 +26,12 @@ float mt_rebal
 float dphi_wlep
 bool jetmismeas
 
+################### Systematic weights #######
+float weight_muRup
+float weight_muRdown
+float weight_muFup
+float weight_muFdown
+
 ###################   MET   ##################
 float met
 float met_phi

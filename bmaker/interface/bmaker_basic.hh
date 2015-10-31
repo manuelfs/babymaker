@@ -41,6 +41,7 @@
 #include "babymaker/bmaker/interface/photon_tools.hh"
 #include "babymaker/bmaker/interface/jet_met_tools.hh"
 #include "babymaker/bmaker/interface/mc_tools.hh"
+#include "babymaker/bmaker/interface/weight_tools.hh"
 #include "babymaker/bmaker/interface/utilities.hh"
 
 typedef float& (baby_base::*baby_float)();
@@ -63,6 +64,7 @@ public:
   jet_met_tools *jetTool;
   photon_tools *photonTool;
   mc_tools *mcTool;
+  weight_tools *weightTool;
 
   // Functions that do the branch writing
   void writeMET(edm::Handle<pat::METCollection> mets, edm::Handle<pat::METCollection> mets_nohf);
@@ -119,6 +121,9 @@ public:
   void rebalancedMET(double& MET, double& METPhi);
   double calculateRescalingFactor(unsigned int jetIdx);
   double calculateRebalancedMET(unsigned int jetIdx, double mu, double& METPhi);
+
+  // for filling additional event weights
+  void fillWeights();
 
   std::vector<TString> trig_name;
 

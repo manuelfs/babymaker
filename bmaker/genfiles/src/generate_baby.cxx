@@ -197,6 +197,7 @@ void WriteBaseHeader(const set<Variable> &all_vars,
   file << "  virtual void GetEntry(const long entry);\n";
   file << "  bool PassString(TString cut);\n\n";
 
+  file << "  virtual void Clear();\n";
   file << "  virtual void Fill();\n";
   file << "  void Write();\n\n";
 
@@ -387,7 +388,12 @@ void WriteBaseSource(const set<Variable> &all_vars,
   file << "  }else{\n";
   file << "    tree_.Fill();\n";
   file << "  }\n\n";
+  file << "}\n\n";
 
+  file << "void baby_base::Clear(){\n";
+  file << "  if(read_only_){\n";
+  file << "    throw std::logic_error(\"Trying to write to read-only tree\");\n";
+  file << "  }else{\n";
   file << "  //Resetting variables\n";
   for(set<Variable>::const_iterator var = com_vars.begin(); var != com_vars.end(); ++var){
     if(Contains(var->type_, "vector")){
@@ -398,6 +404,7 @@ void WriteBaseSource(const set<Variable> &all_vars,
       file << "  " << var->name_ << "_ = static_cast<" << var->type_ << ">(bad_val_);\n";
     }
   }
+  file << "  }\n\n";
   file << "}\n\n";
 
   file << "void baby_base::Write(){\n";

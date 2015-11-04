@@ -40,6 +40,7 @@ using namespace phys_objects;
 void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
   nevents++;
   isData = iEvent.isRealData();
+  baby.Clear();
 
   ///////////////////// MC hard scatter info ///////////////////////
   if (!isData) {
@@ -121,6 +122,7 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
   sig_leps = sig_mus;
   sig_leps.insert(sig_leps.end(), sig_els.begin(), sig_els.end());
   writeLeptons(sig_leps);
+  // if (baby.nleps()<1) return;
   veto_leps = veto_mus;
   veto_leps.insert(veto_leps.end(), veto_els.begin(), veto_els.end());
 
@@ -140,7 +142,9 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
   //////////////////////////// MET/JETs with JECs ///////////////////////////
   edm::Handle<pat::JetCollection> alljets;
   iEvent.getByLabel(jets_label, alljets);
-  jetTool->getJetCorrections(alljets, *rhoEvent_h);
+  edm::Handle<edm::View<reco::GenJet> > genjets;
+  iEvent.getByLabel("slimmedGenJets", genjets) ;
+  jetTool->getJetCorrections(genjets, alljets, *rhoEvent_h);
 
   /// MET
   edm::Handle<pat::METCollection> mets;
@@ -148,6 +152,7 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
   edm::Handle<pat::METCollection> mets_nohf;
   iEvent.getByLabel(met_nohf_label, mets_nohf);
   writeMET(mets, mets_nohf);
+  // if (baby.met()<200.) return;
 
   /// isolated tracks need to be after MET calculation and before jets cleaning
   vCands tks;
@@ -158,9 +163,8 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 
   /// Jets
   vector<LVector> jets;
-  edm::Handle<edm::View<reco::GenJet> > genjets;
-  iEvent.getByLabel("slimmedGenJets", genjets) ;
   jets = writeJets(alljets, genjets, sig_leps, veto_leps, photons, tks);
+  // if (baby.ht()<500.) return;
   writeFatJets(jets);
 
   ////////////////////// mT, dphi /////////////////////
@@ -205,6 +209,26 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
     iEvent.getByLabel("prunedGenParticles", genParticles);
     writeMC(genParticles, all_mus, all_els, photons);
   }
+
+  ////////////////// resolution-corrected MET /////////////////////////
+  baby.jetmismeas() = false;
+  if(doMetRebalancing && sig_leps.size()==1) {
+    double temp_met = baby.met();
+    double temp_met_phi = baby.met_phi();
+    rebalancedMET(temp_met, temp_met_phi);
+    baby.met_rebal() = temp_met;
+    baby.mt_rebal() = getMT(temp_met, temp_met_phi, sig_leps[0]->pt(), sig_leps[0]->phi());
+    if(baby.met_rebal()/baby.met()<0.2 && baby.mt_rebal()<150) baby.jetmismeas()=true;
+  } else {
+    // use default values for events that do not have exactly one lepton
+    baby.mt_rebal() = baby.mt();
+    baby.met_rebal() = baby.met();
+  }
+
+  ////////////////// Systematic weights ////////////////
+
+  weightTool->getWeights(iEvent);
+  fillWeights();
 
   ////////////////// Filling the tree //////////////////
   baby.Fill();
@@ -317,9 +341,12 @@ vector<LVector> bmaker_basic::writeJets(edm::Handle<pat::JetCollection> alljets,
     baby.jets_phi().push_back(jet.phi());
     baby.jets_m().push_back(jetp4.mass());
     baby.jets_islep().push_back(isLep);
+    if(!isData) {
+      float genjet_pt = jetTool->genJetPt[ijet];
+      if (genjet_pt>0.) baby.jets_pt_res().push_back(jetp4.pt()/genjet_pt);
+      else baby.jets_pt_res().push_back(-99999.);
+    } else baby.jets_pt_res().push_back(-99999.);
     baby.jets_hadronFlavour().push_back(jet.hadronFlavour());
-    if(!isData) baby.jets_dpt().push_back(jetTool->mismeasurement(jet, genjets));
-    else baby.jets_dpt().push_back(-9999.);
     baby.jets_csv().push_back(csv);
 
     jets.push_back(jetp4);
@@ -936,6 +963,67 @@ void bmaker_basic::writeMC(edm::Handle<reco::GenParticleCollection> genParticles
 
 } // writeMC
 
+// Finds the jet that minimizes the MET when a variation is performed
+void bmaker_basic::rebalancedMET( double& minMET, double& minMETPhi)
+{
+  for(unsigned int iJet=0; iJet<baby.jets_pt().size(); iJet++) {
+    // calculate best rescaling factor for this jet
+    double rescalingFactor=calculateRescalingFactor(iJet);
+    double newMETPhi=0;
+    double newMET=calculateRebalancedMET(iJet, rescalingFactor, newMETPhi);
+    if(newMET<minMET) {
+      minMET=newMET;
+      minMETPhi=newMETPhi;
+    }
+  }
+}
+
+// calculate a rebalancing of the jet momentum that minimizes MET
+double bmaker_basic::calculateRescalingFactor(unsigned int jetIdx)
+{
+  
+  // don't allow jet pt to be scaled by more than this factor
+  const double scaleCutoff=2;
+  
+  TVector3 jet, metVector;
+  jet.SetPtEtaPhi(baby.jets_pt().at(jetIdx), baby.jets_eta().at(jetIdx), baby.jets_phi().at(jetIdx));
+  metVector.SetPtEtaPhi(baby.met(), 0, baby.met_phi());
+  
+  double denominator = -jet.Px()*jet.Px()-jet.Py()*jet.Py();
+  double numerator = jet.Px()*metVector.Px()+jet.Py()+metVector.Py();
+  
+  double rescalingFactor=1e6;
+  if(denominator!=0) rescalingFactor = numerator/denominator;
+  if(fabs(rescalingFactor)>scaleCutoff) rescalingFactor=scaleCutoff*rescalingFactor/fabs(rescalingFactor);
+  // the resolution tail is on the _low_ side, not the high side
+  // so we always need to subtract pT
+  if(rescalingFactor>0) rescalingFactor=0;
+  
+  return rescalingFactor;
+}
+
+double bmaker_basic::calculateRebalancedMET(unsigned int jetIdx, double mu, double& METPhi)
+{
+  TVector3 jet, metVector;
+  jet.SetPtEtaPhi(baby.jets_pt().at(jetIdx), baby.jets_eta().at(jetIdx), baby.jets_phi().at(jetIdx));
+  metVector.SetPtEtaPhi(baby.met(), 0, baby.met_phi());
+ 
+  double sumPx = metVector.Px()+mu*jet.Px();
+  double sumPy = metVector.Py()+mu*jet.Py();
+
+  METPhi=atan(sumPy/sumPx);
+
+  return sqrt(sumPx*sumPx+sumPy*sumPy);
+}
+
+void bmaker_basic::fillWeights()
+{
+  baby.weight_muRup() = weightTool->weight(weight_tools::muRup);
+  baby.weight_muRdown() = weightTool->weight(weight_tools::muRdown);
+  baby.weight_muFup() = weightTool->weight(weight_tools::muFup);
+  baby.weight_muFdown() = weightTool->weight(weight_tools::muFdown);
+}
+
 /*
  _____                 _                   _                 
 /  __ \               | |                 | |                
@@ -957,7 +1045,9 @@ bmaker_basic::bmaker_basic(const edm::ParameterSet& iConfig):
   met_nohf_label(iConfig.getParameter<edm::InputTag>("met_nohf")),
   jets_label(iConfig.getParameter<edm::InputTag>("jets")),
   nevents_sample(iConfig.getParameter<unsigned int>("nEventsSample")),
-  nevents(0){
+  nevents(0),
+  doMetRebalancing(iConfig.getParameter<bool>("doMetRebalancing"))
+{
   
   time(&startTime);
 
@@ -965,6 +1055,7 @@ bmaker_basic::bmaker_basic(const edm::ParameterSet& iConfig):
   jetTool    = new jet_met_tools(jec_label, btag_label_BC, btag_label_UDSG, btagEfficiencyFile);
   photonTool = new photon_tools();
   mcTool     = new mc_tools();
+  weightTool     = new weight_tools();
 
   outfile = new TFile(outname, "recreate");
   outfile->cd();
@@ -1109,6 +1200,7 @@ bmaker_basic::~bmaker_basic(){
   delete photonTool;
   delete jetTool;
   delete mcTool;
+  delete weightTool;
 }
 
 void bmaker_basic::reportTime(const edm::Event& iEvent){

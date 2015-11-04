@@ -55,11 +55,11 @@ bool jet_met_tools::jetMatched(const pat::Jet &jet, vCands objects){
   return false;
 }
 
-float jet_met_tools::mismeasurement(const pat::Jet &jet, edm::Handle<edm::View <reco::GenJet> > genjets){
+float jet_met_tools::getGenPt(const pat::Jet &jet, edm::Handle<edm::View <reco::GenJet> > genjets){
   for (size_t ijet(0); ijet < genjets->size(); ijet++) {
     const reco::GenJet &genjet = (*genjets)[ijet];
     double dr(deltaR(jet, genjet));
-    if(dr < 0.1) return (jet.pt() - genjet.pt());
+    if(dr < 0.2) return genjet.pt();
   }
   return -99999.;    
 }
@@ -136,13 +136,15 @@ bool jet_met_tools::idJet(const pat::Jet &jet, CutLevel cut){
 }
 
 
-void jet_met_tools::getJetCorrections(edm::Handle<pat::JetCollection> alljets, double rhoEvent){
+void jet_met_tools::getJetCorrections(edm::Handle<edm::View <reco::GenJet> > genjets, edm::Handle<pat::JetCollection> alljets, double rhoEvent){
   jetTotCorrections.resize(alljets->size(), 1.);
   jetL1Corrections.resize(alljets->size(), 1.);
   corrJet.clear();
+  genJetPt.clear();
   if(!doJEC) {
     for (size_t ijet(0); ijet < alljets->size(); ijet++) {
       const pat::Jet &jet = (*alljets)[ijet];
+      genJetPt.push_back(getGenPt(jet, genjets));
       corrJet.push_back(jet.p4());
     }
     return;
@@ -160,7 +162,21 @@ void jet_met_tools::getJetCorrections(edm::Handle<pat::JetCollection> alljets, d
     vector<float> corr_vals = jetCorrector->getSubCorrections(jetValues);
     jetTotCorrections[ijet] = corr_vals.at(corr_vals.size()-1);      // All corrections
     jetL1Corrections[ijet] = corr_vals.at(0);                        // L1 PU correction (offset)
+    
+    //smear jets
+    bool doSmearJets = false;
+    genJetPt.push_back(getGenPt(jet, genjets));
+    if (doSmearJets){
+      if (genJetPt[ijet]>0.) {
+        float corr_pt = jet.p4().pt()*rawFactor*jetTotCorrections[ijet];
+        float smeared_pt = corr_pt;
+        if (genJetPt[ijet]>0) smeared_pt = genJetPt[ijet] + getJetResolutionSF(jet.eta())*(corr_pt - genJetPt[ijet]);
+        if (smeared_pt < 0.) smeared_pt = 0.;
+        jetTotCorrections[ijet] *= smeared_pt/corr_pt;
+      }
+    }  
     corrJet.push_back(jet.p4()*rawFactor*jetTotCorrections[ijet]);   // LorentzVecor with all corrections * raw factor
+
   } // Loop over alljets
     
 }
@@ -321,9 +337,21 @@ jet_met_tools::jet_met_tools(TString ijecName, std::string btag_label_BC, std::s
 	<< "Could not find efficiency file " << btagEfficiencyFile << "." << std::endl;
     }
   }
+}
 
-
-  }
+// from 8TeV dijet measurement with an extra 50% 
+// https://twiki.cern.ch/twiki/bin/view/CMS/JetResolution#2012
+float jet_met_tools::getJetResolutionSF(float jet_eta){
+  double abseta = fabs(jet_eta);
+  if (abseta < 0.5) return (1. + 1.5*0.079);
+  else if (abseta < 1.1) return (1. + 1.5*0.099);
+  else if (abseta < 1.7) return (1. + 1.5*0.121);
+  else if (abseta < 2.3) return (1. + 1.5*0.208);
+  else if (abseta < 2.8) return (1. + 1.5*0.254);
+  else if (abseta < 3.2) return (1. + 1.5*0.395);
+  else if (abseta < 5.0) return (1. + 1.5*0.056);
+  else return 1.;
+}
 
 jet_met_tools::~jet_met_tools(){
   if(doJEC) delete jetCorrector;

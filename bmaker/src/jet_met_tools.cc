@@ -56,6 +56,7 @@ bool jet_met_tools::jetMatched(const pat::Jet &jet, vCands objects){
 }
 
 float jet_met_tools::getGenPt(const pat::Jet &jet, edm::Handle<edm::View <reco::GenJet> > genjets){
+  if(!genjets.isValid()) return -99999.;
   for (size_t ijet(0); ijet < genjets->size(); ijet++) {
     const reco::GenJet &genjet = (*genjets)[ijet];
     double dr(deltaR(jet, genjet));
@@ -144,7 +145,6 @@ void jet_met_tools::getJetCorrections(edm::Handle<edm::View <reco::GenJet> > gen
   if(!doJEC) {
     for (size_t ijet(0); ijet < alljets->size(); ijet++) {
       const pat::Jet &jet = (*alljets)[ijet];
-      genJetPt.push_back(getGenPt(jet, genjets));
       corrJet.push_back(jet.p4());
     }
     return;
@@ -165,8 +165,8 @@ void jet_met_tools::getJetCorrections(edm::Handle<edm::View <reco::GenJet> > gen
     
     //smear jets
     bool doSmearJets = false;
-    genJetPt.push_back(getGenPt(jet, genjets));
     if (doSmearJets){
+      genJetPt.push_back(getGenPt(jet, genjets));
       if (genJetPt[ijet]>0.) {
         float corr_pt = jet.p4().pt()*rawFactor*jetTotCorrections[ijet];
         float smeared_pt = corr_pt;

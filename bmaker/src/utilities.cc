@@ -16,6 +16,11 @@ namespace utilities{
     return a.m() > b.m();
   }
 
+  float getMT(float pt1, float phi1, float pt2, float phi2){
+    //Faster calculation of mT in massless case
+    return sqrt(2.*pt1*pt2*(1.-cos(phi2-phi1)));
+  }
+
   string execute(const string &cmd){
     FILE *pipe = popen(cmd.c_str(), "r");
     if(!pipe) throw runtime_error("Could not open pipe.");

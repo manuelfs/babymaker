@@ -30,11 +30,9 @@
 // User include files
 #include "babymaker/bmaker/interface/bmaker_basic.hh"
 #include "babymaker/bmaker/interface/baby_basic.hh"
-#include "babymaker/bmaker/interface/phys_objects.hh"
 
 using namespace std;
 using namespace utilities;
-using namespace phys_objects;
 
 ///////////////////////// analyze: METHOD CALLED EACH EVENT ///////////////////////////
 void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
@@ -61,7 +59,7 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
   baby.lumiblock() = iEvent.luminosityBlock();
   if(isData){
     // We are applying the golden JSON with lumisToProcess in bmaker_basic_cfg.py
-    bool nonblind(isInJSON("nonblind", baby.run(), baby.lumiblock()));
+    bool nonblind(eventTool->isInJSON("nonblind", baby.run(), baby.lumiblock()));
     //if(!isInJSON("golden", baby.run(), baby.lumiblock()) && !nonblind) return;
     baby.nonblind() = nonblind;
   } else baby.nonblind() = true;
@@ -156,7 +154,7 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 
   /// isolated tracks need to be after MET calculation and before jets cleaning
   vCands tks;
-  if (hasGoodPV(vtx)){
+  if (eventTool->hasGoodPV(vtx)){
     tks = lepTool->getIsoTracks(pfcands, baby.met(), baby.met_phi());
     baby.ntks() = tks.size();
   }  
@@ -788,7 +786,8 @@ void bmaker_basic::writeFilters(const edm::TriggerNames &fnames,
     //else if (name=="Flag_HBHENoiseFilter") baby.pass_hbhe() = pass; // Requires re-running in 2015
   }
 
-  //baby.pass_goodv() &= hasGoodPV(vtx); // We needed to re-run it for Run2015B
+  //baby.pass_goodv() &= eventTool->hasGoodPV(vtx); // We needed to re-run it for Run2015B
+  baby.pass_cschalo() = eventTool->passBeamHalo(baby.run(), baby.event());
 
   baby.pass() = baby.pass_goodv() && baby.pass_eebadsc() && baby.pass_cschalo() && baby.pass_hbhe() && baby.pass_hbheiso() 
     && baby.pass_jets();
@@ -990,7 +989,7 @@ double bmaker_basic::calculateRescalingFactor(unsigned int jetIdx)
   metVector.SetPtEtaPhi(baby.met(), 0, baby.met_phi());
   
   double denominator = -jet.Px()*jet.Px()-jet.Py()*jet.Py();
-  double numerator = jet.Px()*metVector.Px()+jet.Py()+metVector.Py();
+  double numerator = jet.Px()*metVector.Px()+jet.Py()*metVector.Py();
   
   double rescalingFactor=1e6;
   if(denominator!=0) rescalingFactor = numerator/denominator;
@@ -1055,7 +1054,8 @@ bmaker_basic::bmaker_basic(const edm::ParameterSet& iConfig):
   jetTool    = new jet_met_tools(jec_label, btag_label_BC, btag_label_UDSG, btagEfficiencyFile);
   photonTool = new photon_tools();
   mcTool     = new mc_tools();
-  weightTool     = new weight_tools();
+  weightTool = new weight_tools();
+  eventTool  = new event_tools(outname);
 
   outfile = new TFile(outname, "recreate");
   outfile->cd();

@@ -6,14 +6,13 @@ CMSSW code to generate babies (small flat ntuples) from MINIAOD
 To set up the code and generate a file named `baby.root`, issue the following commands 
 on lxplus:
 
-    cmsrel CMSSW_7_4_12_patch4
-    cd CMSSW_7_4_12_patch4/src
+    cmsrel CMSSW_7_4_14
+    cd CMSSW_7_4_14/src
     cmsenv
-    git-cms-addpkg CondFormats/BTauObjects
     git clone git@github.com:manuelfs/babymaker
     cd babymaker
     ./compile.sh
-    cmsRun bmaker/python/bmaker_basic_cfg.py inputFiles=/store/data/Run2015D/SingleMuon/MINIAOD/PromptReco-v3/000/256/675/00000/5E85670E-9C5F-E511-AD41-02163E011E80.root outputFile=baby_Run2015D_SingleMuon.root nEvents=100
+    ./scripts/cmsRun.sh
 
 The `compile.sh` script first compiles the `babymaker/bmaker/genfiles` folder, which
 automatically generates the tree structure (see below), and then issues `scram b`
@@ -37,7 +36,7 @@ automatic vector clearing in the `baby_basic::Fill` method, and other useful fun
 
 The branches are filled in the `bmaker_basic::analyze` method in 
 `babymaker/bmaker/plugins/bmaker_basic.cc`. Functions that define physics quantities,
-like isolation or electron ID, are defined in `babymaker/bmaker/src/phys_objects.cc`.
+like isolation or electron ID, are defined in `babymaker/bmaker/src/*_tools.cc`.
 
 #### Submitting jobs to condor in the T3 at UCSB
 

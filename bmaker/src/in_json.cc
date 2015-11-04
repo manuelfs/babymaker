@@ -15,7 +15,7 @@ using namespace utilities;
 
 std::vector< std::vector<int> > MakeVRunLumi(std::string input){
   std::ifstream orgJSON;
-  std::string fullpath =execute("printf ${CMSSW_BASE}/src/babymaker/");
+  std::string fullpath = execute("printf ${CMSSW_BASE}/src/babymaker/");
   if(input == "golden"){
     fullpath += "txt/json/golden_Cert_246908-258714_13TeV_PromptReco_Collisions15_25ns_JSON.json";
   } else if(input == "nonblind"){

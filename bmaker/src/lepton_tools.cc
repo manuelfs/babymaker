@@ -10,11 +10,9 @@
 
 // User include files
 #include "babymaker/bmaker/interface/lepton_tools.hh"
-#include "babymaker/bmaker/interface/phys_objects.hh"
 
 using namespace std;
 using namespace utilities;
-using namespace phys_objects;
 
 //////////////////// Muons
 bool lepton_tools::isSignalMuon(const pat::Muon &lep, edm::Handle<reco::VertexCollection> vtx, double lepIso){

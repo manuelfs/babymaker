@@ -39,6 +39,7 @@
 #include "babymaker/bmaker/interface/baby_basic.hh"
 #include "babymaker/bmaker/interface/lepton_tools.hh"
 #include "babymaker/bmaker/interface/photon_tools.hh"
+#include "babymaker/bmaker/interface/event_tools.hh"
 #include "babymaker/bmaker/interface/jet_met_tools.hh"
 #include "babymaker/bmaker/interface/mc_tools.hh"
 #include "babymaker/bmaker/interface/weight_tools.hh"
@@ -63,6 +64,7 @@ public:
   lepton_tools *lepTool;
   jet_met_tools *jetTool;
   photon_tools *photonTool;
+  event_tools *eventTool;
   mc_tools *mcTool;
   weight_tools *weightTool;
 

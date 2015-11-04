@@ -4,11 +4,12 @@
 <use name="FWCore/ParameterSet"/>
 <use name="DataFormats/PatCandidates"/>
 <use name="DataFormats/JetReco"/>
+<use name="DataFormats/VertexReco"/>
 <use name="PhysicsTools/PatAlgos"/>
 <use name="CondFormats/JetMETObjects"/>
+<use name="CondFormats/BTauObjects"/>
 <use name="CommonTools/Utils"/>
 <use name="RecoEgamma/EgammaTools"/>
-<use name="CondFormats/BTauObjects"/>
 <use name="fastjet"/>
 <use name="fastjet-contrib"/>
 <export>

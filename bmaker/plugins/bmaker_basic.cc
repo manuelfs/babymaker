@@ -982,7 +982,7 @@ double bmaker_basic::calculateRescalingFactor(unsigned int jetIdx)
 {
   
   // don't allow jet pt to be scaled by more than this factor
-  const double scaleCutoff=2;
+  const double scaleCutoff=1;
   
   TVector3 jet, metVector;
   jet.SetPtEtaPhi(baby.jets_pt().at(jetIdx), baby.jets_eta().at(jetIdx), baby.jets_phi().at(jetIdx));

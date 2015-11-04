@@ -146,6 +146,7 @@ void jet_met_tools::getJetCorrections(edm::Handle<edm::View <reco::GenJet> > gen
     for (size_t ijet(0); ijet < alljets->size(); ijet++) {
       const pat::Jet &jet = (*alljets)[ijet];
       corrJet.push_back(jet.p4());
+      genJetPt.push_back(getGenPt(jet, genjets));
     }
     return;
   }

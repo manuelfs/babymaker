@@ -13,6 +13,9 @@
 #include "babymaker/bmaker/interface/jet_met_tools.hh"
 #include "babymaker/bmaker/interface/release.hh"
 
+// ROOT include files
+#include "TFile.h"
+
 using namespace std;
 using namespace utilities;
 
@@ -223,8 +226,68 @@ void jet_met_tools::getMETWithJEC(edm::Handle<pat::METCollection> mets, float &m
   metPhi = atan2(mety,metx);
 }
 
-jet_met_tools::jet_met_tools(TString ijecName):
-  jecName(ijecName){
+// the jetp4 and isBTaggged are technically redundant but avoid recalculating information
+float jet_met_tools::jetBTagWeight(const pat::Jet &jet, const LVector &jetp4, bool isBTagged)
+{
+  double jet_scalefactor = 1.0;
+  int hadronFlavour = abs(jet.hadronFlavour());
+  // only apply weights if readers are initialized
+  if(readerBC!=0 && readerUDSG!=0) {
+    double jetpttemp = jetp4.pt();
+    // maximum pt in the parameterizations is 670 GeV
+    if(jetpttemp>670) jetpttemp=669.99;
+    try {
+      double eff = getMCTagEfficiency(abs(hadronFlavour), jetp4.eta(), jetpttemp);
+      double SF = 1.0;
+      // procedure from https://twiki.cern.ch/twiki/bin/view/CMS/BTagSFMethods#1a_Event_reweighting_using_scale
+      switch ( abs(hadronFlavour) ) {
+      case 5:
+	SF = readerBC->eval(BTagEntry::FLAV_B, jetp4.eta(), jetpttemp);
+	break;
+      case 4:
+	SF = readerBC->eval(BTagEntry::FLAV_C, jetp4.eta(), jetpttemp);
+	break;
+      default:
+	SF = readerUDSG->eval(BTagEntry::FLAV_UDSG, jetp4.eta(), jetpttemp);
+	break;
+      }
+      jet_scalefactor = isBTagged ? SF : (1-SF*eff)/(1-eff);
+    }
+    catch (std::exception &e) {
+      std::cout << "Caught exception: " << e.what() << " for a jet with (pt,eta,hadron flavor)=(" 
+		<< jetp4.pt() << "," << jetp4.eta() << "," << hadronFlavour << ")" << std::endl;
+    }
+    // jets with pt>670 GeV are assumed to have double the systematic uncertainty of the previous bin
+    if(jetp4.pt()>670) jet_scalefactor*=2.0;
+  }
+
+  return jet_scalefactor;
+}
+
+float jet_met_tools::getMCTagEfficiency(int pdgId, float pT, float eta)
+{
+  // for testing purposes, just use a plausible efficiency
+  // need to add code for getting efficiencies
+  if(abs(pdgId)==4 || abs(pdgId)==5) {
+    int bin = btagEfficiencyParameterization->FindBin(eta, pT, pdgId);
+    return btagEfficiencyParameterization->GetBinContent(bin);
+  }
+  else {
+    // in the ghost clustering scheme to determine flavor, there are only b, c and other (id=0) flavors
+    int bin = btagEfficiencyParameterization->FindBin(eta, pT, 0);
+    return btagEfficiencyParameterization->GetBinContent(bin);
+  }
+}
+
+
+jet_met_tools::jet_met_tools(TString ijecName, std::string btag_label_BC, std::string btag_label_UDSG, std::string btagEfficiency):
+  jecName(ijecName),
+  calib(0),
+  readerBC(0),
+  readerUDSG(0),
+  variationTypeBC(btag_label_BC),
+  variationTypeUDSG(btag_label_UDSG),
+  btagEfficiencyFile(btagEfficiency){
 
   doJEC = !jecName.Contains("miniAOD");
   if(doJEC) {
@@ -237,9 +300,35 @@ jet_met_tools::jet_met_tools(TString ijecName):
     if(jecName.Contains("DATA")) jecFiles.push_back(JetCorrectorParameters(basename+"_L2L3Residual_AK4PFchs.txt"));
     jetCorrector = new FactorizedJetCorrectorCalculator(jecFiles);
   }
+
+  // only run b-tagging systematics if a systematics types are specified
+  if(variationTypeBC.size()>0 && variationTypeBC.size()>0) {
+    calib      = new BTagCalibration("csvv1", "CSVv2.csv");
+    readerBC     = new BTagCalibrationReader(calib, // calibration instance 
+					     BTagEntry::OP_MEDIUM, // operating point
+					     "mujets", // measurement type ("comb" or "mujets")
+					     variationTypeBC.c_str()); // systematics type ("central", "up", or "down")
+    readerUDSG     = new BTagCalibrationReader(calib, // calibration instance 
+					       BTagEntry::OP_MEDIUM, // operating point
+					       "comb", // measurement type ("comb" or "mujets")
+					       variationTypeUDSG.c_str()); // systematics type ("central", "up", or "down")
+    TFile *efficiencyFile = TFile::Open(btagEfficiencyFile.c_str());
+    if(efficiencyFile->IsOpen()) {
+      btagEfficiencyParameterization = static_cast<TH3F*>(efficiencyFile->Get("btagEfficiency"));
+    }
+    else {
+      throw cms::Exception("FileNotFound") 
+	<< "Could not find efficiency file " << btagEfficiencyFile << "." << std::endl;
+    }
+  }
+
+
   }
 
 jet_met_tools::~jet_met_tools(){
   if(doJEC) delete jetCorrector;
+  if(calib !=0 ) delete calib;
+  if(readerBC !=0 ) delete readerBC;
+  if(readerUDSG !=0 ) delete readerUDSG;
 }
 

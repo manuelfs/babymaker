@@ -79,6 +79,14 @@ process.baby_basic = cms.EDAnalyzer('bmaker_basic',
                                     inputFiles = cms.vstring(options.inputFiles),
                                     json = cms.string(options.json),
                                     jec = cms.string(jecLabel),
+                                    # allowed values are "central", "up" and "down".
+                                    # set to empty string for no scale factors
+                                    # "BC" is for b and c jets, which have uncertainties
+                                    # that are taken as fully correlated
+                                    # "UDSG" is for up, down, strange and gluon jets
+                                    btagsysttypeBC = cms.string(""), 
+                                    btagsysttypeUDSG = cms.string(""), 
+                                    btagEfficiencyFile = cms.string("bmaker/data/btagEfficiency.root"),
                                     met = cms.InputTag("slimmedMETs"),
                                     met_nohf = cms.InputTag("slimmedMETsNoHF"),
                                     jets = cms.InputTag(jets_label),

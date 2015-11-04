@@ -9,6 +9,7 @@ on lxplus:
     cmsrel CMSSW_7_4_12_patch4
     cd CMSSW_7_4_12_patch4/src
     cmsenv
+    git-cms-addpkg CondFormats/BTauObjects
     git clone git@github.com:manuelfs/babymaker
     cd babymaker
     ./compile.sh

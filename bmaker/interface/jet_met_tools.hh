@@ -12,14 +12,21 @@
 #include "DataFormats/PatCandidates/interface/MET.h"
 #include "CondFormats/JetMETObjects/interface/FactorizedJetCorrector.h"
 #include "CondFormats/JetMETObjects/interface/JetCorrectorParameters.h"
+// B-tag scale factors                                                                                                                                                                 
+#include "CondFormats/BTauObjects/interface/BTagCalibration.h"
+#include "CondFormats/BTauObjects/interface/BTagCalibrationReader.h"
 
 // ROOT include files
 #include "TString.h"
+#include "TH3.h"
 
 // User include files
 #include "babymaker/bmaker/interface/utilities.hh"
 
 class jet_met_tools{
+private:
+  float getMCTagEfficiency(int pdgId, float pT, float eta);
+
 public:
 
   ///////////////// JET CUTS ///////////////////////
@@ -45,6 +52,12 @@ public:
   std::vector<float> jetTotCorrections, jetL1Corrections;
   std::vector<LVector> corrJet;
 
+  BTagCalibration *calib;
+  BTagCalibrationReader *readerBC;
+  BTagCalibrationReader *readerUDSG;
+  std::string variationTypeBC, variationTypeUDSG, btagEfficiencyFile;
+  TH3F *btagEfficiencyParameterization;
+
   bool leptonInJet(const pat::Jet &jet, vCands leptons);
   bool jetMatched(const pat::Jet &jet, vCands objects);
   bool idJet(const pat::Jet &jet, CutLevel cut);
@@ -56,8 +69,10 @@ public:
   void getMETRaw(edm::Handle<pat::METCollection> mets, float &metRaw, float &metRawPhi);
   void getMETWithJEC(edm::Handle<pat::METCollection> mets, float &met, float &metPhi);
   void getJetCorrections(edm::Handle<pat::JetCollection> alljets, double rhoEvent);
+  
+  float jetBTagWeight(const pat::Jet &jet, const LVector &jetp4, bool isBTagged);
 
-  jet_met_tools(TString ijecName);
+  jet_met_tools(TString ijecName, std::string btag_label_BC, std::string btag_label_UDSG, std::string btagEfficiency);
   ~jet_met_tools();
 };
 

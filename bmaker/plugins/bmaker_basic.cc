@@ -286,6 +286,9 @@ vector<LVector> bmaker_basic::writeJets(edm::Handle<pat::JetCollection> alljets,
       if(!tightJet_ra2) baby.pass_jets_tight_ra2() = false;
     }
     float csv(jet.bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags"));
+    // apply scale factors, which depend on jet (eta, pt, isBTagged) 
+    if(goodJet) baby.weight()*=jetTool->jetBTagWeight(jet, jetp4, csv > jetTool->CSVMedium);
+
     if(goodPtEta && goodJet_ra2) {
       baby.njets_ra2()++;
       baby.ht_ra2() += jetp4.pt();
@@ -314,6 +317,7 @@ vector<LVector> bmaker_basic::writeJets(edm::Handle<pat::JetCollection> alljets,
     baby.jets_phi().push_back(jet.phi());
     baby.jets_m().push_back(jetp4.mass());
     baby.jets_islep().push_back(isLep);
+    baby.jets_hadronFlavour().push_back(jet.hadronFlavour());
     if(!isData) baby.jets_dpt().push_back(jetTool->mismeasurement(jet, genjets));
     else baby.jets_dpt().push_back(-9999.);
     baby.jets_csv().push_back(csv);
@@ -946,6 +950,9 @@ bmaker_basic::bmaker_basic(const edm::ParameterSet& iConfig):
   inputfiles(iConfig.getParameter<vector<string> >("inputFiles")),
   jsonfile(iConfig.getParameter<string>("json")),
   jec_label(iConfig.getParameter<string>("jec")),
+  btag_label_BC(iConfig.getParameter<string>("btagsysttypeBC")),
+  btag_label_UDSG(iConfig.getParameter<string>("btagsysttypeUDSG")),
+  btagEfficiencyFile(iConfig.getParameter<string>("btagEfficiencyFile")),
   met_label(iConfig.getParameter<edm::InputTag>("met")),
   met_nohf_label(iConfig.getParameter<edm::InputTag>("met_nohf")),
   jets_label(iConfig.getParameter<edm::InputTag>("jets")),
@@ -955,7 +962,7 @@ bmaker_basic::bmaker_basic(const edm::ParameterSet& iConfig):
   time(&startTime);
 
   lepTool    = new lepton_tools();
-  jetTool    = new jet_met_tools(jec_label);
+  jetTool    = new jet_met_tools(jec_label, btag_label_BC, btag_label_UDSG, btagEfficiencyFile);
   photonTool = new photon_tools();
   mcTool     = new mc_tools();
 

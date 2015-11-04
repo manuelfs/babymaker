@@ -69,6 +69,7 @@ std::vector<float> jets_dpt
 std::vector<bool>  jets_islep
 std::vector<int>   jets_fjet_index
 std::vector<int>   jets_fjet08_index
+std::vector<int>   jets_hadronFlavour
 
 ##################   Leptons   ################
 int nleps

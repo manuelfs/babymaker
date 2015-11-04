@@ -8,6 +8,7 @@
 <use name="CondFormats/JetMETObjects"/>
 <use name="CommonTools/Utils"/>
 <use name="RecoEgamma/EgammaTools"/>
+<use name="CondFormats/BTauObjects"/>
 <use name="fastjet"/>
 <use name="fastjet-contrib"/>
 <export>

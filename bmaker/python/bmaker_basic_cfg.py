@@ -44,8 +44,9 @@ if doJEC: jets_label = "patJetsReapplyJEC"
 else: jets_label = "slimmedJets"
 
 jecLabel = 'miniAOD' # for 7.4.14 data and mc
-if "Run2015D-PromptReco-v3" in outName: jecLabel = 'Summer15_25nsV5_DATA' # for 7.4.12 data
-elif "RunIISpring15DR74" in outName: jecLabel = 'Summer15_25nsV2_MC' # for 7.4.6.patch4 mc
+if "Run2015D" in outName: jecLabel = 'Summer15_25nsV6_DATA' # for 7.4.12 data
+elif "RunIISpring15DR74" in outName: jecLabel = 'Summer15_25nsV6_MC' # for 7.4.6.patch4 mc
+
 
 if "Run2015" in outName:
     isData = True

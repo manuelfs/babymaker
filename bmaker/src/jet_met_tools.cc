@@ -166,8 +166,8 @@ void jet_met_tools::getJetCorrections(edm::Handle<edm::View <reco::GenJet> > gen
     
     //smear jets
     bool doSmearJets = false;
+    genJetPt.push_back(getGenPt(jet, genjets));
     if (doSmearJets){
-      genJetPt.push_back(getGenPt(jet, genjets));
       if (genJetPt[ijet]>0.) {
         float corr_pt = jet.p4().pt()*rawFactor*jetTotCorrections[ijet];
         float smeared_pt = corr_pt;

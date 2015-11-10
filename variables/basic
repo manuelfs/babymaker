@@ -239,6 +239,7 @@ std::vector<float> mc_eta
 std::vector<float> mc_phi
 std::vector<int>   mc_id
 std::vector<int>   mc_mom
+bool fromGS
 int ntruleps
 int ntrumus
 int ntruels

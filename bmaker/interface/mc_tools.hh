@@ -18,6 +18,8 @@ public:
   void printParticle(const reco::GenParticle &mc);
   bool fromWOrWTau(const reco::GenParticle &mc);
   int mom(const reco::GenParticle &mc, const reco::GenParticle *&mcMom);
+  bool isFromGSP(const reco::Candidate *c);
+  bool isHardProcess(const int status);
 
   mc_tools();
   ~mc_tools();

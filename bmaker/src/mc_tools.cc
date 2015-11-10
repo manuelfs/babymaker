@@ -50,6 +50,38 @@ bool mc_tools::decaysTo(const reco::GenParticle &mc, size_t id, const reco::GenP
   } // Loop over daughters
   return idInDaughters;
 }
+// Code for identifying gluon splitting based on 
+// https://raw.githubusercontent.com/cms-btv-pog/RecoBTag-PerformanceMeasurements/7_4_X/plugins/BTagAnalyzer.cc
+bool mc_tools::isFromGSP(const reco::Candidate *c) 
+{
+  // for example, in case a matched genParton does not exist
+  if(!c) return false;
+
+  bool isFromGSP = false;
+  if( c->numberOfMothers() == 1 ) {
+    const reco::Candidate* dau = c;
+    const reco::Candidate* mom = c->mother();
+    while( dau->numberOfMothers() == 1 && !( isHardProcess(mom->status()) && (abs(mom->pdgId())==4 || abs(mom->pdgId())==5) ) ) {
+      if( abs(mom->pdgId())==21 && (abs(c->pdgId())==4 || abs(c->pdgId())==5) )
+	{
+	  isFromGSP = true;
+	  break;
+	}
+      dau = mom;
+      mom = dau->mother();
+    }
+  }
+
+  return isFromGSP;
+}
+
+bool mc_tools::isHardProcess(const int status)
+{
+  // Assume Pythia8 status codes
+  if( status>=21 && status<=29 ) return true;
+  else return false;
+
+}
 
 void mc_tools::printParticle(const reco::GenParticle &mc){
   int momid(0);

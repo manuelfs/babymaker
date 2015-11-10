@@ -320,7 +320,7 @@ jet_met_tools::jet_met_tools(TString ijecName, std::string btag_label_BC, std::s
 
   // only run b-tagging systematics if a systematics types are specified
   if(variationTypeBC.size()>0 && variationTypeBC.size()>0) {
-    calib      = new BTagCalibration("csvv1", "CSVv2.csv");
+    calib      = new BTagCalibration("csvv1", "bmaker/data/CSVv2.csv");
     readerBC     = new BTagCalibrationReader(calib, // calibration instance 
 					     BTagEntry::OP_MEDIUM, // operating point
 					     "mujets", // measurement type ("comb" or "mujets")

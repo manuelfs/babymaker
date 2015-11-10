@@ -838,6 +838,7 @@ void bmaker_basic::writeMC(edm::Handle<reco::GenParticleCollection> genParticles
   float lep_tru_pt(0.), lep_tru_phi(0.);
   baby.ntruleps()=0; baby.ntrumus()=0; baby.ntruels()=0; baby.ntrutaush()=0; baby.ntrutausl()=0;
   baby.nleps_tm()=0;
+  baby.fromGS()=false;
   for (size_t imc(0); imc < genParticles->size(); imc++) {
     const reco::GenParticle &mc = (*genParticles)[imc];
 
@@ -947,6 +948,9 @@ void bmaker_basic::writeMC(edm::Handle<reco::GenParticleCollection> genParticles
 	metw_tru_y += mc.py();
       }
     } // If undetected neutral particle
+
+    // don't need to check for gluon splitting if flag is already set
+    if(!baby.fromGS()) baby.fromGS()|=mcTool->isFromGSP(dynamic_cast<const reco::Candidate*>(&mc));
 
   } // Loop over genParticles
   baby.ntruleps() = baby.ntrumus()+baby.ntruels()+baby.ntrutaush()+baby.ntrutausl();

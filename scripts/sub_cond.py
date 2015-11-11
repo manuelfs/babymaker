@@ -20,6 +20,7 @@ wishlist = []
 wishlist.append("TTJets_HT")
 wishlist.append("TTJets_SingleLep")
 wishlist.append("TTJets_DiLep")
+wishlist.append("TTGJets");
 # wishlist.append("WJets")
 # wishlist.append("DYJets")
 # wishlist.append("DYJetsToLL_M-50_TuneCUETP8M1_13TeV")

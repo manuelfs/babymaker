@@ -248,3 +248,13 @@ int ntrutausl
 float isr_tru_pt
 float isr_tru_eta
 float isr_tru_phi
+
+################  Systematic variations   ##################
+std::vector<float> sys_ht
+std::vector<int>   sys_njets
+std::vector<int>   sys_nbm
+std::vector<bool>  sys_pass
+std::vector<float> sys_mj
+std::vector<float> sys_met
+std::vector<float> sys_mt
+

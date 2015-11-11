@@ -14,6 +14,8 @@ typedef reco::Candidate::LorentzVector LVector;
 
 namespace utilities{
 
+  enum SysEnum{kSysJER, kSysJECUp, kSysJECDn, kSysLast};
+
   bool greaterPt(const reco::Candidate *a, const reco::Candidate *b);
   bool greaterM(const fastjet::PseudoJet &a, const fastjet::PseudoJet &b);
   float getMT(float pt1, float phi1, float pt2, float phi2);

@@ -18,10 +18,6 @@
 // FW physics include files
 #include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
-#include <fastjet/JetDefinition.hh>
-#include <fastjet/PseudoJet.hh>
-#include <fastjet/ClusterSequence.hh>
-#include <fastjet/GhostedAreaSpec.hh>
 
 // ROOT include files
 #include "TFile.h"
@@ -150,7 +146,6 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
   edm::Handle<pat::METCollection> mets_nohf;
   iEvent.getByLabel(met_nohf_label, mets_nohf);
   writeMET(mets, mets_nohf);
-  // if (baby.met()<200.) return;
 
   /// isolated tracks need to be after MET calculation and before jets cleaning
   vCands tks;
@@ -161,8 +156,13 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 
   /// Jets
   vector<LVector> jets;
-  jets = writeJets(alljets, genjets, sig_leps, veto_leps, photons, tks);
-  // if (baby.ht()<500.) return;
+  vector<vector<LVector> > sys_jets;
+  if (!doSystematics) {
+    writeJets(alljets, genjets, sig_leps, veto_leps, photons, tks, jets, sys_jets);
+  } else {
+    writeJets(alljets, genjets, sig_leps, veto_leps, photons, tks, jets, sys_jets);
+    for (unsigned isys(0); isys<kSysLast; isys++) baby.sys_mj().push_back(jetTool->getSysMJ(1.2, sys_jets[isys]));
+  }
   writeFatJets(jets);
 
   ////////////////////// mT, dphi /////////////////////
@@ -176,6 +176,17 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
     baby.mt() = getMT(baby.met(), baby.met_phi(),  sig_leps[0]->pt(), sig_leps[0]->phi());
     baby.mt_nohf() = getMT(baby.met_nohf(), baby.met_nohf_phi(),  sig_leps[0]->pt(), sig_leps[0]->phi());
   }   
+  // calculating met with systematics and corresponding mT
+  if (doSystematics) {
+    baby.sys_met().resize(kSysLast,-999.);
+    baby.sys_mt().resize(kSysLast,-999.);
+    for (unsigned isys(0); isys<kSysLast; isys++) {
+      float sys_met_phi(0.);
+      jetTool->getMETWithJEC(mets, baby.sys_met()[isys], sys_met_phi, isys);
+      if (sig_leps.size()>0) 
+        baby.sys_mt()[isys] = getMT(baby.sys_met()[isys], sys_met_phi, sig_leps[0]->pt(), sig_leps[0]->phi());                              
+    }
+  }
 
   ///////////////////// Filters ///////////////////////
   // the HBHE noise filter needs to be recomputed in early 2015 data
@@ -193,6 +204,7 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
   if(!filterBits.isValid() && isData) 
     iEvent.getByLabel(edm::InputTag("TriggerResults", "", "PAT"),filterBits);  
   const edm::TriggerNames &fnames = iEvent.triggerNames(*filterBits);
+  //this method uses baby.pass_jets(), so call only after writeJets()!!
   writeFilters(fnames, filterBits, vtx);
 
   //////////////// HLT objects //////////////////
@@ -249,7 +261,7 @@ ______                      _                     _ _   _
 
 // Requires having called jetTool->getJetCorrections(alljets, rhoEvent_) beforehand
 void bmaker_basic::writeMET(edm::Handle<pat::METCollection> mets, edm::Handle<pat::METCollection> mets_nohf){
-  jetTool->getMETWithJEC(mets, baby.met(), baby.met_phi());
+  jetTool->getMETWithJEC(mets, baby.met(), baby.met_phi(), kSysLast);
   jetTool->getMETRaw(mets, baby.met_raw(), baby.met_raw_phi());
   baby.met_mini() = mets->at(0).pt();
   baby.met_mini_phi() = mets->at(0).phi();
@@ -266,9 +278,10 @@ void bmaker_basic::writeMET(edm::Handle<pat::METCollection> mets, edm::Handle<pa
 }
 
 // Requires having called jetTool->getJetCorrections(alljets, rhoEvent_) beforehand
-vector<LVector> bmaker_basic::writeJets(edm::Handle<pat::JetCollection> alljets, edm::Handle<edm::View <reco::GenJet> > genjets,
-					vCands &sig_leps, vCands &veto_leps, vCands &photons, vCands &tks){
-  vector<LVector> jets;
+void bmaker_basic::writeJets(edm::Handle<pat::JetCollection> alljets, 
+                             edm::Handle<edm::View <reco::GenJet> > genjets,
+                             vCands &sig_leps, vCands &veto_leps, vCands &photons, vCands &tks,
+                             vector<LVector> &jets, vector<vector<LVector> > &sys_jets){
   vCands jets_ra2;
   LVector jetsys_p4, jetsys_nob_p4;
   baby.njets() = 0; baby.nbl() = 0; baby.nbm() = 0;  baby.nbt() = 0;  
@@ -276,40 +289,75 @@ vector<LVector> bmaker_basic::writeJets(edm::Handle<pat::JetCollection> alljets,
   baby.njets_ra2() = 0; baby.njets_clean() = 0; baby.nbm_ra2() = 0; baby.ht_ra2() = 0.; baby.ht_clean() = 0.; 
   baby.pass_jets() = true; baby.pass_jets_nohf() = true; baby.pass_jets_tight() = true; 
   baby.pass_jets_ra2() = true; baby.pass_jets_tight_ra2() = true; 
+  if (doSystematics) {
+    baby.sys_njets().resize(kSysLast, 0); baby.sys_nbm().resize(kSysLast, 0); 
+    baby.sys_pass().resize(kSysLast, true); baby.sys_ht().resize(kSysLast, 0.); 
+    sys_jets.resize(kSysLast, vector<LVector>());
+  }
   float mht_px(0.), mht_py(0.), mht_clean_px(0.), mht_clean_py(0.);
   for (size_t ijet(0); ijet < alljets->size(); ijet++) {
     const pat::Jet &jet = (*alljets)[ijet];
-
     if(fabs(jet.eta()) > 5) continue;
 
     LVector jetp4(jetTool->corrJet[ijet]);
-    // Saving good jets and jets corresponding to signal leptons
+    float csv(jet.bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags"));
     bool isLep = jetTool->leptonInJet(jet, sig_leps);
+    bool looseID = jetTool->idJet(jet, jetTool->kLoose);
+    bool tightID = jetTool->idJet(jet, jetTool->kTight);
+    bool goodPtEta = jetp4.pt() > jetTool->JetPtCut && fabs(jet.eta()) <= jetTool->JetEtaCut;
+
+    //   RA4 Jet Quality filters
+    //--------------------------------
+    if(jetp4.pt() > jetTool->JetPtCut && !isLep) {
+        if(goodPtEta && !looseID) baby.pass_jets_nohf() = false;
+        if(!looseID) baby.pass_jets() = false;
+        if(!tightID) baby.pass_jets_tight() = false;
+    }
+
+    //    RA4 Jet Variables
+    //----------------------------
+    if((looseID && goodPtEta) || isLep) {
+      baby.jets_pt().push_back(jetp4.pt());
+      baby.jets_eta().push_back(jet.eta());
+      baby.jets_phi().push_back(jet.phi());
+      baby.jets_m().push_back(jetp4.mass());
+      baby.jets_islep().push_back(isLep);
+      if(!isData && jetTool->genJetPt[ijet]>0.) baby.jets_pt_res().push_back(jetp4.pt()/jetTool->genJetPt[ijet]);
+      else baby.jets_pt_res().push_back(-99999.);
+      baby.jets_hadronFlavour().push_back(jet.hadronFlavour());
+      baby.jets_csv().push_back(csv);
+      jets.push_back(jetp4);
+
+
+      if(!isLep){
+        baby.weight()*=jetTool->jetBTagWeight(jet, jetp4, csv > jetTool->CSVMedium);
+        jetsys_p4 += jet.p4();
+        baby.njets()++;
+        baby.ht() += jetp4.pt();
+        if(csv > jetTool->CSVLoose)  baby.nbl()++;
+        if(csv > jetTool->CSVMedium) baby.nbm()++;
+        else jetsys_nob_p4 += jet.p4();
+        if(csv > jetTool->CSVTight)  baby.nbt()++;
+      }
+    }
+
+    //    HLT HT definition
+    //----------------------------
+    if(jetp4.pt() > jetTool->JetHLTPtCut && fabs(jet.eta()) <= jetTool->JetHLTEtaCut) baby.ht_hlt() += jetp4.pt();
+
+    //    RA2 Jet Variables
+    //----------------------------
     bool isLep_ra2 = jetTool->jetMatched(jet, veto_leps); // Uses RA2/b's loose matching, dpt/pt < 100%, dR < 0.4
     bool isPhoton = jetTool->jetMatched(jet, photons);    // Uses RA2/b's loose matching, dpt/pt < 100%, dR < 0.4
     bool isIsoTrack = jetTool->jetMatched(jet, tks);      // Uses RA2/b's loose matching, dpt/pt < 100%, dR < 0.4
     bool applyId_ra2 = !isLep_ra2 && !isPhoton && !isIsoTrack; // Only check ID if jet not matched
-
-    bool looseID = jetTool->idJet(jet, jetTool->kLoose);
-    bool tightID = jetTool->idJet(jet, jetTool->kTight);
-
-    bool goodPtEta = jetp4.pt() > jetTool->JetPtCut && fabs(jet.eta()) <= jetTool->JetEtaCut;
-    bool goodJet = (!isLep) && looseID && goodPtEta;
     bool goodJet_ra2 = (looseID || !applyId_ra2);
     bool tightJet_ra2 = (tightID || !applyId_ra2);
 
     if(jetp4.pt() > jetTool->JetPtCut) { // Check jet ID on 30 GeV jets
-      if(!isLep) { // RA4 IDs
-	if(goodPtEta && !looseID) baby.pass_jets_nohf() = false;
-	if(!looseID) baby.pass_jets() = false;
-	if(!tightID) baby.pass_jets_tight() = false;
-      }
       if(!goodJet_ra2) baby.pass_jets_ra2() = false;
       if(!tightJet_ra2) baby.pass_jets_tight_ra2() = false;
     }
-    float csv(jet.bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags"));
-    // apply scale factors, which depend on jet (eta, pt, isBTagged) 
-    if(goodJet) baby.weight()*=jetTool->jetBTagWeight(jet, jetp4, csv > jetTool->CSVMedium);
 
     if(goodPtEta && goodJet_ra2) {
       baby.njets_ra2()++;
@@ -317,50 +365,45 @@ vector<LVector> bmaker_basic::writeJets(edm::Handle<pat::JetCollection> alljets,
       jets_ra2.push_back(dynamic_cast<const reco::Candidate *>(&jet)); 
       if(csv > jetTool->CSVMedium) baby.nbm_ra2()++;
       if(!isLep_ra2 && !isPhoton) {
-	baby.njets_clean()++;
-	baby.ht_clean() += jetp4.pt();
+        baby.njets_clean()++;
+        baby.ht_clean() += jetp4.pt();
       }
     }
     if(goodJet_ra2 && jetp4.pt() > jetTool->JetPtCut && fabs(jet.eta()) <= jetTool->JetMHTEtaCut){
       mht_px -= jet.px();
       mht_py -= jet.py();
       if(!isLep_ra2 && !isPhoton) {
-	mht_clean_px -= jet.px();
-	mht_clean_py -= jet.py();
+        mht_clean_px -= jet.px();
+        mht_clean_py -= jet.py();
       }
     }
-    if(jetp4.pt() > jetTool->JetHLTPtCut && fabs(jet.eta()) <= jetTool->JetHLTEtaCut) baby.ht_hlt() += jetp4.pt();
 
-    if(!isLep && !goodJet) continue;
+    //   Systematic variations
+    //----------------------------
+    if (doSystematics){
+      for (unsigned isys(0); isys<kSysLast; isys++){
+        jetp4 = jetTool->corrJet[ijet];
+        if (isys == kSysJER) jetp4 *= (1 + jetTool->jerUnc[ijet]);
+        else if (isys == kSysJECUp) jetp4 *= (1 + jetTool->jecUnc[ijet]);
+        else if (isys == kSysJECDn) jetp4 *= (1 - jetTool->jecUnc[ijet]);
+        //for now store pass_jets in the baby.sys_pass
+        //variable will be updated with rest of filters in writeFilters()
+        if(jetp4.pt() > jetTool->JetPtCut && !isLep && !looseID) baby.sys_pass()[isys] = false;
 
-    // Filling branches
-    baby.jets_pt().push_back(jetp4.pt());
-    baby.jets_eta().push_back(jet.eta());
-    baby.jets_phi().push_back(jet.phi());
-    baby.jets_m().push_back(jetp4.mass());
-    baby.jets_islep().push_back(isLep);
-    if(!isData) {
-      float genjet_pt = jetTool->genJetPt[ijet];
-      if (genjet_pt>0.) baby.jets_pt_res().push_back(jetp4.pt()/genjet_pt);
-      else baby.jets_pt_res().push_back(-99999.);
-    } else baby.jets_pt_res().push_back(-99999.);
-    baby.jets_hadronFlavour().push_back(jet.hadronFlavour());
-    baby.jets_csv().push_back(csv);
-
-    jets.push_back(jetp4);
-
-    if(goodJet){
-      jetsys_p4 += jet.p4();
-      baby.njets()++;
-      baby.ht() += jetp4.pt();
-      if(csv > jetTool->CSVLoose)  baby.nbl()++;
-      if(csv > jetTool->CSVMedium) baby.nbm()++;
-      else jetsys_nob_p4 += jet.p4();
-      if(csv > jetTool->CSVTight)  baby.nbt()++;
-    }
+        if(looseID && jetp4.pt() > jetTool->JetPtCut && fabs(jet.eta()) <= jetTool->JetEtaCut) {
+          sys_jets[isys].push_back(jetp4);
+          if(!isLep){
+            baby.sys_njets()[isys]++;
+            baby.sys_ht()[isys] += jetp4.pt();
+            if(csv > jetTool->CSVMedium) baby.sys_nbm()[isys]++;
+          }
+        }
+      } // loop over systematics
+    } // do systematics
   } // Loop over jets  
 
   if(!isData) baby.ht_tru() = jetTool->trueHT(genjets);
+
   baby.mht() = hypot(mht_px, mht_py);
   baby.mht_phi() = atan2(mht_py, mht_px);
   baby.mht_clean() = hypot(mht_clean_px, mht_clean_py);
@@ -374,99 +417,30 @@ vector<LVector> bmaker_basic::writeJets(edm::Handle<pat::JetCollection> alljets,
   baby.jetsys_nob_pt()  = jetsys_nob_p4.pt();
   baby.jetsys_nob_eta() = jetsys_nob_p4.eta();
   baby.jetsys_nob_phi() = jetsys_nob_p4.phi();
-
-  return jets; // Returning jets that pass acceptance and ID, regardless of whether they're leptons
 }
 
 void bmaker_basic::writeFatJets(vector<LVector> &jets){
-  clusterFatJets(baby.nfjets(), baby.mj(),
-		 baby.fjets_pt(), baby.fjets_eta(),
-		 baby.fjets_phi(), baby.fjets_m(),
-		 baby.fjets_nconst(),
-		 baby.fjets_sumcsv(), baby.fjets_poscsv(),
-		 baby.fjets_btags(), baby.jets_fjet_index(),
-		 1.2, jets);
-  clusterFatJets(baby.nfjets08(), baby.mj08(),
-                 baby.fjets08_pt(), baby.fjets08_eta(),
-                 baby.fjets08_phi(), baby.fjets08_m(),
-                 baby.fjets08_nconst(),
-                 baby.fjets08_sumcsv(), baby.fjets08_poscsv(),
-                 baby.fjets08_btags(), baby.jets_fjet08_index(),
-                 0.8, jets);
+  jetTool->clusterFatJets(baby.nfjets(), baby.mj(),
+                          baby.fjets_pt(), baby.fjets_eta(),
+                          baby.fjets_phi(), baby.fjets_m(),
+                          baby.fjets_nconst(),
+                          baby.fjets_sumcsv(), baby.fjets_poscsv(),
+                          baby.fjets_btags(), baby.jets_fjet_index(),
+                          1.2, jets, baby.jets_csv());
+  jetTool->clusterFatJets(baby.nfjets08(), baby.mj08(),
+                          baby.fjets08_pt(), baby.fjets08_eta(),
+                          baby.fjets08_phi(), baby.fjets08_m(),
+                          baby.fjets08_nconst(),
+                          baby.fjets08_sumcsv(), baby.fjets08_poscsv(),
+                          baby.fjets08_btags(), baby.jets_fjet08_index(),
+                          0.8, jets, baby.jets_csv());
 
 }
-void bmaker_basic::clusterFatJets(int &nfjets, float &mj,
-				  vector<float> &fjets_pt, 
-				  vector<float> &fjets_eta,
-				  vector<float> &fjets_phi, 
-				  vector<float> &fjets_m,
-				  vector<int> &fjets_nconst,
-				  vector<float> &fjets_sumcsv,
-				  vector<float> &fjets_poscsv,
-				  vector<int> &fjets_btags,
-				  vector<int> &jets_fjet_index,
-				  double radius,
-				  vector<LVector> &jets){
-
-  vector<fastjet::PseudoJet> sjets(0);
-  vector<float> csvs(0);
-  for(size_t ijet(0); ijet < jets.size(); ijet++){
-    const fastjet::PseudoJet this_pj(jets[ijet].px(), jets[ijet].py(), jets[ijet].pz(), jets[ijet].energy());
-    sjets.push_back(this_pj);
-    csvs.push_back(baby.jets_csv()[ijet]); // This require to have the same jets in baby and jets
-  } // Loop over skinny jets
-  fastjet::JetDefinition jet_def(fastjet::antikt_algorithm, radius);
-  fastjet::ClusterSequence cs(sjets, jet_def);
-  vector<fastjet::PseudoJet> fjets = cs.inclusive_jets();
-  sort(fjets.begin(), fjets.end(), greaterM);
-  nfjets = 0;
-  mj = 0.;
-  fjets_pt.resize(fjets.size());
-  fjets_eta.resize(fjets.size());
-  fjets_phi.resize(fjets.size());
-  fjets_m.resize(fjets.size());
-  fjets_nconst.resize(fjets.size());
-  fjets_sumcsv.resize(fjets.size());
-  fjets_poscsv.resize(fjets.size());
-  fjets_btags.resize(fjets.size());
-  jets_fjet_index.resize(jets.size());
-
-  for(size_t ipj = 0; ipj < fjets.size(); ++ipj){
-    const fastjet::PseudoJet &pj = fjets.at(ipj);
-    fjets_pt.at(ipj) = pj.pt();
-    fjets_eta.at(ipj) = pj.eta();
-    fjets_phi.at(ipj) = pj.phi_std();
-    fjets_m.at(ipj) = pj.m();
-    const vector<fastjet::PseudoJet> &cjets = pj.constituents();
-    fjets_nconst.at(ipj) = cjets.size();
-    mj += pj.m();
-    ++nfjets;
-    fjets_btags.at(ipj) = 0;
-    fjets_sumcsv.at(ipj) = 0.;
-    fjets_poscsv.at(ipj) = 0.;
-    for(size_t ijet = 0; ijet < jets.size(); ++ijet){
-      for(size_t cjet = 0; cjet < cjets.size(); ++ cjet){
-        if((cjets.at(cjet) - sjets.at(ijet)).pt() < 0.0001){
-          jets_fjet_index.at(ijet) = ipj;
-          fjets_sumcsv.at(ipj) += csvs.at(ijet);
-          if(csvs.at(ijet) > 0.){
-            fjets_poscsv.at(ipj) += csvs.at(ijet);
-          }
-          if(csvs.at(ijet) > jetTool->CSVMedium){
-            ++(fjets_btags.at(ipj));
-          }
-        }
-      } // Loop over fat jet constituents
-    } // Loop over skinny jets
-  } // Loop over fat jets
-
-}
-
 
 vCands bmaker_basic::writeMuons(edm::Handle<pat::MuonCollection> muons, 
-				edm::Handle<pat::PackedCandidateCollection> pfcands, 
-				edm::Handle<reco::VertexCollection> vtx,
-				vCands &veto_mus, vCands &all_mus, double rhoEventCentral){
+                                edm::Handle<pat::PackedCandidateCollection> pfcands, 
+                                edm::Handle<reco::VertexCollection> vtx,
+                                vCands &veto_mus, vCands &all_mus, double rhoEventCentral){
   vCands sig_mus; 
   veto_mus.clear(); all_mus.clear();
   baby.nmus() = 0; baby.nvmus() = 0;
@@ -514,9 +488,9 @@ vCands bmaker_basic::writeMuons(edm::Handle<pat::MuonCollection> muons,
 
 
 vCands bmaker_basic::writeElectrons(edm::Handle<pat::ElectronCollection> electrons, 
-				    edm::Handle<pat::PackedCandidateCollection> pfcands, 
-				    edm::Handle<reco::VertexCollection> vtx,
-				    vCands &veto_els, vCands &all_els, double rhoEventCentral){
+                                    edm::Handle<pat::PackedCandidateCollection> pfcands, 
+                                    edm::Handle<reco::VertexCollection> vtx,
+                                    vCands &veto_els, vCands &all_els, double rhoEventCentral){
   vCands sig_els; 
   veto_els.clear(); all_els.clear();
   baby.nels() = 0; baby.nvels() = 0;
@@ -578,58 +552,58 @@ void bmaker_basic::writeLeptons(vCands &leptons){
 
 void bmaker_basic::writeDiLep(vCands &sig_mus, vCands &sig_els, vCands &veto_mus, vCands &veto_els){
   setDiLepMass(sig_mus,  &baby_base::mumu_m,  &baby_base::mumu_pt1,  &baby_base::mumu_pt2,  &baby_base::mumu_pt,
-	       &baby_base::mumu_eta,  &baby_base::mumu_phi, &baby_base::mus_pt, &baby_base::mus_inz);
+               &baby_base::mumu_eta,  &baby_base::mumu_phi, &baby_base::mus_pt, &baby_base::mus_inz);
   setDiLepMass(veto_mus, &baby_base::mumuv_m, &baby_base::mumuv_pt1, &baby_base::mumuv_pt2, &baby_base::mumuv_pt,
-	       &baby_base::mumuv_eta,  &baby_base::mumuv_phi, &baby_base::mus_pt, &baby_base::mus_inzv);
+               &baby_base::mumuv_eta,  &baby_base::mumuv_phi, &baby_base::mus_pt, &baby_base::mus_inzv);
   setDiLepMass(sig_els,  &baby_base::elel_m,  &baby_base::elel_pt1,  &baby_base::elel_pt2,  &baby_base::elel_pt,
-	       &baby_base::elel_eta,  &baby_base::elel_phi, &baby_base::els_pt, &baby_base::els_inz);
+               &baby_base::elel_eta,  &baby_base::elel_phi, &baby_base::els_pt, &baby_base::els_inz);
   setDiLepMass(veto_els, &baby_base::elelv_m, &baby_base::elelv_pt1, &baby_base::elelv_pt2, &baby_base::elelv_pt,
-	       &baby_base::elelv_eta,  &baby_base::elelv_phi, &baby_base::els_pt, &baby_base::els_inzv);
+               &baby_base::elelv_eta,  &baby_base::elelv_phi, &baby_base::els_pt, &baby_base::els_inzv);
   setElMuMass(sig_els, sig_mus, &baby_base::elmu_m, &baby_base::elmu_pt1, &baby_base::elmu_pt2, &baby_base::elmu_pt,
-	      &baby_base::elmu_eta,  &baby_base::elmu_phi);
+              &baby_base::elmu_eta,  &baby_base::elmu_phi);
   // setElMuMass(veto_els, veto_mus, &baby_base::elmuv_m, &baby_base::elmuv_pt1, &baby_base::elmuv_pt2, &baby_base::elmuv_pt,
-  // 	      &baby_base::elmuv_eta,  &baby_base::elmuv_phi);
+  //          &baby_base::elmuv_eta,  &baby_base::elmuv_phi);
 }
 
 void bmaker_basic::setDiLepMass(vCands leptons, baby_float ll_m, baby_float ll_pt1, baby_float ll_pt2, 
-				baby_float ll_pt, baby_float ll_eta, baby_float ll_phi, baby_vfloat l_pt, baby_vbool l_inz){
+                                baby_float ll_pt, baby_float ll_eta, baby_float ll_phi, baby_vfloat l_pt, baby_vbool l_inz){
   for(size_t lep1(0); lep1 < leptons.size(); lep1++){
     for(size_t lep2(lep1+1); lep2 < leptons.size(); lep2++){
       if(leptons[lep1]->charge()*leptons[lep2]->charge()<0){
-	LVector z_p4(leptons[lep1]->p4()); 
-	z_p4 += leptons[lep2]->p4();
-	(baby.*ll_m)()   = z_p4.mass();
-	(baby.*ll_pt)()  = z_p4.pt();
-	(baby.*ll_eta)() = z_p4.eta();
-	(baby.*ll_phi)() = z_p4.phi();
-	float pt1(leptons[lep1]->pt()), pt2(leptons[lep2]->pt());
-	(baby.*ll_pt1)() = max(pt1, pt2); 
-	(baby.*ll_pt2)() = min(pt1, pt2);
-	for(size_t ilep(0); ilep < (baby.*l_pt)().size(); ilep++){
-	  if(fabs(pt1 - (baby.*l_pt)()[ilep]) < 1e-7) (baby.*l_inz)()[ilep] = true;
-	  if(fabs(pt2 - (baby.*l_pt)()[ilep]) < 1e-7) (baby.*l_inz)()[ilep] = true;
-	}
-	return; // We only set it with the first good ll combination
+        LVector z_p4(leptons[lep1]->p4()); 
+        z_p4 += leptons[lep2]->p4();
+        (baby.*ll_m)()   = z_p4.mass();
+        (baby.*ll_pt)()  = z_p4.pt();
+        (baby.*ll_eta)() = z_p4.eta();
+        (baby.*ll_phi)() = z_p4.phi();
+        float pt1(leptons[lep1]->pt()), pt2(leptons[lep2]->pt());
+        (baby.*ll_pt1)() = max(pt1, pt2); 
+        (baby.*ll_pt2)() = min(pt1, pt2);
+        for(size_t ilep(0); ilep < (baby.*l_pt)().size(); ilep++){
+          if(fabs(pt1 - (baby.*l_pt)()[ilep]) < 1e-7) (baby.*l_inz)()[ilep] = true;
+          if(fabs(pt2 - (baby.*l_pt)()[ilep]) < 1e-7) (baby.*l_inz)()[ilep] = true;
+        }
+        return; // We only set it with the first good ll combination
       }
     } // Loop over lep2
   } // Loop over lep1
 }
 
 void bmaker_basic::setElMuMass(vCands leptons1, vCands leptons2, baby_float ll_m, baby_float ll_pt1, baby_float ll_pt2, 
-			       baby_float ll_pt, baby_float ll_eta, baby_float ll_phi){
+                               baby_float ll_pt, baby_float ll_eta, baby_float ll_phi){
   for(size_t lep1(0); lep1 < leptons1.size(); lep1++){
     for(size_t lep2(0); lep2 < leptons2.size(); lep2++){
       if(leptons1[lep1]->charge()*leptons2[lep2]->charge()<0){
-	LVector z_p4(leptons1[lep1]->p4()); 
-	z_p4 += leptons2[lep2]->p4();
-	(baby.*ll_m)()   = z_p4.mass();
-	(baby.*ll_pt)()  = z_p4.pt();
-	(baby.*ll_eta)() = z_p4.eta();
-	(baby.*ll_phi)() = z_p4.phi();
-	float pt1(leptons1[lep1]->pt()), pt2(leptons2[lep2]->pt());
-	(baby.*ll_pt1)() = pt1; 
-	(baby.*ll_pt2)() = pt2;
-	return; // We only set it with the first good ll combination
+        LVector z_p4(leptons1[lep1]->p4()); 
+        z_p4 += leptons2[lep2]->p4();
+        (baby.*ll_m)()   = z_p4.mass();
+        (baby.*ll_pt)()  = z_p4.pt();
+        (baby.*ll_eta)() = z_p4.eta();
+        (baby.*ll_phi)() = z_p4.phi();
+        float pt1(leptons1[lep1]->pt()), pt2(leptons2[lep2]->pt());
+        (baby.*ll_pt1)() = pt1; 
+        (baby.*ll_pt2)() = pt2;
+        return; // We only set it with the first good ll combination
       }
     } // Loop over lep2
   } // Loop over lep1
@@ -637,9 +611,9 @@ void bmaker_basic::setElMuMass(vCands leptons1, vCands leptons2, baby_float ll_m
 
 
 vCands bmaker_basic::writePhotons(edm::Handle<pat::PhotonCollection> allphotons, 
-				  edm::Handle<std::vector<pat::Electron> > &electrons,
-				  edm::Handle<reco::ConversionCollection> &conversions,
-				  edm::Handle<reco::BeamSpot> &beamspot, double rho){
+                                  edm::Handle<std::vector<pat::Electron> > &electrons,
+                                  edm::Handle<reco::ConversionCollection> &conversions,
+                                  edm::Handle<reco::BeamSpot> &beamspot, double rho){
   vCands photons;
   baby.nph() = 0;
 
@@ -673,7 +647,7 @@ bool bmaker_basic::writeTriggers(const edm::TriggerNames &names,
       if(names.triggerName(itrig).find(trig_name[itn])!=string::npos){
         baby.trig()[itn] = triggerBits->accept(itrig);
         baby.trig_prescale()[itn] = triggerPrescales->getPrescaleForIndex(itrig);
-	if(baby.trig()[itn]) keep = true;
+        if(baby.trig()[itn]) keep = true;
       }
     }
   }
@@ -683,7 +657,7 @@ bool bmaker_basic::writeTriggers(const edm::TriggerNames &names,
 
 void bmaker_basic::writeHLTObjects(const edm::TriggerNames &names, 
                                    edm::Handle<pat::TriggerObjectStandAloneCollection> triggerObjects, 
-				   vCands &all_mus, vCands &all_els, vCands &photons){
+                                   vCands &all_mus, vCands &all_els, vCands &photons){
   const float relptThreshold(1), drThreshold(0.3);      
   for (pat::TriggerObjectStandAlone obj : *triggerObjects) {
     obj.unpackPathNames(names);
@@ -704,22 +678,22 @@ void bmaker_basic::writeHLTObjects(const edm::TriggerNames &names,
       double mindr(999.);
       int minind(-1);
       if(vvvl || isomu18 || mu50 || mu8){
-	for(size_t ind(0); ind < all_mus.size(); ind++) {
-	  double dr(deltaR(obj, *(all_mus[ind])));
-	  //double drelpt(fabs((all_mus[ind]->pt() - objpt)/objpt));
-	  //if(dr > drThreshold || drelpt > relptThreshold) continue;
-	  if(dr > drThreshold) continue;
-	  if(dr < mindr){
-	    mindr = dr;
-	    minind = ind;
-	  }
-	} // Loop over reco muons
-	if(minind>=0){
-	  baby.mus_vvvl()[minind] = vvvl;
-	  baby.mus_isomu18()[minind] = isomu18;
-	  baby.mus_mu50()[minind] = mu50;
-	  baby.mus_mu8()[minind] = mu8;
-	}
+        for(size_t ind(0); ind < all_mus.size(); ind++) {
+          double dr(deltaR(obj, *(all_mus[ind])));
+          //double drelpt(fabs((all_mus[ind]->pt() - objpt)/objpt));
+          //if(dr > drThreshold || drelpt > relptThreshold) continue;
+          if(dr > drThreshold) continue;
+          if(dr < mindr){
+            mindr = dr;
+            minind = ind;
+          }
+        } // Loop over reco muons
+        if(minind>=0){
+          baby.mus_vvvl()[minind] = vvvl;
+          baby.mus_isomu18()[minind] = isomu18;
+          baby.mus_mu50()[minind] = mu50;
+          baby.mus_mu8()[minind] = mu8;
+        }
       } // At least one match
     }
     if(name=="hltEgammaCandidates::HLT" || name=="hltDoubleEle8HLTPixelMatchElectronProducer::HLT"){
@@ -732,41 +706,41 @@ void bmaker_basic::writeHLTObjects(const edm::TriggerNames &names,
       if(ele105 && baby.onel_ele105()<objpt) baby.onel_ele105() = objpt;
       if(ele8 && baby.onel_ele8()<objpt) baby.onel_ele8() = objpt;
       if(vvvl || ele23 || ele105 || ele8){
-	double mindr(999.);
-	int minind(-1);
-	for(size_t ind(0); ind < all_els.size(); ind++) {
-	  double dr(deltaR(obj, *(all_els[ind])));
-	  double drelpt(fabs((all_els[ind]->pt() - objpt)/objpt));
-	  if(dr > drThreshold || drelpt > relptThreshold) continue;
-	  if(dr < mindr){
-	    mindr = dr;
-	    minind = ind;
-	  }
-	} // Loop over reco elecrons
-	if(minind>=0){
-	  baby.els_vvvl()[minind] = vvvl;
-	  baby.els_ele23()[minind] = ele23;
-	  baby.els_ele105()[minind] = ele105;
-	  baby.els_ele8()[minind] = ele8;
-	}
+        double mindr(999.);
+        int minind(-1);
+        for(size_t ind(0); ind < all_els.size(); ind++) {
+          double dr(deltaR(obj, *(all_els[ind])));
+          double drelpt(fabs((all_els[ind]->pt() - objpt)/objpt));
+          if(dr > drThreshold || drelpt > relptThreshold) continue;
+          if(dr < mindr){
+            mindr = dr;
+            minind = ind;
+          }
+        } // Loop over reco elecrons
+        if(minind>=0){
+          baby.els_vvvl()[minind] = vvvl;
+          baby.els_ele23()[minind] = ele23;
+          baby.els_ele105()[minind] = ele105;
+          baby.els_ele8()[minind] = ele8;
+        }
       } // At least one electron match
       bool ph90(obj.hasFilterLabel("hltEG90L1SingleEG40HEFilter"));
       if(ph90 && baby.onph_ph90()<objpt) baby.onph_ph90() = objpt;
       if(ph90){
-	double mindr(999.);
-	int minind(-1);
-	for(size_t ind(0); ind < photons.size(); ind++) {
-	  double dr(deltaR(obj, *(photons[ind])));
-	  double drelpt(fabs((photons[ind]->pt() - objpt)/objpt));
-	  if(dr > drThreshold || drelpt > relptThreshold) continue;
-	  if(dr < mindr){
-	    mindr = dr;
-	    minind = ind;
-	  }
-	} // Loop over reco photons
-	if(minind>=0){
-	  baby.ph_ph90()[minind] = ph90;
-	}
+        double mindr(999.);
+        int minind(-1);
+        for(size_t ind(0); ind < photons.size(); ind++) {
+          double dr(deltaR(obj, *(photons[ind])));
+          double drelpt(fabs((photons[ind]->pt() - objpt)/objpt));
+          if(dr > drThreshold || drelpt > relptThreshold) continue;
+          if(dr < mindr){
+            mindr = dr;
+            minind = ind;
+          }
+        } // Loop over reco photons
+        if(minind>=0){
+          baby.ph_ph90()[minind] = ph90;
+        }
       } // At least one photon match
     }
   } // Loop over trigger objects
@@ -795,17 +769,24 @@ void bmaker_basic::writeFilters(const edm::TriggerNames &fnames,
     && baby.pass_jets_ra2();
   baby.pass_nohf() = baby.pass_goodv() && baby.pass_eebadsc() && baby.pass_cschalo() && baby.pass_hbhe() && baby.pass_hbheiso()  
     && baby.pass_jets_nohf();
+
+  if (doSystematics){
+    for (unsigned isys(0); isys<kSysLast; isys++){
+      // sys_pass_jets already stored in the value of this variable in the baby
+      baby.sys_pass()[isys] = baby.sys_pass()[isys] && baby.pass_goodv() && baby.pass_eebadsc() && baby.pass_cschalo() && baby.pass_hbhe() && baby.pass_hbheiso();
+    }
+  }
 }
 
 void bmaker_basic::writeVertices(edm::Handle<reco::VertexCollection> vtx,
-				 edm::Handle<std::vector< PileupSummaryInfo > >  pu_info){  
+                                 edm::Handle<std::vector< PileupSummaryInfo > >  pu_info){  
   baby.npv() = vtx->size();
   if(pu_info.isValid()){
     for(size_t bc(0); bc<pu_info->size(); ++bc){
       if(pu_info->at(bc).getBunchCrossing()==0){
-	baby.ntrupv() = pu_info->at(bc).getPU_NumInteractions();
-	baby.ntrupv_mean() = pu_info->at(bc).getTrueNumInteractions();
-	break;
+        baby.ntrupv() = pu_info->at(bc).getPU_NumInteractions();
+        baby.ntrupv_mean() = pu_info->at(bc).getTrueNumInteractions();
+        break;
       }
     } // Loop over true PVs
   } // if pu_info is valid
@@ -832,7 +813,7 @@ void bmaker_basic::writeGenInfo(edm::Handle<LHEEventProduct> lhe_info){
 } // writeGenInfo
 
 void bmaker_basic::writeMC(edm::Handle<reco::GenParticleCollection> genParticles, 
-			   vCands &all_mus, vCands &all_els, vCands &photons){
+                           vCands &all_mus, vCands &all_els, vCands &photons){
   LVector isr_p4;
   float metw_tru_x(0.), metw_tru_y(0.);
   float lep_tru_pt(0.), lep_tru_phi(0.);
@@ -871,12 +852,12 @@ void bmaker_basic::writeMC(edm::Handle<reco::GenParticleCollection> genParticles
     if(tauFromTop){
       const reco::GenParticle *tauDaughter(0);
       if(mcTool->decaysTo(mc, 11, tauDaughter) || mcTool->decaysTo(mc, 13, tauDaughter)){
-	baby.mc_id().push_back(tauDaughter->pdgId());
-	baby.mc_pt().push_back(tauDaughter->pt());
-	baby.mc_eta().push_back(tauDaughter->eta());
-	baby.mc_phi().push_back(tauDaughter->phi());
-	baby.mc_mom().push_back(tauDaughter->mother()->pdgId());
-	baby.ntrutausl()++;
+        baby.mc_id().push_back(tauDaughter->pdgId());
+        baby.mc_pt().push_back(tauDaughter->pt());
+        baby.mc_eta().push_back(tauDaughter->eta());
+        baby.mc_phi().push_back(tauDaughter->phi());
+        baby.mc_mom().push_back(tauDaughter->mother()->pdgId());
+        baby.ntrutausl()++;
       } else baby.ntrutaush()++;
     }
 
@@ -886,73 +867,73 @@ void bmaker_basic::writeMC(edm::Handle<reco::GenParticleCollection> genParticles
       double mindr(999.);
       int minind(-1);
       for(size_t ind(0); ind < all_els.size(); ind++) {
-	double dr(deltaR(mc, *(all_els[ind])));
-	double drelpt(fabs((all_els[ind]->pt() - mc.pt())/mc.pt()));
-	if(dr > drThreshold || drelpt > relptThreshold) continue;
-	if(dr < mindr){
-	  mindr = dr;
-	  minind = ind;
-	}
+        double dr(deltaR(mc, *(all_els[ind])));
+        double drelpt(fabs((all_els[ind]->pt() - mc.pt())/mc.pt()));
+        if(dr > drThreshold || drelpt > relptThreshold) continue;
+        if(dr < mindr){
+          mindr = dr;
+          minind = ind;
+        }
       } // Loop over all_els
       if(minind >= 0) {
-	baby.els_tm()[minind] = true;
-	if(baby.els_sig()[minind]) baby.nleps_tm()++;
+        baby.els_tm()[minind] = true;
+        if(baby.els_sig()[minind]) baby.nleps_tm()++;
       }
       if(lep_tru_pt < mc.pt()){
-	lep_tru_pt = mc.pt();
-	lep_tru_phi = mc.phi();
+        lep_tru_pt = mc.pt();
+        lep_tru_phi = mc.phi();
       } // Lepton pt to find mt_tru
     } // If it is an electron
     if(id==13 && mcTool->fromWOrWTau(mc)){
       double mindr(999.);
       int minind(-1);
       for(size_t ind(0); ind < all_mus.size(); ind++) {
-	double dr(deltaR(mc, *(all_mus[ind])));
-	double drelpt(fabs((all_mus[ind]->pt() - mc.pt())/mc.pt()));
-	if(dr > drThreshold || drelpt > relptThreshold) continue;
-	if(dr < mindr){
-	  mindr = dr;
-	  minind = ind;
-	}
+        double dr(deltaR(mc, *(all_mus[ind])));
+        double drelpt(fabs((all_mus[ind]->pt() - mc.pt())/mc.pt()));
+        if(dr > drThreshold || drelpt > relptThreshold) continue;
+        if(dr < mindr){
+          mindr = dr;
+          minind = ind;
+        }
       } // Loop over all_mus
       if(minind >= 0) {
-	baby.mus_tm()[minind] = true;
-	if(baby.mus_sig()[minind]) baby.nleps_tm()++;
+        baby.mus_tm()[minind] = true;
+        if(baby.mus_sig()[minind]) baby.nleps_tm()++;
       }
       if(lep_tru_pt < mc.pt()){
-	lep_tru_pt = mc.pt();
-	lep_tru_phi = mc.phi();
+        lep_tru_pt = mc.pt();
+        lep_tru_phi = mc.phi();
       } // Lepton pt to find mt_tru
     } // If it is a muon
     if(id==22){
       double mindr(999.);
       int minind(-1);
       for(size_t ind(0); ind < photons.size(); ind++) {
-	double dr(deltaR(mc, *(photons[ind])));
-	double drelpt(fabs((photons[ind]->pt() - mc.pt())/mc.pt()));
-	if(dr > drThreshold || drelpt > relptThreshold) continue;
-	if(dr < mindr){
-	  mindr = dr;
-	  minind = ind;
-	}
+        double dr(deltaR(mc, *(photons[ind])));
+        double drelpt(fabs((photons[ind]->pt() - mc.pt())/mc.pt()));
+        if(dr > drThreshold || drelpt > relptThreshold) continue;
+        if(dr < mindr){
+          mindr = dr;
+          minind = ind;
+        }
       } // Loop over photons
       if(minind >= 0) baby.ph_tm()[minind] = true;
     } // If it is a photon
 
     //////// Finding true MET
     if((id==12 || id==14 || id==16 || id==18 || id==1000012 || id==1000014 || id==1000016
-	|| id==1000022 || id==1000023 || id==1000025 || id==1000035 || id==1000039) &&
+        || id==1000022 || id==1000023 || id==1000025 || id==1000035 || id==1000039) &&
        id != momid){ // neutrinos decay to themselves
       if(mcTool->fromWOrWTau(mc)) {
-	metw_tru_x += mc.px();
-	metw_tru_y += mc.py();
+        metw_tru_x += mc.px();
+        metw_tru_y += mc.py();
       }
     } // If undetected neutral particle
 
     // don't need to check for gluon splitting if flag is already set
     if(!baby.fromGS()) baby.fromGS()|=mcTool->isFromGSP(dynamic_cast<const reco::Candidate*>(&mc));
-
   } // Loop over genParticles
+  
   baby.ntruleps() = baby.ntrumus()+baby.ntruels()+baby.ntrutaush()+baby.ntrutausl();
   baby.isr_tru_pt() = isr_p4.pt();
   baby.isr_tru_eta() = isr_p4.eta();
@@ -1040,22 +1021,22 @@ bmaker_basic::bmaker_basic(const edm::ParameterSet& iConfig):
   outname(TString(iConfig.getParameter<string>("outputFile"))),
   inputfiles(iConfig.getParameter<vector<string> >("inputFiles")),
   jsonfile(iConfig.getParameter<string>("json")),
+  condor_subtime(iConfig.getParameter<string>("condor_subtime")),
   jec_label(iConfig.getParameter<string>("jec")),
-  btag_label_BC(iConfig.getParameter<string>("btagsysttypeBC")),
-  btag_label_UDSG(iConfig.getParameter<string>("btagsysttypeUDSG")),
   btagEfficiencyFile(iConfig.getParameter<string>("btagEfficiencyFile")),
   met_label(iConfig.getParameter<edm::InputTag>("met")),
   met_nohf_label(iConfig.getParameter<edm::InputTag>("met_nohf")),
   jets_label(iConfig.getParameter<edm::InputTag>("jets")),
   nevents_sample(iConfig.getParameter<unsigned int>("nEventsSample")),
   nevents(0),
-  doMetRebalancing(iConfig.getParameter<bool>("doMetRebalancing"))
+  doMetRebalancing(iConfig.getParameter<bool>("doMetRebalancing")),
+  doSystematics(iConfig.getParameter<bool>("doSystematics"))
 {
   
   time(&startTime);
 
   lepTool    = new lepton_tools();
-  jetTool    = new jet_met_tools(jec_label, btag_label_BC, btag_label_UDSG, btagEfficiencyFile);
+  jetTool    = new jet_met_tools(jec_label, btagEfficiencyFile, doSystematics);
   photonTool = new photon_tools();
   mcTool     = new mc_tools();
   weightTool = new weight_tools();
@@ -1073,65 +1054,65 @@ bmaker_basic::bmaker_basic(const edm::ParameterSet& iConfig):
 
   trig_name = vector<TString>();
   if(outname.Contains("Run201")){
-    trig_name.push_back("HLT_PFHT350_PFMET100_JetIdCleaned_v");			// 0 
-    trig_name.push_back("HLT_Mu15_IsoVVVL_PFHT350_PFMET50_v");			// 1 
-    trig_name.push_back("HLT_Mu15_IsoVVVL_PFHT600_v");				// 2
-    trig_name.push_back("HLT_Mu15_IsoVVVL_BTagCSV0p72_PFHT400_v");		// 3
-    trig_name.push_back("HLT_Mu15_IsoVVVL_PFHT350_v");				// 4 
-    trig_name.push_back("HLT_Ele15_IsoVVVL_PFHT350_PFMET50_v");			// 5 
-    trig_name.push_back("HLT_Ele15_IsoVVVL_PFHT600_v");				// 6
-    trig_name.push_back("HLT_Ele15_IsoVVVL_BTagCSV0p72_PFHT400_v");		// 7
-    trig_name.push_back("HLT_Ele15_IsoVVVL_PFHT350_v");				// 8 
-    trig_name.push_back("HLT_DoubleMu8_Mass8_PFHT300_v");			// 9
-    trig_name.push_back("HLT_DoubleEle8_CaloIdM_TrackIdM_Mass8_PFHT300_v");	// 10
-    trig_name.push_back("HLT_PFHT475_v");					// 11
-    trig_name.push_back("HLT_PFHT800_v");					// 12
-    trig_name.push_back("HLT_PFMET120_JetIdCleaned_Mu5_v");			// 13
-    trig_name.push_back("HLT_PFMET170_JetIdCleaned_v");				// 14
-    trig_name.push_back("HLT_DoubleIsoMu17_eta2p1_v");		        	// 15
-    trig_name.push_back("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v"); 	        // 16
-    trig_name.push_back("HLT_IsoMu20_v");					// 17
-    trig_name.push_back("HLT_IsoMu18_v");					// 18
-    trig_name.push_back("HLT_IsoMu24_eta2p1_v");				// 19
-    trig_name.push_back("HLT_IsoMu27_v");					// 20
-    trig_name.push_back("HLT_Mu50_v");						// 21
-    trig_name.push_back("HLT_Ele27_eta2p1_WPLoose_Gsf_v");			// 22
-    trig_name.push_back("HLT_Ele23_WPLoose_Gsf_v");         			// 23
-    trig_name.push_back("HLT_Ele105_CaloIdVT_GsfTrkIdT_v");			// 24
-    trig_name.push_back("HLT_DoubleEle33_CaloIdL_GsfTrkIdVL_v");		// 25
-    trig_name.push_back("HLT_DoubleEle24_22_eta2p1_WPLoose_Gsf_v");		// 26
-    trig_name.push_back("HLT_Photon90_CaloIdL_PFHT500_v");		        // 27
-    trig_name.push_back("HLT_PFMETNoMu90_JetIdCleaned_PFMHTNoMu90_IDTight_v");	// 28
+    trig_name.push_back("HLT_PFHT350_PFMET100_JetIdCleaned_v");                 // 0 
+    trig_name.push_back("HLT_Mu15_IsoVVVL_PFHT350_PFMET50_v");                  // 1 
+    trig_name.push_back("HLT_Mu15_IsoVVVL_PFHT600_v");                          // 2
+    trig_name.push_back("HLT_Mu15_IsoVVVL_BTagCSV0p72_PFHT400_v");              // 3
+    trig_name.push_back("HLT_Mu15_IsoVVVL_PFHT350_v");                          // 4 
+    trig_name.push_back("HLT_Ele15_IsoVVVL_PFHT350_PFMET50_v");                 // 5 
+    trig_name.push_back("HLT_Ele15_IsoVVVL_PFHT600_v");                         // 6
+    trig_name.push_back("HLT_Ele15_IsoVVVL_BTagCSV0p72_PFHT400_v");             // 7
+    trig_name.push_back("HLT_Ele15_IsoVVVL_PFHT350_v");                         // 8 
+    trig_name.push_back("HLT_DoubleMu8_Mass8_PFHT300_v");                       // 9
+    trig_name.push_back("HLT_DoubleEle8_CaloIdM_TrackIdM_Mass8_PFHT300_v");     // 10
+    trig_name.push_back("HLT_PFHT475_v");                                       // 11
+    trig_name.push_back("HLT_PFHT800_v");                                       // 12
+    trig_name.push_back("HLT_PFMET120_JetIdCleaned_Mu5_v");                     // 13
+    trig_name.push_back("HLT_PFMET170_JetIdCleaned_v");                         // 14
+    trig_name.push_back("HLT_DoubleIsoMu17_eta2p1_v");                          // 15
+    trig_name.push_back("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v");               // 16
+    trig_name.push_back("HLT_IsoMu20_v");                                       // 17
+    trig_name.push_back("HLT_IsoMu18_v");                                       // 18
+    trig_name.push_back("HLT_IsoMu24_eta2p1_v");                                // 19
+    trig_name.push_back("HLT_IsoMu27_v");                                       // 20
+    trig_name.push_back("HLT_Mu50_v");                                          // 21
+    trig_name.push_back("HLT_Ele27_eta2p1_WPLoose_Gsf_v");                      // 22
+    trig_name.push_back("HLT_Ele23_WPLoose_Gsf_v");                             // 23
+    trig_name.push_back("HLT_Ele105_CaloIdVT_GsfTrkIdT_v");                     // 24
+    trig_name.push_back("HLT_DoubleEle33_CaloIdL_GsfTrkIdVL_v");                // 25
+    trig_name.push_back("HLT_DoubleEle24_22_eta2p1_WPLoose_Gsf_v");             // 26
+    trig_name.push_back("HLT_Photon90_CaloIdL_PFHT500_v");                      // 27
+    trig_name.push_back("HLT_PFMETNoMu90_JetIdCleaned_PFMHTNoMu90_IDTight_v");  // 28
   } else {
-    trig_name.push_back("HLT_PFHT350_PFMET120_NoiseCleaned_v");			// 0 
-    trig_name.push_back("HLT_Mu15_IsoVVVL_PFHT400_PFMET70_v");			// 1 
-    trig_name.push_back("HLT_Mu15_IsoVVVL_PFHT600_v");				// 2
-    trig_name.push_back("HLT_Mu15_IsoVVVL_BTagCSV07_PFHT400_v");		// 3
-    trig_name.push_back("HLT_Mu15_PFHT300_v");				        // 4 
-    trig_name.push_back("HLT_Ele15_IsoVVVL_PFHT400_PFMET70_v");			// 5 
-    trig_name.push_back("HLT_Ele15_IsoVVVL_PFHT600_v");				// 6
-    trig_name.push_back("HLT_Ele15_IsoVVVL_BTagtop8CSV07_PFHT400_v");		// 7
-    trig_name.push_back("HLT_Ele15_PFHT300_v");				        // 8 
-    trig_name.push_back("HLT_DoubleMu8_Mass8_PFHT300_v");			// 9
-    trig_name.push_back("HLT_DoubleEle8_CaloIdM_TrackIdM_Mass8_PFHT300_v");	// 10
-    trig_name.push_back("HLT_PFHT350_v");					// 11
-    trig_name.push_back("HLT_PFHT900_v");					// 12
-    trig_name.push_back("HLT_PFMET120_NoiseCleaned_Mu5_v");			// 13
-    trig_name.push_back("HLT_PFMET170_NoiseCleaned_v");				// 14
-    trig_name.push_back("HLT_DoubleIsoMu17_eta2p1_v");		        	// 15
-    trig_name.push_back("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v"); 	        // 16
-    trig_name.push_back("HLT_IsoMu20_v");					// 17
-    trig_name.push_back("HLT_IsoMu17_eta2p1_v");        			// 18
-    trig_name.push_back("HLT_IsoMu24_eta2p1_v");				// 19
-    trig_name.push_back("HLT_IsoMu27_v");					// 20
-    trig_name.push_back("HLT_Mu50_v");						// 21
-    trig_name.push_back("HLT_Ele27_eta2p1_WP75_Gsf_v");	        		// 22
-    trig_name.push_back("HLT_Ele22_eta2p1_WP75_Gsf_v");        			// 23
-    trig_name.push_back("HLT_Ele105_CaloIdVT_GsfTrkIdT_v");			// 24
-    trig_name.push_back("HLT_DoubleEle33_CaloIdL_GsfTrkIdVL_v");		// 25
-    trig_name.push_back("HLT_DoubleEle24_22_eta2p1_WP75_Gsf_v");		// 26
-    trig_name.push_back("HLT_Photon90_CaloIdL_PFHT500_v");		        // 27
-    trig_name.push_back("HLT_PFMETNoMu90_JetIdCleaned_PFMHTNoMu90_IDTight_v");	// 28
+    trig_name.push_back("HLT_PFHT350_PFMET120_NoiseCleaned_v");                 // 0 
+    trig_name.push_back("HLT_Mu15_IsoVVVL_PFHT400_PFMET70_v");                  // 1 
+    trig_name.push_back("HLT_Mu15_IsoVVVL_PFHT600_v");                          // 2
+    trig_name.push_back("HLT_Mu15_IsoVVVL_BTagCSV07_PFHT400_v");                // 3
+    trig_name.push_back("HLT_Mu15_PFHT300_v");                                  // 4 
+    trig_name.push_back("HLT_Ele15_IsoVVVL_PFHT400_PFMET70_v");                 // 5 
+    trig_name.push_back("HLT_Ele15_IsoVVVL_PFHT600_v");                         // 6
+    trig_name.push_back("HLT_Ele15_IsoVVVL_BTagtop8CSV07_PFHT400_v");           // 7
+    trig_name.push_back("HLT_Ele15_PFHT300_v");                                 // 8 
+    trig_name.push_back("HLT_DoubleMu8_Mass8_PFHT300_v");                       // 9
+    trig_name.push_back("HLT_DoubleEle8_CaloIdM_TrackIdM_Mass8_PFHT300_v");     // 10
+    trig_name.push_back("HLT_PFHT350_v");                                       // 11
+    trig_name.push_back("HLT_PFHT900_v");                                       // 12
+    trig_name.push_back("HLT_PFMET120_NoiseCleaned_Mu5_v");                     // 13
+    trig_name.push_back("HLT_PFMET170_NoiseCleaned_v");                         // 14
+    trig_name.push_back("HLT_DoubleIsoMu17_eta2p1_v");                          // 15
+    trig_name.push_back("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v");               // 16
+    trig_name.push_back("HLT_IsoMu20_v");                                       // 17
+    trig_name.push_back("HLT_IsoMu17_eta2p1_v");                                // 18
+    trig_name.push_back("HLT_IsoMu24_eta2p1_v");                                // 19
+    trig_name.push_back("HLT_IsoMu27_v");                                       // 20
+    trig_name.push_back("HLT_Mu50_v");                                          // 21
+    trig_name.push_back("HLT_Ele27_eta2p1_WP75_Gsf_v");                         // 22
+    trig_name.push_back("HLT_Ele22_eta2p1_WP75_Gsf_v");                         // 23
+    trig_name.push_back("HLT_Ele105_CaloIdVT_GsfTrkIdT_v");                     // 24
+    trig_name.push_back("HLT_DoubleEle33_CaloIdL_GsfTrkIdVL_v");                // 25
+    trig_name.push_back("HLT_DoubleEle24_22_eta2p1_WP75_Gsf_v");                // 26
+    trig_name.push_back("HLT_Photon90_CaloIdL_PFHT500_v");                      // 27
+    trig_name.push_back("HLT_PFMETNoMu90_JetIdCleaned_PFMHTNoMu90_IDTight_v");  // 28
   }
 
 }
@@ -1157,8 +1138,14 @@ bmaker_basic::~bmaker_basic(){
   struct tm * timeinfo = localtime(&curTime);
   strftime(time_c,100,"%Y-%m-%d %H:%M:%S",timeinfo);
   TString date(time_c);
-
   int seconds(floor(difftime(curTime,startTime)+0.5));
+
+  vector<TString> sys_names;
+  sys_names.resize(kSysLast,"");
+  sys_names[kSysJER] = "jer";
+  sys_names[kSysJECUp] = "jec_up";
+  sys_names[kSysJECDn] = "jec_dn";
+
   TTree treeglobal("treeglobal", "treeglobal");
   treeglobal.Branch("nev_sample", &nevents_sample);
   treeglobal.Branch("nev_file", &nevents);
@@ -1169,6 +1156,7 @@ bmaker_basic::~bmaker_basic(){
   treeglobal.Branch("root_version", &root_version);
   treeglobal.Branch("root_tutorial_dir", &root_tutorial_dir);
   treeglobal.Branch("trig_names", &trig_name);
+  treeglobal.Branch("sys_names", &sys_names);
   treeglobal.Branch("xsec", &xsec);
   treeglobal.Branch("user", &user);
   treeglobal.Branch("cmssw", &cmssw);
@@ -1176,6 +1164,7 @@ bmaker_basic::~bmaker_basic(){
   treeglobal.Branch("json", &jsonfile);
   treeglobal.Branch("date", &date);
   treeglobal.Branch("inputfiles", &inputfiles);
+  treeglobal.Branch("condor_subtime", &condor_subtime);
   treeglobal.Fill();
   treeglobal.SetDirectory(outfile);
   treeglobal.Write();
@@ -1213,7 +1202,7 @@ void bmaker_basic::reportTime(const edm::Event& iEvent){
     time_t curTime;
     time(&curTime);
     cout<<endl<<"BABYMAKER: Took "<<roundNumber(difftime(curTime,startTime),1)<<" seconds for set up and run first event"
-	<<endl<<endl;
+        <<endl<<endl;
     time(&startTime);
   }
   if((nevents<100&&nevents%10==0) || (nevents<1000&&nevents%100==0) 
@@ -1222,10 +1211,10 @@ void bmaker_basic::reportTime(const edm::Event& iEvent){
     time(&curTime);
     float seconds(difftime(curTime,startTime));
     cout<<"BABYMAKER: Run "<<iEvent.id().run()<<", Event "<< setw(8)<<iEvent.id().event()
-	<<", LumiSection "<< setw(5)<< iEvent.luminosityBlock()
-	<<". Ran "<<setw(7)<<nevents<<" events in "<<setw(7)<<seconds<<" seconds -> "
-	<<setw(5)<<roundNumber(nevents-1,1,seconds)<<" Hz, "
-	<<setw(5)<<roundNumber(seconds*1000,2,nevents-1)<<" ms per event"<<endl;
+        <<", LumiSection "<< setw(5)<< iEvent.luminosityBlock()
+        <<". Ran "<<setw(7)<<nevents<<" events in "<<setw(7)<<seconds<<" seconds -> "
+        <<setw(5)<<roundNumber(nevents-1,1,seconds)<<" Hz, "
+        <<setw(5)<<roundNumber(seconds*1000,2,nevents-1)<<" ms per event"<<endl;
   }
 }
 

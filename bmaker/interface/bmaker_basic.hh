@@ -70,21 +70,13 @@ public:
 
   // Functions that do the branch writing
   void writeMET(edm::Handle<pat::METCollection> mets, edm::Handle<pat::METCollection> mets_nohf);
-  std::vector<LVector> writeJets(edm::Handle<pat::JetCollection> alljets, edm::Handle<edm::View <reco::GenJet> > genjets, 
-				 vCands &sig_leps, vCands &veto_leps, vCands &photons, vCands &tks);
+  void writeJets(edm::Handle<pat::JetCollection> alljets, 
+                 edm::Handle<edm::View <reco::GenJet> > genjets, 
+                 vCands &sig_leps, vCands &veto_leps, 
+                 vCands &photons, vCands &tks, 
+                 std::vector<LVector> &jets, 
+                 std::vector<std::vector<LVector> > &sysjets);
   void writeFatJets(std::vector<LVector> &jets);
-  void clusterFatJets(int &nfjets, float &mj,
-		      std::vector<float> &fjets_pt, 
-		      std::vector<float> &fjets_eta,
-		      std::vector<float> &fjets_phi, 
-		      std::vector<float> &fjets_m,
-		      std::vector<int> &fjets_nconst,
-		      std::vector<float> &fjets_sumcsv,
-		      std::vector<float> &fjets_poscsv,
-		      std::vector<int> &fjets_btags,
-		      std::vector<int> &jets_fjet_index,
-		      double radius,
-		      std::vector<LVector> &jets);
   vCands writeMuons(edm::Handle<pat::MuonCollection> muons, 
 		    edm::Handle<pat::PackedCandidateCollection> pfcands, 
 		    edm::Handle<reco::VertexCollection> vtx,
@@ -133,6 +125,7 @@ public:
   TString outname;
   std::vector<std::string> inputfiles;
   TString jsonfile;
+  TString condor_subtime;
   TString jec_label;
   std::string btag_label_BC;
   std::string btag_label_UDSG;
@@ -144,6 +137,8 @@ public:
   unsigned int nevents;
   bool doMetRebalancing;
   float xsec;
+
+  bool doSystematics;
 
   static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 

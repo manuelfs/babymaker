@@ -12,6 +12,7 @@
 #include "DataFormats/PatCandidates/interface/MET.h"
 #include "CondFormats/JetMETObjects/interface/FactorizedJetCorrector.h"
 #include "CondFormats/JetMETObjects/interface/JetCorrectorParameters.h"
+#include "CondFormats/JetMETObjects/interface/JetCorrectionUncertainty.h"
 // B-tag scale factors                                                                                                                                                                 
 #include "CondFormats/BTauObjects/interface/BTagCalibration.h"
 #include "CondFormats/BTauObjects/interface/BTagCalibrationReader.h"
@@ -44,13 +45,17 @@ public:
   enum CutLevel{kLoose, kTight, kPBNR};
 
   TString jecName;
+  bool doSystematics;
   bool doJEC;
+  bool isData;
   double rhoEvent_;
   edm::Handle<pat::JetCollection> alljets_;
   FactorizedJetCorrectorCalculator *jetCorrector;
   FactorizedJetCorrectorCalculator::VariableValues jetValues;
+  JetCorrectionUncertainty *jecUncProvider;
   std::vector<float> jetTotCorrections, jetL1Corrections;
   std::vector<LVector> corrJet;
+  std::vector<float> jerUnc, jecUnc;
   std::vector<float> genJetPt;
 
   BTagCalibration *calib;
@@ -68,14 +73,29 @@ public:
   float trueHT(edm::Handle<edm::View <reco::GenJet> > genjets);
 
   void getMETRaw(edm::Handle<pat::METCollection> mets, float &metRaw, float &metRawPhi);
-  void getMETWithJEC(edm::Handle<pat::METCollection> mets, float &met, float &metPhi);
+  void getMETWithJEC(edm::Handle<pat::METCollection> mets, float &met, float &metPhi, unsigned isys);
 
   void getJetCorrections(edm::Handle<edm::View <reco::GenJet> > genjets, edm::Handle<pat::JetCollection> alljets, double rhoEvent);
+  void setJetUncertainties(edm::Handle<edm::View <reco::GenJet> > genjets);
 
   float getJetResolutionSF(float jet_eta);
   float jetBTagWeight(const pat::Jet &jet, const LVector &jetp4, bool isBTagged);
 
-  jet_met_tools(TString ijecName, std::string btag_label_BC, std::string btag_label_UDSG, std::string btagEfficiency);
+  void clusterFatJets(int &nfjets, float &mj,
+          std::vector<float> &fjets_pt, 
+          std::vector<float> &fjets_eta,
+          std::vector<float> &fjets_phi, 
+          std::vector<float> &fjets_m,
+          std::vector<int> &fjets_nconst,
+          std::vector<float> &fjets_sumcsv,
+          std::vector<float> &fjets_poscsv,
+          std::vector<int> &fjets_btags,
+          std::vector<int> &jets_fjet_index,
+          double radius,
+          std::vector<LVector> &jets,
+          std::vector<float> &jets_csv);
+  double getSysMJ(double radius, std::vector<LVector> &jets);  
+  jet_met_tools(TString ijecName, std::string btagEfficiency, bool doSys);
   ~jet_met_tools();
 };
 

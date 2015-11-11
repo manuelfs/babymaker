@@ -32,21 +32,29 @@ options.register('json',
                  VarParsing.multiplicity.singleton,
                  VarParsing.varType.string,
                  "Path to json starting with babymaker/...")
+options.register('condorSubTime',
+                 '000000_000000',
+                 VarParsing.multiplicity.singleton,
+                 VarParsing.varType.string,
+                 "Timestamp from condor submission")
 options.parseArguments()
 outName = options.outputFile
 if outName == "output.root": # output filename not set
     rootfile = basename(options.inputFiles[0])
     outName = "baby_"+rootfile
 
+doSystematics = True
+
 ## This refers to the official JEC methods. To apply on-the-fly, just set jecLabel to something different from miniAOD
 doJEC = False  
 if doJEC: jets_label = "patJetsReapplyJEC"
 else: jets_label = "slimmedJets"
 
-jecLabel = 'miniAOD' # for 7.4.14 data and mc
+# jecLabel must contain the JEC version; this is needed for uncertainty calculation
+# if there is no need to apply JECs then the jecLabel must also contain 'miniAOD' (as well as the version)
+jecLabel = 'miniAOD_Summer15_25nsV6_MC' # for 7.4.14 mc, don't apply JEC, but still give the JEC tag because of systematics
 if "Run2015D" in outName: jecLabel = 'Summer15_25nsV6_DATA' # for 7.4.12 data
 elif "RunIISpring15DR74" in outName: jecLabel = 'Summer15_25nsV6_MC' # for 7.4.6.patch4 mc
-
 
 if "Run2015" in outName:
     isData = True
@@ -76,23 +84,18 @@ if isData: # Processing only lumis in JSON
     process.source.lumisToProcess = LumiList.LumiList(filename = jsonfile).getVLuminosityBlockRange()
 
 process.baby_basic = cms.EDAnalyzer('bmaker_basic',
+                                    condor_subtime = cms.string(options.condorSubTime),
                                     outputFile = cms.string(outName),
                                     inputFiles = cms.vstring(options.inputFiles),
                                     json = cms.string(options.json),
                                     jec = cms.string(jecLabel),
-                                    # allowed values are "central", "up" and "down".
-                                    # set to empty string for no scale factors
-                                    # "BC" is for b and c jets, which have uncertainties
-                                    # that are taken as fully correlated
-                                    # "UDSG" is for up, down, strange and gluon jets
-                                    btagsysttypeBC = cms.string(""), 
-                                    btagsysttypeUDSG = cms.string(""), 
                                     btagEfficiencyFile = cms.string("bmaker/data/btagEfficiency.root"),
                                     met = cms.InputTag("slimmedMETs"),
                                     met_nohf = cms.InputTag("slimmedMETsNoHF"),
                                     jets = cms.InputTag(jets_label),
                                     nEventsSample = cms.uint32(options.nEventsSample),
-                                    doMetRebalancing = cms.bool(True)
+                                    doMetRebalancing = cms.bool(True),
+                                    doSystematics = cms.bool(doSystematics)
 )
 
 ###### Setting up number of events, and reporing frequency 

@@ -8,6 +8,10 @@
 
 #include "CommonTools/Utils/interface/StringCutObjectSelector.h"
 #include <DataFormats/Math/interface/deltaR.h>
+#include <fastjet/JetDefinition.hh>
+#include <fastjet/PseudoJet.hh>
+#include <fastjet/ClusterSequence.hh>
+#include <fastjet/GhostedAreaSpec.hh>
 
 // User include files
 #include "babymaker/bmaker/interface/jet_met_tools.hh"
@@ -28,8 +32,8 @@ bool jet_met_tools::leptonInJet(const pat::Jet &jet, vCands leptons){
     if(leptons[ilep]->isElectron() && npflep==2) indpf = 1; // Electrons have a missing reference at 0
     if(indpf>=0){ // The lepton is PF -> looping over PF cands in jet
       for (unsigned ijet(0); ijet < jet.numberOfSourceCandidatePtrs(); ijet++) 
-	if(jet.sourceCandidatePtr(ijet) == leptons[ilep]->sourceCandidatePtr(indpf))
-	  return true;
+        if(jet.sourceCandidatePtr(ijet) == leptons[ilep]->sourceCandidatePtr(indpf))
+          return true;
     } else { // The lepton is not PF, matching with deltaR
       if(deltaR(jet, *leptons[ilep]) < sizeJet) return true;
     }
@@ -46,8 +50,8 @@ bool jet_met_tools::jetMatched(const pat::Jet &jet, vCands objects){
     double drelpt(fabs((objects[ind]->pt() - jet.pt())/objects[ind]->pt()));
     if(objects[ind]->pdgId()==22) {
       if(objects[ind]->pt()>100){
-	nph++;
-	if(nph>1) continue;
+        nph++;
+        if(nph>1) continue;
       } else continue;
     } // If it is a photon
     if(drelpt < 1. && dr < sizeJet) return true;
@@ -103,29 +107,29 @@ bool jet_met_tools::idJet(const pat::Jet &jet, CutLevel cut){
   double NHFCut, NEMFCut, NumConstCut, CHFCut, CHMCut, CEMFCut, NEMFCut_HF, NumNeuCut;
   switch(cut){
   case kTight:
-    NHFCut	= 0.9;
-    NEMFCut	= 0.9;
+    NHFCut      = 0.9;
+    NEMFCut     = 0.9;
     NumConstCut = 1;
 
-    CHFCut	= 0;
-    CHMCut	= 0;
-    CEMFCut	= 0.99;
+    CHFCut      = 0;
+    CHMCut      = 0;
+    CEMFCut     = 0.99;
 
-    NEMFCut_HF	= 0.9;
-    NumNeuCut	= 10;
+    NEMFCut_HF  = 0.9;
+    NumNeuCut   = 10;
     break;
   case kLoose:
   default:
-    NHFCut	= 0.99;
-    NEMFCut	= 0.99;
+    NHFCut      = 0.99;
+    NEMFCut     = 0.99;
     NumConstCut = 1;
 
-    CHFCut	= 0;
-    CHMCut	= 0;
-    CEMFCut	= 0.99;
+    CHFCut      = 0;
+    CHMCut      = 0;
+    CEMFCut     = 0.99;
 
-    NEMFCut_HF	= 0.9;
-    NumNeuCut	= 10;
+    NEMFCut_HF  = 0.9;
+    NumNeuCut   = 10;
     break;
   }
     
@@ -138,8 +142,12 @@ bool jet_met_tools::idJet(const pat::Jet &jet, CutLevel cut){
 
 
 void jet_met_tools::getJetCorrections(edm::Handle<edm::View <reco::GenJet> > genjets, edm::Handle<pat::JetCollection> alljets, double rhoEvent){
+  rhoEvent_ = rhoEvent;
+  alljets_ = alljets;
   jetTotCorrections.resize(alljets->size(), 1.);
   jetL1Corrections.resize(alljets->size(), 1.);
+  jecUnc.resize(alljets->size(), 0.);
+  jerUnc.resize(alljets->size(), 0.);
   corrJet.clear();
   genJetPt.clear();
   if(!doJEC) {
@@ -148,11 +156,10 @@ void jet_met_tools::getJetCorrections(edm::Handle<edm::View <reco::GenJet> > gen
       corrJet.push_back(jet.p4());
       genJetPt.push_back(getGenPt(jet, genjets));
     }
+    if (doSystematics) setJetUncertainties(genjets);
     return;
   }
   
-  rhoEvent_ = rhoEvent;
-  alljets_ = alljets;
   for (size_t ijet(0); ijet < alljets->size(); ijet++) {
     const pat::Jet &jet = (*alljets)[ijet];
     float rawFactor(jet.jecFactor("Uncorrected"));
@@ -163,23 +170,50 @@ void jet_met_tools::getJetCorrections(edm::Handle<edm::View <reco::GenJet> > gen
     vector<float> corr_vals = jetCorrector->getSubCorrections(jetValues);
     jetTotCorrections[ijet] = corr_vals.at(corr_vals.size()-1);      // All corrections
     jetL1Corrections[ijet] = corr_vals.at(0);                        // L1 PU correction (offset)
-    
-    //smear jets
-    bool doSmearJets = false;
-    genJetPt.push_back(getGenPt(jet, genjets));
-    if (doSmearJets){
-      if (genJetPt[ijet]>0.) {
-        float corr_pt = jet.p4().pt()*rawFactor*jetTotCorrections[ijet];
-        float smeared_pt = corr_pt;
-        if (genJetPt[ijet]>0) smeared_pt = genJetPt[ijet] + getJetResolutionSF(jet.eta())*(corr_pt - genJetPt[ijet]);
-        if (smeared_pt < 0.) smeared_pt = 0.;
-        jetTotCorrections[ijet] *= smeared_pt/corr_pt;
-      }
-    }  
     corrJet.push_back(jet.p4()*rawFactor*jetTotCorrections[ijet]);   // LorentzVecor with all corrections * raw factor
+    
+    //the genJets should be obtained even if we are not running systematics, since we save the pT resolution in the babies
+    genJetPt.push_back(getGenPt(jet, genjets));
+    if (doSystematics){
+      //set JECs uncertainty values
+      jecUncProvider->setJetEta(jet.eta());
+      jecUncProvider->setJetPt(corrJet[ijet].pt());
+      jecUnc[ijet] = jecUncProvider->getUncertainty(true);
+      if (isData) jecUnc[ijet] = sqrt(pow(jecUnc[ijet],2) + pow((corr_vals.at(corr_vals.size()-1)/corr_vals.at(corr_vals.size()-2)-1.),2));
+      //set JER uncertainty values
 
+      float smearedJetPt(0.);
+      if (genJetPt[ijet]>0) smearedJetPt = genJetPt[ijet] + getJetResolutionSF(jet.eta())*(corrJet[ijet].pt() - genJetPt[ijet]);
+      jerUnc[ijet] = smearedJetPt/corrJet[ijet].pt() - 1.;
+      if (smearedJetPt < 0.01) jerUnc[ijet] = 0.; // so data will not have resolution unc. 
+    }
   } // Loop over alljets
     
+}
+
+void jet_met_tools::setJetUncertainties(edm::Handle<edm::View <reco::GenJet> > genjets){
+  // if we are doing systematics but not applying JECs, call this function to load uncertainties independently of JECs
+  for (size_t ijet(0); ijet < alljets_->size(); ijet++) {
+    const pat::Jet &jet = (*alljets_)[ijet];
+    //set JECs uncertainty values
+    jecUncProvider->setJetEta(jet.eta());
+    jecUncProvider->setJetPt(corrJet[ijet].pt());
+    jecUnc[ijet] = jecUncProvider->getUncertainty(true);
+    if (isData) {
+      float rawFactor(jet.jecFactor("Uncorrected"));
+      jetValues.setJetPt(jet.pt()*rawFactor);
+      jetValues.setJetEta(jet.eta());
+      jetValues.setJetA(jet.jetArea());
+      jetValues.setRho(rhoEvent_);
+      vector<float> corr_vals = jetCorrector->getSubCorrections(jetValues);
+      jecUnc[ijet] = sqrt(pow(jecUnc[ijet],2) + pow((corr_vals.at(corr_vals.size()-1)/corr_vals.at(corr_vals.size()-2)-1.),2));
+    }
+    //set JER uncertainty values
+    float smearedJetPt(0.);
+    if (genJetPt[ijet]>0) smearedJetPt = genJetPt[ijet] + getJetResolutionSF(jet.eta())*(corrJet[ijet].pt() - genJetPt[ijet]);
+    jerUnc[ijet] = smearedJetPt/corrJet[ijet].pt() - 1.;
+    if (smearedJetPt < 0.01) jerUnc[ijet] = 0.; // so data will not have resolution unc. 
+  } // Loop over alljets
 }
 
 void jet_met_tools::getMETRaw(edm::Handle<pat::METCollection> mets, float &metRaw, float &metRawPhi){
@@ -193,8 +227,8 @@ void jet_met_tools::getMETRaw(edm::Handle<pat::METCollection> mets, float &metRa
 
 }
 
-void jet_met_tools::getMETWithJEC(edm::Handle<pat::METCollection> mets, float &met, float &metPhi){
-  if(!doJEC) {
+void jet_met_tools::getMETWithJEC(edm::Handle<pat::METCollection> mets, float &met, float &metPhi, unsigned isys){
+  if(!doJEC && (!doSystematics || isys==kSysLast)) {
     met = mets->at(0).pt();
     metPhi = mets->at(0).phi();
     return;
@@ -215,24 +249,27 @@ void jet_met_tools::getMETWithJEC(edm::Handle<pat::METCollection> mets, float &m
     
     reco::Candidate::LorentzVector rawJetP4 = jet.p4()*jet.jecFactor("Uncorrected");
     float totCorr(jetTotCorrections[ijet]), l1Corr(jetL1Corrections[ijet]);
-
     const std::vector<reco::CandidatePtr> & cands = jet.daughterPtrVector();
     for ( std::vector<reco::CandidatePtr>::const_iterator cand = cands.begin();
-	  cand != cands.end(); ++cand ) {
+          cand != cands.end(); ++cand ) {
       const reco::PFCandidate *pfcand = dynamic_cast<const reco::PFCandidate *>(cand->get());
       const reco::Candidate *mu = (pfcand != 0 ? ( pfcand->muonRef().isNonnull() ? pfcand->muonRef().get() : 0) : cand->get());
       if ( mu != 0 && skipMuonSelection(*mu) ) {
-	reco::Candidate::LorentzVector muonP4 = (*cand)->p4();
-	rawJetP4 -= muonP4;
-	jetValues.setJetPt(rawJetP4.pt());
-	jetValues.setJetEta(rawJetP4.eta());
-	jetValues.setJetA(jet.jetArea());
-	jetValues.setRho(rhoEvent_);
-	vector<float> corr_vals = jetCorrector->getSubCorrections(jetValues);
-	totCorr = corr_vals.at(corr_vals.size()-1); // All corrections
-	l1Corr = corr_vals.at(0);      // L1 PU correction (offset)
+        reco::Candidate::LorentzVector muonP4 = (*cand)->p4();
+        rawJetP4 -= muonP4;
+        jetValues.setJetPt(rawJetP4.pt());
+        jetValues.setJetEta(rawJetP4.eta());
+        jetValues.setJetA(jet.jetArea());
+        jetValues.setRho(rhoEvent_);
+        vector<float> corr_vals = jetCorrector->getSubCorrections(jetValues);
+        totCorr = corr_vals.at(corr_vals.size()-1); // All corrections
+        l1Corr = corr_vals.at(0);      // L1 PU correction (offset)
       }
     }
+    
+    if (isys == kSysJER) totCorr *= 1+jerUnc[ijet];
+    else if (isys == kSysJECUp) totCorr *= 1+jecUnc[ijet];
+    else if (isys == kSysJECDn) totCorr *= 1-jecUnc[ijet];
 
     if((rawJetP4.pt()*totCorr) <= 15.) continue;
     metx -= rawJetP4.px()*(totCorr - l1Corr);
@@ -259,20 +296,20 @@ float jet_met_tools::jetBTagWeight(const pat::Jet &jet, const LVector &jetp4, bo
       // procedure from https://twiki.cern.ch/twiki/bin/view/CMS/BTagSFMethods#1a_Event_reweighting_using_scale
       switch ( abs(hadronFlavour) ) {
       case 5:
-	SF = readerBC->eval(BTagEntry::FLAV_B, jetp4.eta(), jetpttemp);
-	break;
+        SF = readerBC->eval(BTagEntry::FLAV_B, jetp4.eta(), jetpttemp);
+        break;
       case 4:
-	SF = readerBC->eval(BTagEntry::FLAV_C, jetp4.eta(), jetpttemp);
-	break;
+        SF = readerBC->eval(BTagEntry::FLAV_C, jetp4.eta(), jetpttemp);
+        break;
       default:
-	SF = readerUDSG->eval(BTagEntry::FLAV_UDSG, jetp4.eta(), jetpttemp);
-	break;
+        SF = readerUDSG->eval(BTagEntry::FLAV_UDSG, jetp4.eta(), jetpttemp);
+        break;
       }
       jet_scalefactor = isBTagged ? SF : (1-SF*eff)/(1-eff);
     }
     catch (std::exception &e) {
       std::cout << "Caught exception: " << e.what() << " for a jet with (pt,eta,hadron flavor)=(" 
-		<< jetp4.pt() << "," << jetp4.eta() << "," << hadronFlavour << ")" << std::endl;
+                << jetp4.pt() << "," << jetp4.eta() << "," << hadronFlavour << ")" << std::endl;
     }
     // jets with pt>670 GeV are assumed to have double the systematic uncertainty of the previous bin
     if(jetp4.pt()>670) jet_scalefactor*=2.0;
@@ -296,46 +333,144 @@ float jet_met_tools::getMCTagEfficiency(int pdgId, float pT, float eta)
   }
 }
 
+void jet_met_tools::clusterFatJets(int &nfjets, float &mj,
+                                  vector<float> &fjets_pt, 
+                                  vector<float> &fjets_eta,
+                                  vector<float> &fjets_phi, 
+                                  vector<float> &fjets_m,
+                                  vector<int> &fjets_nconst,
+                                  vector<float> &fjets_sumcsv,
+                                  vector<float> &fjets_poscsv,
+                                  vector<int> &fjets_btags,
+                                  vector<int> &jets_fjet_index,
+                                  double radius,
+                                  vector<LVector> &jets,
+                                  vector<float> &jets_csv){
 
-jet_met_tools::jet_met_tools(TString ijecName, std::string btag_label_BC, std::string btag_label_UDSG, std::string btagEfficiency):
+  vector<fastjet::PseudoJet> sjets(0);
+  vector<float> csvs(0);
+  for(size_t ijet(0); ijet < jets.size(); ijet++){
+    const fastjet::PseudoJet this_pj(jets[ijet].px(), jets[ijet].py(), jets[ijet].pz(), jets[ijet].energy());
+    sjets.push_back(this_pj);
+    csvs.push_back(jets_csv[ijet]); // This require to have the same jets in baby and jets
+  } // Loop over skinny jets
+  fastjet::JetDefinition jet_def(fastjet::antikt_algorithm, radius);
+  fastjet::ClusterSequence cs(sjets, jet_def);
+  vector<fastjet::PseudoJet> fjets = cs.inclusive_jets();
+  sort(fjets.begin(), fjets.end(), greaterM);
+  nfjets = 0;
+  mj = 0.;
+  fjets_pt.resize(fjets.size());
+  fjets_eta.resize(fjets.size());
+  fjets_phi.resize(fjets.size());
+  fjets_m.resize(fjets.size());
+  fjets_nconst.resize(fjets.size());
+  fjets_sumcsv.resize(fjets.size());
+  fjets_poscsv.resize(fjets.size());
+  fjets_btags.resize(fjets.size());
+  jets_fjet_index.resize(jets.size());
+
+  for(size_t ipj = 0; ipj < fjets.size(); ++ipj){
+    const fastjet::PseudoJet &pj = fjets.at(ipj);
+    fjets_pt.at(ipj) = pj.pt();
+    fjets_eta.at(ipj) = pj.eta();
+    fjets_phi.at(ipj) = pj.phi_std();
+    fjets_m.at(ipj) = pj.m();
+    const vector<fastjet::PseudoJet> &cjets = pj.constituents();
+    fjets_nconst.at(ipj) = cjets.size();
+    mj += pj.m();
+    ++nfjets;
+    fjets_btags.at(ipj) = 0;
+    fjets_sumcsv.at(ipj) = 0.;
+    fjets_poscsv.at(ipj) = 0.;
+    for(size_t ijet = 0; ijet < jets.size(); ++ijet){
+      for(size_t cjet = 0; cjet < cjets.size(); ++ cjet){
+        if((cjets.at(cjet) - sjets.at(ijet)).pt() < 0.0001){
+          jets_fjet_index.at(ijet) = ipj;
+          fjets_sumcsv.at(ipj) += csvs.at(ijet);
+          if(csvs.at(ijet) > 0.){
+            fjets_poscsv.at(ipj) += csvs.at(ijet);
+          }
+          if(csvs.at(ijet) > CSVMedium){
+            ++(fjets_btags.at(ipj));
+          }
+        }
+      } // Loop over fat jet constituents
+    } // Loop over skinny jets
+  } // Loop over fat jets
+
+}
+
+double jet_met_tools::getSysMJ(double radius, vector<LVector> &jets){
+
+  double mj(0.);
+  vector<fastjet::PseudoJet> sjets(0);
+  for(size_t ijet(0); ijet < jets.size(); ijet++){
+    const fastjet::PseudoJet this_pj(jets[ijet].px(), jets[ijet].py(), jets[ijet].pz(), jets[ijet].energy());
+    sjets.push_back(this_pj);
+  } // Loop over skinny jets
+  fastjet::JetDefinition jet_def(fastjet::antikt_algorithm, radius);
+  fastjet::ClusterSequence cs(sjets, jet_def);
+  vector<fastjet::PseudoJet> fjets = cs.inclusive_jets();
+  sort(fjets.begin(), fjets.end(), greaterM);
+  for(size_t ipj = 0; ipj < fjets.size(); ++ipj) mj += fjets.at(ipj).m();
+
+  return mj;
+}
+
+
+jet_met_tools::jet_met_tools(TString ijecName, std::string btagEfficiency, bool doSys):
   jecName(ijecName),
+  doSystematics(doSys),
   calib(0),
   readerBC(0),
   readerUDSG(0),
-  variationTypeBC(btag_label_BC),
-  variationTypeUDSG(btag_label_UDSG),
+  // allowed values are "central", "up" and "down"; set to "" for no uncertainties
+  variationTypeBC(""), // "BC" is for b and c jets, fully correlated
+  variationTypeUDSG(""), // "UDSG" is for up, down, strange and gluon jets
   btagEfficiencyFile(btagEfficiency){
 
+  if (jecName.Contains("_DATA")) isData = true;
+  else if (jecName.Contains("_MC")) isData = false;
+  else cout<<endl<<"BABYMAKER: jet_met_tools: The jecLabel string must contain either '_DATA' or '_MC'. Currently running with "<<jecName<<endl<<endl;
+
   doJEC = !jecName.Contains("miniAOD");
-  if(doJEC) {
+  jecName.ReplaceAll("miniAOD_","");
+  string basename(getenv("CMSSW_BASE")); basename += "/src/babymaker/txt/jec/"; basename += jecName.Data();
+  if(doJEC || doSystematics) {
     vector<JetCorrectorParameters> jecFiles;
-    string basename(getenv("CMSSW_BASE")); basename += "/src/babymaker/txt/jec/"; basename += jecName.Data();
-    cout<<endl<<"BABYMAKER: jet_met_tools: Applying JECs on-the-fly with files "<<basename.c_str()<<"*.txt"<<endl<<endl;
+    if (doJEC) cout<<endl<<"BABYMAKER: jet_met_tools: Applying JECs on-the-fly with files "<<basename.c_str()<<"*.txt"<<endl<<endl;
+    else       cout<<endl<<"BABYMAKER: jet_met_tools: Reading JECs needed to determine "
+                         <<"residuals uncertainty with files "<<basename.c_str()<<"*.txt"<<endl<<endl;
     jecFiles.push_back(JetCorrectorParameters(basename+"_L1FastJet_AK4PFchs.txt"));
     jecFiles.push_back(JetCorrectorParameters(basename+"_L2Relative_AK4PFchs.txt"));
     jecFiles.push_back(JetCorrectorParameters(basename+"_L3Absolute_AK4PFchs.txt"));
     if(jecName.Contains("DATA")) jecFiles.push_back(JetCorrectorParameters(basename+"_L2L3Residual_AK4PFchs.txt"));
     jetCorrector = new FactorizedJetCorrectorCalculator(jecFiles);
   }
+  if (doSystematics){
+    cout<<endl<<"BABYMAKER: jet_met_tools: Using JEC uncertainties from file "<<basename.c_str()<<"_Uncertainty_AK4PFchs.txt"<<endl<<endl;
+    jecUncProvider = new JetCorrectionUncertainty(basename+"_Uncertainty_AK4PFchs.txt");
+  }
 
   // only run b-tagging systematics if a systematics types are specified
   if(variationTypeBC.size()>0 && variationTypeBC.size()>0) {
     calib      = new BTagCalibration("csvv1", "bmaker/data/CSVv2.csv");
     readerBC     = new BTagCalibrationReader(calib, // calibration instance 
-					     BTagEntry::OP_MEDIUM, // operating point
-					     "mujets", // measurement type ("comb" or "mujets")
-					     variationTypeBC.c_str()); // systematics type ("central", "up", or "down")
+                                             BTagEntry::OP_MEDIUM, // operating point
+                                             "mujets", // measurement type ("comb" or "mujets")
+                                             variationTypeBC.c_str()); // systematics type ("central", "up", or "down")
     readerUDSG     = new BTagCalibrationReader(calib, // calibration instance 
-					       BTagEntry::OP_MEDIUM, // operating point
-					       "comb", // measurement type ("comb" or "mujets")
-					       variationTypeUDSG.c_str()); // systematics type ("central", "up", or "down")
+                                               BTagEntry::OP_MEDIUM, // operating point
+                                               "comb", // measurement type ("comb" or "mujets")
+                                               variationTypeUDSG.c_str()); // systematics type ("central", "up", or "down")
     TFile *efficiencyFile = TFile::Open(btagEfficiencyFile.c_str());
     if(efficiencyFile->IsOpen()) {
       btagEfficiencyParameterization = static_cast<TH3F*>(efficiencyFile->Get("btagEfficiency"));
     }
     else {
       throw cms::Exception("FileNotFound") 
-	<< "Could not find efficiency file " << btagEfficiencyFile << "." << std::endl;
+        << "Could not find efficiency file " << btagEfficiencyFile << "." << std::endl;
     }
   }
 }

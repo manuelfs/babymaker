@@ -27,8 +27,8 @@ pprint.pprint(datasets)
 # Parsing where the files can be found depends on whether we run on UCSB or UCSD
 host = os.environ.get("HOSTNAME")
 if "ucsd" in host: host = "sd"
-elif host=="compute-0-1.local"or host =="compute-0-5.local" or host=="compute-0-0.local": host = "sb"
-elif "ucsb" in host: sys.exit("\033[91mERROR: To allow access to hadoop use cms18 or cms19. \033[0m") 
+elif "compute" in host: host = "sb"
+elif "ucsb" in host: sys.exit("\033[91mERROR: To allow access to hadoop at UCSB use one of the compute-0-X machines. \033[0m") 
 else: sys.exit("\033[91mERROR: Unknown host: "+host+" Exit. \033[0m")
 
 hadoop = '/mnt/hadoop/cms'

@@ -20,7 +20,7 @@ wishlist = []
 wishlist.append("TTJets_HT")
 wishlist.append("TTJets_SingleLep")
 wishlist.append("TTJets_DiLep")
-wishlist.append("TTGJets");
+wishlist.append("TTGJets")
 # wishlist.append("WJets")
 # wishlist.append("DYJets")
 # wishlist.append("DYJetsToLL_M-50_TuneCUETP8M1_13TeV")
@@ -85,8 +85,7 @@ whitelist = "T2_US_UCSD,T2_US_WISCONSIN,T2_US_FLORIDA,T2_US_PURDUE,T2_US_NEBRASK
 # Condor set up depends on whether we run on UCSB or UCSD
 host = os.environ.get("HOSTNAME")
 if "ucsd" in host: host = "sd"
-elif host=="cms0.physics.ucsb.edu": host = "sb"
-elif ("ucsb" in host) or ("compute" in host): sys.exit("\033[91mERROR: Submission must be done from cms0. \033[0m")
+elif ("compute" in host) or ( "physics.ucsb.edu" in host) : host = "sb"
 else: sys.exit("\033[91mERROR: Unknown host: "+host+" Exit. \033[0m")
 print "INFO: Setting up job submission at",('UCSB.' if host=='sb' else 'UCSD.')
 hadoop = '/mnt/hadoop/cms'
@@ -99,21 +98,21 @@ if not ("/src/babymaker") in codedir:
   sys.exit(0)
 
 # Need a valid proxy to submit condor jobs at UCSD
+# or for fallback at UCSB
 proxy,valid = "",""
-if host=="sd":
-  proc = subprocess.Popen('voms-proxy-info', stdout=subprocess.PIPE)
-  tmp = proc.stdout.read()
-  if "Proxy not found" in tmp: 
-    sys.exit("\033[91mERROR: Proxy not found. \033[0m")
-  elif ('timeleft' in tmp) and ('0:00:00' in tmp):
-    sys.exit("\033[91mERROR: Proxy expired. \033[0m")
-  else: 
-    for info in tmp.splitlines():
-      if ("/tmp/x509" in info): proxy = "/tmp/x509"+(string.split(info,"/tmp/x509"))[1]
-      if ("timeleft" in info): valid = "Time left before proxy expires: "+info.split()[-1]
+proc = subprocess.Popen('voms-proxy-info', stdout=subprocess.PIPE)
+tmp = proc.stdout.read()
+if "Proxy not found" in tmp: 
+  sys.exit("\033[91mERROR: Proxy not found. \033[0m")
+elif ('timeleft' in tmp) and ('0:00:00' in tmp):
+  sys.exit("\033[91mERROR: Proxy expired. \033[0m")
+else: 
+  for info in tmp.splitlines():
+    if ("/tmp/x509" in info): proxy = "/tmp/x509"+(string.split(info,"/tmp/x509"))[1]
+    if ("timeleft" in info): valid = "Time left before proxy expires: "+info.split()[-1]
 
-  print "INFO: Found proxy path",proxy
-  print "INFO:",valid
+print "INFO: Found proxy path",proxy
+print "INFO:",valid
 
 # Default output directory is the "out" sub-directory of the current working directory.
 outdir = os.getcwd()+'/out/'
@@ -167,14 +166,15 @@ for fnm in flists_pd:
           nent_dict[dsname] = nent_dict[dsname] + int(line.split().pop())
         if "/store" not in line: continue
         col = line.split()
-        redirector = ('file:'+hadoop) if os.path.exists(hadoop + col[2]) else 'root://cmsxrootd.fnal.gov//'
+        # this line is unnecessary; the appropriate action will be determined by the TFC
+        #redirector = ('file:'+hadoop) if os.path.exists(hadoop + col[2]) else 'root://cmsxrootd.fnal.gov//'
         # if data, filter on json
         if 'Run2015' in dsname:
           runlist = [int(irun) for irun in string.split(col[3],",")]
           if any(irun in goldruns for irun in runlist):
-            files_dict[dsname].append(redirector + col[2])
+            files_dict[dsname].append(col[2])
         else:
-          files_dict[dsname].append(redirector + col[2])
+          files_dict[dsname].append(col[2])
 
 # If on UCSD prep also tarball
 if (host=="sd"): 
@@ -248,6 +248,10 @@ for ids, ds in enumerate(sorted(files_dict.keys())):
     if (host=="sb"):
       fcmd.write("Executable   = "+exefile+"\n")
       fcmd.write("Universe     = vanilla\n")
+      # send proxy even for local submissions
+      # in case fallback is necessary
+      fcmd.write("use_x509userproxy = True\n")
+      fcmd.write("x509userproxy="+proxy+"\n")
       fcmd.write("Log          = "+logdir+ "/"+bname+".log\n")
       fcmd.write("output       = "+logdir+"/"+bname+".out\n")
       fcmd.write("error        = "+logdir+"/"+bname+".err\n")
@@ -268,11 +272,18 @@ for ids, ds in enumerate(sorted(files_dict.keys())):
       fcmd.write("error        = "+logdir+"/"+bname+".err\n")
       fcmd.write("queue 1\n")
     fcmd.close()
-
-    # Submit condor job
-    cmd = "condor_submit " + cmdfile
-    print "INFO: Submitting", cmdfile
-    os.system(cmd)
     total_jobs = total_jobs + 1
 
-print "Submitted ", total_jobs
+# Submit condor job
+if host=="sb":
+  cmd = "ssh cms25.physics.ucsb.edu condor_submit "
+else:
+  cmd = "condor_submit "
+  print "INFO: Submitting", cmdfile
+
+# for the sake of efficiency, submit all jobs at once
+if host=="sb":
+  os.system("scp " + proxy + " cms25.physics.ucsb.edu:/tmp")
+os.system("cat " + rundir + "/baby*.cmd > " + rundir + "/submit_all.cmd")
+os.system(cmd + rundir + "/submit_all.cmd")
+print "Submitted ", total_jobs, "jobs"

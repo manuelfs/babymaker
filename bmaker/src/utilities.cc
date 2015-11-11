@@ -104,7 +104,7 @@ namespace utilities{
     if(file.Contains("TTJets_DiLept")) xsec = 85.66; // (3*0.108)^2*815.96
     if(file.Contains("TTJets_SingleLept")) xsec = 178.7; //(1- ((1-3*0.108)^2+(3*0.108)^2))*815.96*0.5 per half
 
-                
+    if(file.Contains("TTG")) xsec = 3.697;                
 
     
     // From https://cms-pdmv.cern.ch/mcm

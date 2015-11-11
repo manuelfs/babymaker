@@ -248,6 +248,8 @@ int ntrutausl
 float isr_tru_pt
 float isr_tru_eta
 float isr_tru_phi
+int mgluino
+int mlsp
 
 ################  Systematic variations   ##################
 std::vector<float> sys_ht

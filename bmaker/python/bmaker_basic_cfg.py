@@ -113,10 +113,13 @@ process.GlobalTag.globaltag = globalTag
 ###### HBHE
 ## HBHE noise filter needs to be recomputed in early 2015 data
 ##___________________________HCAL_Noise_Filter________________________________||
-process.load('CommonTools.RecoAlgos.HBHENoiseFilterResultProducer_cfi')
-process.HBHENoiseFilterResultProducer.minZeros = cms.int32(99999)
-process.HBHENoiseFilterResultProducer.IgnoreTS4TS5ifJetInLowBVRegion=cms.bool(False) 
-process.HBHENoiseFilterResultProducer.defaultDecision = cms.string("HBHENoiseFilterResultRun2Loose")
+if "FSPremix" in outName: fastsim = True
+else: fastsim = False
+if not fastsim:
+    process.load('CommonTools.RecoAlgos.HBHENoiseFilterResultProducer_cfi')
+    process.HBHENoiseFilterResultProducer.minZeros = cms.int32(99999)
+    process.HBHENoiseFilterResultProducer.IgnoreTS4TS5ifJetInLowBVRegion=cms.bool(False) 
+    process.HBHENoiseFilterResultProducer.defaultDecision = cms.string("HBHENoiseFilterResultRun2Loose")
 
 if doJEC:
     ###### Setting sqlite file for the JECs that are in newer global tags 
@@ -181,5 +184,8 @@ if doJEC:
                          process.baby_basic)
 else:
     ###### Path
-    process.p = cms.Path(process.HBHENoiseFilterResultProducer* #produces HBHE baseline bools
-                         process.baby_basic)
+    if not fastsim:
+        process.p = cms.Path(process.HBHENoiseFilterResultProducer* #produces HBHE baseline bools
+                             process.baby_basic)
+    else:
+        process.p = cms.Path(process.baby_basic)

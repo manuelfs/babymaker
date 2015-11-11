@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include "babymaker/bmaker/interface/mc_tools.hh"
+#include "TRegexp.h"
 
 using namespace std;
 using namespace utilities;
@@ -96,6 +97,26 @@ void mc_tools::printParticle(const reco::GenParticle &mc){
   }
   cout<<endl;
 
+}
+
+void mc_tools::getMassPoints(TString mpoints, int &mgluino, int &mlsp){
+
+  int idxstart = mpoints.First("_")+1;
+  int idxmid = mpoints.Index("_",idxstart+1)+1;
+  int idxend = mpoints.Length();
+
+  TString mg = mpoints(idxstart,idxmid-(idxstart+1));
+  TString ml = mpoints(idxmid,idxend);
+
+  /*  if(!mg.IsDigit() || !ml.IsDigit()){
+    cout<<"ERROR: Improper parsing of mass points"<<endl;
+    cout<<"Mass of gluino parsed as \""<<mg<<"\""<<endl;
+    cout<<"Mass of LSP parsed as \""<<ml<<"\""<<endl;
+    exit(0);
+    }*/
+
+  mgluino = mg.Atoi();
+  mlsp = ml.Atoi();
 }
 
 mc_tools::mc_tools(){

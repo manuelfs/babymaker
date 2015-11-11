@@ -46,9 +46,25 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
       reportTime(iEvent);
       return;
     }
+    if(outname.Contains("T1tttt")){
+
+      typedef std::vector<std::string>::const_iterator comments_const_iterator;
+
+      comments_const_iterator c_begin = lhe_info->comments_begin();
+      comments_const_iterator c_end = lhe_info->comments_end();
+
+      TString model_params;
+      for(comments_const_iterator cit=c_begin; cit!=c_end; ++cit) {
+	size_t found = (*cit).find("model");
+	if(found != std::string::npos)   {
+	  //std::cout << *cit <<"end"<< std::endl;  
+	  model_params = *cit;
+	}
+      }
+      mcTool->getMassPoints(model_params,baby.mgluino(),baby.mlsp());
+    }
   }
-
-
+         
    ////////////////////// Event info /////////////////////
   baby.run() = iEvent.id().run();
   baby.event() = iEvent.id().event();
@@ -61,13 +77,19 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
   } else baby.nonblind() = true;
 
   ////////////////////// Trigger /////////////////////
+  bool triggerFired;
   edm::Handle<edm::TriggerResults> triggerBits;
   iEvent.getByLabel(edm::InputTag("TriggerResults","","HLT"),triggerBits);  
   edm::Handle<pat::PackedTriggerPrescales> triggerPrescales;
   iEvent.getByLabel("patTrigger",triggerPrescales);  
-  const edm::TriggerNames &names = iEvent.triggerNames(*triggerBits);
-  // Not saving data events that don't have triggers we care about
-  bool triggerFired(writeTriggers(names, triggerBits, triggerPrescales));
+
+  if(triggerBits.isValid() && triggerPrescales.isValid()){
+    const edm::TriggerNames &names = iEvent.triggerNames(*triggerBits);
+    // Not saving data events that don't have triggers we care about
+    triggerFired = writeTriggers(names, triggerBits, triggerPrescales);
+  }
+  else
+    triggerFired = true;
   if(!triggerFired && isData) {
     reportTime(iEvent);
     return;
@@ -192,9 +214,16 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
   // the HBHE noise filter needs to be recomputed in early 2015 data
   edm::Handle<bool> filter_hbhe;
   if(iEvent.getByLabel("HBHENoiseFilterResultProducer","HBHENoiseFilterResult",filter_hbhe)) { 
-    baby.pass_hbhe() = *filter_hbhe;
+    if(filter_hbhe.isValid()) 
+      baby.pass_hbhe() = *filter_hbhe;
+    else
+      baby.pass_hbhe() = true;
+
     iEvent.getByLabel("HBHENoiseFilterResultProducer","HBHEIsoNoiseFilterResult",filter_hbhe);
-    baby.pass_hbheiso() = *filter_hbhe;
+    if(filter_hbhe.isValid()) 
+      baby.pass_hbheiso() = *filter_hbhe;
+    else
+      baby.pass_hbheiso() = true;
   }
   edm::Handle<edm::TriggerResults> filterBits;
   std::string processLabel = isData ? "RECO":"PAT"; // prompt reco runs in the "RECO" process
@@ -203,15 +232,20 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
   // if the attempt to find data with "RECO" process fails, try "PAT"
   if(!filterBits.isValid() && isData) 
     iEvent.getByLabel(edm::InputTag("TriggerResults", "", "PAT"),filterBits);  
-  const edm::TriggerNames &fnames = iEvent.triggerNames(*filterBits);
-  //this method uses baby.pass_jets(), so call only after writeJets()!!
-  writeFilters(fnames, filterBits, vtx);
+  if(filterBits.isValid()){
+    const edm::TriggerNames &fnames = iEvent.triggerNames(*filterBits);
+    //this method uses baby.pass_jets(), so call only after writeJets()!!
+    writeFilters(fnames, filterBits, vtx);
+  }
 
   //////////////// HLT objects //////////////////
   edm::Handle<pat::TriggerObjectStandAloneCollection> triggerObjects;
   iEvent.getByLabel("selectedPatTrigger",triggerObjects);  
   // Requires having called writeMuons and writeElectrons for truth-matching
-  writeHLTObjects(names, triggerObjects, all_mus, all_els, photons);
+  if(triggerBits.isValid() && triggerPrescales.isValid()){
+    const edm::TriggerNames &names = iEvent.triggerNames(*triggerBits);
+    writeHLTObjects(names, triggerObjects, all_mus, all_els, photons);
+  }
 
   ////////////////// MC particles and Truth-matching //////////////////
   if (!isData) {

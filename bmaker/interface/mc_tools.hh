@@ -20,6 +20,7 @@ public:
   int mom(const reco::GenParticle &mc, const reco::GenParticle *&mcMom);
   bool isFromGSP(const reco::Candidate *c);
   bool isHardProcess(const int status);
+  void getMassPoints(TString mpoints, int &mgluino, int &mlsp);
 
   mc_tools();
   ~mc_tools();

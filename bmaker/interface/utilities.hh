@@ -23,6 +23,7 @@ namespace utilities{
   TString roundNumber(double num, int decimals, double denom=1.);
   TString addCommas(double num);
   float crossSection(const TString &file);
+  void signalCrossSection(int glu_mass, double &xsec, double &xsec_unc);
 
 }
 

@@ -29,6 +29,7 @@ host = os.environ.get("HOSTNAME")
 if "ucsd" in host: host = "sd"
 elif "compute" in host: host = "sb"
 elif "ucsb" in host: sys.exit("\033[91mERROR: To allow access to hadoop at UCSB use one of the compute-0-X machines. \033[0m") 
+elif "lxplus" in host: host = "lxplus"
 else: sys.exit("\033[91mERROR: Unknown host: "+host+" Exit. \033[0m")
 
 hadoop = '/mnt/hadoop/cms'

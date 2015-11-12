@@ -46,23 +46,6 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
       reportTime(iEvent);
       return;
     }
-    if(outname.Contains("T1tttt")){
-
-      typedef std::vector<std::string>::const_iterator comments_const_iterator;
-
-      comments_const_iterator c_begin = lhe_info->comments_begin();
-      comments_const_iterator c_end = lhe_info->comments_end();
-
-      TString model_params;
-      for(comments_const_iterator cit=c_begin; cit!=c_end; ++cit) {
-	size_t found = (*cit).find("model");
-	if(found != std::string::npos)   {
-	  //std::cout << *cit <<"end"<< std::endl;  
-	  model_params = *cit;
-	}
-      }
-      mcTool->getMassPoints(model_params,baby.mgluino(),baby.mlsp());
-    }
   }
          
    ////////////////////// Event info /////////////////////
@@ -844,6 +827,24 @@ void bmaker_basic::writeGenInfo(edm::Handle<LHEEventProduct> lhe_info){
     }
 
   } // Loop over generator particles
+  
+  if(outname.Contains("T1tttt")){ //Get mgluino and mlsp
+    
+    typedef std::vector<std::string>::const_iterator comments_const_iterator;
+    
+    comments_const_iterator c_begin = lhe_info->comments_begin();
+    comments_const_iterator c_end = lhe_info->comments_end();
+    
+    TString model_params;
+    for(comments_const_iterator cit=c_begin; cit!=c_end; ++cit) {
+      size_t found = (*cit).find("model");
+      if(found != std::string::npos)   {
+	//std::cout << *cit <<"end"<< std::endl;  
+	model_params = *cit;
+      }
+    }
+    mcTool->getMassPoints(model_params,baby.mgluino(),baby.mlsp());
+  }
 } // writeGenInfo
 
 void bmaker_basic::writeMC(edm::Handle<reco::GenParticleCollection> genParticles, 

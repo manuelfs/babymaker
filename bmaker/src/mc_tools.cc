@@ -107,13 +107,14 @@ void mc_tools::getMassPoints(TString mpoints, int &mgluino, int &mlsp){
 
   TString mg = mpoints(idxstart,idxmid-(idxstart+1));
   TString ml = mpoints(idxmid,idxend);
-
-  /*  if(!mg.IsDigit() || !ml.IsDigit()){
+  ml.ReplaceAll("\n","");
+  
+  if(!mg.IsFloat() || !ml.IsFloat()){
     cout<<"ERROR: Improper parsing of mass points"<<endl;
     cout<<"Mass of gluino parsed as \""<<mg<<"\""<<endl;
     cout<<"Mass of LSP parsed as \""<<ml<<"\""<<endl;
     exit(0);
-    }*/
+  }
 
   mgluino = mg.Atoi();
   mlsp = ml.Atoi();

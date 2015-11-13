@@ -94,13 +94,13 @@ process.baby_basic = cms.EDAnalyzer('bmaker_basic',
                                     inputFiles = cms.vstring(options.inputFiles),
                                     json = cms.string(options.json),
                                     jec = cms.string(jecLabel),
-                                    btagEfficiencyFile = cms.string("bmaker/data/btagEfficiency.root"),
                                     met = cms.InputTag("slimmedMETs"),
                                     met_nohf = cms.InputTag("slimmedMETsNoHF"),
                                     jets = cms.InputTag(jets_label),
                                     nEventsSample = cms.uint32(options.nEventsSample),
                                     doMetRebalancing = cms.bool(True),
                                     doSystematics = cms.bool(doSystematics),
+                                    addBTagWeights = cms.bool(True),
                                     isCRABJob = cms.bool(options.isCRABJob)
 )
 

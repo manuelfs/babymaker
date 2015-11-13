@@ -31,6 +31,11 @@ float weight_muRup
 float weight_muRdown
 float weight_muFup
 float weight_muFdown
+float weight_btag_central
+float weight_btag_BCup
+float weight_btag_BCdown
+float weight_btag_UDSGup
+float weight_btag_UDSGdown
 
 ###################   MET   ##################
 float met

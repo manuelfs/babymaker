@@ -308,6 +308,7 @@ void bmaker_basic::writeJets(edm::Handle<pat::JetCollection> alljets,
   baby.njets_ra2() = 0; baby.njets_clean() = 0; baby.nbm_ra2() = 0; baby.ht_ra2() = 0.; baby.ht_clean() = 0.; 
   baby.pass_jets() = true; baby.pass_jets_nohf() = true; baby.pass_jets_tight() = true; 
   baby.pass_jets_ra2() = true; baby.pass_jets_tight_ra2() = true; 
+  baby.weight_btag_central()=baby.weight_btag_BCup()=baby.weight_btag_BCdown()=baby.weight_btag_UDSGup()=baby.weight_btag_UDSGdown()=1.0;
   if (doSystematics) {
     baby.sys_njets().resize(kSysLast, 0); baby.sys_nbm().resize(kSysLast, 0); 
     baby.sys_pass().resize(kSysLast, true); baby.sys_ht().resize(kSysLast, 0.); 
@@ -349,7 +350,13 @@ void bmaker_basic::writeJets(edm::Handle<pat::JetCollection> alljets,
 
 
       if(!isLep){
-        baby.weight()*=jetTool->jetBTagWeight(jet, jetp4, csv > jetTool->CSVMedium);
+	if(addBTagWeights) {
+	  baby.weight_btag_central()*=jetTool->jetBTagWeight(jet, jetp4, csv > jetTool->CSVMedium, jet_met_tools::kBTagCentral, jet_met_tools::kBTagCentral);
+	  baby.weight_btag_BCup()*=jetTool->jetBTagWeight(jet, jetp4, csv > jetTool->CSVMedium, jet_met_tools::kBTagUp, jet_met_tools::kBTagCentral);
+	  baby.weight_btag_BCdown()*=jetTool->jetBTagWeight(jet, jetp4, csv > jetTool->CSVMedium, jet_met_tools::kBTagDown, jet_met_tools::kBTagCentral);
+	  baby.weight_btag_UDSGup()*=jetTool->jetBTagWeight(jet, jetp4, csv > jetTool->CSVMedium, jet_met_tools::kBTagCentral, jet_met_tools::kBTagUp);
+	  baby.weight_btag_UDSGdown()*=jetTool->jetBTagWeight(jet, jetp4, csv > jetTool->CSVMedium, jet_met_tools::kBTagCentral, jet_met_tools::kBTagDown);
+	}
         jetsys_p4 += jet.p4();
         baby.njets()++;
         baby.ht() += jetp4.pt();
@@ -1060,13 +1067,13 @@ bmaker_basic::bmaker_basic(const edm::ParameterSet& iConfig):
   jsonfile(iConfig.getParameter<string>("json")),
   condor_subtime(iConfig.getParameter<string>("condor_subtime")),
   jec_label(iConfig.getParameter<string>("jec")),
-  btagEfficiencyFile(iConfig.getParameter<string>("btagEfficiencyFile")),
   met_label(iConfig.getParameter<edm::InputTag>("met")),
   met_nohf_label(iConfig.getParameter<edm::InputTag>("met_nohf")),
   jets_label(iConfig.getParameter<edm::InputTag>("jets")),
   nevents_sample(iConfig.getParameter<unsigned int>("nEventsSample")),
   nevents(0),
   doMetRebalancing(iConfig.getParameter<bool>("doMetRebalancing")),
+  addBTagWeights(iConfig.getParameter<bool>("addBTagWeights")),
   doSystematics(iConfig.getParameter<bool>("doSystematics"))
 {
   CRABJob = iConfig.getParameter<bool>("isCRABJob");
@@ -1074,7 +1081,7 @@ bmaker_basic::bmaker_basic(const edm::ParameterSet& iConfig):
   time(&startTime);
 
   lepTool    = new lepton_tools();
-  jetTool    = new jet_met_tools(jec_label, btagEfficiencyFile, doSystematics);
+  jetTool    = new jet_met_tools(jec_label, doSystematics);
   photonTool = new photon_tools();
   mcTool     = new mc_tools();
   weightTool = new weight_tools();

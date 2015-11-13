@@ -129,7 +129,6 @@ public:
   TString jec_label;
   std::string btag_label_BC;
   std::string btag_label_UDSG;
-  std::string btagEfficiencyFile;
   edm::InputTag met_label;
   edm::InputTag met_nohf_label;
   edm::InputTag jets_label;
@@ -138,6 +137,7 @@ public:
   bool doMetRebalancing;
   float xsec;
 
+  bool addBTagWeights;
   bool doSystematics;
 
   static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);

@@ -20,6 +20,10 @@ else:
 
 onePerJob = False
 
+# determine if job is running at UCSB or UCSD
+host = os.environ.get("HOSTNAME")
+atUCSB = "compute" in host or "physics.ucsb.edu" in host
+
 redirector = "root://cmsxrootd.fnal.gov//"
 
 bdir = os.getcwd()
@@ -45,7 +49,8 @@ for flog in loglist:
   else:
     if "BABYMAKER: Written" not in open(fout).read():
       failed.add(bname)
-    if "Transfer took" not in open(ferr).read():
+    # transfer not necessary at UCSB
+    if "Transfer took" not in open(ferr).read() and not atUCSB:
       failed.add(bname)
 
 print "--------- Unfinished:"
@@ -75,6 +80,11 @@ for old_baby in failed:
       break
 
 # --- resubmission
+
+sys_cmd = ""
+# at UCSB submission is only possible from cms25
+if atUCSB:
+  sys_cmd+="ssh cms25.physics.ucsb.edu "
 total_jobs = 0
 for old_baby in failed:
   fexe = os.path.join(logdir.replace("/logs/","/run/"), old_baby+".sh")
@@ -84,7 +94,7 @@ for old_baby in failed:
     old_exe = open(fexe).read()
     new_exe = old_exe.replace("file:/hadoop/cms/phedex", redirector)
     with open(fexe,'w') as f: f.write(new_exe)
-    sys_cmd = "condor_submit " + fcmd
+    sys_cmd += "condor_submit " + fcmd
     print "INFO: Submitting", fcmd
     os.system(sys_cmd)
     total_jobs = total_jobs + 1
@@ -119,7 +129,7 @@ for old_baby in failed:
       new_cmd = old_cmd.replace(old_baby, new_baby)
       fnew_cmd = fcmd.replace(old_baby,new_baby)
       with open(fnew_cmd,'w') as f2: f2.write(new_cmd)
-      sys_cmd = "condor_submit " + fnew_cmd
+      sys_cmd += "condor_submit " + fnew_cmd
       print "INFO: Submitting", fnew_cmd
       os.system(sys_cmd)
       total_jobs = total_jobs + 1

@@ -17,6 +17,8 @@
 using namespace std;
 using namespace utilities;
 
+extern bool CRABJob;
+
 bool event_tools::isInJSON(string type, int run, int lumiblock){
   //if(type=="golden") return inJSON(VRunLumi2015golden, run, lumiblock);
   if(type=="golden") return true; // Applying this in bmaker_*_cfg.py
@@ -75,7 +77,9 @@ event_tools::event_tools(TString outname):
   VRunLumi2015nonblind(MakeVRunLumi("nonblind")){
 
   doBeamHalo = false;
-  string eventList = execute("printf ${CMSSW_BASE}/src/babymaker/txt/csc_beamhalo_filter/eventlist_");
+  string command("printf ${CMSSW_BASE}/src/babymaker/txt/csc_beamhalo_filter/eventlist_");
+  if(CRABJob) command="printf ${CMSSW_BASE}/csc_beamhalo_filter/eventlist_";
+  string eventList = execute(command.c_str());
   vector<string> datasets = {"SingleElectron", "SingleMuon", "MET", "HTMHT", "JetHT", "DoubleMuon", "DoubleEG"};
   for(size_t ind(0); ind < datasets.size(); ind++){
     if(outname.Contains(datasets[ind].c_str())){

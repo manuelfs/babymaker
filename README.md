@@ -43,7 +43,7 @@ like isolation or electron ID, are defined in `babymaker/bmaker/src/*_tools.cc`.
 For now, make sure that `process.maxEvents` is set to the number of events you want
 (-1 for all events) in `babymaker/bmaker/python/bmaker_basic_cfg.py`.
 
-Log on to cms18 and set up the code are described above.
+Log on to one of the compute-0-X machines and set up the code are described above.
 Define the datasets you want to run over in `babymaker/scripts/get_flist.py` and run it
 from the `babymaker` folder with 
 
@@ -54,7 +54,7 @@ This step finds the paths for the files that are to be run over.
 In the `babymaker` folder, create an `out` folder. This is typically a soft link to a place
 with lots of disk space, such as `ln -s /net/cms2/cms2r0/user/out/ out`.
 
-Then log on to cms0 and submit the condor jobs from `babymaker` folder with
+Then submit the condor jobs from `babymaker` folder with
 
     ./scripts/sub_cond.py
 

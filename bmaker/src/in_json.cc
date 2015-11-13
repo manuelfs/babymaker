@@ -13,13 +13,17 @@
 using namespace std;
 using namespace utilities;
 
+extern bool CRABJob;
+
 std::vector< std::vector<int> > MakeVRunLumi(std::string input){
   std::ifstream orgJSON;
-  std::string fullpath = execute("printf ${CMSSW_BASE}/src/babymaker/");
+  std::string command("printf ${CMSSW_BASE}/src/babymaker/txt/");
+  if(CRABJob) command="printf ${CMSSW_BASE}/";
+  std::string fullpath = execute(command.c_str());
   if(input == "golden"){
-    fullpath += "txt/json/golden_Cert_246908-258714_13TeV_PromptReco_Collisions15_25ns_JSON.json";
+    fullpath += "json/golden_Cert_246908-258714_13TeV_PromptReco_Collisions15_25ns_JSON.json";
   } else if(input == "nonblind"){
-    fullpath += "txt/json/nonblind_Cert_246908-258714_13TeV_PromptReco_Collisions15_25ns_JSON.json";
+    fullpath += "json/nonblind_Cert_246908-258714_13TeV_PromptReco_Collisions15_25ns_JSON.json";
   } else{
     fullpath = input;
   }

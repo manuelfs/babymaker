@@ -23,6 +23,7 @@
 using namespace std;
 using namespace utilities;
 
+extern bool CRABJob;
 
 bool jet_met_tools::leptonInJet(const pat::Jet &jet, vCands leptons){
   for(unsigned ilep(0); ilep < leptons.size(); ilep++){
@@ -436,7 +437,11 @@ jet_met_tools::jet_met_tools(TString ijecName, std::string btagEfficiency, bool 
 
   doJEC = !jecName.Contains("miniAOD");
   jecName.ReplaceAll("miniAOD_","");
-  string basename(getenv("CMSSW_BASE")); basename += "/src/babymaker/txt/jec/"; basename += jecName.Data();
+  string basename(getenv("CMSSW_BASE"));
+  if(CRABJob) basename += "/jec/";
+  else basename += "/src/babymaker/txt/jec/";
+  basename += jecName.Data();
+
   if(doJEC || doSystematics) {
     vector<JetCorrectorParameters> jecFiles;
     if (doJEC) cout<<endl<<"BABYMAKER: jet_met_tools: Applying JECs on-the-fly with files "<<basename.c_str()<<"*.txt"<<endl<<endl;
@@ -455,7 +460,9 @@ jet_met_tools::jet_met_tools(TString ijecName, std::string btagEfficiency, bool 
 
   // only run b-tagging systematics if a systematics types are specified
   if(variationTypeBC.size()>0 && variationTypeBC.size()>0) {
-    calib      = new BTagCalibration("csvv1", "bmaker/data/CSVv2.csv");
+    std::string scaleFactorFile("bmaker/data/CSVv2.csv");
+    if(CRABJob) scaleFactorFile = "data/CSVv2.csv";
+    calib      = new BTagCalibration("csvv1", scaleFactorFile);
     readerBC     = new BTagCalibrationReader(calib, // calibration instance 
                                              BTagEntry::OP_MEDIUM, // operating point
                                              "mujets", // measurement type ("comb" or "mujets")

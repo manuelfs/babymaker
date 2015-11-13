@@ -30,6 +30,8 @@
 using namespace std;
 using namespace utilities;
 
+extern bool CRABJob;
+
 ///////////////////////// analyze: METHOD CALLED EACH EVENT ///////////////////////////
 void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
   nevents++;
@@ -1067,7 +1069,8 @@ bmaker_basic::bmaker_basic(const edm::ParameterSet& iConfig):
   doMetRebalancing(iConfig.getParameter<bool>("doMetRebalancing")),
   doSystematics(iConfig.getParameter<bool>("doSystematics"))
 {
-  
+  CRABJob = iConfig.getParameter<bool>("isCRABJob");
+
   time(&startTime);
 
   lepTool    = new lepton_tools();

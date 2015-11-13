@@ -308,7 +308,8 @@ void bmaker_basic::writeJets(edm::Handle<pat::JetCollection> alljets,
   baby.njets_ra2() = 0; baby.njets_clean() = 0; baby.nbm_ra2() = 0; baby.ht_ra2() = 0.; baby.ht_clean() = 0.; 
   baby.pass_jets() = true; baby.pass_jets_nohf() = true; baby.pass_jets_tight() = true; 
   baby.pass_jets_ra2() = true; baby.pass_jets_tight_ra2() = true; 
-  baby.weight_btag_central()=baby.weight_btag_BCup()=baby.weight_btag_BCdown()=baby.weight_btag_UDSGup()=baby.weight_btag_UDSGdown()=1.0;
+  for(int i=0; i<2; i++) baby.sys_btagBC().push_back(1);
+  for(int i=0; i<2; i++) baby.sys_btagUDSG().push_back(1);
   if (doSystematics) {
     baby.sys_njets().resize(kSysLast, 0); baby.sys_nbm().resize(kSysLast, 0); 
     baby.sys_pass().resize(kSysLast, true); baby.sys_ht().resize(kSysLast, 0.); 
@@ -351,11 +352,11 @@ void bmaker_basic::writeJets(edm::Handle<pat::JetCollection> alljets,
 
       if(!isLep){
 	if(addBTagWeights) {
-	  baby.weight_btag_central()*=jetTool->jetBTagWeight(jet, jetp4, csv > jetTool->CSVMedium, jet_met_tools::kBTagCentral, jet_met_tools::kBTagCentral);
-	  baby.weight_btag_BCup()*=jetTool->jetBTagWeight(jet, jetp4, csv > jetTool->CSVMedium, jet_met_tools::kBTagUp, jet_met_tools::kBTagCentral);
-	  baby.weight_btag_BCdown()*=jetTool->jetBTagWeight(jet, jetp4, csv > jetTool->CSVMedium, jet_met_tools::kBTagDown, jet_met_tools::kBTagCentral);
-	  baby.weight_btag_UDSGup()*=jetTool->jetBTagWeight(jet, jetp4, csv > jetTool->CSVMedium, jet_met_tools::kBTagCentral, jet_met_tools::kBTagUp);
-	  baby.weight_btag_UDSGdown()*=jetTool->jetBTagWeight(jet, jetp4, csv > jetTool->CSVMedium, jet_met_tools::kBTagCentral, jet_met_tools::kBTagDown);
+	  baby.wbtag()*=jetTool->jetBTagWeight(jet, jetp4, csv > jetTool->CSVMedium, jet_met_tools::kBTagCentral, jet_met_tools::kBTagCentral);
+	  baby.sys_btagBC().at(0)*=jetTool->jetBTagWeight(jet, jetp4, csv > jetTool->CSVMedium, jet_met_tools::kBTagUp, jet_met_tools::kBTagCentral);
+	  baby.sys_btagBC().at(1)*=jetTool->jetBTagWeight(jet, jetp4, csv > jetTool->CSVMedium, jet_met_tools::kBTagDown, jet_met_tools::kBTagCentral);
+	  baby.sys_btagUDSG().at(0)*=jetTool->jetBTagWeight(jet, jetp4, csv > jetTool->CSVMedium, jet_met_tools::kBTagCentral, jet_met_tools::kBTagUp);
+	  baby.sys_btagUDSG().at(1)*=jetTool->jetBTagWeight(jet, jetp4, csv > jetTool->CSVMedium, jet_met_tools::kBTagCentral, jet_met_tools::kBTagDown);
 	}
         jetsys_p4 += jet.p4();
         baby.njets()++;
@@ -1046,10 +1047,12 @@ double bmaker_basic::calculateRebalancedMET(unsigned int jetIdx, double mu, doub
 
 void bmaker_basic::fillWeights()
 {
-  baby.weight_muRup() = weightTool->weight(weight_tools::muRup);
-  baby.weight_muRdown() = weightTool->weight(weight_tools::muRdown);
-  baby.weight_muFup() = weightTool->weight(weight_tools::muFup);
-  baby.weight_muFdown() = weightTool->weight(weight_tools::muFdown);
+  baby.sys_mur().push_back(weightTool->weight(weight_tools::muRup));
+  baby.sys_mur().push_back(weightTool->weight(weight_tools::muRdown));
+  baby.sys_muf().push_back(weightTool->weight(weight_tools::muFup));
+  baby.sys_muf().push_back(weightTool->weight(weight_tools::muFdown));
+  baby.sys_murf().push_back(weightTool->weight(weight_tools::muRup_muFup));
+  baby.sys_murf().push_back(weightTool->weight(weight_tools::muRdown_muFdown));
 }
 
 /*

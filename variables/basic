@@ -27,16 +27,14 @@ float dphi_wlep
 bool jetmismeas
 
 ################### Systematic weights #######
-float weight_muRup
-float weight_muRdown
-float weight_muFup
-float weight_muFdown
-float weight_btag_central
-float weight_btag_BCup
-float weight_btag_BCdown
-float weight_btag_UDSGup
-float weight_btag_UDSGdown
-
+# +/- variations are index 0 and 1
+std::vector<float> sys_mur
+std::vector<float> sys_muf
+std::vector<float> sys_murf
+std::vector<float> sys_btagBC
+std::vector<float> sys_btagUDSG
+######### Scale factor central values ########
+float wbtag
 ###################   MET   ##################
 float met
 float met_phi

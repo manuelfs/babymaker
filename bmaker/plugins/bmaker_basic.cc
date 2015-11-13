@@ -82,13 +82,13 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 
   //////////////// Weight //////////////////
   const float luminosity = 1000.;
-  baby.weight() = 1.;
+  baby.weight() = baby.wbtag() = 1.;
   if(!isData) {
     edm::Handle<GenEventInfoProduct> gen_event_info;
     iEvent.getByLabel("generator", gen_event_info);
     if (gen_event_info->weight() < 0) baby.weight() *= -1.;
     baby.weight() *= xsec*luminosity / static_cast<double>(nevents_sample);
-
+    
   }
 
   ////////////////////// Primary vertices /////////////////////

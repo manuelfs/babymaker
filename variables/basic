@@ -182,6 +182,16 @@ std::vector<bool>  ph_ph90
 
 ###################   Tracks    ##################
 int ntks
+int nveto
+
+std::vector<float> tks_pt
+std::vector<float> tks_eta
+std::vector<float> tks_phi
+std::vector<int> tks_pdg
+std::vector<float> tks_miniso
+std::vector<float> tks_mt2
+std::vector<float> tks_mt
+
 
 ###################   Trigger   ##################
 std::vector<bool> trig;

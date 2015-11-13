@@ -155,10 +155,44 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
   writeMET(mets, mets_nohf);
 
   /// isolated tracks need to be after MET calculation and before jets cleaning
-  vCands tks;
+  vCands tks,ra4tks;
   if (eventTool->hasGoodPV(vtx)){
     tks = lepTool->getIsoTracks(pfcands, baby.met(), baby.met_phi());
     baby.ntks() = tks.size();
+    
+    vector<float> isos;
+    ra4tks = lepTool->getRA4IsoTracks(pfcands, baby.met(), baby.met_phi(),rhoEventCentral,isos,baby.leps_id().at(0));
+    vector<float> tks_pt;
+    vector<float> tks_eta;
+    vector<float> tks_phi;
+    vector<int> tks_pdg;
+    vector<float> tks_miniso;
+    vector<float> tks_mt2;
+    vector<float> tks_mt;
+    int nveto=0;
+
+    for(unsigned i=0;i<ra4tks.size();i++){
+      tks_pt.push_back(ra4tks.at(i)->pt());
+      tks_eta.push_back(ra4tks.at(i)->eta());
+      tks_phi.push_back(ra4tks.at(i)->phi());
+      tks_pdg.push_back(ra4tks.at(i)->pdgId());
+      tks_miniso.push_back(isos.at(i));
+      tks_mt2.push_back(getMT2(baby.leps_pt().at(0),baby.leps_phi().at(0),tks_pt.back(),tks_phi.back(),baby.met(),baby.met_phi()));
+      tks_mt.push_back(getMT(tks_pt.back(),tks_phi.back(),baby.met(),baby.met_phi()));
+      if(fabs(tks_pdg.back())==211 && tks_pt.back()>15. && tks_miniso.back()<0.05 && tks_mt2.back()<100) nveto++;
+      else if (fabs(tks_pdg.back())==13 && tks_pt.back()>10. && tks_miniso.back()<0.2 && tks_mt2.back()<100) nveto++;
+      else if (fabs(tks_pdg.back())==11 && tks_pt.back()>10. && tks_miniso.back()<0.1 && tks_mt2.back()<100) nveto++;
+    }
+    
+    baby.tks_pt() = tks_pt;
+    baby.tks_eta() = tks_eta;
+    baby.tks_phi() = tks_phi;
+    baby.tks_pdg() = tks_pdg;
+    baby.tks_miniso() = tks_miniso;
+    baby.tks_mt2() = tks_mt2;
+    baby.tks_mt() = tks_mt;
+    baby.nveto()=nveto;
+
   }  
 
   /// Jets

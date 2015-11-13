@@ -63,6 +63,7 @@ public:
                         double rho, bool charged_only);
 
   vCands getIsoTracks(edm::Handle<pat::PackedCandidateCollection> pfcands, double met, double met_phi);
+  vCands getRA4IsoTracks(edm::Handle<pat::PackedCandidateCollection> pfcands, double met, double met_phi,double rhoEventCentral,std::vector<float> &isos, int primary_pdg);
 
 };
 

@@ -11,6 +11,7 @@
 // User include files
 #include "babymaker/bmaker/interface/lepton_tools.hh"
 
+
 using namespace std;
 using namespace utilities;
 
@@ -295,6 +296,50 @@ vCands lepton_tools::getIsoTracks(edm::Handle<pat::PackedCandidateCollection> pf
 
   return tks;
 }
+
+vCands lepton_tools::getRA4IsoTracks(edm::Handle<pat::PackedCandidateCollection> pfcands, double met, double met_phi, double rhoEventCentral, vector<float> &isos, int primary_pdg){
+
+  vCands tks;
+  //common parameters
+  float eta_max = 2.5;
+  float dz_max = 0.1;
+  // float cone_size = 0.3;
+
+  for (size_t i(0); i < pfcands->size(); i++) {
+    const pat::PackedCandidate &tk = (*pfcands)[i];
+    unsigned int id = abs(tk.pdgId());
+    
+   
+
+    //id-specific parameters
+    float pt_min = id==211 ? 10. : 5.;
+    // float iso_max = id==211 ? 0.1 : 0.2;
+
+    // track selection
+    if (tk.charge()==0 || tk.charge()==(-primary_pdg)) continue;
+    if (id!=11 && id!=13 && id!=211) continue;
+    if (tk.pt() < pt_min) continue;
+    if (fabs(tk.eta()) > eta_max) continue;
+    if (fabs(tk.dz()) > dz_max) continue;
+    
+    
+    //if (mt_max>0.01 && getMT(met, met_phi,  tk.pt(), tk.phi())>mt_max) continue;
+
+    // calculate track isolation
+    double iso = 0.;
+    if(id!=211)
+      iso = getPFIsolation(pfcands, dynamic_cast<const reco::Candidate *>(&tk), 0.05, 0.2, 10., rhoEventCentral, false);
+    else 
+      iso = getPFIsolation(pfcands, dynamic_cast<const reco::Candidate *>(&tk), 0.05, 0.2, 10., rhoEventCentral, true);
+
+    if(iso>0.5) continue;
+    isos.push_back(iso);
+    tks.push_back(dynamic_cast<const reco::Candidate *>(&tk));
+  }
+
+  return tks;
+}
+
 
 lepton_tools::lepton_tools(){
 }

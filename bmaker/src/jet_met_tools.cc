@@ -424,7 +424,8 @@ double jet_met_tools::getSysMJ(double radius, vector<LVector> &jets){
 jet_met_tools::jet_met_tools(TString ijecName, bool doSys):
   jecName(ijecName),
   doSystematics(doSys),
-  calib(0){
+  calib(0),
+  calibFS(0){
 
   if (jecName.Contains("_DATA")) isData = true;
   else if (jecName.Contains("_MC")) isData = false;
@@ -456,42 +457,37 @@ jet_met_tools::jet_met_tools(TString ijecName, bool doSys):
   // only add b-tagging weights if requested
   if(doSystematics) {
     std::string scaleFactorFile("bmaker/data/CSVv2.csv");
-    if(CRABJob) scaleFactorFile = "data/CSVv2.csv";
+    std::string scaleFactorFileFastSim("bmaker/data/CSV_13TEV_TTJets_12_10_2015_prelimUnc.csv");
     calib      = new BTagCalibration("csvv1", scaleFactorFile);
-    // central BC
-    readersBC.push_back(new BTagCalibrationReader(calib, // calibration instance 
-						BTagEntry::OP_MEDIUM, // operating point
-						"mujets", // measurement type ("comb" or "mujets")
-						"central")); // systematics type ("central", "up", or "down")
-    // BC up
-    readersBC.push_back(new BTagCalibrationReader(calib, // calibration instance 
-						BTagEntry::OP_MEDIUM, // operating point
-						"mujets", // measurement type ("comb" or "mujets")
-						"up")); // systematics type ("central", "up", or "down")
-    // BC down
-    readersBC.push_back(new BTagCalibrationReader(calib, // calibration instance 
-						BTagEntry::OP_MEDIUM, // operating point
-						"mujets", // measurement type ("comb" or "mujets")
-						"down")); // systematics type ("central", "up", or "down")
+    calibFS      = new BTagCalibration("csvv1", scaleFactorFileFastSim);
 
-    // central UDSG
-    readersUDSG.push_back(new BTagCalibrationReader(calib, // calibration instance 
-						BTagEntry::OP_MEDIUM, // operating point
-						"comb", // measurement type ("comb" or "mujets")
-						"central")); // systematics type ("central", "up", or "down")
-    // UDSG up
-    readersUDSG.push_back(new BTagCalibrationReader(calib, // calibration instance 
-						BTagEntry::OP_MEDIUM, // operating point
-						"comb", // measurement type ("comb" or "mujets")
-						"up")); // systematics type ("central", "up", or "down")
-    // UDSG down
-    readersUDSG.push_back(new BTagCalibrationReader(calib, // calibration instance 
-						BTagEntry::OP_MEDIUM, // operating point
-						"comb", // measurement type ("comb" or "mujets")
-						"down")); // systematics type ("central", "up", or "down")
+    std::vector<std::string> variationTypes = {"central", "up", "down"};
+    for(auto itype : variationTypes) {
+      // BC full sim
+      readersBC.push_back(new BTagCalibrationReader(calib, // calibration instance 
+						    BTagEntry::OP_MEDIUM, // operating point
+						    "mujets", // measurement type ("comb" or "mujets")
+						    itype)); // systematics type ("central", "up", or "down")
+      // UDSG full sim
+      readersUDSG.push_back(new BTagCalibrationReader(calib, // calibration instance 
+						      BTagEntry::OP_MEDIUM, // operating point
+						      "comb", // measurement type ("comb" or "mujets")
+						      itype)); // systematics type ("central", "up", or "down")
+    }
+    for(auto itype : variationTypes) {
+      // BC fastsim
+      readersBC.push_back(new BTagCalibrationReader(calibFS, // calibration instance 
+						    BTagEntry::OP_MEDIUM, // operating point
+						    "fastsim", // measurement type ("comb" or "mujets")
+						    itype)); // systematics type ("central", "up", or "down")
+      // UDSG fastsim
+      readersUDSG.push_back(new BTagCalibrationReader(calibFS, // calibration instance 
+						      BTagEntry::OP_MEDIUM, // operating point
+						      "fastsim", // measurement type ("comb" or "mujets")
+						      itype)); // systematics type ("central", "up", or "down")
+    }
 
     std::string filename("bmaker/data/btagEfficiency.root");
-    if(CRABJob) filename = "data/btagEfficiency.root";
     TFile *efficiencyFile = TFile::Open(filename.c_str());
     if(efficiencyFile->IsOpen()) {
       btagEfficiencyParameterization = static_cast<TH3F*>(efficiencyFile->Get("btagEfficiency"));
@@ -520,6 +516,7 @@ float jet_met_tools::getJetResolutionSF(float jet_eta){
 jet_met_tools::~jet_met_tools(){
   if(doJEC) delete jetCorrector;
   if(calib !=0 ) delete calib;
+  if(calibFS !=0 ) delete calibFS;
   for(auto ireader : readersBC) delete ireader;
   for(auto ireader : readersUDSG) delete ireader;
 }

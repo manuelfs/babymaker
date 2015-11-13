@@ -82,7 +82,7 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 
   //////////////// Weight //////////////////
   const float luminosity = 1000.;
-  baby.weight() = baby.wbtag() = 1.;
+  baby.weight() = baby.wbtag() = baby.wbtagFS() = 1.;
   if(!isData) {
     edm::Handle<GenEventInfoProduct> gen_event_info;
     iEvent.getByLabel("generator", gen_event_info);
@@ -156,7 +156,7 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 
   /// isolated tracks need to be after MET calculation and before jets cleaning
   vCands tks,ra4tks;
-  if (eventTool->hasGoodPV(vtx)){
+  if (eventTool->hasGoodPV(vtx) && baby.leps_id().size()>0){
     tks = lepTool->getIsoTracks(pfcands, baby.met(), baby.met_phi());
     baby.ntks() = tks.size();
     
@@ -342,8 +342,12 @@ void bmaker_basic::writeJets(edm::Handle<pat::JetCollection> alljets,
   baby.njets_ra2() = 0; baby.njets_clean() = 0; baby.nbm_ra2() = 0; baby.ht_ra2() = 0.; baby.ht_clean() = 0.; 
   baby.pass_jets() = true; baby.pass_jets_nohf() = true; baby.pass_jets_tight() = true; 
   baby.pass_jets_ra2() = true; baby.pass_jets_tight_ra2() = true; 
-  for(int i=0; i<2; i++) baby.sys_btagBC().push_back(1);
-  for(int i=0; i<2; i++) baby.sys_btagUDSG().push_back(1);
+  for(int i=0; i<2; i++) {
+    baby.sys_btagBC().push_back(1);
+    baby.sys_btagUDSG().push_back(1);
+    baby.sys_btagBC_FS().push_back(1);
+    baby.sys_btagUDSG_FS().push_back(1);
+  }
   if (doSystematics) {
     baby.sys_njets().resize(kSysLast, 0); baby.sys_nbm().resize(kSysLast, 0); 
     baby.sys_pass().resize(kSysLast, true); baby.sys_ht().resize(kSysLast, 0.); 
@@ -391,6 +395,13 @@ void bmaker_basic::writeJets(edm::Handle<pat::JetCollection> alljets,
 	  baby.sys_btagBC().at(1)*=jetTool->jetBTagWeight(jet, jetp4, csv > jetTool->CSVMedium, jet_met_tools::kBTagDown, jet_met_tools::kBTagCentral);
 	  baby.sys_btagUDSG().at(0)*=jetTool->jetBTagWeight(jet, jetp4, csv > jetTool->CSVMedium, jet_met_tools::kBTagCentral, jet_met_tools::kBTagUp);
 	  baby.sys_btagUDSG().at(1)*=jetTool->jetBTagWeight(jet, jetp4, csv > jetTool->CSVMedium, jet_met_tools::kBTagCentral, jet_met_tools::kBTagDown);
+	  if(isFastSim) {
+	    baby.wbtagFS()*=jetTool->jetBTagWeight(jet, jetp4, csv > jetTool->CSVMedium, jet_met_tools::kBTagCentralFS, jet_met_tools::kBTagCentralFS);
+	    baby.sys_btagBC_FS().at(0)*=jetTool->jetBTagWeight(jet, jetp4, csv > jetTool->CSVMedium, jet_met_tools::kBTagUpFS, jet_met_tools::kBTagCentralFS);
+	    baby.sys_btagBC_FS().at(1)*=jetTool->jetBTagWeight(jet, jetp4, csv > jetTool->CSVMedium, jet_met_tools::kBTagDownFS, jet_met_tools::kBTagCentralFS);
+	    baby.sys_btagUDSG_FS().at(0)*=jetTool->jetBTagWeight(jet, jetp4, csv > jetTool->CSVMedium, jet_met_tools::kBTagCentralFS, jet_met_tools::kBTagUpFS);
+	    baby.sys_btagUDSG_FS().at(1)*=jetTool->jetBTagWeight(jet, jetp4, csv > jetTool->CSVMedium, jet_met_tools::kBTagCentralFS, jet_met_tools::kBTagDownFS);
+	  }
 	}
         jetsys_p4 += jet.p4();
         baby.njets()++;
@@ -1111,6 +1122,7 @@ bmaker_basic::bmaker_basic(const edm::ParameterSet& iConfig):
   nevents(0),
   doMetRebalancing(iConfig.getParameter<bool>("doMetRebalancing")),
   addBTagWeights(iConfig.getParameter<bool>("addBTagWeights")),
+  isFastSim(iConfig.getParameter<bool>("isFastSim")),
   doSystematics(iConfig.getParameter<bool>("doSystematics"))
 {
   CRABJob = iConfig.getParameter<bool>("isCRABJob");

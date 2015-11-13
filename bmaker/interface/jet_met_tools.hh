@@ -43,7 +43,7 @@ public:
   const float sizeJet      = 0.4;
 
   enum CutLevel{kLoose, kTight, kPBNR};
-  enum btagVariation { kBTagCentral, kBTagUp, kBTagDown};
+  enum btagVariation { kBTagCentral, kBTagUp, kBTagDown,  kBTagCentralFS, kBTagUpFS, kBTagDownFS};
 
   TString jecName;
   bool doSystematics;
@@ -60,6 +60,7 @@ public:
   std::vector<float> genJetPt;
 
   BTagCalibration *calib;
+  BTagCalibration *calibFS;
   std::vector<BTagCalibrationReader*> readersBC;
   std::vector<BTagCalibrationReader*> readersUDSG;
   TH3F *btagEfficiencyParameterization;

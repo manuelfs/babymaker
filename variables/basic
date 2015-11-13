@@ -33,8 +33,11 @@ std::vector<float> sys_muf
 std::vector<float> sys_murf
 std::vector<float> sys_btagBC
 std::vector<float> sys_btagUDSG
+std::vector<float> sys_btagBC_FS
+std::vector<float> sys_btagUDSG_FS
 ######### Scale factor central values ########
 float wbtag
+float wbtagFS
 ###################   MET   ##################
 float met
 float met_phi

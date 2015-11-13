@@ -101,6 +101,7 @@ process.baby_basic = cms.EDAnalyzer('bmaker_basic',
                                     doMetRebalancing = cms.bool(True),
                                     doSystematics = cms.bool(doSystematics),
                                     addBTagWeights = cms.bool(True),
+                                    isFastSim = cms.bool(False),
                                     isCRABJob = cms.bool(options.isCRABJob)
 )
 

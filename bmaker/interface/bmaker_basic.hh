@@ -138,6 +138,7 @@ public:
   float xsec;
 
   bool addBTagWeights;
+  bool isFastSim;
   bool doSystematics;
 
   static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);

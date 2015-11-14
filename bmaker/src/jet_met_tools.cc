@@ -456,8 +456,10 @@ jet_met_tools::jet_met_tools(TString ijecName, bool doSys):
 
   // only add b-tagging weights if requested
   if(doSystematics) {
-    std::string scaleFactorFile("bmaker/data/CSVv2.csv");
-    std::string scaleFactorFileFastSim("bmaker/data/CSV_13TEV_TTJets_12_10_2015_prelimUnc.csv");
+    std::string scaleFactorFile(getenv("CMSSW_BASE"));
+    std::string scaleFactorFileFastSim(scaleFactorFile);
+    scaleFactorFile+="/src/babymaker/bmaker/data/CSVv2.csv";
+    scaleFactorFileFastSim+="/src/babymaker/bmaker/data/CSV_13TEV_TTJets_12_10_2015_prelimUnc.csv";
     calib      = new BTagCalibration("csvv1", scaleFactorFile);
     calibFS      = new BTagCalibration("csvv1", scaleFactorFileFastSim);
 
@@ -487,7 +489,8 @@ jet_met_tools::jet_met_tools(TString ijecName, bool doSys):
 						      itype)); // systematics type ("central", "up", or "down")
     }
 
-    std::string filename("bmaker/data/btagEfficiency.root");
+    std::string filename(getenv("CMSSW_BASE"));
+    filename+="/src/babymaker/bmaker/data/btagEfficiency.root";
     TFile *efficiencyFile = TFile::Open(filename.c_str());
     if(efficiencyFile->IsOpen()) {
       btagEfficiencyParameterization = static_cast<TH3F*>(efficiencyFile->Get("btagEfficiency"));

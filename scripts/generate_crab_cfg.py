@@ -19,6 +19,9 @@ def getNumberOfEvents(dataset):
 
 #######################################################
 
+print "####################################################################################"
+print "# Warning! This script will not set the correct weight for samples with extensions #" 
+print "####################################################################################"
 
 if len(sys.argv) != 2:
 	print "Must specify dataset name"

@@ -3,6 +3,14 @@ babymaker
 
 CMSSW code to generate babies (small flat ntuples) from MINIAOD
 
+  * [Code setup](#code-setup)
+  * [Adding new branches](#adding-new-branches)
+  * [Getting an flist](#getting-an-flist)
+  * [Submitting jobs to condor in the T3 at UCSB](#submitting-jobs-to-condor-in-the-T3-at-UCSB)
+  * [Conventions in babymaker](#conventions-in-babymaker)
+
+
+#### Code setup
 To set up the code and generate a file named `baby.root`, issue the following commands 
 on lxplus:
 
@@ -12,11 +20,12 @@ on lxplus:
     git clone git@github.com:manuelfs/babymaker
     cd babymaker
     ./compile.sh
-    ./scripts/cmsRun.sh
+    ./scripts/cmsRun.sh <inputfile> <nevents=1000> <outname>
 
 The `compile.sh` script first compiles the `babymaker/bmaker/genfiles` folder, which
 automatically generates the tree structure (see below), and then issues `scram b`
 in the `babymaker` folder. 
+
 
 #### Adding new branches
 
@@ -33,28 +42,50 @@ the files
 which have the c++ code that defines the class `baby_basic` with the tree, all the branches,
 automatic vector clearing in the `baby_basic::Fill` method, and other useful functions.
 
-
 The branches are filled in the `bmaker_basic::analyze` method in 
 `babymaker/bmaker/plugins/bmaker_basic.cc`. Functions that define physics quantities,
 like isolation or electron ID, are defined in `babymaker/bmaker/src/*_tools.cc`.
 
+
+#### Getting an flist
+
+To process entire datasets you need the corresponding flist, or list of individual files in the dataset.
+A number of these flists are committed to trandbea/flists, and are downloaded with
+
+    git clone git@github.com:trandbea/flists
+
+This repository must be placed at `${CMSSW_BASE}/scr`, not inside `babymaker`.
+
+To obtain an flist for a new dataset, or a number of datasets, you use the following script
+
+    ./scripts/get_flist.py -d <dataset_name>
+    ./scripts/get_flist.py -f <file_with_dataset_names>
+
+All flists must be placed in the `${CMSSW_BASE}/scr/flists` folder.
+
+
 #### Submitting jobs to condor in the T3 at UCSB
 
-For now, make sure that `process.maxEvents` is set to the number of events you want
-(-1 for all events) in `babymaker/bmaker/python/bmaker_basic_cfg.py`.
-
 Log on to one of the compute-0-X machines and set up the code are described above.
-Define the datasets you want to run over in `babymaker/scripts/get_flist.py` and run it
-from the `babymaker` folder with 
-
-    ./scripts/get_flist.py 
-
-This step finds the paths for the files that are to be run over.
-
 In the `babymaker` folder, create an `out` folder. This is typically a soft link to a place
 with lots of disk space, such as `ln -s /net/cms2/cms2r0/user/out/ out`.
 
-Then submit the condor jobs from `babymaker` folder with
+Then, add the datasets you want to run over in the wishlist of `scripts/sub_cond.py` and submit the condor jobs from
+`babymaker` folder with
 
     ./scripts/sub_cond.py
 
+#### Conventions in babymaker
+
+In order to homogenize the code and know what to expect, we try to follow these conventions in the  development
+of `babymaker`:
+
+ * **Branch names** use **all lower case letters**. If words must be separated, use an underscore, e.g. `met_phi`
+ * **File names** use **all lower case letters**. If words must be separated, use an underscore, e.g. `lepton_tools.cc`
+ * **Function names** follow the standard **CMSSW convention**, that is, first word all lower case, and first letter 
+ of subsequent words in upper case. e.g. `bmaker_basic::writeFatJets`
+ * **Product names** (e.g. `"slimmedElectrons"`) are **only defined in `bmaker_basic::analize` or in 
+ `babymaker/bmaker/python/bmaker_basic_cfg.py`**. 
+ * As much as possible, **physics definitions go in the corresponding `src/*_tools.cc` file, e.g. lepton ID goes in
+ `src/lepton_tools.cc`. They should not be part of `plugins/bmaker_basic.cc` so that when/if we move to having various 
+ baby definitions in parallel, for which the code is setup, all babies would use common definitions.

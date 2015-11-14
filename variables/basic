@@ -1,7 +1,7 @@
 ##################   Provenance   #############
 int run
 int lumiblock
-int event
+long event
 float weight
 bool nonblind
 

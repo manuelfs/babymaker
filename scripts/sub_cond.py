@@ -48,7 +48,7 @@ print
 # for data get the golden runs
 goldruns = []
 if (args.json):
-  json_name = "txt/json/" + args.json
+  json_name = "data/json/" + args.json
   with open(json_name) as jfile:
     jdata = json.load(jfile)
   goldruns = [int(i) for i in jdata.keys()]

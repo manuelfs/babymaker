@@ -1,8 +1,7 @@
 ##################   Provenance   #############
 int run
 int lumiblock
-long event
-float weight
+Long64_t event
 bool nonblind
 
 ####################   Global   ###################
@@ -26,18 +25,6 @@ float mt_rebal
 float dphi_wlep
 bool jetmismeas
 
-################### Systematic weights #######
-# +/- variations are index 0 and 1
-std::vector<float> sys_mur
-std::vector<float> sys_muf
-std::vector<float> sys_murf
-std::vector<float> sys_btagBC
-std::vector<float> sys_btagUDSG
-std::vector<float> sys_btagBC_FS
-std::vector<float> sys_btagUDSG_FS
-######### Scale factor central values ########
-float wbtag
-float wbtagFS
 ###################   MET   ##################
 float met
 float met_phi
@@ -267,7 +254,13 @@ float isr_tru_phi
 int mgluino
 int mlsp
 
+################  Weights   ##################
+float weight
+float w_btag
+float wfs_btag
+
 ################  Systematic variations   ##################
+# variations have index 0 (JER smearing), 1 (JEC up) and 2 (JEC down)
 std::vector<float> sys_ht
 std::vector<int>   sys_njets
 std::vector<int>   sys_nbm
@@ -275,4 +268,13 @@ std::vector<bool>  sys_pass
 std::vector<float> sys_mj
 std::vector<float> sys_met
 std::vector<float> sys_mt
+
+# +/- variations are index 0 and 1
+std::vector<float> sys_mur
+std::vector<float> sys_muf
+std::vector<float> sys_murf
+std::vector<float> sys_bctag
+std::vector<float> sys_udsgtag
+std::vector<float> sysfs_bctag
+std::vector<float> sysfs_udsgtag
 

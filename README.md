@@ -54,14 +54,14 @@ A number of these flists are committed to trandbea/flists, and are downloaded wi
 
     git clone git@github.com:trandbea/flists
 
-This repository must be placed at `${CMSSW_BASE}/scr`, not inside `babymaker`.
+This repository must be placed at `${CMSSW_BASE}/src`, not inside `babymaker`.
 
 To obtain an flist for a new dataset, or a number of datasets, you use the following script
 
     ./scripts/get_flist.py -d <dataset_name>
     ./scripts/get_flist.py -f <file_with_dataset_names>
 
-All flists must be placed in the `${CMSSW_BASE}/scr/flists` folder.
+All flists must be placed in the `${CMSSW_BASE}/src/flists` folder.
 
 
 #### Submitting jobs to condor in the T3 at UCSB
@@ -86,6 +86,6 @@ of `babymaker`:
  of subsequent words in upper case. e.g. `bmaker_basic::writeFatJets`
  * **Product names** (e.g. `"slimmedElectrons"`) are **only defined in `bmaker_basic::analize` or in 
  `babymaker/bmaker/python/bmaker_basic_cfg.py`**. 
- * As much as possible, **physics definitions go in the corresponding `src/*_tools.cc` file, e.g. lepton ID goes in
+ * As much as possible, **physics definitions go in the corresponding `src/*_tools.cc` file**, e.g. lepton ID goes in
  `src/lepton_tools.cc`. They should not be part of `plugins/bmaker_basic.cc` so that when/if we move to having various 
  baby definitions in parallel, for which the code is setup, all babies would use common definitions.

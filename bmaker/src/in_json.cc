@@ -17,7 +17,7 @@ extern bool CRABJob;
 
 std::vector< std::vector<int> > MakeVRunLumi(std::string input){
   std::ifstream orgJSON;
-  std::string command("printf ${CMSSW_BASE}/src/babymaker/txt/");
+  std::string command("printf ${CMSSW_BASE}/src/babymaker/data/");
   if(CRABJob) command="printf ${CMSSW_BASE}/";
   std::string fullpath = execute(command.c_str());
   if(input == "golden"){

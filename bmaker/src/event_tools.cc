@@ -77,7 +77,7 @@ event_tools::event_tools(TString outname):
   VRunLumi2015nonblind(MakeVRunLumi("nonblind")){
 
   doBeamHalo = false;
-  string command("printf ${CMSSW_BASE}/src/babymaker/txt/csc_beamhalo_filter/eventlist_");
+  string command("printf ${CMSSW_BASE}/src/babymaker/data/csc_beamhalo_filter/eventlist_");
   if(CRABJob) command="printf ${CMSSW_BASE}/csc_beamhalo_filter/eventlist_";
   string eventList = execute(command.c_str());
   vector<string> datasets = {"SingleElectron", "SingleMuon", "MET", "HTMHT", "JetHT", "DoubleMuon", "DoubleEG"};

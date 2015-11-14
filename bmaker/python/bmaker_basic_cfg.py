@@ -28,7 +28,7 @@ options.register('nEvents',
                  VarParsing.varType.int,
                  "Number of events to run over.")
 options.register('json',
-                 'babymaker/txt/json/golden_Cert_246908-258714_13TeV_PromptReco_Collisions15_25ns_JSON.json',
+                 'babymaker/data/json/golden_Cert_246908-258714_13TeV_PromptReco_Collisions15_25ns_JSON.json',
                  VarParsing.multiplicity.singleton,
                  VarParsing.varType.string,
                  "Path to json starting with babymaker/...")
@@ -134,7 +134,7 @@ if doJEC:
     process.load("CondCore.DBCommon.CondDBCommon_cfi")
     from CondCore.DBCommon.CondDBSetup_cfi import CondDBSetup
     process.jec = cms.ESSource("PoolDBESSource",CondDBSetup,
-                               connect = cms.string('sqlite_file:txt/jec/'+jecLabel+'.db'),
+                               connect = cms.string('sqlite_file:data/jec/'+jecLabel+'.db'),
                                toGet   = cms.VPSet(
                                    cms.PSet(
                                        record = cms.string("JetCorrectionsRecord"),

@@ -23,7 +23,7 @@ config.JobType.psetName = 'babymaker/bmaker/python/bmaker_basic_cfg.py'
 config.JobType.disableAutomaticOutputCollection = True
 config.JobType.outputFiles = ['baby_' + datasetID + '.root']
 config.JobType.pyCfgParams = ['nEventsSample=' + str(nevents), 'outputFile=baby_' + datasetID + '.root', 'isCRABJob=True']
-config.JobType.inputFiles = ['babymaker/txt/csc_beamhalo_filter', 'babymaker/txt/dataset', 'babymaker/txt/jec', 'babymaker/txt/json' , 'babymaker/bmaker/data']
+config.JobType.inputFiles = ['babymaker/bmaker/data']
 
 config.section_("Data")
 config.Data.inputDataset = dataset

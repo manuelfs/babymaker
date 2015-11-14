@@ -435,7 +435,7 @@ jet_met_tools::jet_met_tools(TString ijecName, bool doSys):
   jecName.ReplaceAll("miniAOD_","");
   string basename(getenv("CMSSW_BASE"));
   if(CRABJob) basename += "/jec/";
-  else basename += "/src/babymaker/txt/jec/";
+  else basename += "/src/babymaker/data/jec/";
   basename += jecName.Data();
 
   if(doJEC || doSystematics) {

@@ -13,12 +13,9 @@
 using namespace std;
 using namespace utilities;
 
-extern bool CRABJob;
-
 std::vector< std::vector<int> > MakeVRunLumi(std::string input){
   std::ifstream orgJSON;
   std::string command("printf ${CMSSW_BASE}/src/babymaker/data/");
-  if(CRABJob) command="printf ${CMSSW_BASE}/";
   std::string fullpath = execute(command.c_str());
   if(input == "golden"){
     fullpath += "json/golden_Cert_246908-258714_13TeV_PromptReco_Collisions15_25ns_JSON.json";

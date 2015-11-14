@@ -22,8 +22,7 @@ config.JobType.pluginName = 'Analysis'
 config.JobType.psetName = 'babymaker/bmaker/python/bmaker_basic_cfg.py'
 config.JobType.disableAutomaticOutputCollection = True
 config.JobType.outputFiles = ['baby_' + datasetID + '.root']
-config.JobType.pyCfgParams = ['nEventsSample=' + str(nevents), 'outputFile=baby_' + datasetID + '.root', 'isCRABJob=True']
-config.JobType.inputFiles = ['babymaker/bmaker/data']
+config.JobType.pyCfgParams = ['nEventsSample=' + str(nevents), 'outputFile=baby_' + datasetID + '.root']
 
 config.section_("Data")
 config.Data.inputDataset = dataset

@@ -37,11 +37,6 @@ options.register('condorSubTime',
                  VarParsing.multiplicity.singleton,
                  VarParsing.varType.string,
                  "Timestamp from condor submission")
-options.register('isCRABJob',
-                 False,
-                 VarParsing.multiplicity.singleton,
-                 VarParsing.varType.bool,
-                 "Switch to change directory structure")
 options.parseArguments()
 outName = options.outputFile
 if outName == "output.root": # output filename not set
@@ -102,7 +97,6 @@ process.baby_basic = cms.EDAnalyzer('bmaker_basic',
                                     doSystematics = cms.bool(doSystematics),
                                     addBTagWeights = cms.bool(True),
                                     isFastSim = cms.bool(False),
-                                    isCRABJob = cms.bool(options.isCRABJob)
 )
 
 ###### Setting up number of events, and reporing frequency 

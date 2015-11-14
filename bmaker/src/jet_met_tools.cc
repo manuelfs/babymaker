@@ -23,8 +23,6 @@
 using namespace std;
 using namespace utilities;
 
-extern bool CRABJob;
-
 bool jet_met_tools::leptonInJet(const pat::Jet &jet, vCands leptons){
   for(unsigned ilep(0); ilep < leptons.size(); ilep++){
     int indpf(-1);
@@ -434,8 +432,7 @@ jet_met_tools::jet_met_tools(TString ijecName, bool doSys):
   doJEC = !jecName.Contains("miniAOD");
   jecName.ReplaceAll("miniAOD_","");
   string basename(getenv("CMSSW_BASE"));
-  if(CRABJob) basename += "/jec/";
-  else basename += "/src/babymaker/data/jec/";
+  basename += "/src/babymaker/data/jec/";
   basename += jecName.Data();
 
   if(doJEC || doSystematics) {

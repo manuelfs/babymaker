@@ -22,9 +22,10 @@ onePerJob = False
 
 # determine if job is running at UCSB or UCSD
 host = os.environ.get("HOSTNAME")
-atUCSB = "compute" in host or "physics.ucsb.edu" in host
+atUCSB = True#"compute" in host or "physics.ucsb.edu" in host
 
-redirector = "root://cmsxrootd.fnal.gov//"
+# redirector = "root://cmsxrootd.fnal.gov//"
+redirector = "root://cms-xrd-global.cern.ch//"
 
 bdir = os.getcwd()
 if ('babymaker' not in bdir.split("/").pop()):
@@ -34,29 +35,45 @@ logdir = os.path.join(bdir,'logs',timestamp)
 if not os.path.exists(logdir):
   sys.exit("Can't find log directory %s" %logdir)
 
+arxivdir = os.path.join(bdir,'logs',timestamp,'arxiv')
+if not os.path.exists(arxivdir):
+  os.mkdir(arxivdir)
+
 loglist = [x for x in glob.glob(logdir+"/*.log") if "_rs" not in x] 
 print "Found %i logs" %(len(loglist))
 
 failed = set()
 unfinished = set()
+xrootd_err = set()
 
 for flog in loglist:
   ferr = flog.rstrip(".log") + ".err"
   fout = flog.rstrip(".log") + ".out"
   bname = flog.split("/").pop().rstrip(".log")
-  if os.path.getsize(fout)==0 or os.path.getsize(ferr)==0:
+  if os.path.getsize(fout)==0:
     unfinished.add(bname)
   else:
     if "BABYMAKER: Written" not in open(fout).read():
       failed.add(bname)
+    errfile = open(ferr).read()
     # transfer not necessary at UCSB
-    if "Transfer took" not in open(ferr).read() and not atUCSB:
+    if "Transfer took" not in errfile and not atUCSB:
       failed.add(bname)
+    if "Fatal Exception" or "cmsRun exit code 1" in errfile:
+      failed.add(bname)
+    if "Socket error while handshaking: [FATAL] Auth failed" in errfile:
+      xrootd_err.add(bname)
+
+    if bname in xrootd_err and bname not in failed:
+      print "xrootd err but success(?): ",bname 
 
 print "--------- Unfinished:"
 pprint(unfinished)
 print "--------- Failed:"
 pprint(failed)
+print "Total unfinished ",len(unfinished)
+print "Total failed ",len(failed)
+print "Total with xrootd err",len(xrootd_err)
 
 user_input = raw_input('Resubmit jobs [y/n]?')
 if (user_input!='y'):
@@ -80,11 +97,6 @@ for old_baby in failed:
       break
 
 # --- resubmission
-
-sys_cmd = ""
-# at UCSB submission is only possible from cms25
-if atUCSB:
-  sys_cmd+="ssh cms25.physics.ucsb.edu "
 total_jobs = 0
 for old_baby in failed:
   fexe = os.path.join(logdir.replace("/logs/","/run/"), old_baby+".sh")
@@ -94,7 +106,12 @@ for old_baby in failed:
     old_exe = open(fexe).read()
     new_exe = old_exe.replace("file:/hadoop/cms/phedex", redirector)
     with open(fexe,'w') as f: f.write(new_exe)
-    sys_cmd += "condor_submit " + fcmd
+    # arxiv log files
+    os.rename(logdir+"/"+old_baby+".log", arxivdir+"/"+old_baby+".log")
+    os.rename(logdir+"/"+old_baby+".err", arxivdir+"/"+old_baby+".err")
+    os.rename(logdir+"/"+old_baby+".out", arxivdir+"/"+old_baby+".out")
+    sys_cmd = "condor_submit " + fcmd
+    if atUCSB: sys_cmd = "ssh cms25.physics.ucsb.edu condor_submit " + fcmd
     print "INFO: Submitting", fcmd
     os.system(sys_cmd)
     total_jobs = total_jobs + 1
@@ -113,8 +130,6 @@ for old_baby in failed:
     inputfiles = [line for line in old_exe if ("/store/" in line and "lcg-cp" not in line)]
     for i, line in enumerate(inputfiles):
       inputfiles[i] = "/store/"+line.split("/store/").pop().split(".root")[0]+".root"
-    if len(inputfiles)!=nfiles:
-      sys.exit("Could not parse for the input files")
     # pprint(inputfiles)
 
     # --- assume none are local in case job failed because file was not found
@@ -129,7 +144,8 @@ for old_baby in failed:
       new_cmd = old_cmd.replace(old_baby, new_baby)
       fnew_cmd = fcmd.replace(old_baby,new_baby)
       with open(fnew_cmd,'w') as f2: f2.write(new_cmd)
-      sys_cmd += "condor_submit " + fnew_cmd
+      sys_cmd = "condor_submit " + fnew_cmd
+      if atUCSB: sys_cmd = "ssh cms25.physics.ucsb.edu condor_submit " + fnew_cmd
       print "INFO: Submitting", fnew_cmd
       os.system(sys_cmd)
       total_jobs = total_jobs + 1

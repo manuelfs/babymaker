@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import os, sys, subprocess
+import pprint
 import glob
 import json
 import string
@@ -12,46 +13,43 @@ import argparse
 # "TTJets_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15DR74_Asympt25ns"
 # if we want all the HT-binned TTJets append:
 # "TTJets_HT-"
-wishlist = []
+mc_wishlist = []
 #------------ MC ------------------
-# wishlist.append("T1tttt_mGluino-1500_mLSP-100_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15DR74_Asympt25ns_MCRUN2_74_V9")
-# wishlist.append("T1tttt_mGluino-1200_mLSP-800_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15DR74_Asympt25ns_MCRUN2_74_V9")
+# mc_wishlist.append("T1tttt_mGluino-1500_mLSP-100_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15DR74_Asympt25ns_MCRUN2_74_V9")
+# mc_wishlist.append("T1tttt_mGluino-1200_mLSP-800_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15DR74_Asympt25ns_MCRUN2_74_V9")
 
-wishlist.append("TTJets_HT")
-wishlist.append("TTJets_SingleLep")
-wishlist.append("TTJets_DiLep")
-wishlist.append("TTGJets")
-# wishlist.append("WJets")
-# wishlist.append("DYJets")
-# wishlist.append("DYJetsToLL_M-50_TuneCUETP8M1_13TeV")
-# wishlist.append("QCD_")
-# wishlist.append("ST_")
-# wishlist.append("ttHJetTobb")
-# wishlist.append("WWTo2L2Nu")
-# wishlist.append("WWToLNuQQ")
-# wishlist.append("ggZH_HToBB")
+# mc_wishlist.append("TTJets_HT")
+# mc_wishlist.append("TTJets_SingleLep")
+# mc_wishlist.append("TTJets_DiLep")
+# mc_wishlist.append("TTGJets")
+# mc_wishlist.append("WJets")
+# mc_wishlist.append("DYJets")
+# mc_wishlist.append("DYJetsToLL_M-50_TuneCUETP8M1_13TeV")
+# mc_wishlist.append("QCD_")
+# mc_wishlist.append("ST_")
+# mc_wishlist.append("ttHJetTobb")
+# mc_wishlist.append("WWTo2L2Nu")
+# mc_wishlist.append("WWToLNuQQ")
+# mc_wishlist.append("ggZH_HToBB")
 
-# wishlist.append("JetHT")
-# wishlist.append("HTMHT")
-# wishlist.append("MET")
-# wishlist.append("SingleElectron")
-# wishlist.append("SingleMuon")
-# wishlist.append("DoubleEG")
-# wishlist.append("DoubleMuon")
+data_wishlist = []
+data_wishlist.append("JetHT")
+data_wishlist.append("HTMHT")
+data_wishlist.append("MET")
+data_wishlist.append("SingleElectron")
+data_wishlist.append("SingleMuon")
+data_wishlist.append("DoubleEG")
+data_wishlist.append("DoubleMuon")
 
-parser = argparse.ArgumentParser()
-parser.add_argument("-j","--json")
-args = parser.parse_args()
-
-print 
+jsonlist = glob.glob("data/json/subgolden_*.json")
 
 # for data get the golden runs
-goldruns = []
-if (args.json):
-  json_name = "data/json/" + args.json
-  with open(json_name) as jfile:
+goldruns = {}
+for jsonfile in jsonlist:
+  jdata = {}
+  with open(jsonfile) as jfile:
     jdata = json.load(jfile)
-  goldruns = [int(i) for i in jdata.keys()]
+  goldruns[jsonfile] = [int(i) for i in jdata.keys()]
 
 # Maximum number of input MINIAOD files per condor job
 maxfiles = int(raw_input('Enter max number of files per job: '))
@@ -61,8 +59,7 @@ maxfiles = int(raw_input('Enter max number of files per job: '))
 # they are considered extensions of each other and combined
 # i.e. the output babies and logs are labeled by 'substring-before-key'+'key'
 # the sub-string following the key is dropped and forgotten!
-# in this example, 'Run2015D-PromptReco-v3' will be separated from the rest of Run D so that different corrections can be applied
-comb_keys = ['RunIISpring15DR74_Asympt25ns_MCRUN2_74_V9', 'RunIISpring15MiniAODv2_74X_mcRun2_asymptotic_v2', 'Run2015D-PromptReco-v3', 'Run2015D', 'Run2015C', 'Run2015B']
+comb_keys = ['RunIISpring15DR74_Asympt25ns_MCRUN2_74_V9', 'RunIISpring15MiniAODv2_74X_mcRun2_asymptotic_v2','Run2015D']
 
 # for testing... otherwise set to -1
 maxjobs = -1
@@ -140,12 +137,11 @@ flistdir = os.path.join(os.getenv("CMSSW_BASE"),"src/flists/")
 if not os.path.exists(flistdir):
   sys.exit("ERROR: flists repository not found.")
 
-flists_pd = glob.glob(os.path.join(flistdir,"flist*.txt"))
 files_dict = {}
 nent_dict = {}
+flists_pd = glob.glob(os.path.join(flistdir,"flist*.txt"))
 for fnm in flists_pd:
-  if any(wish in fnm for wish in wishlist):
-    # get the dataset name up to where the extension gets listed.
+  if any(wish in fnm for wish in mc_wishlist):
     dsname = ''
     if any(ikey in fnm for ikey in comb_keys):
       for ikey in comb_keys: 
@@ -155,7 +151,7 @@ for fnm in flists_pd:
     else:
       sys.exit("ERROR: None of the combination keys (%s) were found in this flist:%s\n" % (comb_keys,fnm))
 
-    print "INFO: Adding PD: ",dsname
+    print "INFO: Adding PD: ",fnm.replace("flist_","").replace(".txt","")
 
     if dsname not in files_dict.keys():
       nent_dict[dsname] = 0
@@ -166,15 +162,29 @@ for fnm in flists_pd:
           nent_dict[dsname] = nent_dict[dsname] + int(line.split().pop())
         if "/store" not in line: continue
         col = line.split()
-        # this line is unnecessary; the appropriate action will be determined by the TFC
-        #redirector = ('file:'+hadoop) if os.path.exists(hadoop + col[2]) else 'root://cmsxrootd.fnal.gov//'
-        # if data, filter on json
-        if 'Run2015' in dsname:
-          runlist = [int(irun) for irun in string.split(col[3],",")]
-          if any(irun in goldruns for irun in runlist):
-            files_dict[dsname].append(col[2])
-        else:
-          files_dict[dsname].append(col[2])
+        files_dict[dsname].append(col[2])
+
+# form new datasets from the data split into subperiods
+for pd in data_wishlist:
+  # book the dataset names for all sub-periods in advance
+  for json in jsonlist:
+    dsname = pd + json.replace('data/json/subgolden','').replace('.json','')
+    files_dict[dsname] = []
+    nent_dict[dsname] = 0 # not filled for data
+  # read flists
+  flists_pd = glob.glob(os.path.join(flistdir,"flist_"+pd+"_Run2015D*.txt"))
+  for fnm in flists_pd:
+    with open(fnm) as f: 
+      for line in f:
+        if "/store" not in line: continue
+        col = line.split()
+        runlist = [int(irun) for irun in string.split(col[3],",")]
+        for run in runlist:
+          for jsonfile in goldruns.keys():
+            if run in goldruns[jsonfile]:
+              dsname = pd + jsonfile.replace('data/json/subgolden','').replace('.json','')
+              if (col[2] not in files_dict[dsname]): # don't add same file twice if it has two runs in this subperiod
+                files_dict[dsname].append(col[2])
 
 # If on UCSD prep also tarball
 if (host=="sd"): 
@@ -209,10 +219,14 @@ for ids, ds in enumerate(sorted(files_dict.keys())):
     condor_args = []
     condor_args.append("nEvents="+str(maxevents_perjob))
     condor_args.append("nEventsSample="+str(nent_dict[ds]))
-    if (args.json): condor_args.append("json=babymaker/"+json_name)
     condor_args.append("inputFiles=\\\n"+",\\\n".join(files_dict[ds][(job*maxfiles):((job+1)*maxfiles)]))
     if (host=="sb"): condor_args.append("outputFile="+outpath)
     else: condor_args.append("outputFile="+bname+".root")
+    condor_args.append("condorSubTime="+sub_time)
+    if ("Run2015D" in ds):
+      json_name = "data/json/subgolden_Run2015D" + ds.split("Run2015D").pop() + ".json"
+      if (json_name not in jsonlist): sys.exit("ERROR: Could not find json!")
+      condor_args.append("json=babymaker/"+json_name)
 
     # Create executable that will be transfered to the work node by condor
     exefile =rundir+"/"+bname+".sh"
@@ -236,6 +250,7 @@ for ids, ds in enumerate(sorted(files_dict.keys())):
       fexe.write("cd babymaker\n")
       fexe.write("./compile.sh\n")
       fexe.write("cmsRun bmaker/python/bmaker_basic_cfg.py \\\n"+" \\\n".join(condor_args)+"\n")
+      fexe.write("echo \"cmsRun exit code \"$?\n")
       fexe.write("lcg-cp -b -D srmv2 --vo cms -t 2400 --verbose file:"+bname+".root srm://bsrm-3.t2.ucsd.edu:8443/srm/v2/server?SFN="+outpath+"\n")
       fexe.write("cd ../../..\n")
       fexe.write("rm -rf "+cmssw+"\n")
@@ -260,6 +275,7 @@ for ids, ds in enumerate(sorted(files_dict.keys())):
     else:
       fcmd.write("Universe = grid\n")
       fcmd.write("Grid_Resource = condor cmssubmit-r1.t2.ucsd.edu glidein-collector.t2.ucsd.edu\n")
+      fcmd.write("use_x509userproxy = True\n")
       fcmd.write("x509userproxy="+proxy+"\n")
       fcmd.write("+remote_DESIRED_Sites=\""+whitelist+"\"\n")
       fcmd.write("Executable = "+exefile+"\n")

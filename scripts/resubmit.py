@@ -16,13 +16,15 @@ if (args.timestamp):
 elif (args.logpath):
   timestamp = args.logpath.rstrip("/").split("/")[-1]
 else:
-  sys.exist("Please provide a timestamp either as, e.g. 151019_011440, or a path ending with the timestamp")
+  sys.exit("Please provide a timestamp either as, e.g. 151019_011440, or a path ending with the timestamp")
 
 onePerJob = False
 
 # determine if job is running at UCSB or UCSD
 host = os.environ.get("HOSTNAME")
-atUCSB = True#"compute" in host or "physics.ucsb.edu" in host
+atUCSB = False
+if "compute" in host or "physics.ucsb.edu" in host:
+  atUCSB = True
 
 # redirector = "root://cmsxrootd.fnal.gov//"
 redirector = "root://cms-xrd-global.cern.ch//"

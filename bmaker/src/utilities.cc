@@ -140,6 +140,7 @@ namespace utilities{
     if(file.Contains("TTG")) xsec = 3.697;                
     if(file.Contains("TTTT")) xsec = 0.009103;
     if(file.Contains("WJetsToQQ_HT-600ToInf")) xsec = 95.14;
+    if(file.Contains("ZJetsToQQ_HT600toInf")) xsec = 5.67;
     
     // From https://cms-pdmv.cern.ch/mcm
     // k-factors from https://mangano.web.cern.ch/mangano/public/MECCA/samples_50ns_miniaod.txt

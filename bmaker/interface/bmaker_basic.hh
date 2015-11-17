@@ -138,6 +138,7 @@ public:
   float xsec;
 
   bool addBTagWeights;
+  std::vector<double> puWeights;
   bool isFastSim;
   bool doSystematics;
 

@@ -4,27 +4,37 @@
 #include "babymaker/bmaker/interface/weight_tools.hh"
 #include <vector>
 
-weight_tools::weight_tools() {}
+weight_tools::weight_tools(std::vector<double> puWeights):
+  pileupWeights(puWeights)
+{
+
+}
 weight_tools::~weight_tools() {}
 
-float weight_tools::weight(weight_tools::variationType variation)
+float weight_tools::pileupWeight(unsigned int ntrupv)
 {
-  if(weights.size()!=0) {
-    return weights.at(variation).wgt/weights.at(nominal).wgt;
+  if(pileupWeights.size()!=0) return static_cast<float>(pileupWeights.at(ntrupv));
+  else return 1.0;
+}
+
+float weight_tools::theoryWeight(weight_tools::variationType variation)
+{
+  if(theoryWeights.size()!=0) {
+    return theoryWeights.at(variation).wgt/theoryWeights.at(nominal).wgt;
   }
   else return 1.0;
 }
 
-void weight_tools::getWeights(const edm::Event& iEvent)
+void weight_tools::getTheoryWeights(const edm::Event& iEvent)
 {
-  weights.clear();
+  theoryWeights.clear();
   if(!iEvent.isRealData()) { 
     edm::Handle<LHEEventProduct> wLHEEventProduct;
     iEvent.getByLabel("externalLHEProducer", wLHEEventProduct);
     // these event weights are only defined in samples
     // generated from LHE files so an "else" is not desired
     if(wLHEEventProduct.isValid()) {
-      weights = wLHEEventProduct->weights();
+      theoryWeights = wLHEEventProduct->weights();
     }
   }
 }

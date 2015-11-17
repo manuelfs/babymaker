@@ -6,7 +6,8 @@
 class weight_tools{
 
 private:
-  std::vector<gen::WeightsInfo> weights;
+  std::vector<gen::WeightsInfo> theoryWeights;
+  std::vector<double> pileupWeights;
 
 public:
   // the enum index corresponds to the index of the variation
@@ -22,10 +23,11 @@ public:
     muRdown_muFdown=8
   };
 
-  float weight(variationType variation);
-  void getWeights(const edm::Event& iEvent);    
+  float theoryWeight(variationType variation);
+  void getTheoryWeights(const edm::Event& iEvent);
+  float pileupWeight(unsigned int ntrupv);
 
-  weight_tools();
+  weight_tools(std::vector<double> puWeights);
   ~weight_tools();
 };
 

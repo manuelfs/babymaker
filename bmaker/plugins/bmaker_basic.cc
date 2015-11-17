@@ -288,7 +288,7 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 
   ////////////////// Systematic weights ////////////////
 
-  weightTool->getWeights(iEvent);
+  weightTool->getTheoryWeights(iEvent);
   fillWeights();
 
   ////////////////// Filling the tree //////////////////
@@ -1090,12 +1090,14 @@ double bmaker_basic::calculateRebalancedMET(unsigned int jetIdx, double mu, doub
 
 void bmaker_basic::fillWeights()
 {
-  baby.sys_mur().push_back(weightTool->weight(weight_tools::muRup));
-  baby.sys_mur().push_back(weightTool->weight(weight_tools::muRdown));
-  baby.sys_muf().push_back(weightTool->weight(weight_tools::muFup));
-  baby.sys_muf().push_back(weightTool->weight(weight_tools::muFdown));
-  baby.sys_murf().push_back(weightTool->weight(weight_tools::muRup_muFup));
-  baby.sys_murf().push_back(weightTool->weight(weight_tools::muRdown_muFdown));
+  baby.sys_mur().push_back(weightTool->theoryWeight(weight_tools::muRup));
+  baby.sys_mur().push_back(weightTool->theoryWeight(weight_tools::muRdown));
+  baby.sys_muf().push_back(weightTool->theoryWeight(weight_tools::muFup));
+  baby.sys_muf().push_back(weightTool->theoryWeight(weight_tools::muFdown));
+  baby.sys_murf().push_back(weightTool->theoryWeight(weight_tools::muRup_muFup));
+  baby.sys_murf().push_back(weightTool->theoryWeight(weight_tools::muRdown_muFdown));
+
+  baby.w_pileup() = weightTool->pileupWeight(baby.ntrupv_mean());
 }
 
 /*
@@ -1120,6 +1122,7 @@ bmaker_basic::bmaker_basic(const edm::ParameterSet& iConfig):
   nevents(0),
   doMetRebalancing(iConfig.getParameter<bool>("doMetRebalancing")),
   addBTagWeights(iConfig.getParameter<bool>("addBTagWeights")),
+  puWeights(iConfig.getParameter<std::vector<double> >("puWeights")),
   isFastSim(iConfig.getParameter<bool>("isFastSim")),
   doSystematics(iConfig.getParameter<bool>("doSystematics"))
 {
@@ -1129,7 +1132,7 @@ bmaker_basic::bmaker_basic(const edm::ParameterSet& iConfig):
   jetTool    = new jet_met_tools(jec_label, doSystematics);
   photonTool = new photon_tools();
   mcTool     = new mc_tools();
-  weightTool = new weight_tools();
+  weightTool = new weight_tools(puWeights);
   eventTool  = new event_tools(outname);
 
   outfile = new TFile(outname, "recreate");

@@ -96,6 +96,19 @@ process.baby_basic = cms.EDAnalyzer('bmaker_basic',
                                     doMetRebalancing = cms.bool(True),
                                     doSystematics = cms.bool(doSystematics),
                                     addBTagWeights = cms.bool(True),
+                                    # pile up weights assuming sigma = 70 mb from 
+                                    # http://cms2.physics.ucsb.edu/susy/slides/archive/Jae_GroupMtg_PUreweigthing_06Nov2015.pdf
+                                    puWeights = cms.vdouble(92.66, 156.421, 85.5032, 22.7873, 11.1068,
+                                                            1.45208,  0.811141, 1.60897, 2.70799, 2.86957,
+                                                            2.92751, 2.9037, 2.45653,  1.69264, 0.942664,
+                                                            0.423634, 0.156387, 0.0486229, 0.0134478,  0.00366324,
+                                                            0.0011088, 0.000415319, 0.000205835, 0.00013166, 9.85865e-05,
+                                                            7.94856e-05, 6.63283e-05, 5.6517e-05, 4.85908e-05, 4.08087e-05,
+                                                            3.1246e-05,  1.99589e-05, 1.02308e-05, 4.38991e-06, 1.68079e-06,
+                                                            5.97956e-07, 2.01355e-07,  6.46797e-08, 1.98891e-08, 5.86555e-09,
+                                                            1.66118e-09, 4.52251e-10, 1.18455e-10,  2.98702e-11, 7.2563e-12,
+                                                            1.69906e-12, 9.49276e-13, 3.03915e-13, 2.38289e-13,  7.0558e-14,
+                                                            0, 0),
                                     isFastSim = cms.bool(False),
 )
 

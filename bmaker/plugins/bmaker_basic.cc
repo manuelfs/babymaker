@@ -915,6 +915,7 @@ void bmaker_basic::writeMC(edm::Handle<reco::GenParticleCollection> genParticles
     if(mc.mother()) momid = abs(mc.mother()->pdgId());
     bool lastTop(mcTool->isLast(mc,6));
     bool lastGluino(mcTool->isLast(mc,1000021));
+    bool lastLSP(mcTool->isLast(mc,1000022));
     bool lastZ(mcTool->isLast(mc,23));
     bool bFromTop(id==5 && momid==6);
     bool eFromTopZ(id==11 && (momid==24 || momid==23));
@@ -927,11 +928,12 @@ void bmaker_basic::writeMC(edm::Handle<reco::GenParticleCollection> genParticles
        (lastZ && outname.Contains("DY"))) isr_p4 -= mc.p4();
 
     //////// Saving interesting true particles
-    if(lastTop || lastGluino || lastZ || bFromTop || eFromTopZ || muFromTopZ || tauFromTop || fromWOrWTau) {
+    if(lastTop || lastGluino || lastLSP || lastZ || bFromTop || eFromTopZ || muFromTopZ || tauFromTop || fromWOrWTau) {
       baby.mc_id().push_back(mc.pdgId());
       baby.mc_pt().push_back(mc.pt());
       baby.mc_eta().push_back(mc.eta());
       baby.mc_phi().push_back(mc.phi());
+      baby.mc_mass().push_back(mc.mass());
       baby.mc_mom().push_back(mc.mother()->pdgId());
     }
     //////// Counting true leptons

@@ -240,6 +240,7 @@ float ht_isr_me
 std::vector<float> mc_pt
 std::vector<float> mc_eta
 std::vector<float> mc_phi
+std::vector<float> mc_mass
 std::vector<int>   mc_id
 std::vector<int>   mc_mom
 bool fromGS

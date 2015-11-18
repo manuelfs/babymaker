@@ -252,9 +252,10 @@ for ids, ds in enumerate(sorted(files_dict.keys())):
       fexe.write("cmsRun bmaker/python/bmaker_basic_cfg.py \\\n"+" \\\n".join(condor_args)+"\n")
       fexe.write("echo \"cmsRun exit code \"$?\n")
       #fexe.write("lcg-cp -b -D srmv2 --vo cms -t 2400 --verbose file:"+bname+".root srm://bsrm-3.t2.ucsd.edu:8443/srm/v2/server?SFN="+outpath+"\n")
-      fexe.write("./bmaker/genfiles/run/skim_scan_onefile.exe "+bname+".root\n")
+      if "T1tttt" in bname:
+        fexe.write("./bmaker/genfiles/run/skim_scan_onefile.exe "+bname+".root\n")
       fexe.write("for i in $(ls *.root); do\n")
-      fexe.write("lcg-cp -b -D srmv2 --vo cms -t 2400 --verbose file:$i srm://bsrm-3.t2.ucsd.edu:8443/srm/v2/server?SFN="+outpath+"\n")
+      fexe.write("\tlcg-cp -b -D srmv2 --vo cms -t 2400 --verbose file:$i srm://bsrm-3.t2.ucsd.edu:8443/srm/v2/server?SFN="+outpath+"\n")
       fexe.write("done\n")
       fexe.write("cd ../../..\n")
       fexe.write("rm -rf "+cmssw+"\n")

@@ -26,6 +26,7 @@
 // User include files
 #include "babymaker/bmaker/interface/bmaker_basic.hh"
 #include "babymaker/bmaker/interface/baby_basic.hh"
+#include "babymaker/bmaker/interface/lester_mt2_bisect.h"
 
 using namespace std;
 using namespace utilities;
@@ -154,44 +155,47 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 
   /// isolated tracks need to be after MET calculation and before jets cleaning
   vCands tks,ra4tks;
-  if (eventTool->hasGoodPV(vtx) && baby.leps_id().size()>0){
+  if (eventTool->hasGoodPV(vtx)){
+    // RA2/b track veto
     tks = lepTool->getIsoTracks(pfcands, baby.met(), baby.met_phi());
     baby.ntks() = tks.size();
-    
-    vector<float> isos;
-    ra4tks = lepTool->getRA4IsoTracks(pfcands, baby.met(), baby.met_phi(),rhoEventCentral,isos,baby.leps_id().at(0));
-    vector<float> tks_pt;
-    vector<float> tks_eta;
-    vector<float> tks_phi;
-    vector<int> tks_pdg;
-    vector<float> tks_miniso;
-    vector<float> tks_mt2;
-    vector<float> tks_mt;
-    int nveto=0;
+    // RA4 track veto
+    if(baby.leps_id().size()>0){    
+      vector<float> isos;
+      ra4tks = lepTool->getRA4IsoTracks(pfcands, baby.met(), baby.met_phi(),rhoEventCentral,isos,baby.leps_id().at(0));
+      vector<float> tks_pt;
+      vector<float> tks_eta;
+      vector<float> tks_phi;
+      vector<int> tks_pdg;
+      vector<float> tks_miniso;
+      vector<float> tks_mt2;
+      vector<float> tks_mt;
+      int nveto=0;
 
-    for(unsigned i=0;i<ra4tks.size();i++){
-      tks_pt.push_back(ra4tks.at(i)->pt());
-      tks_eta.push_back(ra4tks.at(i)->eta());
-      tks_phi.push_back(ra4tks.at(i)->phi());
-      tks_pdg.push_back(ra4tks.at(i)->pdgId());
-      tks_miniso.push_back(isos.at(i));
-      tks_mt2.push_back(getMT2(baby.leps_pt().at(0),baby.leps_phi().at(0),tks_pt.back(),tks_phi.back(),baby.met(),baby.met_phi()));
-      tks_mt.push_back(getMT(tks_pt.back(),tks_phi.back(),baby.met(),baby.met_phi()));
-      if(fabs(tks_pdg.back())==211 && tks_pt.back()>15. && tks_miniso.back()<0.05 && tks_mt2.back()<100) nveto++;
-      else if (fabs(tks_pdg.back())==13 && tks_pt.back()>10. && tks_miniso.back()<0.2 && tks_mt2.back()<100) nveto++;
-      else if (fabs(tks_pdg.back())==11 && tks_pt.back()>10. && tks_miniso.back()<0.1 && tks_mt2.back()<100) nveto++;
-    }
+      for(unsigned i=0;i<ra4tks.size();i++){
+	tks_pt.push_back(ra4tks.at(i)->pt());
+	tks_eta.push_back(ra4tks.at(i)->eta());
+	tks_phi.push_back(ra4tks.at(i)->phi());
+	tks_pdg.push_back(ra4tks.at(i)->pdgId());
+	tks_miniso.push_back(isos.at(i));
+	tks_mt2.push_back(getMT2(baby.leps_pt().at(0),baby.leps_phi().at(0),tks_pt.back(),tks_phi.back(),baby.met(),baby.met_phi()));
+	tks_mt.push_back(getMT(tks_pt.back(),tks_phi.back(),baby.met(),baby.met_phi()));
+	if(fabs(tks_pdg.back())==211 && tks_pt.back()>15. && tks_miniso.back()<0.05 && tks_mt2.back()<100) nveto++;
+	else if (fabs(tks_pdg.back())==13 && tks_pt.back()>10. && tks_miniso.back()<0.2 && tks_mt2.back()<100) nveto++;
+	else if (fabs(tks_pdg.back())==11 && tks_pt.back()>10. && tks_miniso.back()<0.1 && tks_mt2.back()<100) nveto++;
+      }
     
-    baby.tks_pt() = tks_pt;
-    baby.tks_eta() = tks_eta;
-    baby.tks_phi() = tks_phi;
-    baby.tks_pdg() = tks_pdg;
-    baby.tks_miniso() = tks_miniso;
-    baby.tks_mt2() = tks_mt2;
-    baby.tks_mt() = tks_mt;
-    baby.nveto()=nveto;
+      baby.tks_pt() = tks_pt;
+      baby.tks_eta() = tks_eta;
+      baby.tks_phi() = tks_phi;
+      baby.tks_pdg() = tks_pdg;
+      baby.tks_miniso() = tks_miniso;
+      baby.tks_mt2() = tks_mt2;
+      baby.tks_mt() = tks_mt;
+      baby.nveto()=nveto;
 
-  }  
+    }  
+  } // if goodPV
 
   /// Jets
   vector<LVector> jets;
@@ -1099,7 +1103,8 @@ void bmaker_basic::fillWeights()
   baby.sys_murf().push_back(weightTool->theoryWeight(weight_tools::muRup_muFup));
   baby.sys_murf().push_back(weightTool->theoryWeight(weight_tools::muRdown_muFdown));
 
-  baby.w_pileup() = weightTool->pileupWeight(baby.ntrupv_mean());
+  if(isData) baby.w_pu() = 1.;
+  else baby.w_pu() = weightTool->pileupWeight(baby.ntrupv_mean());
 }
 
 /*
@@ -1137,6 +1142,8 @@ bmaker_basic::bmaker_basic(const edm::ParameterSet& iConfig):
   weightTool = new weight_tools(puWeights);
   eventTool  = new event_tools(outname);
 
+  asymm_mt2_lester_bisect::disableCopyrightMessage();
+
   outfile = new TFile(outname, "recreate");
   outfile->cd();
   baby.tree_.SetDirectory(outfile);
@@ -1149,7 +1156,7 @@ bmaker_basic::bmaker_basic(const edm::ParameterSet& iConfig):
 
   trig_name = vector<TString>();
   if(outname.Contains("Run201")){
-    trig_name.push_back("HLT_PFHT350_PFMET100_JetIdCleaned_v");                 // 0 
+    trig_name.push_back("HLT_PFHT350_PFMET100_");                               // 0 
     trig_name.push_back("HLT_Mu15_IsoVVVL_PFHT350_PFMET50_v");                  // 1 
     trig_name.push_back("HLT_Mu15_IsoVVVL_PFHT600_v");                          // 2
     trig_name.push_back("HLT_Mu15_IsoVVVL_BTagCSV0p72_PFHT400_v");              // 3

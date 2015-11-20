@@ -38,8 +38,6 @@ namespace utilities{
     double chiB = 0; // hypothesised mass of invisible on side B.  Must be >=0.
     double desiredPrecisionOnMt2 = 0; // Must be >=0.  If 0 alg aims for machine precision.  if >0, MT2 computed to supplied absolute precision.
 
-    // asymm_mt2_lester_bisect::disableCopyrightMessage();
-
     double MT2 =  asymm_mt2_lester_bisect::get_mT2(
 						   mVisA, pxA, pyA,
 						   mVisB, pxB, pyB,

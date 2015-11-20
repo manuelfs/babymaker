@@ -257,7 +257,7 @@ int mlsp
 
 ################  Weights   ##################
 float weight
-float w_pileup
+float w_pu
 float w_btag
 float wfs_btag
 

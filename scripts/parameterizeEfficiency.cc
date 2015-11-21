@@ -10,9 +10,8 @@ void parameterizeEfficiency()
 
   float csvCut = btagCuts::CSVM;
 
-  std::string filename("baby_TT_uncorrected.root");
-  TFile *file = TFile::Open(filename.c_str());
-  TTree *tree = static_cast<TTree*>(file->Get("tree"));
+  TChain *ch = new TChain("tree");
+  ch->Add("/net/cms29/cms29r0/cawest/out/151113_173003/baby_TTJets_TuneCUETP8M1_13TeV*root");
 
   // These are the cuts that would be needed in a full parameterization
   //  std::vector<float> etaCuts = { 0.0, 1.2, 2.4, 5.0 };
@@ -20,7 +19,7 @@ void parameterizeEfficiency()
   // 				200, 300, 670, 1e4};
   std::vector<float> etaCuts = { 0.0, 1.2, 2.4};
   std::vector<float> ptCuts = { 30, 50, 70, 100, 140, 
-				200, 1e4};
+				200, 300, 670, 1e4};
   std::vector<int> flavorCuts = {0, 4, 5};
   std::vector<float> flavorCutsFloat = {0, 4, 5};
 
@@ -42,7 +41,7 @@ void parameterizeEfficiency()
 	cutWithCSV+=csvCut;
 	std::cout << cut << std::endl;      
 	std::cout << cutWithCSV << std::endl;      
-	tree->Project(histname.Data(), cutWithCSV.Data(), cut.Data());
+	ch->Project(histname.Data(), cutWithCSV.Data(), cut.Data());
 	std::cout << "efficiency: " << hCSV[ieta][ipt][iflavor]->GetMean() << "\n" << std::endl;
 	btagEfficiency->SetBinContent(ieta+1, ipt+1, iflavor+1, hCSV[ieta][ipt][iflavor]->GetMean());
       }

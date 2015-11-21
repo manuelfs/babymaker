@@ -41,7 +41,7 @@ arxivdir = os.path.join(bdir,'logs',timestamp,'arxiv')
 if not os.path.exists(arxivdir):
   os.mkdir(arxivdir)
 
-loglist = [x for x in glob.glob(logdir+"/*.log") if "_rs" not in x] 
+loglist = [x for x in glob.glob(logdir+"/*.log")] 
 print "Found %i logs" %(len(loglist))
 
 failed = set()
@@ -52,6 +52,10 @@ for flog in loglist:
   ferr = flog.rstrip(".log") + ".err"
   fout = flog.rstrip(".log") + ".out"
   bname = flog.split("/").pop().rstrip(".log")
+  logfile = open(flog).read()
+  if "Job was aborted by the user" in logfile:
+    failed.add(bname)
+    continue;
   if os.path.getsize(fout)==0:
     unfinished.add(bname)
   else:
@@ -61,7 +65,9 @@ for flog in loglist:
     # transfer not necessary at UCSB
     if "Transfer took" not in errfile and not atUCSB:
       failed.add(bname)
-    if "Fatal Exception" or "cmsRun exit code 1" in errfile:
+    if "cmsRun exit code 1" in errfile:
+      failed.add(bname)
+    if "Fatal Exception" in errfile:
       failed.add(bname)
     if "Socket error while handshaking: [FATAL] Auth failed" in errfile:
       xrootd_err.add(bname)
@@ -69,34 +75,25 @@ for flog in loglist:
     if bname in xrootd_err and bname not in failed:
       print "xrootd err but success(?): ",bname 
 
-print "--------- Unfinished:"
-pprint(unfinished)
-print "--------- Failed:"
-pprint(failed)
-print "Total unfinished ",len(unfinished)
-print "Total failed ",len(failed)
-print "Total with xrootd err",len(xrootd_err)
+if len(unfinished) > 0 :
+  print "--------- Unfinished:"
+  pprint(unfinished)
+if len(failed) > 0 :
+  print "--------- Failed:"
+  pprint(failed)
+  print "Total unfinished ",len(unfinished)
+  print "Total failed ",len(failed)
+  print "Total with xrootd err",len(xrootd_err)
+else :
+  sys.exit("\nCongrats, no jobs failed. You might be able to go out and enjoy the mountains now :o)\n")
 
-user_input = raw_input('Resubmit jobs [y/n]?')
+user_input = raw_input('Resubmit jobs [y/N]?')
 if (user_input!='y'):
   sys.exit("Bye.")
 else:
-  user_input = raw_input('Resubmit with one file per job [y/n]?')
+  user_input = raw_input('Resubmit with one file per job [y/N]?')
   if (user_input=='y'):
     onePerJob = True
-
-# --- check if corrupted output files already exist
-badfiles = []
-for old_baby in failed:
-  fexe = os.path.join(logdir.replace("/logs/","/run/"), old_baby+".sh")
-  old_exe = open(fexe).readlines()
-  for line in old_exe:
-    if ("SFN=") in line:
-      outputfile = line.split("SFN=").pop().strip("\n")
-      if os.path.exists(outputfile):
-        print "Output file exists %s" % outputfile
-        badfiles.append(outputfile)
-      break
 
 # --- resubmission
 total_jobs = 0
@@ -154,16 +151,16 @@ for old_baby in failed:
 
 print("Submitted %i jobs." % total_jobs)
 
-# --- deal with old output
-print("Corrupt output files:")
-pprint(badfiles)
-for badfile in badfiles:
-  froot = ROOT.TFile(badfile)
-  if froot.IsZombie():
-    user_input = raw_input('Remove zombie file %s [y/n]?' % badfile)
-    if (user_input=='y'):
-      os.remove(badfile)
-  else: 
-    print "**** ERROR: Inputs resubmitted, but output exist. Please check status and remove manually: ", badfile
+# --- check if output files already exist
+for old_baby in failed:
+  fexe = os.path.join(logdir.replace("/logs/","/run/"), old_baby+".sh")
+  old_exe = open(fexe).readlines()
+  for line in old_exe:
+    if ("SFN=") in line:
+      outputfile = line.split("SFN=").pop().strip("\n")
+      if os.path.exists(outputfile):
+        user_input = raw_input('Remove output file %s corresponding to a failed job [y/N]?' % badfile)
+        if (user_input=='y'):
+          os.remove(badfile)
 
           

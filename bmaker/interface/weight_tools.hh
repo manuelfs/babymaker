@@ -26,6 +26,8 @@ public:
   float theoryWeight(variationType variation);
   void getTheoryWeights(const edm::Event& iEvent);
   float pileupWeight(unsigned int ntrupv);
+  float topPtWeight(float top_pt1,float top_pt2);
+  float isrWeight(float isrpt);
 
   weight_tools(std::vector<double> puWeights);
   ~weight_tools();

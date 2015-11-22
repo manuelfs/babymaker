@@ -102,6 +102,7 @@ namespace utilities{
 
 
     // From https://twiki.cern.ch/twiki/bin/view/LHCPhysics/SUSYCrossSections13TeVgluglu
+    if(file.Contains("T1tttt")) xsec = 0.0856418; //just to avoid crash on scans
     if(file.Contains("T1tttt") && file.Contains("825_"))   xsec = 1.2167;
     if(file.Contains("T1tttt") && file.Contains("1025_"))  xsec = 0.272778;
     if(file.Contains("T1tttt") && file.Contains("1150_"))  xsec = 0.117687;

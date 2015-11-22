@@ -14,6 +14,49 @@ import argparse
 # if we want all the HT-binned TTJets append:
 # "TTJets_HT-"
 mc_wishlist = []
+mc_wishlist.append("SMS-T1tttt_mGluino-1000to1050_mLSP-1to800");
+mc_wishlist.append("SMS-T1tttt_mGluino-1050_mLSP-50to775");
+mc_wishlist.append("SMS-T1tttt_mGluino-1100_mLSP-1to775");
+mc_wishlist.append("SMS-T1tttt_mGluino-1100to1125_mLSP-700to900");
+mc_wishlist.append("SMS-T1tttt_mGluino-1150_mLSP-1to800");
+mc_wishlist.append("SMS-T1tttt_mGluino-1150to1175_mLSP-750to925");
+mc_wishlist.append("SMS-T1tttt_mGluino-1200_mLSP-1to825");
+mc_wishlist.append("SMS-T1tttt_mGluino-1200to1225_mLSP-800to1000");
+mc_wishlist.append("SMS-T1tttt_mGluino-1250to1275_mLSP-700to1050");
+mc_wishlist.append("SMS-T1tttt_mGluino-1275_mLSP-900to975");
+mc_wishlist.append("SMS-T1tttt_mGluino-1300_mLSP-1to1075");
+mc_wishlist.append("SMS-T1tttt_mGluino-1300to1325_mLSP-700to1100");
+mc_wishlist.append("SMS-T1tttt_mGluino-1325to1350_mLSP-1to1125");
+mc_wishlist.append("SMS-T1tttt_mGluino-1350to1375_mLSP-50to1025");
+mc_wishlist.append("SMS-T1tttt_mGluino-1400_mLSP-1to1175");
+mc_wishlist.append("SMS-T1tttt_mGluino-1400to1425_mLSP-50to1100");
+mc_wishlist.append("SMS-T1tttt_mGluino-1425to1450_mLSP-1to1200");
+mc_wishlist.append("SMS-T1tttt_mGluino-1450to1475_mLSP-50to1075");
+mc_wishlist.append("SMS-T1tttt_mGluino-1475to1500_mLSP-1to1250");
+mc_wishlist.append("SMS-T1tttt_mGluino-1500to1525_mLSP-50to1125");
+mc_wishlist.append("SMS-T1tttt_mGluino-1525to1550_mLSP-1to1300");
+mc_wishlist.append("SMS-T1tttt_mGluino-1600to1650_mLSP-1to1350");
+mc_wishlist.append("SMS-T1tttt_mGluino-1650to1700_mLSP-1to1400");
+mc_wishlist.append("SMS-T1tttt_mGluino-1700to1750_mLSP-1to1450");
+mc_wishlist.append("SMS-T1tttt_mGluino-1800to1850_mLSP-1to1450");
+mc_wishlist.append("SMS-T1tttt_mGluino-1850to1900_mLSP-1to1450");
+mc_wishlist.append("SMS-T1tttt_mGluino-1900to1950_mLSP-0to1450");
+mc_wishlist.append("SMS-T1tttt_mGluino-1950_mLSP-700to950");
+mc_wishlist.append("SMS-T1tttt_mGluino-600_mLSP-250to325");
+mc_wishlist.append("SMS-T1tttt_mGluino-625_mLSP-275to375");
+mc_wishlist.append("SMS-T1tttt_mGluino-625to650_mLSP-200to400");
+mc_wishlist.append("SMS-T1tttt_mGluino-650to675_mLSP-250to425");
+mc_wishlist.append("SMS-T1tttt_mGluino-675_mLSP-325to450");
+mc_wishlist.append("SMS-T1tttt_mGluino-700_mLSP-1to450");
+mc_wishlist.append("SMS-T1tttt_mGluino-700to750_mLSP-200to500");
+mc_wishlist.append("SMS-T1tttt_mGluino-750to775_mLSP-350to525");
+mc_wishlist.append("SMS-T1tttt_mGluino-775_mLSP-475to550");
+mc_wishlist.append("SMS-T1tttt_mGluino-800to825_mLSP-1to575");
+mc_wishlist.append("SMS-T1tttt_mGluino-825to850_mLSP-200to600");
+mc_wishlist.append("SMS-T1tttt_mGluino-850to875_mLSP-450to625");
+mc_wishlist.append("SMS-T1tttt_mGluino-875to900_mLSP-1to650");
+mc_wishlist.append("SMS-T1tttt_mGluino-950to975_mLSP-350to725");
+mc_wishlist.append("SMS-T1tttt_mGluino-975_mLSP-600to750");
 #------------ MC ------------------
 # mc_wishlist.append("T1tttt_mGluino-1500_mLSP-100_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15DR74_Asympt25ns_MCRUN2_74_V9")
 # mc_wishlist.append("T1tttt_mGluino-1200_mLSP-800_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15DR74_Asympt25ns_MCRUN2_74_V9")
@@ -33,13 +76,13 @@ mc_wishlist = []
 # mc_wishlist.append("ggZH_HToBB")
 
 data_wishlist = []
-data_wishlist.append("JetHT")
-data_wishlist.append("HTMHT")
-data_wishlist.append("MET")
-data_wishlist.append("SingleElectron")
-data_wishlist.append("SingleMuon")
-data_wishlist.append("DoubleEG")
-data_wishlist.append("DoubleMuon")
+#data_wishlist.append("JetHT")
+#data_wishlist.append("HTMHT")
+#data_wishlist.append("MET")
+#data_wishlist.append("SingleElectron")
+#data_wishlist.append("SingleMuon")
+#data_wishlist.append("DoubleEG")
+#data_wishlist.append("DoubleMuon")
 
 jsonlist = glob.glob("data/json/subgolden_*.json")
 
@@ -59,7 +102,7 @@ maxfiles = int(raw_input('Enter max number of files per job: '))
 # they are considered extensions of each other and combined
 # i.e. the output babies and logs are labeled by 'substring-before-key'+'key'
 # the sub-string following the key is dropped and forgotten!
-comb_keys = ['RunIISpring15DR74_Asympt25ns_MCRUN2_74_V9', 'RunIISpring15MiniAODv2_74X_mcRun2_asymptotic_v2','Run2015D']
+comb_keys = ['RunIISpring15DR74_Asympt25ns_MCRUN2_74_V9','RunIISpring15FSPremix_MCRUN2_74_V9','RunIISpring15MiniAODv2_74X_mcRun2_asymptotic_v2','Run2015D']
 
 # for testing... otherwise set to -1
 maxjobs = -1
@@ -130,7 +173,7 @@ if not (os.path.exists(os.getcwd()+'/run')):
         os.mkdir(os.getcwd()+'/run')
 rundir = os.path.join(os.path.realpath(os.getcwd()+'/run'),sub_time)
 os.mkdir(rundir)
-
+print rundir
 # read in datasets to run over based on the flist_*txt files
 # where to find the flists
 flistdir = os.path.join(os.getenv("CMSSW_BASE"),"src/flists/")
@@ -207,7 +250,7 @@ for ids, ds in enumerate(sorted(files_dict.keys())):
   for job in range(0,njobs):
     # name the baby
     bname = "_".join(["baby",ds,"mf"+str(maxfiles),"batch"+str(job)])
-    # print(bname)
+    print("INF0: "+bname)
 
     # check if job had already succeeded on previous submission
     outpath = os.path.join(outdir,bname+".root")
@@ -255,7 +298,7 @@ for ids, ds in enumerate(sorted(files_dict.keys())):
       if "T1tttt" in bname:
         fexe.write("./bmaker/genfiles/run/skim_scan_onefile.exe "+bname+".root\n")
       fexe.write("for i in $(ls *.root); do\n")
-      fexe.write("\tlcg-cp -b -D srmv2 --vo cms -t 2400 --verbose file:$i srm://bsrm-3.t2.ucsd.edu:8443/srm/v2/server?SFN="+outpath+"\n")
+      fexe.write("\tlcg-cp -b -D srmv2 --vo cms -t 2400 --verbose file:$i srm://bsrm-3.t2.ucsd.edu:8443/srm/v2/server?SFN="+outdir+"/$i\n")
       fexe.write("done\n")
       fexe.write("cd ../../..\n")
       fexe.write("rm -rf "+cmssw+"\n")
@@ -264,6 +307,7 @@ for ids, ds in enumerate(sorted(files_dict.keys())):
 
     # Create condor submission cmd file
     cmdfile = rundir+"/"+bname+".cmd"
+    print "cmdfile is "+ cmdfile
     fcmd = open(cmdfile,"w")
     if (host=="sb"):
       fcmd.write("Executable   = "+exefile+"\n")
@@ -306,5 +350,5 @@ else:
 if host=="sb":
   os.system("scp " + proxy + " cms25.physics.ucsb.edu:/tmp")
 os.system("cat " + rundir + "/baby*.cmd > " + rundir + "/submit_all.cmd")
-#os.system(cmd + rundir + "/submit_all.cmd")
+os.system(cmd + rundir + "/submit_all.cmd")
 print "Submitted ", total_jobs, "jobs"

@@ -912,6 +912,7 @@ void bmaker_basic::writeMC(edm::Handle<reco::GenParticleCollection> genParticles
   baby.ntruleps()=0; baby.ntrumus()=0; baby.ntruels()=0; baby.ntrutaush()=0; baby.ntrutausl()=0;
   baby.nleps_tm()=0;
   baby.fromGS()=false;
+  vector<float> top_pt;
   for (size_t imc(0); imc < genParticles->size(); imc++) {
     const reco::GenParticle &mc = (*genParticles)[imc];
 
@@ -926,7 +927,7 @@ void bmaker_basic::writeMC(edm::Handle<reco::GenParticleCollection> genParticles
     bool muFromTopZ(id==13 && (momid==24 || momid==23));
     bool tauFromTop(id==15 && momid==24);
     bool fromWOrWTau(mcTool->fromWOrWTau(mc));
-
+    
     //////// Finding p4 of ME ISR system
     if((lastTop && outname.Contains("TTJets")) || (lastGluino && outname.Contains("SMS")) || 
        (lastZ && outname.Contains("DY"))) isr_p4 -= mc.p4();
@@ -940,6 +941,11 @@ void bmaker_basic::writeMC(edm::Handle<reco::GenParticleCollection> genParticles
       baby.mc_mass().push_back(mc.mass());
       baby.mc_mom().push_back(mc.mother()->pdgId());
     }
+    if(lastTop && outname.Contains("TTJets")){
+      top_pt.push_back(mc.pt());
+    }
+   
+    
     //////// Counting true leptons
     if(muFromTopZ) baby.ntrumus()++;
     if(eFromTopZ)  baby.ntruels()++;
@@ -1032,6 +1038,17 @@ void bmaker_basic::writeMC(edm::Handle<reco::GenParticleCollection> genParticles
   baby.isr_tru_pt() = isr_p4.pt();
   baby.isr_tru_eta() = isr_p4.eta();
   baby.isr_tru_phi() = isr_p4.phi();
+  
+  vector<float> isr_sys;
+  if(outname.Contains("SMS")){
+    isr_sys.push_back(weightTool->isrWeight(baby.isr_tru_pt()));
+    isr_sys.push_back(weightTool->isrWeight(baby.isr_tru_pt()));
+  }
+  else{ isr_sys.push_back(0.); isr_sys.push_back(0.);}
+  baby.sys_isr()=isr_sys;
+
+  if(outname.Contains("TTJets") && top_pt.size() == 2) baby.w_toppt() = weightTool->topPtWeight(top_pt.at(0),top_pt.at(1));
+  else baby.w_toppt() = 1.;
 
   baby.met_tru_nuw() = hypot(metw_tru_x, metw_tru_y);
   baby.met_tru_nuw_phi() = atan2(metw_tru_y, metw_tru_x);

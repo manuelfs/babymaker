@@ -13,7 +13,7 @@ weight_tools::~weight_tools() {}
 
 float weight_tools::pileupWeight(unsigned int ntrupv)
 {
-  if(pileupWeights.size()!=0) return static_cast<float>(pileupWeights.at(ntrupv));
+  if(pileupWeights.size()!=0 && ntrupv<pileupWeights.size()) return static_cast<float>(pileupWeights.at(ntrupv));
   else return 1.0;
 }
 

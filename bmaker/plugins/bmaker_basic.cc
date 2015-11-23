@@ -1041,10 +1041,10 @@ void bmaker_basic::writeMC(edm::Handle<reco::GenParticleCollection> genParticles
   
   vector<float> isr_sys;
   if(outname.Contains("SMS")){
-    isr_sys.push_back(weightTool->isrWeight(baby.isr_tru_pt()));
-    isr_sys.push_back(weightTool->isrWeight(baby.isr_tru_pt()));
+    isr_sys.push_back(1. + weightTool->isrWeight(baby.isr_tru_pt()));
+    isr_sys.push_back(1. - weightTool->isrWeight(baby.isr_tru_pt()));
   }
-  else{ isr_sys.push_back(0.); isr_sys.push_back(0.);}
+  else{ isr_sys.push_back(1.); isr_sys.push_back(1.);}
   baby.sys_isr()=isr_sys;
 
   if(outname.Contains("TTJets") && top_pt.size() == 2) baby.w_toppt() = weightTool->topPtWeight(top_pt.at(0),top_pt.at(1));

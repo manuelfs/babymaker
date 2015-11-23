@@ -272,6 +272,7 @@ double lepton_tools::getPFIsolation(edm::Handle<pat::PackedCandidateCollection> 
     if (abs(pfc.pdgId())<7) continue;
     double dr = deltaR(pfc, *ptcl);
     if (dr > r_iso) continue;
+    if (&pfc == ptcl) continue;
     if (pfc.charge()==0){ //neutrals
       if (pfc.pt()>ptThresh) {
         if (abs(pfc.pdgId())==22) { //photons

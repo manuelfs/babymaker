@@ -41,7 +41,8 @@ arxivdir = os.path.join(bdir,'logs',timestamp,'arxiv')
 if not os.path.exists(arxivdir):
   os.mkdir(arxivdir)
 
-loglist = [x for x in glob.glob(logdir+"/*.log")] 
+loglist = [x for x in glob.glob(logdir+"/*.log") if "_rs" in x]
+#loglist = [x for x in glob.glob(logdir+"/*.log")] 
 print "Found %i logs" %(len(loglist))
 
 failed = set()
@@ -55,8 +56,9 @@ for flog in loglist:
   logfile = open(flog).read()
   if "Job was aborted by the user" in logfile:
     failed.add(bname)
-    continue;
+    continue
   if os.path.getsize(fout)==0:
+    #failed.add(bname)
     unfinished.add(bname)
   else:
     if "BABYMAKER: Written" not in open(fout).read():
@@ -100,15 +102,17 @@ total_jobs = 0
 for old_baby in failed:
   fexe = os.path.join(logdir.replace("/logs/","/run/"), old_baby+".sh")
   fcmd = os.path.join(logdir.replace("/logs/","/run/"), old_baby+".cmd")
-
+  os.rename(logdir+"/"+old_baby+".log", arxivdir+"/"+old_baby+".log")
+  os.rename(logdir+"/"+old_baby+".err", arxivdir+"/"+old_baby+".err")
+  os.rename(logdir+"/"+old_baby+".out", arxivdir+"/"+old_baby+".out")
   if not onePerJob:
     old_exe = open(fexe).read()
     new_exe = old_exe.replace("file:/hadoop/cms/phedex", redirector)
     with open(fexe,'w') as f: f.write(new_exe)
     # arxiv log files
-    os.rename(logdir+"/"+old_baby+".log", arxivdir+"/"+old_baby+".log")
-    os.rename(logdir+"/"+old_baby+".err", arxivdir+"/"+old_baby+".err")
-    os.rename(logdir+"/"+old_baby+".out", arxivdir+"/"+old_baby+".out")
+    #os.rename(logdir+"/"+old_baby+".log", arxivdir+"/"+old_baby+".log")
+    #os.rename(logdir+"/"+old_baby+".err", arxivdir+"/"+old_baby+".err")
+    #os.rename(logdir+"/"+old_baby+".out", arxivdir+"/"+old_baby+".out")
     sys_cmd = "condor_submit " + fcmd
     if atUCSB: sys_cmd = "ssh cms25.physics.ucsb.edu condor_submit " + fcmd
     print "INFO: Submitting", fcmd

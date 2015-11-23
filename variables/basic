@@ -71,7 +71,7 @@ std::vector<float> jets_pt_res
 std::vector<bool>  jets_islep
 std::vector<int>   jets_fjet_index
 std::vector<int>   jets_fjet08_index
-std::vector<int>   jets_hadronFlavour
+std::vector<int>   jets_hflavor
 
 ##################   Leptons   ################
 int nleps
@@ -259,7 +259,6 @@ int mlsp
 float weight
 float w_pu
 float w_btag
-float wfs_btag
 float w_toppt
 
 ################  Systematic variations   ##################
@@ -278,6 +277,4 @@ std::vector<float> sys_muf
 std::vector<float> sys_murf
 std::vector<float> sys_bctag
 std::vector<float> sys_udsgtag
-std::vector<float> sysfs_bctag
-std::vector<float> sysfs_udsgtag
 std::vector<float> sys_isr

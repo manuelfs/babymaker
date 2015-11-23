@@ -34,7 +34,7 @@ void parameterizeEfficiency()
       for(int iflavor(0); iflavor<flavorCuts.size(); iflavor++) {
 	TString histname(Form("csv_%d_%d_%d",ieta, ipt, iflavor));
 	hCSV[ieta][ipt][iflavor] = new TH1F(histname, histname, 2, -0.5, 1.5);
-	TString cut(Form("jets_hadronFlavour==%d && %f<=jets_eta && jets_eta <%f && %f <= jets_pt && jets_pt < %f", 
+	TString cut(Form("jets_hflavor==%d && %f<=jets_eta && jets_eta <%f && %f <= jets_pt && jets_pt < %f", 
 			 flavorCuts.at(iflavor), etaCuts.at(ieta), etaCuts.at(ieta+1), ptCuts.at(ipt), ptCuts.at(ipt+1)));
 	TString cutWithCSV=cut;
 	cutWithCSV+=" && jets_csv> ";

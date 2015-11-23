@@ -29,7 +29,7 @@ public:
   float topPtWeight(float top_pt1,float top_pt2);
   float isrWeight(float isrpt);
 
-  weight_tools(std::vector<double> puWeights);
+  weight_tools();
   ~weight_tools();
 };
 

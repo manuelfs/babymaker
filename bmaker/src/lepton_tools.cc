@@ -2,7 +2,13 @@
 //// Function names follow the first-lowercase, following words-uppercase. No underscores
 
 // System include files
+#include <cmath>
+#include <cstdlib>
+
 #include <algorithm>
+
+//ROOT include files
+#include "TFile.h"
 
 // FW include files
 #include "FWCore/Framework/interface/ESHandle.h"
@@ -11,9 +17,14 @@
 // User include files
 #include "babymaker/bmaker/interface/lepton_tools.hh"
 
-
 using namespace std;
 using namespace utilities;
+
+//////////////////// Scale Factor loading
+const TH2D lepton_tools::muon_id_sf = *static_cast<TH2D*>(TFile((string(getenv("CMSSW_BASE"))+"/src/babymaker/bmaker/data/lepton_sf/muon_medium_id.root").c_str(),"read").Get("pt_abseta_PLOT_pair_probeMultiplicity_bin0_&_tag_combRelIsoPF04dBeta_bin0_&_tag_pt_bin0_&_tag_IsoMu20_pass"));
+const TH2D lepton_tools::muon_iso_sf = *static_cast<TH2D*>(TFile((string(getenv("CMSSW_BASE"))+"/src/babymaker/bmaker/data/lepton_sf/muon_mini_iso_0p2.root").c_str(),"read").Get("pt_abseta_PLOT_pair_probeMultiplicity_bin0_&_tag_combRelIsoPF04dBeta_bin0_&_tag_pt_bin0_&_PF_pass_&_tag_IsoMu20_pass"));
+const TH2D lepton_tools::electron_id_sf = *static_cast<TH2D*>(TFile((string(getenv("CMSSW_BASE"))+"/src/babymaker/bmaker/data/lepton_sf/electron.root").c_str(),"read").Get("CutBasedMedium"));
+const TH2D lepton_tools::electron_iso_sf = *static_cast<TH2D*>(TFile((string(getenv("CMSSW_BASE"))+"/src/babymaker/bmaker/data/lepton_sf/electron.root").c_str(),"read").Get("MiniIso0p1_vs_AbsEta"));
 
 //////////////////// Muons
 bool lepton_tools::isSignalMuon(const pat::Muon &lep, edm::Handle<reco::VertexCollection> vtx, double lepIso){
@@ -86,6 +97,23 @@ double lepton_tools::getRelIsolation(const pat::Muon &lep, double rho){
   return (ch_iso + neu_iso) / lep.pt();
 }
 
+double lepton_tools::getScaleFactor(const pat::Muon &lep){
+  auto id_bin = muon_id_sf.FindFixBin(lep.pt(), lep.eta());
+  auto iso_bin = muon_id_sf.FindFixBin(lep.pt(), lep.eta());
+  auto id_val = muon_id_sf.GetBinContent(id_bin);
+  auto iso_val = muon_iso_sf.GetBinContent(iso_bin);
+  return id_val * iso_val;
+}
+
+double lepton_tools::getScaleFactorUncertainty(const pat::Muon &lep){
+  auto id_bin = muon_id_sf.FindFixBin(lep.pt(), lep.eta());
+  auto iso_bin = muon_id_sf.FindFixBin(lep.pt(), lep.eta());
+  auto id_val = muon_id_sf.GetBinContent(id_bin);
+  auto iso_val = muon_iso_sf.GetBinContent(iso_bin);
+  auto id_err = muon_id_sf.GetBinError(id_bin);
+  auto iso_err = muon_iso_sf.GetBinError(iso_bin);
+  return hypot(id_val*iso_err, iso_val*id_err);
+}
 
 //////////////////// Electrons
 bool lepton_tools::isSignalElectron(const pat::Electron &lep, edm::Handle<reco::VertexCollection> vtx, double lepIso){
@@ -188,6 +216,24 @@ double lepton_tools::getEffAreaElectron(double eta){
   else if (abseta < 2.4) return 0.2243;
   else if (abseta < 2.5) return 0.2687;
   else return 0;
+}
+
+double lepton_tools::getScaleFactor(const pat::Electron &lep){
+  auto id_bin = electron_id_sf.FindFixBin(lep.pt(), lep.eta());
+  auto iso_bin = electron_id_sf.FindFixBin(lep.pt(), lep.eta());
+  auto id_val = electron_id_sf.GetBinContent(id_bin);
+  auto iso_val = electron_iso_sf.GetBinContent(iso_bin);
+  return id_val * iso_val;
+}
+
+double lepton_tools::getScaleFactorUncertainty(const pat::Electron &lep){
+  auto id_bin = electron_id_sf.FindFixBin(lep.pt(), lep.eta());
+  auto iso_bin = electron_id_sf.FindFixBin(lep.pt(), lep.eta());
+  auto id_val = electron_id_sf.GetBinContent(id_bin);
+  auto iso_val = electron_iso_sf.GetBinContent(iso_bin);
+  auto id_err = electron_id_sf.GetBinError(id_bin);
+  auto iso_err = electron_iso_sf.GetBinError(iso_bin);
+  return hypot(id_val*iso_err, iso_val*id_err);
 }
 
 double lepton_tools::getRelIsolation(const pat::Electron &lep, double rho){

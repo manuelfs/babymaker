@@ -3,6 +3,8 @@
 #ifndef H_LEPTON_TOOLS
 #define H_LEPTON_TOOLS
 
+#include "TH2D.h"
+
 #include "FWCore/Framework/interface/ESHandle.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
@@ -49,6 +51,8 @@ public:
   bool vertexMuon(const pat::Muon &lep, edm::Handle<reco::VertexCollection> vtx, double &dz, double &d0);
   double getEffAreaMuon(double eta);
   double getRelIsolation(const pat::Muon &lep, double rho);
+  double getScaleFactor(const pat::Muon &lep);
+  double getScaleFactorUncertainty(const pat::Muon &lep);
 
   bool isVetoElectron(const pat::Electron &lep, edm::Handle<reco::VertexCollection> vtx, double lepIso);
   bool isSignalElectron(const pat::Electron &lep, edm::Handle<reco::VertexCollection> vtx, double lepIso);
@@ -56,6 +60,8 @@ public:
   bool vertexElectron(const pat::Electron &lep, edm::Handle<reco::VertexCollection> vtx, double &dz, double &d0);
   double getEffAreaElectron(double eta);
   double getRelIsolation(const pat::Electron &lep, double rho);
+  double getScaleFactor(const pat::Electron &lep);
+  double getScaleFactorUncertainty(const pat::Electron &lep);
 
   double getPFIsolation(edm::Handle<pat::PackedCandidateCollection> pfcands,
 			const reco::Candidate* ptcl,  
@@ -64,6 +70,9 @@ public:
 
   vCands getIsoTracks(edm::Handle<pat::PackedCandidateCollection> pfcands, double met, double met_phi);
   vCands getRA4IsoTracks(edm::Handle<pat::PackedCandidateCollection> pfcands, double met, double met_phi,double rhoEventCentral,std::vector<float> &isos, int primary_pdg);
+
+  private:
+  static const TH2D muon_id_sf, muon_iso_sf, electron_id_sf, electron_iso_sf;
 
 };
 

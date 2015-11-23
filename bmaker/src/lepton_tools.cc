@@ -99,19 +99,23 @@ double lepton_tools::getRelIsolation(const pat::Muon &lep, double rho){
 
 double lepton_tools::getScaleFactor(const pat::Muon &lep){
   auto id_bin = muon_id_sf.FindFixBin(lep.pt(), fabs(lep.eta()));
-  auto iso_bin = muon_id_sf.FindFixBin(lep.pt(), fabs(lep.eta()));
-  auto id_val = muon_id_sf.GetBinContent(id_bin);
-  auto iso_val = muon_iso_sf.GetBinContent(iso_bin);
+  auto iso_bin = muon_iso_sf.FindFixBin(lep.pt(), fabs(lep.eta()));
+  auto id_overflow = muon_id_sf.IsBinOverflow(id_bin);
+  auto iso_overflow = muon_iso_sf.IsBinOverflow(id_bin);
+  auto id_val = id_overflow ? 1. : muon_id_sf.GetBinContent(id_bin);
+  auto iso_val = iso_overflow ? 1. : muon_iso_sf.GetBinContent(iso_bin);
   return id_val * iso_val;
 }
 
 double lepton_tools::getScaleFactorUncertainty(const pat::Muon &lep){
   auto id_bin = muon_id_sf.FindFixBin(lep.pt(), fabs(lep.eta()));
-  auto iso_bin = muon_id_sf.FindFixBin(lep.pt(), fabs(lep.eta()));
-  auto id_val = muon_id_sf.GetBinContent(id_bin);
-  auto iso_val = muon_iso_sf.GetBinContent(iso_bin);
-  auto id_err = muon_id_sf.GetBinError(id_bin);
-  auto iso_err = muon_iso_sf.GetBinError(iso_bin);
+  auto iso_bin = muon_iso_sf.FindFixBin(lep.pt(), fabs(lep.eta()));
+  auto id_overflow = muon_id_sf.IsBinOverflow(id_bin);
+  auto iso_overflow = muon_iso_sf.IsBinOverflow(id_bin);
+  auto id_val = id_overflow ? 1. : muon_id_sf.GetBinContent(id_bin);
+  auto iso_val = iso_overflow ? 1. : muon_iso_sf.GetBinContent(iso_bin);
+  auto id_err = id_overflow ? 0. : muon_id_sf.GetBinError(id_bin);
+  auto iso_err = iso_overflow ? 0. : muon_iso_sf.GetBinError(iso_bin);
   auto full_val = id_val*iso_val;
   return hypot(hypot(hypot(id_val*iso_err, iso_val*id_err),0.01*full_val),0.01*full_val);
 }
@@ -220,8 +224,8 @@ double lepton_tools::getEffAreaElectron(double eta){
 }
 
 double lepton_tools::getScaleFactor(const pat::Electron &lep){
-  auto id_bin = electron_id_sf.FindFixBin(lep.pt(), fabs(lep.superCluster()->eta()));
-  auto iso_bin = electron_id_sf.FindFixBin(lep.pt(), fabs(lep.superCluster()->eta()));
+  auto id_bin = electron_id_sf.FindFixBin(lep.superCluster()->energy()*sin(lep.superClusterPosition().theta()), fabs(lep.superCluster()->eta()));
+  auto iso_bin = electron_iso_sf.FindFixBin(lep.superCluster()->energy()*sin(lep.superClusterPosition().theta()), fabs(lep.superCluster()->eta()));
   auto id_val = electron_id_sf.GetBinContent(id_bin);
   auto iso_val = electron_iso_sf.GetBinContent(iso_bin);
   return id_val * iso_val;
@@ -229,7 +233,7 @@ double lepton_tools::getScaleFactor(const pat::Electron &lep){
 
 double lepton_tools::getScaleFactorUncertainty(const pat::Electron &lep){
   auto id_bin = electron_id_sf.FindFixBin(lep.pt(), fabs(lep.superCluster()->eta()));
-  auto iso_bin = electron_id_sf.FindFixBin(lep.pt(), fabs(lep.superCluster()->eta()));
+  auto iso_bin = electron_iso_sf.FindFixBin(lep.pt(), fabs(lep.superCluster()->eta()));
   auto id_val = electron_id_sf.GetBinContent(id_bin);
   auto iso_val = electron_iso_sf.GetBinContent(iso_bin);
   auto id_err = electron_id_sf.GetBinError(id_bin);

@@ -296,7 +296,7 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
   ////////////////// Systematic weights ////////////////
 
   weightTool->getTheoryWeights(iEvent);
-  fillWeights();
+  fillWeights(sig_leps);
 
   ////////////////// Filling the tree //////////////////
   baby.Fill();
@@ -1112,7 +1112,7 @@ double bmaker_basic::calculateRebalancedMET(unsigned int jetIdx, double mu, doub
   return sqrt(sumPx*sumPx+sumPy*sumPy);
 }
 
-void bmaker_basic::fillWeights()
+void bmaker_basic::fillWeights(const vCands &sig_leps)
 {
   baby.sys_mur().push_back(weightTool->theoryWeight(weight_tools::muRup));
   baby.sys_mur().push_back(weightTool->theoryWeight(weight_tools::muRdown));
@@ -1123,6 +1123,13 @@ void bmaker_basic::fillWeights()
 
   if(isData) baby.w_pu() = 1.;
   else baby.w_pu() = weightTool->pileupWeight(baby.ntrupv_mean());
+  
+  double sf = lepton_tools::getScaleFactor(sig_leps);
+  double unc = lepton_tools::getScaleFactorUncertainty(sig_leps)/sf;
+  baby.w_lep() = sf;
+  vector<float>(2, 1.).swap(baby.sys_lep());
+  baby.sys_lep().at(0) = 1.+unc;
+  baby.sys_lep().at(1) = 1.-unc;
 }
 
 /*

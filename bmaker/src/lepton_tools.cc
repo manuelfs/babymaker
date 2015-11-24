@@ -6,6 +6,8 @@
 #include <cstdlib>
 
 #include <algorithm>
+#include <stdexcept>
+#include <string>
 
 //ROOT include files
 #include "TFile.h"
@@ -67,13 +69,13 @@ bool lepton_tools::idMuon(const pat::Muon &lep, edm::Handle<reco::VertexCollecti
     return lep.isTightMuon(vtx->at(0));
   }
 }
-  
+
 bool lepton_tools::vertexMuon(const pat::Muon &lep, edm::Handle<reco::VertexCollection> vtx, double &dz, double &d0){
   dz = 0.; d0 = 0.;
   if(lep.track().isAvailable()){ // If the track is not available we probably don't want the muon
     dz = lep.track()->vz()-vtx->at(0).z();
     d0 = lep.track()->d0()-vtx->at(0).x()*sin(lep.track()->phi())+vtx->at(0).y()*cos(lep.track()->phi());
-  } 
+  }
   if(fabs(dz) > 0.5 || fabs(d0) > 0.2) return false;
 
   return true;
@@ -92,32 +94,9 @@ double lepton_tools::getEffAreaMuon(double eta){
 double lepton_tools::getRelIsolation(const pat::Muon &lep, double rho){
   double ch_iso(lep.pfIsolationR04().sumChargedHadronPt);
   double neu_iso(max(0., lep.pfIsolationR04().sumNeutralHadronEt + lep.pfIsolationR04().sumPhotonEt
-	       -rho*getEffAreaMuon(lep.eta())));
+                     -rho*getEffAreaMuon(lep.eta())));
 
   return (ch_iso + neu_iso) / lep.pt();
-}
-
-double lepton_tools::getScaleFactor(const pat::Muon &lep){
-  auto id_bin = muon_id_sf.FindFixBin(lep.pt(), fabs(lep.eta()));
-  auto iso_bin = muon_iso_sf.FindFixBin(lep.pt(), fabs(lep.eta()));
-  auto id_overflow = muon_id_sf.IsBinOverflow(id_bin);
-  auto iso_overflow = muon_iso_sf.IsBinOverflow(id_bin);
-  auto id_val = id_overflow ? 1. : muon_id_sf.GetBinContent(id_bin);
-  auto iso_val = iso_overflow ? 1. : muon_iso_sf.GetBinContent(iso_bin);
-  return id_val * iso_val;
-}
-
-double lepton_tools::getScaleFactorUncertainty(const pat::Muon &lep){
-  auto id_bin = muon_id_sf.FindFixBin(lep.pt(), fabs(lep.eta()));
-  auto iso_bin = muon_iso_sf.FindFixBin(lep.pt(), fabs(lep.eta()));
-  auto id_overflow = muon_id_sf.IsBinOverflow(id_bin);
-  auto iso_overflow = muon_iso_sf.IsBinOverflow(id_bin);
-  auto id_val = id_overflow ? 1. : muon_id_sf.GetBinContent(id_bin);
-  auto iso_val = iso_overflow ? 1. : muon_iso_sf.GetBinContent(iso_bin);
-  auto id_err = id_overflow ? 0. : muon_id_sf.GetBinError(id_bin);
-  auto iso_err = iso_overflow ? 0. : muon_iso_sf.GetBinError(iso_bin);
-  auto full_val = id_val*iso_val;
-  return hypot(hypot(hypot(id_val*iso_err, iso_val*id_err),0.01*full_val),0.01*full_val);
 }
 
 //////////////////// Electrons
@@ -155,29 +134,28 @@ bool lepton_tools::idElectron(const pat::Electron &lep, edm::Handle<reco::Vertex
   //https://twiki.cern.ch/twiki/bin/viewauth/CMS/CutBasedElectronIdentificationRun2#Working_points_for_Spring15_MC_s
   // Last updated October 8th
   if(barrel){
-    ieta_cut        = chooseVal(threshold	,0.0114,  0.0103,  0.0101,  0.0101);
-    deta_cut        = chooseVal(threshold	,0.0152,  0.0105,  0.0103,  0.00926);
-    dphi_cut        = chooseVal(threshold	,0.216,   0.115,   0.0336,  0.0336);
-    hovere_cut      = chooseVal(threshold	,0.181,   0.104,   0.0876,  0.0597);
-    reliso_cut      = chooseVal(threshold	,0.126,   0.0893,  0.0766,  0.0354);
-    ooeminusoop_cut = chooseVal(threshold	,0.207,   0.102,   0.0174,  0.012);
-    d0_cut          = chooseVal(threshold	,0.0564,  0.0261,  0.0118,  0.0111);
-    dz_cut          = chooseVal(threshold	,0.472,   0.41,  0.373,   0.0466);
-    misshits_cut    = chooseVal(threshold	,2,   2,   2,   2);
-    req_conv_veto   = chooseVal(threshold	,true		,  true		,  true		,  true );
+    ieta_cut        = chooseVal(threshold       ,0.0114,  0.0103,  0.0101,  0.0101);
+    deta_cut        = chooseVal(threshold       ,0.0152,  0.0105,  0.0103,  0.00926);
+    dphi_cut        = chooseVal(threshold       ,0.216,   0.115,   0.0336,  0.0336);
+    hovere_cut      = chooseVal(threshold       ,0.181,   0.104,   0.0876,  0.0597);
+    reliso_cut      = chooseVal(threshold       ,0.126,   0.0893,  0.0766,  0.0354);
+    ooeminusoop_cut = chooseVal(threshold       ,0.207,   0.102,   0.0174,  0.012);
+    d0_cut          = chooseVal(threshold       ,0.0564,  0.0261,  0.0118,  0.0111);
+    dz_cut          = chooseVal(threshold       ,0.472,   0.41,  0.373,   0.0466);
+    misshits_cut    = chooseVal(threshold       ,2,   2,   2,   2);
+    req_conv_veto   = chooseVal(threshold       ,true           ,  true         ,  true         ,  true );
   } else {
-    ieta_cut        = chooseVal(threshold	,0.0352 , 0.0301 , 0.0283 , 0.0279);
-    deta_cut        = chooseVal(threshold	,0.0113 , 0.00814 , 0.00733 , 0.00724);
-    dphi_cut        = chooseVal(threshold	,0.237 , 0.182 , 0.114 , 0.0918);
-    hovere_cut      = chooseVal(threshold	,0.116 , 0.0897 , 0.0678 , 0.0615);
-    reliso_cut      = chooseVal(threshold	,0.144 , 0.121 , 0.0678 , 0.0646);
-    ooeminusoop_cut = chooseVal(threshold	,0.174 , 0.126 , 0.0898 , 0.00999);
-    d0_cut          = chooseVal(threshold	,0.222 , 0.118 , 0.0739 , 0.0351);
-    dz_cut          = chooseVal(threshold	,0.921 , 0.822 , 0.602 , 0.417);
-    misshits_cut    = chooseVal(threshold	,3, 1, 1, 1);
-    req_conv_veto   = chooseVal(threshold	,true   ,  true   ,  true   ,  true );
+    ieta_cut        = chooseVal(threshold       ,0.0352 , 0.0301 , 0.0283 , 0.0279);
+    deta_cut        = chooseVal(threshold       ,0.0113 , 0.00814 , 0.00733 , 0.00724);
+    dphi_cut        = chooseVal(threshold       ,0.237 , 0.182 , 0.114 , 0.0918);
+    hovere_cut      = chooseVal(threshold       ,0.116 , 0.0897 , 0.0678 , 0.0615);
+    reliso_cut      = chooseVal(threshold       ,0.144 , 0.121 , 0.0678 , 0.0646);
+    ooeminusoop_cut = chooseVal(threshold       ,0.174 , 0.126 , 0.0898 , 0.00999);
+    d0_cut          = chooseVal(threshold       ,0.222 , 0.118 , 0.0739 , 0.0351);
+    dz_cut          = chooseVal(threshold       ,0.921 , 0.822 , 0.602 , 0.417);
+    misshits_cut    = chooseVal(threshold       ,3, 1, 1, 1);
+    req_conv_veto   = chooseVal(threshold       ,true   ,  true   ,  true   ,  true );
   }
-
 
   double dz(0.), d0(0.);
   vertexElectron(lep, vtx, dz, d0);
@@ -185,7 +163,7 @@ bool lepton_tools::idElectron(const pat::Electron &lep, edm::Handle<reco::Vertex
   int mhits(0);
   if(lep.gsfTrack().isAvailable()){
     mhits = lep.gsfTrack()->hitPattern().numberOfLostHits(reco::HitPattern::MISSING_INNER_HITS);;
-  } 
+  }
   const double sigietaieta(lep.full5x5_sigmaIetaIeta());
 
   return deta_cut > fabs(lep.deltaEtaSuperClusterTrackAtVtx())
@@ -205,7 +183,7 @@ bool lepton_tools::vertexElectron(const pat::Electron &lep, edm::Handle<reco::Ve
   if(lep.gsfTrack().isAvailable()){ // If the track is not available we probably don't want the electron
     dz = lep.gsfTrack()->vz()-vtx->at(0).z();
     d0 = lep.gsfTrack()->d0()-vtx->at(0).x()*sin(lep.gsfTrack()->phi())+vtx->at(0).y()*cos(lep.gsfTrack()->phi());
-  } 
+  }
   if(fabs(dz) > 0.5 || fabs(d0) > 0.2) return false;
 
   return true;
@@ -223,43 +201,67 @@ double lepton_tools::getEffAreaElectron(double eta){
   else return 0;
 }
 
-double lepton_tools::getScaleFactor(const pat::Electron &lep){
-  auto id_bin = electron_id_sf.FindFixBin(lep.superCluster()->energy()*sin(lep.superClusterPosition().theta()), fabs(lep.superCluster()->eta()));
-  auto iso_bin = electron_iso_sf.FindFixBin(lep.superCluster()->energy()*sin(lep.superClusterPosition().theta()), fabs(lep.superCluster()->eta()));
-  auto id_val = electron_id_sf.GetBinContent(id_bin);
-  auto iso_val = electron_iso_sf.GetBinContent(iso_bin);
-  return id_val * iso_val;
-}
-
-double lepton_tools::getScaleFactorUncertainty(const pat::Electron &lep){
-  auto id_bin = electron_id_sf.FindFixBin(lep.pt(), fabs(lep.superCluster()->eta()));
-  auto iso_bin = electron_iso_sf.FindFixBin(lep.pt(), fabs(lep.superCluster()->eta()));
-  auto id_val = electron_id_sf.GetBinContent(id_bin);
-  auto iso_val = electron_iso_sf.GetBinContent(iso_bin);
-  auto id_err = electron_id_sf.GetBinError(id_bin);
-  auto iso_err = electron_iso_sf.GetBinError(iso_bin);
-  return hypot(id_val*iso_err, iso_val*id_err);
-}
-
 double lepton_tools::getRelIsolation(const pat::Electron &lep, double rho){
   double ch_iso(lep.pfIsolationVariables().sumChargedHadronPt);
   double neu_iso(max(0., lep.pfIsolationVariables().sumNeutralHadronEt + lep.pfIsolationVariables().sumPhotonEt
-	       -rho*getEffAreaElectron(lep.eta())));
+                     -rho*getEffAreaElectron(lep.eta())));
 
   return (ch_iso + neu_iso) / lep.pt();
 }
 
+double lepton_tools::getScaleFactor(const reco::Candidate &cand){
+  if(const pat::Electron * ele_ptr = dynamic_cast<const pat::Electron*>(&cand)){
+    return getScaleFactor(*ele_ptr);
+  }else if(const reco::Muon * mu_ptr = dynamic_cast<const reco::Muon*>(&cand)){
+    return getScaleFactor(*mu_ptr);
+  }else{
+    throw runtime_error(string("Cannot get scale factor for type ")+typeid(cand).name());
+  }
+  return 1.;
+}
+
+double lepton_tools::getScaleFactorUncertainty(const reco::Candidate &cand){
+  if(const pat::Electron * ele_ptr = dynamic_cast<const pat::Electron*>(&cand)){
+    return getScaleFactorUncertainty(*ele_ptr);
+  }else if(const reco::Muon * mu_ptr = dynamic_cast<const reco::Muon*>(&cand)){
+    return getScaleFactorUncertainty(*mu_ptr);
+  }else{
+    throw runtime_error(string("Cannot get scale factor uncertainty for type ")+typeid(cand).name());
+  }
+  return 0.;
+}
+
+double lepton_tools::getScaleFactor(const vCands &sig_leps){
+  double scale_factor = 1.;
+  for(const auto &lep: sig_leps){
+    if(lep == nullptr) throw runtime_error("sig_leps contains a nullptr in lepton_tools::getScaleFactor");
+    scale_factor *= getScaleFactor(*lep);
+  }
+  return scale_factor;
+}
+
+double lepton_tools::getScaleFactorUncertainty(const vCands &sig_leps){
+  //Crashes if scale factor == 0...
+  double scale_factor = getScaleFactor(sig_leps);
+  double uncertainty = 0.;
+  for(const auto &lep: sig_leps){
+    if(lep == nullptr) throw runtime_error("sig_leps contains a nullptr in lepton_tools::getScaleFactorUncertainty");
+    uncertainty = hypot(uncertainty, getScaleFactorUncertainty(*lep)/scale_factor);
+  }
+  return uncertainty*scale_factor;
+}
+
 double lepton_tools::getPFIsolation(edm::Handle<pat::PackedCandidateCollection> pfcands,
-                      const reco::Candidate* ptcl,  
-                      double r_iso_min, double r_iso_max, double kt_scale,
-                      double rho, bool charged_only) {
+                                    const reco::Candidate* ptcl,
+                                    double r_iso_min, double r_iso_max, double kt_scale,
+                                    double rho, bool charged_only) {
   if (ptcl->pt()<5.) return 99999.;
 
   double deadcone_nh(0.), deadcone_ch(0.), deadcone_ph(0.), deadcone_pu(0.);
   if(ptcl->isElectron()) {
     if (fabs(ptcl->eta())>1.479) {deadcone_ch = 0.015; deadcone_pu = 0.015; deadcone_ph = 0.08;}
   } else if(ptcl->isMuon()) {
-    deadcone_ch = 0.0001; deadcone_pu = 0.01; deadcone_ph = 0.01;deadcone_nh = 0.01;  
+    deadcone_ch = 0.0001; deadcone_pu = 0.01; deadcone_ph = 0.01;deadcone_nh = 0.01;
   } else {
     //deadcone_ch = 0.0001; deadcone_pu = 0.01; deadcone_ph = 0.01;deadcone_nh = 0.01; // maybe use muon cones??
   }
@@ -360,8 +362,6 @@ vCands lepton_tools::getRA4IsoTracks(edm::Handle<pat::PackedCandidateCollection>
   for (size_t i(0); i < pfcands->size(); i++) {
     const pat::PackedCandidate &tk = (*pfcands)[i];
     unsigned int id = abs(tk.pdgId());
-    
-   
 
     //id-specific parameters
     float pt_min = id==211 ? 10. : 5.;
@@ -373,15 +373,14 @@ vCands lepton_tools::getRA4IsoTracks(edm::Handle<pat::PackedCandidateCollection>
     if (tk.pt() < pt_min) continue;
     if (fabs(tk.eta()) > eta_max) continue;
     if (fabs(tk.dz()) > dz_max) continue;
-    
-    
+
     //if (mt_max>0.01 && getMT(met, met_phi,  tk.pt(), tk.phi())>mt_max) continue;
 
     // calculate track isolation
     double iso = 0.;
     if(id!=211)
       iso = getPFIsolation(pfcands, dynamic_cast<const reco::Candidate *>(&tk), 0.05, 0.2, 10., rhoEventCentral, false);
-    else 
+    else
       iso = getPFIsolation(pfcands, dynamic_cast<const reco::Candidate *>(&tk), 0.05, 0.2, 10., rhoEventCentral, true);
 
     if(iso>0.5) continue;
@@ -392,10 +391,49 @@ vCands lepton_tools::getRA4IsoTracks(edm::Handle<pat::PackedCandidateCollection>
   return tks;
 }
 
+double lepton_tools::getScaleFactor(const reco::Muon &lep){
+  auto id_bin = muon_id_sf.FindFixBin(lep.pt(), fabs(lep.eta()));
+  auto iso_bin = muon_iso_sf.FindFixBin(lep.pt(), fabs(lep.eta()));
+  auto id_overflow = muon_id_sf.IsBinOverflow(id_bin);
+  auto iso_overflow = muon_iso_sf.IsBinOverflow(id_bin);
+  auto id_val = id_overflow ? 1. : muon_id_sf.GetBinContent(id_bin);
+  auto iso_val = iso_overflow ? 1. : muon_iso_sf.GetBinContent(iso_bin);
+  return id_val * iso_val;
+}
+
+double lepton_tools::getScaleFactorUncertainty(const reco::Muon &lep){
+  auto id_bin = muon_id_sf.FindFixBin(lep.pt(), fabs(lep.eta()));
+  auto iso_bin = muon_iso_sf.FindFixBin(lep.pt(), fabs(lep.eta()));
+  auto id_overflow = muon_id_sf.IsBinOverflow(id_bin);
+  auto iso_overflow = muon_iso_sf.IsBinOverflow(id_bin);
+  auto id_val = id_overflow ? 1. : muon_id_sf.GetBinContent(id_bin);
+  auto iso_val = iso_overflow ? 1. : muon_iso_sf.GetBinContent(iso_bin);
+  auto id_err = id_overflow ? 0. : muon_id_sf.GetBinError(id_bin);
+  auto iso_err = iso_overflow ? 0. : muon_iso_sf.GetBinError(iso_bin);
+  auto full_val = id_val*iso_val;
+  return hypot(hypot(hypot(id_val*iso_err, iso_val*id_err),0.01*full_val),0.01*full_val);
+}
+
+double lepton_tools::getScaleFactor(const pat::Electron &lep){
+  auto id_bin = electron_id_sf.FindFixBin(lep.superCluster()->energy()*sin(lep.superClusterPosition().theta()), fabs(lep.superCluster()->eta()));
+  auto iso_bin = electron_iso_sf.FindFixBin(lep.superCluster()->energy()*sin(lep.superClusterPosition().theta()), fabs(lep.superCluster()->eta()));
+  auto id_val = electron_id_sf.GetBinContent(id_bin);
+  auto iso_val = electron_iso_sf.GetBinContent(iso_bin);
+  return id_val * iso_val;
+}
+
+double lepton_tools::getScaleFactorUncertainty(const pat::Electron &lep){
+  auto id_bin = electron_id_sf.FindFixBin(lep.pt(), fabs(lep.superCluster()->eta()));
+  auto iso_bin = electron_iso_sf.FindFixBin(lep.pt(), fabs(lep.superCluster()->eta()));
+  auto id_val = electron_id_sf.GetBinContent(id_bin);
+  auto iso_val = electron_iso_sf.GetBinContent(iso_bin);
+  auto id_err = electron_id_sf.GetBinError(id_bin);
+  auto iso_err = electron_iso_sf.GetBinError(iso_bin);
+  return hypot(id_val*iso_err, iso_val*id_err);
+}
 
 lepton_tools::lepton_tools(){
 }
 
-lepton_tools::~lepton_tools(){ 
+lepton_tools::~lepton_tools(){
 }
-

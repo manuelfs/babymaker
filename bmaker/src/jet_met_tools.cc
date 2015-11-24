@@ -311,8 +311,6 @@ float jet_met_tools::jetBTagWeight(const pat::Jet &jet, const LVector &jetp4, bo
       std::cout << "Caught exception: " << e.what() << " for a jet with (pt,eta,hadron flavor)=(" 
                 << jetp4.pt() << "," << jetp4.eta() << "," << hadronFlavour << ")" << std::endl;
     }
-    // jets with pt>670 GeV are assumed to have double the systematic uncertainty of the previous bin
-    if(jetp4.pt()>670) jet_scalefactor*=2.0;
   }
 
   return jet_scalefactor;
@@ -457,8 +455,8 @@ jet_met_tools::jet_met_tools(TString ijecName, bool doSys):
     std::string scaleFactorFileFastSim(scaleFactorFile);
     scaleFactorFile+="/src/babymaker/bmaker/data/CSVv2.csv";
     scaleFactorFileFastSim+="/src/babymaker/bmaker/data/CSV_13TEV_Combined_20_11_2015.csv";
-    calib      = new BTagCalibration("csvv1", scaleFactorFile);
-    calibFS      = new BTagCalibration("csvv1", scaleFactorFileFastSim);
+    calib   = new BTagCalibration("csvv1", scaleFactorFile);
+    calibFS = new BTagCalibration("csvv1", scaleFactorFileFastSim);
 
     std::vector<std::string> variationTypes = {"central", "up", "down"};
     for(auto itype : variationTypes) {

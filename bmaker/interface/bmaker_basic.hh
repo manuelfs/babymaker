@@ -87,9 +87,11 @@ public:
 			vCands &veto_els, vCands &all_els, double rhoEventCentral);
   void writeDiLep(vCands &sig_mus, vCands &sig_els, vCands &veto_mus, vCands &veto_els);
   void setDiLepMass(vCands leptons, baby_float ll_m, baby_float ll_pt1, baby_float ll_pt2, baby_float ll_pt, 
-		    baby_float ll_eta, baby_float ll_phi, baby_vfloat l_pt, baby_vbool l_inz);
+		    baby_float ll_eta, baby_float ll_phi, baby_vfloat l_pt, baby_vbool l_inz,
+		    baby_float ll_w);
   void setElMuMass(vCands leptons1, vCands leptons2, baby_float ll_m, baby_float ll_pt1, baby_float ll_pt2, 
-		   baby_float ll_pt, baby_float ll_eta, baby_float ll_phi);
+		   baby_float ll_pt, baby_float ll_eta, baby_float ll_phi,
+		   baby_float ll_w);
   void writeLeptons(vCands &leptons); 
 
   vCands writePhotons(edm::Handle<pat::PhotonCollection> allphotons, edm::Handle<std::vector<pat::Electron> > &electrons,
@@ -117,7 +119,7 @@ public:
   double calculateRebalancedMET(unsigned int jetIdx, double mu, double& METPhi);
 
   // for filling additional event weights
-  void fillWeights();
+  void fillWeights(const vCands &sig_leps);
 
   std::vector<TString> trig_name;
 
@@ -138,7 +140,6 @@ public:
   float xsec;
 
   bool addBTagWeights;
-  std::vector<double> puWeights;
   bool isFastSim;
   bool doSystematics;
 

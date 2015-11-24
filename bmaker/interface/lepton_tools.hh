@@ -3,6 +3,8 @@
 #ifndef H_LEPTON_TOOLS
 #define H_LEPTON_TOOLS
 
+#include "TH2D.h"
+
 #include "FWCore/Framework/interface/ESHandle.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
@@ -19,26 +21,26 @@ public:
   ~lepton_tools();
 
   ///////////////// LEPTON CUTS ///////////////////////
-  const float SignalLeptonPtCut	 = 20.0;
-  const float VetoLeptonPtCut	 = 10.0;
-  const float MuonEtaCut	 = 2.4;
-  const float ElectronEtaCut	 = 2.5;
-  const float MuonMiniIsoCut	 = 0.2;
+  const float SignalLeptonPtCut  = 20.0;
+  const float VetoLeptonPtCut    = 10.0;
+  const float MuonEtaCut         = 2.4;
+  const float ElectronEtaCut     = 2.5;
+  const float MuonMiniIsoCut     = 0.2;
   const float ElectronMiniIsoCut = 0.1;
 
   enum CutLevel{kVeto, kLoose, kMedium, kTight};
   template<class T>
   T chooseVal(CutLevel threshold, T valVeto, T valLoose, T valMedium, T valTight){
     switch(threshold){
-      default:
-      case kVeto:
-        return valVeto;
-      case kLoose:
-        return valLoose;
-      case kMedium:
-        return valMedium;
-      case kTight:
-        return valTight;
+    default:
+    case kVeto:
+      return valVeto;
+    case kLoose:
+      return valLoose;
+    case kMedium:
+      return valMedium;
+    case kTight:
+      return valTight;
     }
     return valVeto;
   }
@@ -57,14 +59,26 @@ public:
   double getEffAreaElectron(double eta);
   double getRelIsolation(const pat::Electron &lep, double rho);
 
+  static double getScaleFactor(const reco::Candidate &cand);
+  static double getScaleFactorUncertainty(const reco::Candidate &cand);
+
+  static double getScaleFactor(const vCands &sig_leps);
+  static double getScaleFactorUncertainty(const vCands &sig_leps);
+
   double getPFIsolation(edm::Handle<pat::PackedCandidateCollection> pfcands,
-			const reco::Candidate* ptcl,  
+                        const reco::Candidate* ptcl,
                         double r_iso_min, double r_iso_max, double kt_scale,
                         double rho, bool charged_only);
 
   vCands getIsoTracks(edm::Handle<pat::PackedCandidateCollection> pfcands, double met, double met_phi);
   vCands getRA4IsoTracks(edm::Handle<pat::PackedCandidateCollection> pfcands, double met, double met_phi,double rhoEventCentral,std::vector<float> &isos, int primary_pdg);
 
+private:
+  static const TH2D muon_id_sf, muon_iso_sf, electron_id_sf, electron_iso_sf;
+  static double getScaleFactor(const reco::Muon &lep);
+  static double getScaleFactorUncertainty(const reco::Muon &lep);
+  static double getScaleFactor(const pat::Electron &lep);
+  static double getScaleFactorUncertainty(const pat::Electron &lep);
 };
 
 #endif

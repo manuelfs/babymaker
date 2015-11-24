@@ -55,6 +55,7 @@ else: jets_label = "slimmedJets"
 jecLabel = 'miniAOD_Summer15_25nsV6_MC' # for 7.4.14 mc, don't apply JEC, but still give the JEC tag because of systematics
 if "Run2015D" in outName: jecLabel = 'Summer15_25nsV6_DATA' # for 7.4.12 data
 elif "RunIISpring15DR74" in outName: jecLabel = 'Summer15_25nsV6_MC' # for 7.4.6.patch4 mc
+elif "RunIISpring15FSPremix" in outName: jecLabel = 'MCRUN2_74_V9'
 
 if "Run2015" in outName:
     isData = True
@@ -96,18 +97,6 @@ process.baby_basic = cms.EDAnalyzer('bmaker_basic',
                                     doMetRebalancing = cms.bool(True),
                                     doSystematics = cms.bool(doSystematics),
                                     addBTagWeights = cms.bool(True),
-                                    # pile up weights assuming sigma = 69 mb
-                                    puWeights = cms.vdouble(178.037, 137.543, 90.6595, 23.9371, 11.4287,
-                                                            1.57655, 0.963025, 1.97081, 3.05875, 3.09653,
-                                                            3.07308, 2.94232, 2.38953, 1.56449, 0.822713,
-                                                            0.348372, 0.1212, 0.035636, 0.00948505, 0.00253883,
-                                                            0.000780246, 0.000305642, 0.000159835, 0.000105483, 7.88995e-05,
-                                                            6.23615e-05, 5.06906e-05, 4.16566e-05, 3.46035e-05, 2.82562e-05,
-                                                            2.07778e-05, 1.26429e-05, 6.47437e-06, 2.59927e-06, 9.77605e-07,
-                                                            3.32172e-07, 1.04265e-07, 3.09878e-08, 9.38906e-09, 2.68163e-09,
-                                                            7.26119e-10, 1.71182e-10, 4.61733e-11, 1.07015e-11, 2.49233e-12,
-                                                            5.48282e-13, 2.57415e-13, 7.73396e-14, 6.6361e-14, 0,
-                                                            0, 0),
                                     isFastSim = cms.bool(False),
 )
 

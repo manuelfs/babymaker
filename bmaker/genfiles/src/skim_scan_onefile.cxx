@@ -17,29 +17,35 @@
 #include "TMath.h"
 #include "TSystem.h"
 #include "TDirectory.h"
+#include <ctime>
 
 using namespace std;
 using std::cout;
 using std::endl;
 
 int main(int argc, char *argv[]){
+  time_t startTime;
+  time(&startTime);
+ 
 
   if(argc < 1) {
     cout<<endl<<"Requires 1 argument: "
 	<<"./run/skim_scan_onefile.exe infile";
     return 1;
   }
+  
+  
 
   TString infiles(argv[1]);
   TChain tree("tree");
   int nfiles = tree.Add(infiles);
   TChain treeglobal("treeglobal");
-  treeglobal.Add(infiles);
+  treeglobal.Add(infiles);  
 
   //Project tree into mass plane to find points for skim
   TH2F * mass_plane = new TH2F("mglu_vs_mlsp","mglu_vs_mlsp",3000,-0.5,2999.5,3000,-0.5,2999.5);
   tree.Project("mglu_vs_mlsp","mgluino:mlsp","","colz");
- 
+  
   //find relevant range to loop over
   int ini_x = mass_plane->FindFirstBinAbove(0,1);
   int last_x = mass_plane->FindLastBinAbove(0,1);
@@ -57,6 +63,14 @@ int main(int argc, char *argv[]){
       }
     }
   }
+
+  time_t curTime;
+  time(&curTime);
+  // char time_c[100];
+  //struct tm * timeinfo = localtime(&curTime);
+  //strftime(time_c,100,"%Y-%m-%d %H:%M:%S",timeinfo);
+  int seconds(floor(difftime(curTime,startTime)+0.5));
+  cout<<"took "<<seconds<<" seconds to fill chain, project and find mass pairs"<<endl;
  
 
   /*TString folder(infiles);
@@ -65,9 +79,10 @@ int main(int argc, char *argv[]){
   // gSystem->mkdir(outfolder, kTRUE);
   // Finding outfile names
   for(unsigned int ip = 0; ip<pair_cuts.size(); ip++){
-   
+    time_t startloop;
+    time(&startloop);
     TString outfile=infiles;
-    outfile.Remove(0, outfile.Last('/')); outfile.ReplaceAll("*","");
+    //outfile.Remove(0, outfile.Last('/')); outfile.ReplaceAll("*","");
     if(outfile.Contains(".root")) outfile.ReplaceAll(".root","_"+pair_cuts.at(ip)+".root");
     else outfile += ("_"+pair_cuts.at(ip)+".root");
     outfile.ReplaceAll(">=","ge"); outfile.ReplaceAll("<=","se"); outfile.ReplaceAll("&&","_");
@@ -87,8 +102,7 @@ int main(int argc, char *argv[]){
       continue;
       }*/
       
-    //  cout<<"creating outfile"<<endl;
-    TFile out_rootfile(outfile, "CREATE");
+    TFile out_rootfile(outfile.Data(), "CREATE");
     if(out_rootfile.IsZombie() || !out_rootfile.IsOpen()) return 1;
     out_rootfile.cd();
 
@@ -103,7 +117,11 @@ int main(int argc, char *argv[]){
     else cout<<"Could not find treeglobal in "<<infiles<<endl;
     cout<<"Written "<<outfile<<" from "<<nfiles<<" files and "<<nentries<<" entries."<<endl;
     out_rootfile.Close();
+    time_t endloop;
+    time(&endloop);
+    int secs(floor(difftime(endloop,startloop)+0.5));
+    cout<<"took "<<secs<<" seconds to copy tree"<<endl;
     
-  }
+    }
 }
 

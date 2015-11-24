@@ -133,6 +133,7 @@ float elmu_pt2
 float elmu_pt
 float elmu_eta
 float elmu_phi
+float elmu_w
 
 float elel_m
 float elel_pt1
@@ -140,12 +141,14 @@ float elel_pt2
 float elel_pt
 float elel_eta
 float elel_phi
+float elel_w
 float elelv_m
 float elelv_pt1
 float elelv_pt2
 float elelv_pt
 float elelv_eta
 float elelv_phi
+float elelv_w
 
 float mumu_m
 float mumu_pt1
@@ -153,12 +156,14 @@ float mumu_pt2
 float mumu_pt
 float mumu_eta
 float mumu_phi
+float mumu_w
 float mumuv_m
 float mumuv_pt1
 float mumuv_pt2
 float mumuv_pt
 float mumuv_eta
 float mumuv_phi
+float mumuv_w
 
 ##################   Photons   ###################
 int nph

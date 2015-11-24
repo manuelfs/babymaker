@@ -627,21 +627,27 @@ void bmaker_basic::writeLeptons(vCands &leptons){
 
 void bmaker_basic::writeDiLep(vCands &sig_mus, vCands &sig_els, vCands &veto_mus, vCands &veto_els){
   setDiLepMass(sig_mus,  &baby_base::mumu_m,  &baby_base::mumu_pt1,  &baby_base::mumu_pt2,  &baby_base::mumu_pt,
-               &baby_base::mumu_eta,  &baby_base::mumu_phi, &baby_base::mus_pt, &baby_base::mus_inz);
+               &baby_base::mumu_eta,  &baby_base::mumu_phi, &baby_base::mus_pt, &baby_base::mus_inz,
+	       &baby_base::mumu_w);
   setDiLepMass(veto_mus, &baby_base::mumuv_m, &baby_base::mumuv_pt1, &baby_base::mumuv_pt2, &baby_base::mumuv_pt,
-               &baby_base::mumuv_eta,  &baby_base::mumuv_phi, &baby_base::mus_pt, &baby_base::mus_inzv);
+               &baby_base::mumuv_eta,  &baby_base::mumuv_phi, &baby_base::mus_pt, &baby_base::mus_inzv,
+	       &baby_base::mumuv_w);
   setDiLepMass(sig_els,  &baby_base::elel_m,  &baby_base::elel_pt1,  &baby_base::elel_pt2,  &baby_base::elel_pt,
-               &baby_base::elel_eta,  &baby_base::elel_phi, &baby_base::els_pt, &baby_base::els_inz);
+               &baby_base::elel_eta,  &baby_base::elel_phi, &baby_base::els_pt, &baby_base::els_inz,
+	       &baby_base::elel_w);
   setDiLepMass(veto_els, &baby_base::elelv_m, &baby_base::elelv_pt1, &baby_base::elelv_pt2, &baby_base::elelv_pt,
-               &baby_base::elelv_eta,  &baby_base::elelv_phi, &baby_base::els_pt, &baby_base::els_inzv);
+               &baby_base::elelv_eta,  &baby_base::elelv_phi, &baby_base::els_pt, &baby_base::els_inzv,
+	       &baby_base::elelv_w);
   setElMuMass(sig_els, sig_mus, &baby_base::elmu_m, &baby_base::elmu_pt1, &baby_base::elmu_pt2, &baby_base::elmu_pt,
-              &baby_base::elmu_eta,  &baby_base::elmu_phi);
+              &baby_base::elmu_eta,  &baby_base::elmu_phi,
+	      &baby_base::elmu_w);
   // setElMuMass(veto_els, veto_mus, &baby_base::elmuv_m, &baby_base::elmuv_pt1, &baby_base::elmuv_pt2, &baby_base::elmuv_pt,
   //          &baby_base::elmuv_eta,  &baby_base::elmuv_phi);
 }
 
 void bmaker_basic::setDiLepMass(vCands leptons, baby_float ll_m, baby_float ll_pt1, baby_float ll_pt2, 
-                                baby_float ll_pt, baby_float ll_eta, baby_float ll_phi, baby_vfloat l_pt, baby_vbool l_inz){
+                                baby_float ll_pt, baby_float ll_eta, baby_float ll_phi, baby_vfloat l_pt, baby_vbool l_inz,
+				baby_float ll_w){
   for(size_t lep1(0); lep1 < leptons.size(); lep1++){
     for(size_t lep2(lep1+1); lep2 < leptons.size(); lep2++){
       if(leptons[lep1]->charge()*leptons[lep2]->charge()<0){
@@ -658,6 +664,7 @@ void bmaker_basic::setDiLepMass(vCands leptons, baby_float ll_m, baby_float ll_p
           if(fabs(pt1 - (baby.*l_pt)()[ilep]) < 1e-7) (baby.*l_inz)()[ilep] = true;
           if(fabs(pt2 - (baby.*l_pt)()[ilep]) < 1e-7) (baby.*l_inz)()[ilep] = true;
         }
+	(baby.*ll_w)() = lepton_tools::getScaleFactor({leptons[lep1], leptons[lep2]});
         return; // We only set it with the first good ll combination
       }
     } // Loop over lep2
@@ -665,7 +672,8 @@ void bmaker_basic::setDiLepMass(vCands leptons, baby_float ll_m, baby_float ll_p
 }
 
 void bmaker_basic::setElMuMass(vCands leptons1, vCands leptons2, baby_float ll_m, baby_float ll_pt1, baby_float ll_pt2, 
-                               baby_float ll_pt, baby_float ll_eta, baby_float ll_phi){
+                               baby_float ll_pt, baby_float ll_eta, baby_float ll_phi,
+			       baby_float ll_w){
   for(size_t lep1(0); lep1 < leptons1.size(); lep1++){
     for(size_t lep2(0); lep2 < leptons2.size(); lep2++){
       if(leptons1[lep1]->charge()*leptons2[lep2]->charge()<0){
@@ -678,6 +686,7 @@ void bmaker_basic::setElMuMass(vCands leptons1, vCands leptons2, baby_float ll_m
         float pt1(leptons1[lep1]->pt()), pt2(leptons2[lep2]->pt());
         (baby.*ll_pt1)() = pt1; 
         (baby.*ll_pt2)() = pt2;
+	(baby.*ll_w)() = lepton_tools::getScaleFactor({leptons1[lep1], leptons2[lep2]});
         return; // We only set it with the first good ll combination
       }
     } // Loop over lep2

@@ -291,7 +291,7 @@ float jet_met_tools::jetBTagWeight(const pat::Jet &jet, const LVector &jetp4, bo
     // maximum pt in the parameterizations is 670 GeV
     if(jetpttemp>670) jetpttemp=669.99;
     try {
-      double eff = getMCTagEfficiency(abs(hadronFlavour), jetp4.eta(), jetpttemp);
+      double eff = getMCTagEfficiency(abs(hadronFlavour), jetpttemp, fabs(jetp4.eta()));
       double SF = 1.0;
       // procedure from https://twiki.cern.ch/twiki/bin/view/CMS/BTagSFMethods#1a_Event_reweighting_using_scale
       switch ( abs(hadronFlavour) ) {
@@ -456,7 +456,7 @@ jet_met_tools::jet_met_tools(TString ijecName, bool doSys):
     std::string scaleFactorFile(getenv("CMSSW_BASE"));
     std::string scaleFactorFileFastSim(scaleFactorFile);
     scaleFactorFile+="/src/babymaker/bmaker/data/CSVv2.csv";
-    scaleFactorFileFastSim+="/src/babymaker/bmaker/data/CSV_13TEV_TTJets_12_10_2015_prelimUnc.csv";
+    scaleFactorFileFastSim+="/src/babymaker/bmaker/data/CSV_13TEV_Combined_20_11_2015.csv";
     calib      = new BTagCalibration("csvv1", scaleFactorFile);
     calibFS      = new BTagCalibration("csvv1", scaleFactorFileFastSim);
 

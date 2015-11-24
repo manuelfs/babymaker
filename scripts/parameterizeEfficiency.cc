@@ -23,11 +23,11 @@ void parameterizeEfficiency()
   std::vector<int> flavorCuts = {0, 4, 5};
   std::vector<float> flavorCutsFloat = {0, 4, 5};
 
-  TH1F *hCSV[etaCuts.size()-1][ptCuts.size()-1][flavorCuts.size()];
+  TH1F *hCSV[etaCuts.size()][ptCuts.size()][flavorCuts.size()];
   TH3F *btagEfficiency = new TH3F("btagEfficiency", "btagEfficiency", 
 			       etaCuts.size()-1, &etaCuts[0],
 			       ptCuts.size()-1, &ptCuts[0],
-			       flavorCuts.size(), &flavorCutsFloat[0]);
+			       flavorCuts.size()-1, &flavorCutsFloat[0]);
 
   for(int ieta(0); ieta<etaCuts.size()-1; ieta++ ) {
     for(int ipt(0); ipt<ptCuts.size()-1; ipt++ ) {

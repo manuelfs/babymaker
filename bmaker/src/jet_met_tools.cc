@@ -292,7 +292,7 @@ float jet_met_tools::jetBTagWeight(const pat::Jet &jet, const LVector &jetp4, bo
     if(jetpttemp>670) jetpttemp=669.99;
     try {
       double eff = getMCTagEfficiency(abs(hadronFlavour), jetp4.eta(), jetpttemp);
-      cout<<"eff "<<eff<<", flav "<<hadronFlavour<<", eta "<< jetp4.eta()<<", pt "<<jetpttemp<<endl;
+      // cout<<"eff "<<eff<<", flav "<<hadronFlavour<<", eta "<< jetp4.eta()<<", pt "<<jetpttemp<<endl;
       double SF = 1.0;
       // procedure from https://twiki.cern.ch/twiki/bin/view/CMS/BTagSFMethods#1a_Event_reweighting_using_scale
       switch ( abs(hadronFlavour) ) {

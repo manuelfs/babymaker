@@ -200,6 +200,16 @@ float onel_ele23
 float onel_ele8
 float onel_ele105
 float onph_ph90
+int nmus_vvvl
+int nmus_isomu18
+int nels_vvvl
+int nels_ele23
+std::vector<float> mus_vvvl_pt
+std::vector<float> mus_vvvl_eta
+std::vector<float> mus_vvvl_phi
+std::vector<float> els_vvvl_pt
+std::vector<float> els_vvvl_eta
+std::vector<float> els_vvvl_phi
 
 ###################   Quality   ##################
 bool pass_jets;

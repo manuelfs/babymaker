@@ -742,6 +742,8 @@ bool bmaker_basic::writeTriggers(const edm::TriggerNames &names,
 void bmaker_basic::writeHLTObjects(const edm::TriggerNames &names, 
                                    edm::Handle<pat::TriggerObjectStandAloneCollection> triggerObjects, 
                                    vCands &all_mus, vCands &all_els, vCands &photons){
+  baby.nmus_vvvl() = 0; baby.nmus_isomu18() = 0; 
+  baby.nels_vvvl() = 0; baby.nels_ele23() = 0; 
   const float relptThreshold(1), drThreshold(0.3);      
   for (pat::TriggerObjectStandAlone obj : *triggerObjects) {
     obj.unpackPathNames(names);
@@ -755,6 +757,13 @@ void bmaker_basic::writeHLTObjects(const edm::TriggerNames &names,
       bool isomu18(obj.hasFilterLabel("hltL3crIsoL1sMu16L1f0L2f10QL3f18QL3trkIsoFiltered0p09") );
       bool mu50(obj.hasFilterLabel("hltL3fL1sMu16orMu25L1f0L2f10QL3Filtered50Q"));
       bool mu8(obj.hasFilterLabel("hltDoubleMu8Mass8L3Filtered"));
+      if(vvvl) {
+	baby.nmus_vvvl()++;
+	baby.mus_vvvl_pt().push_back(objpt);
+	baby.mus_vvvl_eta().push_back(obj.eta());
+	baby.mus_vvvl_phi().push_back(obj.phi());
+      }
+      if(isomu18) baby.nmus_isomu18()++;
       if(vvvl && baby.onmu_vvvl()<objpt) baby.onmu_vvvl() = objpt;
       if(isomu18 && baby.onmu_isomu18()<objpt) baby.onmu_isomu18() = objpt;
       if(mu50 && baby.onmu_mu50()<objpt) baby.onmu_mu50() = objpt;
@@ -785,6 +794,13 @@ void bmaker_basic::writeHLTObjects(const edm::TriggerNames &names,
       bool ele23(obj.hasFilterLabel("hltEle23WPLooseGsfTrackIsoFilter") );
       bool ele105(obj.hasFilterLabel("hltEle105CaloIdVTGsfTrkIdTGsfDphiFilter"));
       bool ele8(obj.hasFilterLabel("hltDoubleEle8Mass8Filter"));
+      if(vvvl) {
+	baby.nels_vvvl()++;
+	baby.els_vvvl_pt().push_back(objpt);
+	baby.els_vvvl_eta().push_back(obj.eta());
+	baby.els_vvvl_phi().push_back(obj.phi());
+      }
+      if(ele23) baby.nels_ele23()++;
       if(vvvl && baby.onel_vvvl()<objpt) baby.onel_vvvl() = objpt;
       if(ele23 && baby.onel_ele23()<objpt) baby.onel_ele23() = objpt;
       if(ele105 && baby.onel_ele105()<objpt) baby.onel_ele105() = objpt;

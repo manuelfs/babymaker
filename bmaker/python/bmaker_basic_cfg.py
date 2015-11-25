@@ -57,6 +57,9 @@ if "Run2015D" in outName: jecLabel = 'Summer15_25nsV6_DATA' # for 7.4.12 data
 elif "RunIISpring15DR74" in outName: jecLabel = 'Summer15_25nsV6_MC' # for 7.4.6.patch4 mc
 elif "RunIISpring15FSPremix" in outName: jecLabel = 'MCRUN2_74_V9'
 
+if "FSPremix" in outName: fastsim = True
+else: fastsim = False
+
 if "Run2015" in outName:
     isData = True
     # These only used for the official application of JECs
@@ -97,7 +100,7 @@ process.baby_basic = cms.EDAnalyzer('bmaker_basic',
                                     doMetRebalancing = cms.bool(True),
                                     doSystematics = cms.bool(doSystematics),
                                     addBTagWeights = cms.bool(True),
-                                    isFastSim = cms.bool(False),
+                                    isFastSim = cms.bool(fastsim),
 )
 
 ###### Setting up number of events, and reporing frequency 
@@ -115,8 +118,8 @@ process.GlobalTag.globaltag = globalTag
 ###### HBHE
 ## HBHE noise filter needs to be recomputed in early 2015 data
 ##___________________________HCAL_Noise_Filter________________________________||
-if "FSPremix" in outName: fastsim = True
-else: fastsim = False
+#if "FSPremix" in outName: fastsim = True #(moved earlier)
+#else: fastsim = False
 if not fastsim:
     process.load('CommonTools.RecoAlgos.HBHENoiseFilterResultProducer_cfi')
     process.HBHENoiseFilterResultProducer.minZeros = cms.int32(99999)

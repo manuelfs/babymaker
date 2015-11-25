@@ -4,7 +4,6 @@
 #include <string>
 #include <vector>
 
-#include "change_branch.hh"
 #include "utilities.hh"
 
 using namespace std;

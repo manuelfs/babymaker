@@ -37,6 +37,8 @@ void change_branch_one(TString indir, TString name, TString outdir, vector<TStri
   //Set up old tree and branch
   TFile* oldfile = new TFile(indir+name);
   TTree* oldtree = static_cast<TTree*>(oldfile->Get("tree"));
+  TTree* oldtreeglobal = static_cast<TTree*>(oldfile->Get("treeglobal"));
+  
 
   vector<int> new_var_int_(nvar,-999);
   vector<float> new_var_flt_(nvar,-999);
@@ -57,6 +59,7 @@ void change_branch_one(TString indir, TString name, TString outdir, vector<TStri
   name.ReplaceAll(".root","_mod.root");
   TFile* newfile = new TFile(outdir+name,"recreate");
   TTree* newtree = oldtree->CloneTree(0);
+  TTree* newtreeglobal = oldtreeglobal->CloneTree();
 
   //Loop and fill events with new weights
   int nentries = oldtree->GetEntries();
@@ -79,8 +82,10 @@ void change_branch_one(TString indir, TString name, TString outdir, vector<TStri
     }
     newtree->Fill();
   }
+  
   //Save tree
   newtree->AutoSave();
+  newtreeglobal->AutoSave();
   delete oldfile;
   delete newfile;
 }

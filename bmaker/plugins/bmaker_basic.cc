@@ -1154,7 +1154,18 @@ void bmaker_basic::fillWeights(const vCands &sig_leps)
   baby.w_lep() = sf;
   vector<float>(2, 1.).swap(baby.sys_lep());
   baby.sys_lep().at(0) = 1.+unc;
-  baby.sys_lep().at(1) = 1.-unc;
+  baby.sys_lep().at(1) = 1.-unc; 
+
+  double sf_fs = 1; 
+  double unc_fs = 0.; 
+  //if(isFastSim){ 
+    sf_fs = lepton_tools::getScaleFactorFs(sig_leps,baby.npv());
+    unc_fs =lepton_tools::getScaleFactorUncertaintyFs(sig_leps,baby.npv())/*/sf_fs*/; 
+ // }
+  baby.w_fs_lep() = sf_fs;
+  vector<float>(2, 1.).swap(baby.sys_fs_lep());
+  baby.sys_fs_lep().at(0) = 1.+unc_fs;
+  baby.sys_fs_lep().at(1) = 1.-unc_fs; 
 }
 
 /*

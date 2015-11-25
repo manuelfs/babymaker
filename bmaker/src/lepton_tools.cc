@@ -27,6 +27,8 @@ const TH2D lepton_tools::muon_id_sf = *static_cast<TH2D*>(TFile((string(getenv("
 const TH2D lepton_tools::muon_iso_sf = *static_cast<TH2D*>(TFile((string(getenv("CMSSW_BASE"))+"/src/babymaker/bmaker/data/lepton_sf/muon_mini_iso_0p2.root").c_str(),"read").Get("pt_abseta_PLOT_pair_probeMultiplicity_bin0_&_tag_combRelIsoPF04dBeta_bin0_&_tag_pt_bin0_&_PF_pass_&_tag_IsoMu20_pass"));
 const TH2D lepton_tools::electron_id_sf = *static_cast<TH2D*>(TFile((string(getenv("CMSSW_BASE"))+"/src/babymaker/bmaker/data/lepton_sf/electron.root").c_str(),"read").Get("CutBasedMedium"));
 const TH2D lepton_tools::electron_iso_sf = *static_cast<TH2D*>(TFile((string(getenv("CMSSW_BASE"))+"/src/babymaker/bmaker/data/lepton_sf/electron.root").c_str(),"read").Get("MiniIso0p1_vs_AbsEta"));
+const TH3D lepton_tools::muon_idiso_fs_sf = *static_cast<TH3D*>(TFile((string(getenv("CMSSW_BASE"))+"/src/babymaker/bmaker/data/lepton_sf/sf_mu_mediumID_mini02.root").c_str(),"read").Get("histo3D"));
+const TH3D lepton_tools::electron_idiso_fs_sf = *static_cast<TH3D*>(TFile((string(getenv("CMSSW_BASE"))+"/src/babymaker/bmaker/data/lepton_sf/sf_el_mediumCB_mini01.root").c_str(),"read").Get("histo3D"));
 
 //////////////////// Muons
 bool lepton_tools::isSignalMuon(const pat::Muon &lep, edm::Handle<reco::VertexCollection> vtx, double lepIso){
@@ -251,6 +253,49 @@ double lepton_tools::getScaleFactorUncertainty(const vCands &sig_leps){
   return uncertainty*scale_factor;
 }
 
+double lepton_tools::getScaleFactorFs(const reco::Candidate &cand, int npv){
+  if(const pat::Electron * ele_ptr = dynamic_cast<const pat::Electron*>(&cand)){
+    return getScaleFactorFs(*ele_ptr,npv);
+  }else if(const reco::Muon * mu_ptr = dynamic_cast<const reco::Muon*>(&cand)){
+    return getScaleFactorFs(*mu_ptr,npv);
+  }else{
+    throw runtime_error(string("Cannot get scale factor for type ")+typeid(cand).name());
+  }
+  return 1.;
+}
+
+double lepton_tools::getScaleFactorUncertaintyFs(const reco::Candidate &cand, int npv){
+  if(const pat::Electron * ele_ptr = dynamic_cast<const pat::Electron*>(&cand)){
+    return getScaleFactorUncertaintyFs(*ele_ptr,npv);
+  }else if(const reco::Muon * mu_ptr = dynamic_cast<const reco::Muon*>(&cand)){
+    return getScaleFactorUncertaintyFs(*mu_ptr,npv);
+  }else{
+    throw runtime_error(string("Cannot get scale factor uncertainty for type ")+typeid(cand).name());
+  }
+  return 0.;
+}
+
+double lepton_tools::getScaleFactorFs(const vCands &sig_leps, int npv){
+  double scale_factor = 1.;
+  for(const auto &lep: sig_leps){
+    if(lep == nullptr) throw runtime_error("sig_leps contains a nullptr in lepton_tools::getScaleFactor");
+    scale_factor *= getScaleFactorFs(*lep,npv);
+  }
+  return scale_factor;
+}
+
+double lepton_tools::getScaleFactorUncertaintyFs(const vCands &sig_leps, int npv){
+  //Crashes if scale factor == 0...
+  double scale_factor = getScaleFactorFs(sig_leps,npv);
+  double uncertainty = 0.;
+  for(const auto &lep: sig_leps){
+    if(lep == nullptr) throw runtime_error("sig_leps contains a nullptr in lepton_tools::getScaleFactorUncertainty");
+    uncertainty = hypot(uncertainty, getScaleFactorUncertaintyFs(*lep,npv)/scale_factor);
+  }
+  return uncertainty*scale_factor;
+}
+
+
 double lepton_tools::getPFIsolation(edm::Handle<pat::PackedCandidateCollection> pfcands,
                                     const reco::Candidate* ptcl,
                                     double r_iso_min, double r_iso_max, double kt_scale,
@@ -430,6 +475,46 @@ double lepton_tools::getScaleFactorUncertainty(const pat::Electron &lep){
   auto id_err = electron_id_sf.GetBinError(id_bin);
   auto iso_err = electron_iso_sf.GetBinError(iso_bin);
   return hypot(id_val*iso_err, iso_val*id_err);
+}
+
+double lepton_tools::getScaleFactorFs(const reco::Muon &lep, int npv){
+  auto bin = muon_idiso_fs_sf.FindFixBin(lep.pt(), fabs(lep.eta()), npv);
+  auto overflow = muon_idiso_fs_sf.IsBinOverflow(bin);
+  auto val = overflow ? 1. : muon_idiso_fs_sf.GetBinContent(bin); 
+  return val;
+}
+
+double lepton_tools::getScaleFactorUncertaintyFs(const reco::Muon &lep, int npv){
+  auto bin = muon_idiso_fs_sf.FindFixBin(lep.pt(), fabs(lep.eta()), npv);
+  auto overflow = muon_idiso_fs_sf.IsBinOverflow(bin);
+  auto val = overflow ? 1. : muon_idiso_fs_sf.GetBinContent(bin); 
+
+  // Systematics : https://twiki.cern.ch/twiki/bin/view/CMS/SUSLeptonSFMC#Recommendations
+  float syst=0;
+  if(lep.pt()>10 && lep.pt()<=20) syst=val*0.10;
+  else if(lep.pt()>20 && lep.pt()<=30) syst=val*0.03;
+  else if(lep.pt()>30) syst=val*0.03; 
+  return syst;
+}
+
+double lepton_tools::getScaleFactorFs(const pat::Electron &lep, int npv){
+  auto bin = electron_idiso_fs_sf.FindFixBin(lep.pt(), fabs(lep.eta()), npv);
+  auto overflow = electron_idiso_fs_sf.IsBinOverflow(bin);
+  auto val = overflow ? 1. : electron_idiso_fs_sf.GetBinContent(bin);
+  return val;
+}
+
+double lepton_tools::getScaleFactorUncertaintyFs(const pat::Electron &lep, int npv){
+  auto bin = electron_idiso_fs_sf.FindFixBin(lep.pt(), fabs(lep.eta()), npv);
+  auto overflow = electron_idiso_fs_sf.IsBinOverflow(bin);
+  auto val = overflow ? 1. : electron_idiso_fs_sf.GetBinContent(bin);
+
+  // Systematics : https://twiki.cern.ch/twiki/bin/view/CMS/SUSLeptonSFMC#Recommendations
+  float syst=0;
+  if(lep.pt()>10 && lep.pt()<=20) syst=val*0.15;
+  else if(lep.pt()>20 && lep.pt()<=30) syst=val*0.08;
+  else if(lep.pt()>30) syst=val*0.08; 
+  return syst;
 }
 
 lepton_tools::lepton_tools(){

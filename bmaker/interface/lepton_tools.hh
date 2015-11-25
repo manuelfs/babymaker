@@ -4,6 +4,7 @@
 #define H_LEPTON_TOOLS
 
 #include "TH2D.h"
+#include "TH3D.h"
 
 #include "FWCore/Framework/interface/ESHandle.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
@@ -65,6 +66,12 @@ public:
   static double getScaleFactor(const vCands &sig_leps);
   static double getScaleFactorUncertainty(const vCands &sig_leps);
 
+  static double getScaleFactorFs(const reco::Candidate &cand, int npv);
+  static double getScaleFactorUncertaintyFs(const reco::Candidate &cand, int npv);
+
+  static double getScaleFactorFs(const vCands &sig_leps, int npv);
+  static double getScaleFactorUncertaintyFs(const vCands &sig_leps, int npv);
+
   double getPFIsolation(edm::Handle<pat::PackedCandidateCollection> pfcands,
                         const reco::Candidate* ptcl,
                         double r_iso_min, double r_iso_max, double kt_scale,
@@ -75,10 +82,16 @@ public:
 
 private:
   static const TH2D muon_id_sf, muon_iso_sf, electron_id_sf, electron_iso_sf;
+  static const TH3D muon_idiso_fs_sf,electron_idiso_fs_sf;
   static double getScaleFactor(const reco::Muon &lep);
   static double getScaleFactorUncertainty(const reco::Muon &lep);
   static double getScaleFactor(const pat::Electron &lep);
   static double getScaleFactorUncertainty(const pat::Electron &lep);
+  
+  static double getScaleFactorFs(const reco::Muon &lep,  int npv);
+  static double getScaleFactorUncertaintyFs(const reco::Muon &lep, int npv);
+  static double getScaleFactorFs(const pat::Electron &lep,  int npv);
+  static double getScaleFactorUncertaintyFs(const pat::Electron &lep, int npv);
 };
 
 #endif

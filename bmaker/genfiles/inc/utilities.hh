@@ -20,7 +20,6 @@ typedef std::pair<int,double> int_double;
 typedef std::pair<double,double> double_double;
 const long double PI = acos(-1.L);
 
-float cross_section(const TString &file);
 std::vector<TString> dirlist(const TString &folder,
                              const TString &inname="dir",
                              const TString &tag="");

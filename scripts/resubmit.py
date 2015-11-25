@@ -41,8 +41,8 @@ arxivdir = os.path.join(bdir,'logs',timestamp,'arxiv')
 if not os.path.exists(arxivdir):
   os.mkdir(arxivdir)
 
-loglist = [x for x in glob.glob(logdir+"/*.log") if "_rs" in x]
-#loglist = [x for x in glob.glob(logdir+"/*.log")] 
+#loglist = [x for x in glob.glob(logdir+"/*.log") if "_rs" in x]
+loglist = [x for x in glob.glob(logdir+"/*.log")] 
 print "Found %i logs" %(len(loglist))
 
 failed = set()
@@ -80,6 +80,7 @@ for flog in loglist:
 if len(unfinished) > 0 :
   print "--------- Unfinished:"
   pprint(unfinished)
+  print "--------- Total unfinished ",len(unfinished),"\n"
 if len(failed) > 0 :
   print "--------- Failed:"
   pprint(failed)
@@ -87,7 +88,8 @@ if len(failed) > 0 :
   print "Total failed ",len(failed)
   print "Total with xrootd err",len(xrootd_err)
 else :
-  sys.exit("\nCongrats, no jobs failed. You might be able to go out and enjoy the mountains now :o)\n")
+  if len(unfinished) == 0 : sys.exit("\nCongrats, no jobs failed. You might be able to go out and enjoy the mountains now :o)\n")
+  else : sys.exit("\nCongrats, no jobs failed, but still "+str(len(unfinished))+" jobs to go\n")
 
 user_input = raw_input('Resubmit jobs [y/N]?')
 if (user_input!='y'):

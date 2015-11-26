@@ -159,9 +159,14 @@ for old_baby in failed:
   old_exe = open(fexe).readlines()
   for line in old_exe:
     if ("SFN=") in line:
-      outputfile = line.split("SFN=").pop().strip("$i\n") + old_baby + ".root"
-      print "Removing file: ", outputfile
-      if os.path.exists(outputfile):
-        os.remove(outputfile)
+      if ("T1tttt" in old_baby):
+        outputfile = line.split("SFN=").pop().strip("$i\n") + old_baby + ".root"
+      else: 
+        outputfile = line.split("SFN=").pop().strip("\n")
+      if os.path.exists(outputfile):      
+        user_input = raw_input('Remove output file %s corresponding to a failed job [Y/n]?' % outputfile)
+        if (user_input!='n'):
+          print "Removing file: ", outputfile
+          os.remove(outputfile)
 
           

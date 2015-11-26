@@ -101,6 +101,7 @@ process.baby_basic = cms.EDAnalyzer('bmaker_basic',
                                     doSystematics = cms.bool(doSystematics),
                                     addBTagWeights = cms.bool(True),
                                     isFastSim = cms.bool(fastsim),
+                                    debugMode = cms.bool(False)
 )
 
 ###### Setting up number of events, and reporing frequency 

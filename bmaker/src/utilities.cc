@@ -226,6 +226,10 @@ namespace utilities{
     if(file.Contains("WWToLNuQQ_13TeV-powheg"))   xsec = 49.997; //NNLO
     if(file.Contains("ttHJetTobb_M125_13TeV_amcatnloFXFX"))   xsec = 0.2934;
 
+    if(file.Contains("WZTo2L2Q_13TeV_amcatnloFXFX"))   xsec = 5.595;
+    if(file.Contains("WZTo3LNu_TuneCUETP8M1_13TeV-powheg-"))   xsec = 4.42965;
+    if(file.Contains("VVTo2L2Nu_13TeV_amcatnloFXFX"))   xsec = 11.95;
+
     // Calculated at 13 TeV in
     // https://twiki.cern.ch/twiki/bin/view/LHCPhysics/CERNYellowReportPageAt1314TeV
     // Higgs branching ratios from

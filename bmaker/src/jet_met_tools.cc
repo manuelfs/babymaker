@@ -277,11 +277,13 @@ void jet_met_tools::getMETWithJEC(edm::Handle<pat::METCollection> mets, float &m
 
   met = hypot(metx,mety);
   metPhi = atan2(mety,metx);
+
 }
 
 // the jetp4 and isBTaggged are technically redundant but avoid recalculating information
 float jet_met_tools::jetBTagWeight(const pat::Jet &jet, const LVector &jetp4, bool isBTagged, 
-				   btagVariation readerTypeBC, btagVariation readerTypeUDSG)
+				   btagVariation readerTypeBC, btagVariation readerTypeUDSG,
+           btagVariation readerTypeBC_fs, btagVariation readerTypeUDSG_fs)
 {
   double jet_scalefactor = 1.0;
   int hadronFlavour = abs(jet.hadronFlavour());
@@ -292,27 +294,34 @@ float jet_met_tools::jetBTagWeight(const pat::Jet &jet, const LVector &jetp4, bo
     if(jetpttemp>670) jetpttemp=669.99;
     try {
       double eff = getMCTagEfficiency(abs(hadronFlavour), jetpttemp, fabs(jetp4.eta()));
-      double SF = 1.0;
+      double sf(1.), sf_fs(1.); 
       // procedure from https://twiki.cern.ch/twiki/bin/view/CMS/BTagSFMethods#1a_Event_reweighting_using_scale
       switch ( abs(hadronFlavour) ) {
       case 5:
-	SF = readersBC.at(readerTypeBC)->eval(BTagEntry::FLAV_B, jetp4.eta(), jetpttemp);
+        sf = readersBC.at(readerTypeBC)->eval(BTagEntry::FLAV_B, jetp4.eta(), jetpttemp);
+        if (isFastSim) sf_fs = readersBC_fs.at(readerTypeBC_fs)->eval(BTagEntry::FLAV_B, jetp4.eta(), jetpttemp);
         break;
       case 4:
-        SF = readersBC.at(readerTypeBC)->eval(BTagEntry::FLAV_C, jetp4.eta(), jetpttemp);
+        sf = readersBC.at(readerTypeBC)->eval(BTagEntry::FLAV_C, jetp4.eta(), jetpttemp);
+        if (isFastSim) sf_fs = readersBC_fs.at(readerTypeBC_fs)->eval(BTagEntry::FLAV_C, jetp4.eta(), jetpttemp);
         break;
       default:
-        SF = readersUDSG.at(readerTypeUDSG)->eval(BTagEntry::FLAV_UDSG, jetp4.eta(), jetpttemp);
+        sf = readersUDSG.at(readerTypeUDSG)->eval(BTagEntry::FLAV_UDSG, jetp4.eta(), jetpttemp);
+        if (isFastSim) sf_fs = readersUDSG_fs.at(readerTypeUDSG_fs)->eval(BTagEntry::FLAV_UDSG, jetp4.eta(), jetpttemp);
         break;
       }
-      jet_scalefactor = isBTagged ? SF : (1-SF*eff)/(1-eff);
+      if (isFastSim) {
+        double eff_fs = eff/sf_fs;
+        jet_scalefactor = isBTagged ? sf*sf_fs : (1-sf*sf_fs*eff_fs)/(1-eff_fs);
+      } else {
+        jet_scalefactor = isBTagged ? sf : (1-sf*eff)/(1-eff);
+      }
     }
     catch (std::exception &e) {
       std::cout << "Caught exception: " << e.what() << " for a jet with (pt,eta,hadron flavor)=(" 
                 << jetp4.pt() << "," << jetp4.eta() << "," << hadronFlavour << ")" << std::endl;
     }
   }
-
   return jet_scalefactor;
 }
 
@@ -417,15 +426,16 @@ double jet_met_tools::getSysMJ(double radius, vector<LVector> &jets){
 }
 
 
-jet_met_tools::jet_met_tools(TString ijecName, bool doSys):
+jet_met_tools::jet_met_tools(TString ijecName, bool doSys, bool fastSim):
   jecName(ijecName),
   doSystematics(doSys),
+  isFastSim(fastSim),
   calib(0),
   calibFS(0){
 
-  if (jecName.Contains("_DATA")) isData = true;
-  else if (jecName.Contains("_MC")) isData = false;
-  else cout<<endl<<"BABYMAKER: jet_met_tools: The jecLabel string must contain either '_DATA' or '_MC'. Currently running with "<<jecName<<endl<<endl;
+  if (jecName.Contains("DATA")) isData = true;
+  else if (jecName.Contains("MC")) isData = false;
+  else cout<<endl<<"BABYMAKER: jet_met_tools: The jecLabel string must contain either 'DATA' or 'MC'. Currently running with "<<jecName<<endl<<endl;
 
   doJEC = !jecName.Contains("miniAOD");
   jecName.ReplaceAll("miniAOD_","");
@@ -450,51 +460,52 @@ jet_met_tools::jet_met_tools(TString ijecName, bool doSys):
   }
 
   // only add b-tagging weights if requested
-  if(doSystematics) {
-    std::string scaleFactorFile(getenv("CMSSW_BASE"));
-    std::string scaleFactorFileFastSim(scaleFactorFile);
-    scaleFactorFile+="/src/babymaker/bmaker/data/CSVv2.csv";
-    scaleFactorFileFastSim+="/src/babymaker/bmaker/data/CSV_13TEV_Combined_20_11_2015.csv";
-    calib   = new BTagCalibration("csvv1", scaleFactorFile);
-    calibFS = new BTagCalibration("csvv1", scaleFactorFileFastSim);
 
-    std::vector<std::string> variationTypes = {"central", "up", "down"};
-    for(auto itype : variationTypes) {
-      // BC full sim
-      readersBC.push_back(new BTagCalibrationReader(calib, // calibration instance 
-						    BTagEntry::OP_MEDIUM, // operating point
-						    "mujets", // measurement type ("comb" or "mujets")
-						    itype)); // systematics type ("central", "up", or "down")
-      // UDSG full sim
-      readersUDSG.push_back(new BTagCalibrationReader(calib, // calibration instance 
-						      BTagEntry::OP_MEDIUM, // operating point
-						      "comb", // measurement type ("comb" or "mujets")
-						      itype)); // systematics type ("central", "up", or "down")
-    }
+  std::string scaleFactorFile(getenv("CMSSW_BASE"));
+  scaleFactorFile+="/src/babymaker/bmaker/data/CSVv2.csv";
+  calib   = new BTagCalibration("csvv1", scaleFactorFile);
+  std::vector<std::string> variationTypes = {"central", "up", "down"};
+  for(auto itype : variationTypes) {
+    // BC full sim
+    readersBC.push_back(new BTagCalibrationReader(calib, // calibration instance 
+					    BTagEntry::OP_MEDIUM, // operating point
+					    "mujets", // measurement type ("comb" or "mujets")
+					    itype)); // systematics type ("central", "up", or "down")
+    // UDSG full sim
+    readersUDSG.push_back(new BTagCalibrationReader(calib, // calibration instance 
+					      BTagEntry::OP_MEDIUM, // operating point
+					      "comb", // measurement type ("comb" or "mujets")
+					      itype)); // systematics type ("central", "up", or "down")
+  }
+  if (isFastSim){
+    std::string scaleFactorFileFastSim(getenv("CMSSW_BASE"));
+    scaleFactorFileFastSim+="/src/babymaker/bmaker/data/CSV_13TEV_Combined_20_11_2015.csv";
+    calibFS = new BTagCalibration("csvv1", scaleFactorFileFastSim);
     for(auto itype : variationTypes) {
       // BC fastsim
-      readersBC.push_back(new BTagCalibrationReader(calibFS, // calibration instance 
-						    BTagEntry::OP_MEDIUM, // operating point
-						    "fastsim", // measurement type ("comb" or "mujets")
-						    itype)); // systematics type ("central", "up", or "down")
+      readersBC_fs.push_back(new BTagCalibrationReader(calibFS, // calibration instance 
+  					    BTagEntry::OP_MEDIUM, // operating point
+  					    "fastsim", // measurement type ("comb" or "mujets")
+  					    itype)); // systematics type ("central", "up", or "down")
       // UDSG fastsim
-      readersUDSG.push_back(new BTagCalibrationReader(calibFS, // calibration instance 
-						      BTagEntry::OP_MEDIUM, // operating point
-						      "fastsim", // measurement type ("comb" or "mujets")
-						      itype)); // systematics type ("central", "up", or "down")
-    }
-
-    std::string filename(getenv("CMSSW_BASE"));
-    filename+="/src/babymaker/bmaker/data/btagEfficiency.root";
-    TFile *efficiencyFile = TFile::Open(filename.c_str());
-    if(efficiencyFile->IsOpen()) {
-      btagEfficiencyParameterization = static_cast<TH3F*>(efficiencyFile->Get("btagEfficiency"));
-    }
-    else {
-      throw cms::Exception("FileNotFound") 
-        << "Could not find efficiency file " << filename << "." << std::endl;
+      readersUDSG_fs.push_back(new BTagCalibrationReader(calibFS, // calibration instance 
+  					      BTagEntry::OP_MEDIUM, // operating point
+  					      "fastsim", // measurement type ("comb" or "mujets")
+  					      itype)); // systematics type ("central", "up", or "down")
     }
   }
+
+  std::string filename(getenv("CMSSW_BASE"));
+  filename+="/src/babymaker/bmaker/data/btagEfficiency.root";
+  TFile *efficiencyFile = TFile::Open(filename.c_str());
+  if(efficiencyFile->IsOpen()) {
+    btagEfficiencyParameterization = static_cast<TH3F*>(efficiencyFile->Get("btagEfficiency"));
+  }
+  else {
+    throw cms::Exception("FileNotFound") 
+      << "Could not find efficiency file " << filename << "." << std::endl;
+  }
+  
 }
 
 // from 8TeV dijet measurement with an extra 50% 

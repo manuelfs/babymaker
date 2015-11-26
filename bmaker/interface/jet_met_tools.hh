@@ -43,10 +43,11 @@ public:
   const float sizeJet      = 0.4;
 
   enum CutLevel{kLoose, kTight, kPBNR};
-  enum btagVariation { kBTagCentral, kBTagUp, kBTagDown,  kBTagCentralFS, kBTagUpFS, kBTagDownFS};
+  enum btagVariation { kBTagCentral, kBTagUp, kBTagDown};
 
   TString jecName;
   bool doSystematics;
+  bool isFastSim;
   bool doJEC;
   bool isData;
   double rhoEvent_;
@@ -63,6 +64,8 @@ public:
   BTagCalibration *calibFS;
   std::vector<BTagCalibrationReader*> readersBC;
   std::vector<BTagCalibrationReader*> readersUDSG;
+  std::vector<BTagCalibrationReader*> readersBC_fs;
+  std::vector<BTagCalibrationReader*> readersUDSG_fs;
   TH3F *btagEfficiencyParameterization;
 
   bool leptonInJet(const pat::Jet &jet, vCands leptons);
@@ -80,7 +83,9 @@ public:
   void setJetUncertainties(edm::Handle<edm::View <reco::GenJet> > genjets);
 
   float getJetResolutionSF(float jet_eta);
-  float jetBTagWeight(const pat::Jet &jet, const LVector &jetp4, bool isBTagged, btagVariation readerTypeBC, btagVariation readerTypeUDSG);
+  float jetBTagWeight(const pat::Jet &jet, const LVector &jetp4, bool isBTagged, 
+                      btagVariation readerTypeBC, btagVariation readerTypeUDSG,
+                      btagVariation readerTypeBC_fs = kBTagCentral, btagVariation readerTypeUDSG_fs = kBTagCentral);
 
   void clusterFatJets(int &nfjets, float &mj,
           std::vector<float> &fjets_pt, 
@@ -96,7 +101,7 @@ public:
           std::vector<LVector> &jets,
           std::vector<float> &jets_csv);
   double getSysMJ(double radius, std::vector<LVector> &jets);  
-  jet_met_tools(TString ijecName, bool doSys);
+  jet_met_tools(TString ijecName, bool doSys, bool isFastSim);
   ~jet_met_tools();
 };
 

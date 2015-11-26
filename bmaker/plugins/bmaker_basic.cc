@@ -38,6 +38,7 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
   baby.Clear();
 
   ///////////////////// MC hard scatter info ///////////////////////
+  if (debug) cout<<"INFO: Retrieving hard scatter info..."<<endl;
   edm::Handle<LHEEventProduct> lhe_info;
   if (!isData) {
     iEvent.getByLabel("externalLHEProducer", lhe_info);
@@ -54,6 +55,7 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
   baby.event() = iEvent.id().event();
   baby.lumiblock() = iEvent.luminosityBlock();
   if(isData){
+    if (debug) cout<<"INFO: Checking JSON..."<<endl;
     // We are applying the golden JSON with lumisToProcess in bmaker_basic_cfg.py
     bool nonblind(eventTool->isInJSON("nonblind", baby.run(), baby.lumiblock()));
     //if(!isInJSON("golden", baby.run(), baby.lumiblock()) && !nonblind) return;
@@ -61,6 +63,7 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
   } else baby.nonblind() = true;
 
   ////////////////////// Trigger /////////////////////
+  if (debug) cout<<"INFO: Processing trigger info..."<<endl;
   bool triggerFired;
   edm::Handle<edm::TriggerResults> triggerBits;
   iEvent.getByLabel(edm::InputTag("TriggerResults","","HLT"),triggerBits);  
@@ -80,6 +83,7 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
   }
 
   //////////////// Weight //////////////////
+  if (debug) cout<<"INFO: Setting generator weights..."<<endl;
   const float luminosity = 1000.;
   baby.weight() = baby.w_btag() = 1.;
   if(!isData) {
@@ -91,6 +95,7 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
   }
 
   ////////////////////// Primary vertices /////////////////////
+  if (debug) cout<<"INFO: Writing vertices..."<<endl;
   edm::Handle<reco::VertexCollection> vtx;
   iEvent.getByLabel("offlineSlimmedPrimaryVertices", vtx);
   edm::Handle<std::vector< PileupSummaryInfo > >  pu_info;
@@ -101,6 +106,7 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
   writeVertices(vtx, pu_info);
 
   ////////////////////// Leptons /////////////////////
+  if (debug) cout<<"INFO: Writing leptons..."<<endl;
   // pfcands, to be used in calculating isolation
   edm::Handle<pat::PackedCandidateCollection> pfcands;
   iEvent.getByLabel("packedPFCandidates", pfcands);
@@ -130,6 +136,7 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
   veto_leps.insert(veto_leps.end(), veto_els.begin(), veto_els.end());
 
   ///////////////////////////////// Photons ////////////////////////////////
+  if (debug) cout<<"INFO: Writing photons..."<<endl;
   vCands photons;
   edm::Handle<double> rhoEvent_h;
   iEvent.getByLabel( "fixedGridRhoFastjetAll", rhoEvent_h);
@@ -143,6 +150,7 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
   photons = writePhotons(allphotons, allelectrons, conversions, beamspot, *rhoEvent_h);
 
   //////////////////////////// MET/JETs with JECs ///////////////////////////
+  if (debug) cout<<"INFO: Applying JECs..."<<endl;
   edm::Handle<pat::JetCollection> alljets;
   iEvent.getByLabel(jets_label, alljets);
   edm::Handle<edm::View<reco::GenJet> > genjets;
@@ -150,6 +158,7 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
   jetTool->getJetCorrections(genjets, alljets, *rhoEvent_h);
 
   /// MET
+  if (debug) cout<<"INFO: Writing MET..."<<endl;
   edm::Handle<pat::METCollection> mets;
   iEvent.getByLabel(met_label, mets);
   edm::Handle<pat::METCollection> mets_nohf;
@@ -157,6 +166,7 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
   writeMET(mets, mets_nohf);
 
   /// isolated tracks need to be after MET calculation and before jets cleaning
+  if (debug) cout<<"INFO: Calculating track veto..."<<endl;
   vCands tks,ra4tks;
   if (eventTool->hasGoodPV(vtx)){
     // RA2/b track veto
@@ -201,6 +211,7 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
   } // if goodPV
 
   /// Jets
+  if (debug) cout<<"INFO: Writing jets..."<<endl;
   vector<LVector> jets;
   vector<vector<LVector> > sys_jets;
   if (!doSystematics) {
@@ -213,6 +224,7 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 
   ////////////////////// mT, dphi /////////////////////
   // It requires previous storing of MET
+  if (debug) cout<<"INFO: Calculating mT..."<<endl;
   if(sig_leps.size()>0){
     float wx = baby.met()*cos(baby.met_phi()) + sig_leps[0]->px();
     float wy = baby.met()*sin(baby.met_phi()) + sig_leps[0]->py();
@@ -236,6 +248,7 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 
   ///////////////////// Filters ///////////////////////
   // the HBHE noise filter needs to be recomputed in early 2015 data
+  if (debug) cout<<"INFO: Writing filters..."<<endl;
   edm::Handle<bool> filter_hbhe;
   if(iEvent.getByLabel("HBHENoiseFilterResultProducer","HBHENoiseFilterResult",filter_hbhe)) { 
     if(filter_hbhe.isValid()) 
@@ -263,6 +276,7 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
   }
 
   //////////////// HLT objects //////////////////
+  if (debug) cout<<"INFO: Writing HLT objects..."<<endl;
   edm::Handle<pat::TriggerObjectStandAloneCollection> triggerObjects;
   iEvent.getByLabel("selectedPatTrigger",triggerObjects);  
   // Requires having called writeMuons and writeElectrons for truth-matching
@@ -273,12 +287,14 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 
   ////////////////// MC particles and Truth-matching //////////////////
   if (!isData) {
+    if (debug) cout<<"INFO: Writing MC particles..."<<endl;
     edm::Handle<reco::GenParticleCollection> genParticles;
     iEvent.getByLabel("prunedGenParticles", genParticles);
     writeMC(genParticles, all_mus, all_els, photons);
   }
 
   ////////////////// resolution-corrected MET /////////////////////////
+  if (debug) cout<<"INFO: Calculating MET rebalancing..."<<endl;
   baby.jetmismeas() = false;
   if(doMetRebalancing && sig_leps.size()==1) {
     double temp_met = baby.met();
@@ -295,6 +311,7 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 
   ////////////////// Systematic weights ////////////////
 
+  if (debug) cout<<"INFO: Filling weights..."<<endl;
   if (!isData) weightTool->getTheoryWeights(lhe_info);
   fillWeights(sig_leps);
 
@@ -347,10 +364,8 @@ void bmaker_basic::writeJets(edm::Handle<pat::JetCollection> alljets,
   baby.njets_ra2() = 0; baby.njets_clean() = 0; baby.nbm_ra2() = 0; baby.ht_ra2() = 0.; baby.ht_clean() = 0.; 
   baby.pass_jets() = true; baby.pass_jets_nohf() = true; baby.pass_jets_tight() = true; 
   baby.pass_jets_ra2() = true; baby.pass_jets_tight_ra2() = true; 
-  for(int i=0; i<2; i++) {
-    baby.sys_bctag().push_back(1);
-    baby.sys_udsgtag().push_back(1);
-  }
+  baby.sys_bctag().resize(2, 1.); baby.sys_udsgtag().resize(2, 1.);
+  if (isFastSim){ baby.sys_fs_bctag().resize(2, 1.); baby.sys_fs_udsgtag().resize(2, 1.);}
   if (doSystematics) {
     baby.sys_njets().resize(kSysLast, 0); baby.sys_nbm().resize(kSysLast, 0); 
     baby.sys_pass().resize(kSysLast, true); baby.sys_ht().resize(kSysLast, 0.); 
@@ -392,20 +407,25 @@ void bmaker_basic::writeJets(edm::Handle<pat::JetCollection> alljets,
 
 
       if(!isLep){
-	if(addBTagWeights) {
-	  bool btag(csv > jetTool->CSVMedium);
-	  jet_met_tools::btagVariation central(jetTool->kBTagCentral), up(jetTool->kBTagUp), down(jetTool->kBTagDown);
-	  if(isFastSim) {
-	    central = jetTool->kBTagCentralFS; 
-	    up	    = jetTool->kBTagUpFS; 
-	    down    = jetTool->kBTagDownFS;
-	  }
-	  baby.w_btag()		*= jetTool->jetBTagWeight(jet, jetp4, btag, central, central);
-	  baby.sys_bctag()[0]	*= jetTool->jetBTagWeight(jet, jetp4, btag, up, central);
-	  baby.sys_bctag()[1]	*= jetTool->jetBTagWeight(jet, jetp4, btag, down, central);
-	  baby.sys_udsgtag()[0]	*= jetTool->jetBTagWeight(jet, jetp4, btag, central, up);
-	  baby.sys_udsgtag()[1]	*= jetTool->jetBTagWeight(jet, jetp4, btag, central, down);
-	}
+        if(addBTagWeights) {
+          bool btag(csv > jetTool->CSVMedium);
+          jet_met_tools::btagVariation central(jetTool->kBTagCentral), up(jetTool->kBTagUp), down(jetTool->kBTagDown);
+          //central weight for fastsim taken into account together with the fullsim inside jetTool->jetBTagWeight()
+          baby.w_btag()         *= jetTool->jetBTagWeight(jet, jetp4, btag, central, central);
+          // now, vary only the full sim scale factor, regardless of whether we run on Fast or Full sim
+          // this is necessary since uncertainties for FastSim and FullSim are uncorrelated 
+          baby.sys_bctag()[0]   *= jetTool->jetBTagWeight(jet, jetp4, btag, up,      central);
+          baby.sys_bctag()[1]   *= jetTool->jetBTagWeight(jet, jetp4, btag, down,    central);
+          baby.sys_udsgtag()[0] *= jetTool->jetBTagWeight(jet, jetp4, btag, central, up);
+          baby.sys_udsgtag()[1]	*= jetTool->jetBTagWeight(jet, jetp4, btag, central, down);
+          if (isFastSim) { 
+            // now we vary only the FastSim SF
+            baby.sys_fs_bctag()[0]   *= jetTool->jetBTagWeight(jet, jetp4, btag, central, central, up,      central);
+            baby.sys_fs_bctag()[1]   *= jetTool->jetBTagWeight(jet, jetp4, btag, central, central, down,    central);
+            baby.sys_fs_udsgtag()[0] *= jetTool->jetBTagWeight(jet, jetp4, btag, central, central, central, up);
+            baby.sys_fs_udsgtag()[1] *= jetTool->jetBTagWeight(jet, jetp4, btag, central, central, central, down);
+          }
+        }
         jetsys_p4 += jet.p4();
         baby.njets()++;
         baby.ht() += jetp4.pt();
@@ -485,6 +505,14 @@ void bmaker_basic::writeJets(edm::Handle<pat::JetCollection> alljets,
   baby.mht_clean_phi() = atan2(mht_clean_py, mht_clean_px);
   baby.low_dphi() = jetTool->isLowDphi(jets_ra2, baby.mht_phi(), baby.dphi1(), baby.dphi2(), baby.dphi3(), baby.dphi4());
 
+  for (unsigned i(0); i<2; i++){
+    baby.sys_bctag()[i] /= baby.w_btag();
+    baby.sys_udsgtag()[i] /= baby.w_btag();
+    if (isFastSim) { 
+      baby.sys_fs_bctag()[i] /= baby.w_btag();
+      baby.sys_fs_udsgtag()[i] /= baby.w_btag();
+    }
+  }
   // ISR system for Z->ll and tt->llbb configurations
   baby.jetsys_pt()  = jetsys_p4.pt();
   baby.jetsys_eta() = jetsys_p4.eta();
@@ -1193,12 +1221,13 @@ bmaker_basic::bmaker_basic(const edm::ParameterSet& iConfig):
   doMetRebalancing(iConfig.getParameter<bool>("doMetRebalancing")),
   addBTagWeights(iConfig.getParameter<bool>("addBTagWeights")),
   isFastSim(iConfig.getParameter<bool>("isFastSim")),
-  doSystematics(iConfig.getParameter<bool>("doSystematics"))
+  doSystematics(iConfig.getParameter<bool>("doSystematics")),
+  debug(iConfig.getParameter<bool>("debugMode"))
 {
   time(&startTime);
 
   lepTool    = new lepton_tools();
-  jetTool    = new jet_met_tools(jec_label, doSystematics);
+  jetTool    = new jet_met_tools(jec_label, doSystematics, isFastSim);
   photonTool = new photon_tools();
   mcTool     = new mc_tools();
   weightTool = new weight_tools();

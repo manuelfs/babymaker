@@ -142,6 +142,7 @@ public:
   bool addBTagWeights;
   bool isFastSim;
   bool doSystematics;
+  bool debug;
 
   static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 

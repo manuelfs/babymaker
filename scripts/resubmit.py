@@ -58,7 +58,7 @@ for flog in loglist:
     failed.add(bname)
     continue
   if os.path.getsize(fout)==0:
-    #failed.add(bname)
+    # failed.add(bname)
     unfinished.add(bname)
   else:
     if "BABYMAKER: Written" not in open(fout).read():
@@ -111,10 +111,6 @@ for old_baby in failed:
     old_exe = open(fexe).read()
     new_exe = old_exe.replace("file:/hadoop/cms/phedex", redirector)
     with open(fexe,'w') as f: f.write(new_exe)
-    # arxiv log files
-    #os.rename(logdir+"/"+old_baby+".log", arxivdir+"/"+old_baby+".log")
-    #os.rename(logdir+"/"+old_baby+".err", arxivdir+"/"+old_baby+".err")
-    #os.rename(logdir+"/"+old_baby+".out", arxivdir+"/"+old_baby+".out")
     sys_cmd = "condor_submit " + fcmd
     if atUCSB: sys_cmd = "ssh cms25.physics.ucsb.edu condor_submit " + fcmd
     print "INFO: Submitting", fcmd
@@ -163,10 +159,9 @@ for old_baby in failed:
   old_exe = open(fexe).readlines()
   for line in old_exe:
     if ("SFN=") in line:
-      outputfile = line.split("SFN=").pop().strip("\n")
+      outputfile = line.split("SFN=").pop().strip("$i\n") + old_baby + ".root"
+      print "Removing file: ", outputfile
       if os.path.exists(outputfile):
-        user_input = raw_input('Remove output file %s corresponding to a failed job [y/N]?' % badfile)
-        if (user_input=='y'):
-          os.remove(badfile)
+        os.remove(outputfile)
 
           

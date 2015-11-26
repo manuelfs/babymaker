@@ -49,7 +49,7 @@ namespace xsec{
 
     // cross sections from mcm
     if(file.Contains("TTG")) xsec = 3.697;                
-    if(file.Contains("TTTT")) xsec = 0.009103;
+    if(file.Contains("TTTT_TuneCUETP8M1_13TeV-amcatnlo")) xsec = 0.009103;
     if(file.Contains("WJetsToQQ_HT-600ToInf")) xsec = 95.14;
     if(file.Contains("ZJetsToQQ_HT600toInf")) xsec = 5.67;
     
@@ -164,7 +164,10 @@ namespace xsec{
     if(file.Contains("TTZToLLNuNu_M-10"))                       fneg = 0.2676;
     if(file.Contains("TTWJetsToQQ"))                            fneg = 0.2412;
     if(file.Contains("TTWJetsToLNu"))                           fneg = 0.2433;
-    if(file.Contains("TTG"))                                    fneg = 0.266; // pulled out of Ryan's hat (similar to ttZ)
+    if(file.Contains("TTG"))                                    fneg = 0.342; // from MCM
+
+    if(file.Contains("TTTT_TuneCUETP8M1_13TeV-amcatnlo"))       fneg = 0.41; // from MCM
+    if(file.Contains("VVTo2L2Nu_13TeV_amcatnloFXFX"))       fneg = 0.20; // from MCM
 
     // Single top
     if (file.Contains("ST_s-channel_4f_leptonDecays_13TeV-amcatnlo-pythia8")) fneg = 0.1884;

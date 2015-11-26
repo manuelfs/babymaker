@@ -14,66 +14,55 @@ import argparse
 # if we want all the HT-binned TTJets append:
 # "TTJets_HT-"
 mc_wishlist = []
-mc_wishlist.append("SMS-T1tttt_mGluino-1000to1050_mLSP-1to800");
-mc_wishlist.append("SMS-T1tttt_mGluino-1050_mLSP-50to775");
-mc_wishlist.append("SMS-T1tttt_mGluino-1100_mLSP-1to775");
-mc_wishlist.append("SMS-T1tttt_mGluino-1100to1125_mLSP-700to900");
-mc_wishlist.append("SMS-T1tttt_mGluino-1150_mLSP-1to800");
-mc_wishlist.append("SMS-T1tttt_mGluino-1150to1175_mLSP-750to925");
-mc_wishlist.append("SMS-T1tttt_mGluino-1200_mLSP-1to825");
-mc_wishlist.append("SMS-T1tttt_mGluino-1200to1225_mLSP-800to1000");
-mc_wishlist.append("SMS-T1tttt_mGluino-1250to1275_mLSP-700to1050");
-mc_wishlist.append("SMS-T1tttt_mGluino-1275_mLSP-900to975");
-mc_wishlist.append("SMS-T1tttt_mGluino-1300_mLSP-1to1075");
-mc_wishlist.append("SMS-T1tttt_mGluino-1300to1325_mLSP-700to1100");
-mc_wishlist.append("SMS-T1tttt_mGluino-1325to1350_mLSP-1to1125");
-mc_wishlist.append("SMS-T1tttt_mGluino-1350to1375_mLSP-50to1025");
-mc_wishlist.append("SMS-T1tttt_mGluino-1400_mLSP-1to1175");
-mc_wishlist.append("SMS-T1tttt_mGluino-1400to1425_mLSP-50to1100");
-mc_wishlist.append("SMS-T1tttt_mGluino-1425to1450_mLSP-1to1200");
-mc_wishlist.append("SMS-T1tttt_mGluino-1450to1475_mLSP-50to1075");
-mc_wishlist.append("SMS-T1tttt_mGluino-1475to1500_mLSP-1to1250");
-mc_wishlist.append("SMS-T1tttt_mGluino-1500to1525_mLSP-50to1125");
-mc_wishlist.append("SMS-T1tttt_mGluino-1525to1550_mLSP-1to1300");
-mc_wishlist.append("SMS-T1tttt_mGluino-1600to1650_mLSP-1to1350");
-mc_wishlist.append("SMS-T1tttt_mGluino-1650to1700_mLSP-1to1400");
-mc_wishlist.append("SMS-T1tttt_mGluino-1700to1750_mLSP-1to1450");
-mc_wishlist.append("SMS-T1tttt_mGluino-1800to1850_mLSP-1to1450");
-mc_wishlist.append("SMS-T1tttt_mGluino-1850to1900_mLSP-1to1450");
-mc_wishlist.append("SMS-T1tttt_mGluino-1900to1950_mLSP-0to1450");
-mc_wishlist.append("SMS-T1tttt_mGluino-1950_mLSP-700to950");
-mc_wishlist.append("SMS-T1tttt_mGluino-600_mLSP-250to325");
-mc_wishlist.append("SMS-T1tttt_mGluino-625_mLSP-275to375");
-mc_wishlist.append("SMS-T1tttt_mGluino-625to650_mLSP-200to400");
-mc_wishlist.append("SMS-T1tttt_mGluino-650to675_mLSP-250to425");
-mc_wishlist.append("SMS-T1tttt_mGluino-675_mLSP-325to450");
-mc_wishlist.append("SMS-T1tttt_mGluino-700_mLSP-1to450");
-mc_wishlist.append("SMS-T1tttt_mGluino-700to750_mLSP-200to500");
-mc_wishlist.append("SMS-T1tttt_mGluino-750to775_mLSP-350to525");
-mc_wishlist.append("SMS-T1tttt_mGluino-775_mLSP-475to550");
-mc_wishlist.append("SMS-T1tttt_mGluino-800to825_mLSP-1to575");
-mc_wishlist.append("SMS-T1tttt_mGluino-825to850_mLSP-200to600");
-mc_wishlist.append("SMS-T1tttt_mGluino-850to875_mLSP-450to625");
-mc_wishlist.append("SMS-T1tttt_mGluino-875to900_mLSP-1to650");
-mc_wishlist.append("SMS-T1tttt_mGluino-950to975_mLSP-350to725");
-mc_wishlist.append("SMS-T1tttt_mGluino-975_mLSP-600to750");
-#------------ MC ------------------
-# mc_wishlist.append("T1tttt_mGluino-1500_mLSP-100_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15DR74_Asympt25ns_MCRUN2_74_V9")
-# mc_wishlist.append("T1tttt_mGluino-1200_mLSP-800_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15DR74_Asympt25ns_MCRUN2_74_V9")
 
-# mc_wishlist.append("TTJets_HT")
-# mc_wishlist.append("TTJets_SingleLep")
-# mc_wishlist.append("TTJets_DiLep")
-# mc_wishlist.append("TTGJets")
-# mc_wishlist.append("WJets")
-# mc_wishlist.append("DYJets")
-# mc_wishlist.append("DYJetsToLL_M-50_TuneCUETP8M1_13TeV")
-# mc_wishlist.append("QCD_")
-# mc_wishlist.append("ST_")
-# mc_wishlist.append("ttHJetTobb")
-# mc_wishlist.append("WWTo2L2Nu")
-# mc_wishlist.append("WWToLNuQQ")
-# mc_wishlist.append("ggZH_HToBB")
+## Signal scan, 81M events
+mc_wishlist.append("SMS-T1tttt_mGluino")
+
+## TTJets, 170M events
+mc_wishlist.append("TTJets_DiLept_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15DR74_Asympt25ns_MCRUN2_74_V9")
+mc_wishlist.append("TTJets_HT-1200to2500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15DR74_Asympt25ns_MCRUN2_74_V9")
+mc_wishlist.append("TTJets_HT-2500toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15DR74_Asympt25ns_MCRUN2_74_V9")
+mc_wishlist.append("TTJets_HT-600to800_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15DR74_Asympt25ns_MCRUN2_74_V9")
+mc_wishlist.append("TTJets_HT-800to1200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15DR74_Asympt25ns_MCRUN2_74_V9")
+mc_wishlist.append("TTJets_SingleLeptFromT_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15DR74_Asympt25ns_MCRUN2_74_V9")
+mc_wishlist.append("TTJets_SingleLeptFromTbar_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15DR74_Asympt25ns_MCRUN2_74_V9")
+mc_wishlist.append("TTJets_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15DR74_Asympt25ns_MCRUN2_74_V9")
+
+## QCD, 85M events 
+mc_wishlist.append("QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15DR74_Asympt25ns_MCRUN2_74_V9")
+mc_wishlist.append("QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15DR74_Asympt25ns_MCRUN2_74_V9")
+mc_wishlist.append("QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15DR74_Asympt25ns_MCRUN2_74_V9")
+mc_wishlist.append("QCD_HT200to300_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15DR74_Asympt25ns_MCRUN2_74_V9")
+mc_wishlist.append("QCD_HT300to500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15DR74_Asympt25ns_MCRUN2_74_V9")
+mc_wishlist.append("QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15DR74_Asympt25ns_MCRUN2_74_V9")
+mc_wishlist.append("QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15DR74_Asympt25ns_MCRUN2_74_V9")
+
+## Other MC, 95M events 
+mc_wishlist.append("DYJetsToLL_M-50_HT-100to200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15DR74_Asympt25ns_MCRUN2_74_V9")
+mc_wishlist.append("DYJetsToLL_M-50_HT-200to400_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15DR74_Asympt25ns_MCRUN2_74_V9")
+mc_wishlist.append("DYJetsToLL_M-50_HT-400to600_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15DR74_Asympt25ns_MCRUN2_74_V9")
+mc_wishlist.append("DYJetsToLL_M-50_HT-600toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15DR74_Asympt25ns_MCRUN2_74_V9")
+mc_wishlist.append("DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15DR74_Asympt25ns_MCRUN2_74_V9")
+mc_wishlist.append("ST_s-channel_4f_leptonDecays_13TeV-amcatnlo-pythia8_TuneCUETP8M1_RunIISpring15DR74_Asympt25ns_MCRUN2_74_V9")
+mc_wishlist.append("ST_t-channel_antitop_4f_leptonDecays_13TeV-powheg-pythia8_TuneCUETP8M1_RunIISpring15DR74_Asympt25ns_MCRUN2_74_V9")
+mc_wishlist.append("ST_t-channel_top_4f_leptonDecays_13TeV-powheg-pythia8_TuneCUETP8M1_RunIISpring15DR74_Asympt25ns_MCRUN2_74_V9")
+mc_wishlist.append("ST_tW_antitop_5f_inclusiveDecays_13TeV-powheg-pythia8_TuneCUETP8M1_RunIISpring15DR74_Asympt25ns_MCRUN2_74_V9")
+mc_wishlist.append("ST_tW_top_5f_inclusiveDecays_13TeV-powheg-pythia8_TuneCUETP8M1_RunIISpring15DR74_Asympt25ns_MCRUN2_74_V9")
+mc_wishlist.append("TTGJets_TuneCUETP8M1_13TeV-amcatnloFXFX-madspin-pythia8_RunIISpring15DR74_Asympt25ns_MCRUN2_74_V9")
+mc_wishlist.append("TTTT_TuneCUETP8M1_13TeV-amcatnlo-pythia8_RunIISpring15DR74_Asympt25ns_MCRUN2_74_V9")
+mc_wishlist.append("TTWJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-madspin-pythia8_RunIISpring15DR74_Asympt25ns_MCRUN2_74_V9")
+mc_wishlist.append("TTWJetsToQQ_TuneCUETP8M1_13TeV-amcatnloFXFX-madspin-pythia8_RunIISpring15DR74_Asympt25ns_MCRUN2_74_V9")
+mc_wishlist.append("TTZToLLNuNu_M-10_TuneCUETP8M1_13TeV-amcatnlo-pythia8_RunIISpring15DR74_Asympt25ns_MCRUN2_74_V9")
+mc_wishlist.append("TTZToQQ_TuneCUETP8M1_13TeV-amcatnlo-pythia8_RunIISpring15DR74_Asympt25ns_MCRUN2_74_V9")
+mc_wishlist.append("WJetsToLNu_HT-100To200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15DR74_Asympt25ns_MCRUN2_74_V9")
+mc_wishlist.append("WJetsToLNu_HT-200To400_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15DR74_Asympt25ns_MCRUN2_74_V9")
+mc_wishlist.append("WJetsToLNu_HT-400To600_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15DR74_Asympt25ns_MCRUN2_74_V9")
+mc_wishlist.append("WJetsToLNu_HT-600ToInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15DR74_Asympt25ns_MCRUN2_74_V9")
+mc_wishlist.append("WWTo2L2Nu_13TeV-powheg_RunIISpring15DR74_Asympt25ns_MCRUN2_74_V9")
+mc_wishlist.append("WWToLNuQQ_13TeV-powheg_RunIISpring15DR74_Asympt25ns_MCRUN2_74_V9")
+mc_wishlist.append("WZTo2L2Q_13TeV_amcatnloFXFX_madspin_pythia8_RunIISpring15DR74_Asympt25ns_MCRUN2_74_V9")
+mc_wishlist.append("WZTo3LNu_TuneCUETP8M1_13TeV-powheg-pythia8_RunIISpring15DR74_Asympt25ns_MCRUN2_74_V9")
+mc_wishlist.append("ttHJetTobb_M125_13TeV_amcatnloFXFX_madspin_pythia8_RunIISpring15DR74_Asympt25ns_MCRUN2_74_V9_ext3")
 
 data_wishlist = []
 #data_wishlist.append("JetHT")
@@ -232,7 +221,12 @@ for pd in data_wishlist:
 # If on UCSD prep also tarball
 if (host=="sd"): 
   print "INFO: Creating babymaker tarball to transfer to work node..."
-  os.system("tar --directory=../ --exclude=\"babymaker/out\" --exclude=\"babymaker/run\" --exclude=\"babymaker/logs\" --exclude=\"bmaker/interface/release.hh\" -c babymaker | xz > ../babymaker.tar.xz")
+  tarcmd = "tar --directory=../ --exclude=\"babymaker/out\" --exclude=\"babymaker/run\""
+  tarcmd += " --exclude=\"babymaker/logs\" --exclude=\"bmaker/interface/release.hh\""
+  ## The CSC filter lists are large, so we exclude them for MC
+  if len(data_wishlist) == 0: tarcmd += " --exclude=\"babymaker/data/csc_beamhalo_filter\""
+  tarcmd += " -c babymaker | xz > ../babymaker.tar.xz"
+  os.system(tarcmd)
 
 total_jobs = 0
 for ids, ds in enumerate(sorted(files_dict.keys())):

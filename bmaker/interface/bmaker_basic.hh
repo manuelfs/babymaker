@@ -119,7 +119,8 @@ public:
   double calculateRebalancedMET(unsigned int jetIdx, double mu, double& METPhi);
 
   // for filling additional event weights
-  void fillWeights(const vCands &sig_leps);
+  void writeWeights(const vCands &sig_leps, edm::Handle<GenEventInfoProduct> &gen_event_info, 
+		    edm::Handle<LHEEventProduct> &lhe_info);
 
   std::vector<TString> trig_name;
 

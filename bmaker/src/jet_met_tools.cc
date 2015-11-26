@@ -283,8 +283,7 @@ void jet_met_tools::getMETWithJEC(edm::Handle<pat::METCollection> mets, float &m
 // the jetp4 and isBTaggged are technically redundant but avoid recalculating information
 float jet_met_tools::jetBTagWeight(const pat::Jet &jet, const LVector &jetp4, bool isBTagged, 
 				   btagVariation readerTypeBC, btagVariation readerTypeUDSG,
-           btagVariation readerTypeBC_fs, btagVariation readerTypeUDSG_fs)
-{
+				   btagVariation readerTypeBC_fs, btagVariation readerTypeUDSG_fs) {
   double jet_scalefactor = 1.0;
   int hadronFlavour = abs(jet.hadronFlavour());
   // only apply weights if readers are initialized

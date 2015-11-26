@@ -3,6 +3,8 @@ int run
 int lumiblock
 Long64_t event
 bool nonblind
+## stitch is used to stitch an MC sample with its corresponding HT-bin sample
+bool stitch
 
 ####################   Global   ###################
 int npv
@@ -272,11 +274,13 @@ int mlsp
 
 ################  Weights   ##################
 float weight
+float w_lumi
 float w_pu
 float w_btag
 float w_toppt
 float w_lep
 float w_fs_lep
+float eff_trig
 std::vector<float> w_pdf
 
 ################  Systematic variations   ##################
@@ -301,3 +305,4 @@ std::vector<float> sys_lep
 std::vector<float> sys_fs_lep
 std::vector<float> sys_fs_bctag
 std::vector<float> sys_fs_udsgtag
+std::vector<float> sys_trig

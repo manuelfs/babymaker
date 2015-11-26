@@ -23,7 +23,7 @@ weight_tools::weight_tools(){
     5.26588e-11, 5.69234e-12, 5.60035e-13, 5.37918e-14, 4.09235e-15, 
     0, 0, 0, 0, 0, 
     0, 0, 0, 0, 0
-	});
+        });
 }
 weight_tools::~weight_tools() {}
 
@@ -33,6 +33,50 @@ float weight_tools::pileupWeight(unsigned int ntrupv)
   else return 1.0;
 }
 
+
+float weight_tools::triggerEfficiency(int &nmus, int &nels, vector<float> &sys_trig){
+  sys_trig.resize(2,1.);
+  int nleps(nmus+nels);
+
+  if(nleps == 0 || nleps > 2) return 1.;
+
+  float eff_trig(1.);
+  if(nleps == 1){
+    if(nels==1){
+      // eff = 0.941 +0.6-0.7 +-1.0 = 0.941 +0.012 - 0.012
+      eff_trig = 0.941;
+      sys_trig[0] = (eff_trig+0.012)/eff_trig;
+      sys_trig[1] = (eff_trig-0.012)/eff_trig;
+    }
+    if(nmus==1){
+      // eff = 0.951 +0.5-0.5 +-1.0 = 0.951 +0.011 - 0.011
+      eff_trig = 0.951;
+      sys_trig[0] = (eff_trig+0.011)/eff_trig;
+      sys_trig[1] = (eff_trig-0.011)/eff_trig;
+    } 
+  } // nleps == 1
+  if(nleps == 2){
+    if(nels==2){
+      // eff = 0.983 +0.5-0.7 +-0.5 = 0.983 +0.007 - 0.009
+      eff_trig = 0.983;
+      sys_trig[0] = (eff_trig+0.007)/eff_trig;
+      sys_trig[1] = (eff_trig-0.009)/eff_trig;
+    }
+    if(nmus==2){
+      // eff = 0.991 +0.3-0.5 +-0.5 = 0.991 +0.006 - 0.007
+      eff_trig = 0.991;
+      sys_trig[0] = (eff_trig+0.006)/eff_trig;
+      sys_trig[1] = (eff_trig-0.007)/eff_trig;
+    }
+    if(nels==1&&nmus==1){
+      // eff = 0.989 +0.5-0.9 +-0.5 = 0.989 +0.007 - 0.010
+      eff_trig = 0.989;
+      sys_trig[0] = (eff_trig+0.007)/eff_trig;
+      sys_trig[1] = (eff_trig-0.010)/eff_trig;
+    }
+  } // nleps == 2
+  return eff_trig;
+}
 
 float weight_tools::topPtWeight(float toppt1, float toppt2){
   float pt1,pt2;
@@ -75,4 +119,3 @@ void weight_tools::getPDFWeights(vector<float> &sys_pdf, vector<float> &w_pdf){
     sys_pdf.push_back(*result.first);  //min
   } 
 }
-

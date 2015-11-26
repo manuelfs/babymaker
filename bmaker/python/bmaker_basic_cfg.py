@@ -1,7 +1,7 @@
 ###########################################################
 ### Configuration file to make basic babies from miniAOD
 ###########################################################
-import math
+import math, sys
 from   os import environ
 from   os.path import exists, join, basename
 
@@ -44,6 +44,9 @@ if outName == "output.root": # output filename not set
     outName = "baby_"+rootfile
 
 doSystematics = True
+cmsswRel = environ["CMSSW_BASE"]
+if "RunIISpring15DR74" in outName or "RunIISpring15FSPremix" in outName: 
+    if cmsswRel.find("CMSSW_7_4_6") == -1: sys.exit("ERROR: Trying to run miniAOD V1 in a new release. Exiting")
 
 ## This refers to the official JEC methods. To apply on-the-fly, just set jecLabel to something different from miniAOD
 doJEC = False  
@@ -54,8 +57,8 @@ else: jets_label = "slimmedJets"
 # if there is no need to apply JECs then the jecLabel must also contain 'miniAOD' (as well as the version)
 jecLabel = 'miniAOD_Summer15_25nsV6_MC' # for 7.4.14 mc, don't apply JEC, but still give the JEC tag because of systematics
 if "Run2015D" in outName: jecLabel = 'Summer15_25nsV6_DATA' # for 7.4.12 data
-elif "RunIISpring15DR74" in outName: jecLabel = 'Summer15_25nsV6_MC' # for 7.4.6.patch4 mc
 elif "RunIISpring15FSPremix" in outName: jecLabel = 'MCRUN2_74_V9'
+else: jecLabel = 'Summer15_25nsV6_MC'
 
 if "FSPremix" in outName: fastsim = True
 else: fastsim = False
@@ -74,7 +77,6 @@ else:
     jecLevels = ['L1FastJet', 'L2Relative', 'L3Absolute']
 
 # The 7.4.14 re-miniAOD already has V5 JECs with the new prescription
-cmsswRel = environ["CMSSW_BASE"]
 # if cmsswRel.find("CMSSW_7_4_14") != -1: jecLabel = 'miniAOD' 
 
 ###### Defining Baby process, input and output files 
@@ -140,12 +142,12 @@ if doJEC:
                                        tag    = cms.string("JetCorrectorParametersCollection_"+jecLabel+"_AK4PFchs"),
                                        label  = cms.untracked.string("AK4PFchs")
                                    ),
-	                cms.PSet(
+                        cms.PSet(
                             record = cms.string("JetCorrectionsRecord"),
                             tag    = cms.string("JetCorrectorParametersCollection_"+jecLabel+"_AK4PF"),
                             label  = cms.untracked.string("AK4PF")
                         )
-	        )
+                )
     )
     process.es_prefer_jec = cms.ESPrefer("PoolDBESSource","jec")
     ###### Jets 

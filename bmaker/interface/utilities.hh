@@ -23,8 +23,6 @@ namespace utilities{
   std::string execute(const std::string &cmd);
   TString roundNumber(double num, int decimals, double denom=1.);
   TString addCommas(double num);
-  float crossSection(const TString &file);
-  void signalCrossSection(int glu_mass, double &xsec, double &xsec_unc);
 
 }
 

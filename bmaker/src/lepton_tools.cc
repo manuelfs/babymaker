@@ -244,13 +244,15 @@ double lepton_tools::getScaleFactor(const vCands &sig_leps){
 
 double lepton_tools::getScaleFactorUncertainty(const vCands &sig_leps){
   //Crashes if scale factor == 0...
-  double scale_factor = getScaleFactor(sig_leps);
-  double uncertainty = 0.;
+  double uncertainty = 0., totsf(1.);
   for(const auto &lep: sig_leps){
     if(lep == nullptr) throw runtime_error("sig_leps contains a nullptr in lepton_tools::getScaleFactorUncertainty");
+    double scale_factor = getScaleFactor(*lep);
+    if(scale_factor <= 0) throw runtime_error("One lepton FSSF is 0 in lepton_tools::getScaleFactorUncertainty");
     uncertainty = hypot(uncertainty, getScaleFactorUncertainty(*lep)/scale_factor);
+    totsf *= scale_factor;
   }
-  return uncertainty*scale_factor;
+  return uncertainty*totsf;
 }
 
 double lepton_tools::getScaleFactorFs(const reco::Candidate &cand, int npv){
@@ -286,13 +288,15 @@ double lepton_tools::getScaleFactorFs(const vCands &sig_leps, int npv){
 
 double lepton_tools::getScaleFactorUncertaintyFs(const vCands &sig_leps, int npv){
   //Crashes if scale factor == 0...
-  double scale_factor = getScaleFactorFs(sig_leps,npv);
-  double uncertainty = 0.;
+  double uncertainty = 0., totsf(1.);
   for(const auto &lep: sig_leps){
     if(lep == nullptr) throw runtime_error("sig_leps contains a nullptr in lepton_tools::getScaleFactorUncertainty");
+    double scale_factor = getScaleFactorFs(*lep, npv);
+    if(scale_factor <= 0) throw runtime_error("One lepton FSSF is 0 in lepton_tools::getScaleFactorUncertainty");
     uncertainty = hypot(uncertainty, getScaleFactorUncertaintyFs(*lep,npv)/scale_factor);
+    totsf *= scale_factor;
   }
-  return uncertainty*scale_factor;
+  return uncertainty*totsf;
 }
 
 
@@ -456,7 +460,8 @@ double lepton_tools::getScaleFactorUncertainty(const reco::Muon &lep){
   auto id_err = id_overflow ? 0. : muon_id_sf.GetBinError(id_bin);
   auto iso_err = iso_overflow ? 0. : muon_iso_sf.GetBinError(iso_bin);
   auto full_val = id_val*iso_val;
-  return hypot(hypot(hypot(id_val*iso_err, iso_val*id_err),0.01*full_val),0.01*full_val);
+  // Adding relative uncertainty of ISO, ID, and two 1% systematics
+  return full_val * hypot(hypot(hypot(iso_err/iso_err, id_err/id_err),0.01/full_val),0.01/full_val);
 }
 
 double lepton_tools::getScaleFactor(const pat::Electron &lep){
@@ -474,7 +479,9 @@ double lepton_tools::getScaleFactorUncertainty(const pat::Electron &lep){
   auto iso_val = electron_iso_sf.GetBinContent(iso_bin);
   auto id_err = electron_id_sf.GetBinError(id_bin);
   auto iso_err = electron_iso_sf.GetBinError(iso_bin);
-  return hypot(id_val*iso_err, iso_val*id_err);
+  // Adding relative uncertainty of ISO, ID
+  auto full_val = id_val*iso_val;
+  return full_val * hypot(iso_err/iso_err, id_err/id_err);
 }
 
 double lepton_tools::getScaleFactorFs(const reco::Muon &lep, int npv){
@@ -491,9 +498,9 @@ double lepton_tools::getScaleFactorUncertaintyFs(const reco::Muon &lep, int npv)
 
   // Systematics : https://twiki.cern.ch/twiki/bin/view/CMS/SUSLeptonSFMC#Recommendations
   float syst=0;
-  if(lep.pt()>10 && lep.pt()<=20) syst=val*0.10;
-  else if(lep.pt()>20 && lep.pt()<=30) syst=val*0.03;
-  else if(lep.pt()>30) syst=val*0.03; 
+  if(lep.pt()>10 && lep.pt()<=20)	syst = val*0.10;
+  else if(lep.pt()>20 && lep.pt()<=30)	syst = val*0.03;
+  else if(lep.pt()>30)			syst = val*0.03; 
   return syst;
 }
 
@@ -511,9 +518,9 @@ double lepton_tools::getScaleFactorUncertaintyFs(const pat::Electron &lep, int n
 
   // Systematics : https://twiki.cern.ch/twiki/bin/view/CMS/SUSLeptonSFMC#Recommendations
   float syst=0;
-  if(lep.pt()>10 && lep.pt()<=20) syst=val*0.15;
-  else if(lep.pt()>20 && lep.pt()<=30) syst=val*0.08;
-  else if(lep.pt()>30) syst=val*0.08; 
+  if(lep.pt()>10 && lep.pt()<=20)	syst=val*0.15;
+  else if(lep.pt()>20 && lep.pt()<=30)	syst=val*0.08;
+  else if(lep.pt()>30)			syst=val*0.08; 
   return syst;
 }
 

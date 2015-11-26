@@ -300,6 +300,90 @@ double lepton_tools::getScaleFactorUncertaintyFs(const vCands &sig_leps, int npv
 }
 
 
+double lepton_tools::getScaleFactor(const reco::Muon &lep){
+  auto id_bin = muon_id_sf.FindFixBin(lep.pt(), fabs(lep.eta()));
+  auto iso_bin = muon_iso_sf.FindFixBin(lep.pt(), fabs(lep.eta()));
+  auto id_overflow = muon_id_sf.IsBinOverflow(id_bin);
+  auto iso_overflow = muon_iso_sf.IsBinOverflow(id_bin);
+  auto id_val = id_overflow ? 1. : muon_id_sf.GetBinContent(id_bin);
+  auto iso_val = iso_overflow ? 1. : muon_iso_sf.GetBinContent(iso_bin);
+  return id_val * iso_val;
+}
+
+double lepton_tools::getScaleFactorUncertainty(const reco::Muon &lep){
+  auto id_bin = muon_id_sf.FindFixBin(lep.pt(), fabs(lep.eta()));
+  auto iso_bin = muon_iso_sf.FindFixBin(lep.pt(), fabs(lep.eta()));
+  auto id_overflow = muon_id_sf.IsBinOverflow(id_bin);
+  auto iso_overflow = muon_iso_sf.IsBinOverflow(id_bin);
+  auto id_val = id_overflow ? 1. : muon_id_sf.GetBinContent(id_bin);
+  auto iso_val = iso_overflow ? 1. : muon_iso_sf.GetBinContent(iso_bin);
+  auto id_err = id_overflow ? 0. : muon_id_sf.GetBinError(id_bin);
+  auto iso_err = iso_overflow ? 0. : muon_iso_sf.GetBinError(iso_bin);
+  auto full_val = id_val*iso_val;
+  // Adding relative uncertainty of ISO, ID, and two 1% systematics
+  return full_val * hypot(hypot(hypot(iso_err/iso_val, id_err/id_val),0.01/full_val),0.01/full_val);
+}
+
+double lepton_tools::getScaleFactor(const pat::Electron &lep){
+  auto id_bin = electron_id_sf.FindFixBin(lep.superCluster()->energy()*sin(lep.superClusterPosition().theta()), fabs(lep.superCluster()->eta()));
+  auto iso_bin = electron_iso_sf.FindFixBin(lep.superCluster()->energy()*sin(lep.superClusterPosition().theta()), fabs(lep.superCluster()->eta()));
+  auto id_val = electron_id_sf.GetBinContent(id_bin);
+  auto iso_val = electron_iso_sf.GetBinContent(iso_bin);
+  return id_val * iso_val;
+}
+
+double lepton_tools::getScaleFactorUncertainty(const pat::Electron &lep){
+  auto id_bin = electron_id_sf.FindFixBin(lep.pt(), fabs(lep.superCluster()->eta()));
+  auto iso_bin = electron_iso_sf.FindFixBin(lep.pt(), fabs(lep.superCluster()->eta()));
+  auto id_val = electron_id_sf.GetBinContent(id_bin);
+  auto iso_val = electron_iso_sf.GetBinContent(iso_bin);
+  auto id_err = electron_id_sf.GetBinError(id_bin);
+  auto iso_err = electron_iso_sf.GetBinError(iso_bin);
+  // Adding relative uncertainty of ISO, ID
+  auto full_val = id_val*iso_val;
+  return full_val * hypot(iso_err/iso_val, id_err/id_val);
+}
+
+double lepton_tools::getScaleFactorFs(const reco::Muon &lep, int npv){
+  auto bin = muon_idiso_fs_sf.FindFixBin(lep.pt(), fabs(lep.eta()), npv);
+  auto overflow = muon_idiso_fs_sf.IsBinOverflow(bin);
+  auto val = overflow ? 1. : muon_idiso_fs_sf.GetBinContent(bin); 
+  return val;
+}
+
+double lepton_tools::getScaleFactorUncertaintyFs(const reco::Muon &lep, int npv){
+  auto bin = muon_idiso_fs_sf.FindFixBin(lep.pt(), fabs(lep.eta()), npv);
+  auto overflow = muon_idiso_fs_sf.IsBinOverflow(bin);
+  auto val = overflow ? 1. : muon_idiso_fs_sf.GetBinContent(bin); 
+
+  // Systematics : https://twiki.cern.ch/twiki/bin/view/CMS/SUSLeptonSFMC#Recommendations
+  float syst=0;
+  if(lep.pt()>10 && lep.pt()<=20)	syst = val*0.10;
+  else if(lep.pt()>20 && lep.pt()<=30)	syst = val*0.03;
+  else if(lep.pt()>30)			syst = val*0.03; 
+  return syst;
+}
+
+double lepton_tools::getScaleFactorFs(const pat::Electron &lep, int npv){
+  auto bin = electron_idiso_fs_sf.FindFixBin(lep.pt(), fabs(lep.eta()), npv);
+  auto overflow = electron_idiso_fs_sf.IsBinOverflow(bin);
+  auto val = overflow ? 1. : electron_idiso_fs_sf.GetBinContent(bin);
+  return val;
+}
+
+double lepton_tools::getScaleFactorUncertaintyFs(const pat::Electron &lep, int npv){
+  auto bin = electron_idiso_fs_sf.FindFixBin(lep.pt(), fabs(lep.eta()), npv);
+  auto overflow = electron_idiso_fs_sf.IsBinOverflow(bin);
+  auto val = overflow ? 1. : electron_idiso_fs_sf.GetBinContent(bin);
+
+  // Systematics : https://twiki.cern.ch/twiki/bin/view/CMS/SUSLeptonSFMC#Recommendations
+  float syst=0;
+  if(lep.pt()>10 && lep.pt()<=20)	syst=val*0.15;
+  else if(lep.pt()>20 && lep.pt()<=30)	syst=val*0.08;
+  else if(lep.pt()>30)			syst=val*0.08; 
+  return syst;
+}
+
 double lepton_tools::getPFIsolation(edm::Handle<pat::PackedCandidateCollection> pfcands,
                                     const reco::Candidate* ptcl,
                                     double r_iso_min, double r_iso_max, double kt_scale,
@@ -438,90 +522,6 @@ vCands lepton_tools::getRA4IsoTracks(edm::Handle<pat::PackedCandidateCollection>
   }
 
   return tks;
-}
-
-double lepton_tools::getScaleFactor(const reco::Muon &lep){
-  auto id_bin = muon_id_sf.FindFixBin(lep.pt(), fabs(lep.eta()));
-  auto iso_bin = muon_iso_sf.FindFixBin(lep.pt(), fabs(lep.eta()));
-  auto id_overflow = muon_id_sf.IsBinOverflow(id_bin);
-  auto iso_overflow = muon_iso_sf.IsBinOverflow(id_bin);
-  auto id_val = id_overflow ? 1. : muon_id_sf.GetBinContent(id_bin);
-  auto iso_val = iso_overflow ? 1. : muon_iso_sf.GetBinContent(iso_bin);
-  return id_val * iso_val;
-}
-
-double lepton_tools::getScaleFactorUncertainty(const reco::Muon &lep){
-  auto id_bin = muon_id_sf.FindFixBin(lep.pt(), fabs(lep.eta()));
-  auto iso_bin = muon_iso_sf.FindFixBin(lep.pt(), fabs(lep.eta()));
-  auto id_overflow = muon_id_sf.IsBinOverflow(id_bin);
-  auto iso_overflow = muon_iso_sf.IsBinOverflow(id_bin);
-  auto id_val = id_overflow ? 1. : muon_id_sf.GetBinContent(id_bin);
-  auto iso_val = iso_overflow ? 1. : muon_iso_sf.GetBinContent(iso_bin);
-  auto id_err = id_overflow ? 0. : muon_id_sf.GetBinError(id_bin);
-  auto iso_err = iso_overflow ? 0. : muon_iso_sf.GetBinError(iso_bin);
-  auto full_val = id_val*iso_val;
-  // Adding relative uncertainty of ISO, ID, and two 1% systematics
-  return full_val * hypot(hypot(hypot(iso_err/iso_err, id_err/id_err),0.01/full_val),0.01/full_val);
-}
-
-double lepton_tools::getScaleFactor(const pat::Electron &lep){
-  auto id_bin = electron_id_sf.FindFixBin(lep.superCluster()->energy()*sin(lep.superClusterPosition().theta()), fabs(lep.superCluster()->eta()));
-  auto iso_bin = electron_iso_sf.FindFixBin(lep.superCluster()->energy()*sin(lep.superClusterPosition().theta()), fabs(lep.superCluster()->eta()));
-  auto id_val = electron_id_sf.GetBinContent(id_bin);
-  auto iso_val = electron_iso_sf.GetBinContent(iso_bin);
-  return id_val * iso_val;
-}
-
-double lepton_tools::getScaleFactorUncertainty(const pat::Electron &lep){
-  auto id_bin = electron_id_sf.FindFixBin(lep.pt(), fabs(lep.superCluster()->eta()));
-  auto iso_bin = electron_iso_sf.FindFixBin(lep.pt(), fabs(lep.superCluster()->eta()));
-  auto id_val = electron_id_sf.GetBinContent(id_bin);
-  auto iso_val = electron_iso_sf.GetBinContent(iso_bin);
-  auto id_err = electron_id_sf.GetBinError(id_bin);
-  auto iso_err = electron_iso_sf.GetBinError(iso_bin);
-  // Adding relative uncertainty of ISO, ID
-  auto full_val = id_val*iso_val;
-  return full_val * hypot(iso_err/iso_err, id_err/id_err);
-}
-
-double lepton_tools::getScaleFactorFs(const reco::Muon &lep, int npv){
-  auto bin = muon_idiso_fs_sf.FindFixBin(lep.pt(), fabs(lep.eta()), npv);
-  auto overflow = muon_idiso_fs_sf.IsBinOverflow(bin);
-  auto val = overflow ? 1. : muon_idiso_fs_sf.GetBinContent(bin); 
-  return val;
-}
-
-double lepton_tools::getScaleFactorUncertaintyFs(const reco::Muon &lep, int npv){
-  auto bin = muon_idiso_fs_sf.FindFixBin(lep.pt(), fabs(lep.eta()), npv);
-  auto overflow = muon_idiso_fs_sf.IsBinOverflow(bin);
-  auto val = overflow ? 1. : muon_idiso_fs_sf.GetBinContent(bin); 
-
-  // Systematics : https://twiki.cern.ch/twiki/bin/view/CMS/SUSLeptonSFMC#Recommendations
-  float syst=0;
-  if(lep.pt()>10 && lep.pt()<=20)	syst = val*0.10;
-  else if(lep.pt()>20 && lep.pt()<=30)	syst = val*0.03;
-  else if(lep.pt()>30)			syst = val*0.03; 
-  return syst;
-}
-
-double lepton_tools::getScaleFactorFs(const pat::Electron &lep, int npv){
-  auto bin = electron_idiso_fs_sf.FindFixBin(lep.pt(), fabs(lep.eta()), npv);
-  auto overflow = electron_idiso_fs_sf.IsBinOverflow(bin);
-  auto val = overflow ? 1. : electron_idiso_fs_sf.GetBinContent(bin);
-  return val;
-}
-
-double lepton_tools::getScaleFactorUncertaintyFs(const pat::Electron &lep, int npv){
-  auto bin = electron_idiso_fs_sf.FindFixBin(lep.pt(), fabs(lep.eta()), npv);
-  auto overflow = electron_idiso_fs_sf.IsBinOverflow(bin);
-  auto val = overflow ? 1. : electron_idiso_fs_sf.GetBinContent(bin);
-
-  // Systematics : https://twiki.cern.ch/twiki/bin/view/CMS/SUSLeptonSFMC#Recommendations
-  float syst=0;
-  if(lep.pt()>10 && lep.pt()<=20)	syst=val*0.15;
-  else if(lep.pt()>20 && lep.pt()<=30)	syst=val*0.08;
-  else if(lep.pt()>30)			syst=val*0.08; 
-  return syst;
 }
 
 lepton_tools::lepton_tools(){

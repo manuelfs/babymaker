@@ -3,10 +3,14 @@
 
 #include "babymaker/bmaker/interface/weight_tools.hh"
 #include <vector>
+#include <algorithm>
+#include <iostream>
 
 using namespace std;
 
 weight_tools::weight_tools(){
+  theoryWeights.clear();
+
   // Pile up weights assuming sigma = 69 mb
   pileupWeights = vector<double>({
     217.107, 133.498, 123.917, 34.7894, 19.9406, 
@@ -37,36 +41,38 @@ float weight_tools::topPtWeight(float toppt1, float toppt2){
   if(toppt2>400) pt2=400;
   else pt2=toppt2;
   return sqrt(exp(0.156-0.00137*pt1)*exp(0.156-0.00137*pt2));
-
-
 }
 
 float weight_tools::isrWeight(float isrpt){
   if(isrpt<400) return 0.;
   else if(isrpt<600) return 0.15;
   else return 0.3;
-
-
 }
 
-float weight_tools::theoryWeight(weight_tools::variationType variation)
-{
+float weight_tools::theoryWeight(weight_tools::variationType variation){
   if(theoryWeights.size()!=0) {
     return theoryWeights.at(variation).wgt/theoryWeights.at(nominal).wgt;
   }
   else return 1.0;
 }
 
-void weight_tools::getTheoryWeights(const edm::Event& iEvent)
-{
+void weight_tools::getTheoryWeights(edm::Handle<LHEEventProduct> lhe_info){
   theoryWeights.clear();
-  if(!iEvent.isRealData()) { 
-    edm::Handle<LHEEventProduct> wLHEEventProduct;
-    iEvent.getByLabel("externalLHEProducer", wLHEEventProduct);
-    // these event weights are only defined in samples
-    // generated from LHE files so an "else" is not desired
-    if(wLHEEventProduct.isValid()) {
-      theoryWeights = wLHEEventProduct->weights();
-    }
-  }
+  theoryWeights = lhe_info->weights();
 }
+
+void weight_tools::getPDFWeights(vector<float> &sys_pdf, vector<float> &w_pdf){
+  if(theoryWeights.size()!=0) {
+    unsigned ind(10), nweights(100); //index of the first pdf weight and number of replicas
+    vector<double> pdfwgt = vector<double>(nweights,1.);
+    for (unsigned i(0); i<nweights; i++){
+      double ipdfw = theoryWeights[i+ind].wgt/theoryWeights[nominal].wgt;
+      w_pdf.push_back(ipdfw);
+      if (ipdfw > 1e-3) pdfwgt[i] = ipdfw;
+    }
+    auto result = minmax_element(pdfwgt.begin(), pdfwgt.end());
+    sys_pdf.push_back(*result.second); //max
+    sys_pdf.push_back(*result.first);  //min
+  } 
+}
+

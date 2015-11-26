@@ -38,8 +38,8 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
   baby.Clear();
 
   ///////////////////// MC hard scatter info ///////////////////////
+  edm::Handle<LHEEventProduct> lhe_info;
   if (!isData) {
-    edm::Handle<LHEEventProduct> lhe_info;
     iEvent.getByLabel("externalLHEProducer", lhe_info);
     if(!lhe_info.isValid()) iEvent.getByLabel("source", lhe_info);
     writeGenInfo(lhe_info);
@@ -295,7 +295,7 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 
   ////////////////// Systematic weights ////////////////
 
-  weightTool->getTheoryWeights(iEvent);
+  if (!isData) weightTool->getTheoryWeights(lhe_info);
   fillWeights(sig_leps);
 
   ////////////////// Filling the tree //////////////////
@@ -1145,6 +1145,8 @@ void bmaker_basic::fillWeights(const vCands &sig_leps)
   baby.sys_muf().push_back(weightTool->theoryWeight(weight_tools::muFdown));
   baby.sys_murf().push_back(weightTool->theoryWeight(weight_tools::muRup_muFup));
   baby.sys_murf().push_back(weightTool->theoryWeight(weight_tools::muRdown_muFdown));
+
+  weightTool->getPDFWeights(baby.sys_pdf(), baby.w_pdf());
 
   if(isData) baby.w_pu() = 1.;
   else baby.w_pu() = weightTool->pileupWeight(baby.ntrupv_mean());

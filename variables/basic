@@ -277,6 +277,7 @@ float w_btag
 float w_toppt
 float w_lep
 float w_fs_lep
+std::vector<float> w_pdf
 
 ################  Systematic variations   ##################
 # variations have index 0 (JER smearing), 1 (JEC up) and 2 (JEC down)
@@ -292,6 +293,7 @@ std::vector<float> sys_mt
 std::vector<float> sys_mur
 std::vector<float> sys_muf
 std::vector<float> sys_murf
+std::vector<float> sys_pdf
 std::vector<float> sys_bctag
 std::vector<float> sys_udsgtag
 std::vector<float> sys_isr

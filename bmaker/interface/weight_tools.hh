@@ -3,6 +3,8 @@
 #ifndef H_WEIGHT_TOOLS
 #define H_WEIGHT_TOOLS
 
+#include "SimDataFormats/GeneratorProducts/interface/LHERunInfoProduct.h"
+
 class weight_tools{
 
 private:
@@ -24,11 +26,11 @@ public:
   };
 
   float theoryWeight(variationType variation);
-  void getTheoryWeights(const edm::Event& iEvent);
+  void getTheoryWeights(edm::Handle<LHEEventProduct> lhe_info);
   float pileupWeight(unsigned int ntrupv);
   float topPtWeight(float top_pt1,float top_pt2);
   float isrWeight(float isrpt);
-
+  void getPDFWeights(std::vector<float> &sys_pdf, std::vector<float> &w_pdf);
   weight_tools();
   ~weight_tools();
 };

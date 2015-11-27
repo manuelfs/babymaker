@@ -51,7 +51,7 @@ vector<TString> dirlist(const TString &folder,
 void change_branch_one(TString indir, TString name, TString outdir, vector<TString> var_type, vector<TString> var, vector<TString> var_val){
 
   if(var_type.size()!=var.size() || var_type.size()!=var_val.size())
-    { cout<<"Error: Branch vectors are not the same size"<<endl; exit(0); }
+    { cout<<"[Change Branch One] Error: Branch vectors are not the same size"<<endl; exit(0); }
 
   const int nvar = var.size();
 
@@ -81,15 +81,17 @@ void change_branch_one(TString indir, TString name, TString outdir, vector<TStri
   vector<float> new_var_flt_(nvar,-999);
   vector<double> new_var_dbl_(nvar,-999);
   deque<bool> new_var_bool_(nvar, false); // vector<bool>is not a vector in C++... so can't pass bools by reference
-  
+  vector<vector<float> * > new_var_vflt_(nvar);
+
   //Branches
   for(int ibch=0; ibch<nvar; ibch++){
-    if(var_type[ibch]=="int")         {  new_var_int_[ibch]  = 0;     oldtree->SetBranchAddress(var[ibch], &new_var_int_[ibch]); }
-    else if(var_type[ibch]=="float")  {  new_var_flt_[ibch]  = 0;     oldtree->SetBranchAddress(var[ibch], &new_var_flt_[ibch]); }
-    else if(var_type[ibch]=="double") {  new_var_dbl_[ibch]  = 0;     oldtree->SetBranchAddress(var[ibch], &new_var_dbl_[ibch]); }
-    else if(var_type[ibch]=="bool")   {  new_var_bool_[ibch] = 0;     oldtree->SetBranchAddress(var[ibch], &new_var_bool_[ibch]);
-      if(multiply[ibch])  cout<<"Warning: Multiplying branch of type \"bool\". Skipping branch."<<endl;}
-    else {cout<<"Error: Branch type invalid. Use only \"int\", \"float\", \"double\", or \"bool\""<<endl; exit(0);}
+    if(var_type[ibch]=="int")          {  new_var_int_[ibch]  = 0;     oldtree->SetBranchAddress(var[ibch], &new_var_int_[ibch]);  }
+    else if(var_type[ibch]=="float")   {  new_var_flt_[ibch]  = 0;     oldtree->SetBranchAddress(var[ibch], &new_var_flt_[ibch]);  }
+    else if(var_type[ibch]=="double")  {  new_var_dbl_[ibch]  = 0;     oldtree->SetBranchAddress(var[ibch], &new_var_dbl_[ibch]);  }
+    else if(var_type[ibch]=="bool")    {  new_var_bool_[ibch] = 0;     oldtree->SetBranchAddress(var[ibch], &new_var_bool_[ibch]);
+      if(multiply[ibch])  cout<<"[Change Branch One] Warning: Multiplying branch of type \"bool\". Skipping branch."<<endl;        }
+    else if(var_type[ibch]=="vfloat")  {  new_var_flt_[ibch]  = 0;     oldtree->SetBranchAddress(var[ibch], &new_var_vflt_[ibch]); }
+    else {cout<<"[Change Branch One] Error: Branch type invalid. Use only \"int\", \"float\", \"double\", \"bool\", or \"vfloat\""<<endl; exit(0);}
   }
 
   //Set up new tree
@@ -110,11 +112,17 @@ void change_branch_one(TString indir, TString name, TString outdir, vector<TStri
 	else if(var_type[iset]=="float")      new_var_flt_[iset]  = var_val[iset].Atof();
 	else if(var_type[iset]=="double")     new_var_dbl_[iset]  = static_cast<double>(var_val[iset].Atof());
 	else if(var_type[iset]=="bool")       new_var_bool_[iset] = var_val[iset].Atoi();
+	else if(var_type[iset]=="vfloat")     	  
+	  for(unsigned int vidx=0; vidx<new_var_vflt_[iset]->size(); vidx++)
+	    new_var_vflt_[iset]->at(vidx) = var_val[iset].Atof();
       }
       else {
 	if(var_type[iset]=="int")             new_var_int_[iset]  *= var_val[iset].Atoi(); 
 	else if(var_type[iset]=="float")      new_var_flt_[iset]  *= var_val[iset].Atof(); 
 	else if(var_type[iset]=="double")     new_var_dbl_[iset]  *= var_val[iset].Atof(); 
+	else if(var_type[iset]=="vfloat")     
+	  for(unsigned int vidx=0; vidx<new_var_vflt_[iset]->size(); vidx++)
+	    new_var_vflt_[iset]->at(vidx) *= var_val[iset].Atof();
       }
     }
     newtree->Fill();

@@ -13,7 +13,7 @@ int main(int argc, char *argv[]){
     cout<<"Format: ./run/change_branch.exe <infolder> <outfolder> <branch_type1> <branch_name1> <branch_value1> ... <branch_valueN>"<<endl;
     cout<<"Accepts up to N branches folowing the format above."<<endl;
     cout<<"Accepts multiplication of branches, i.e. <branch_value>=\"*3.1415\" or <branch_value>=\"3.1415*\""<<endl;
-    cout<<"<branch_type> must be \"int\", \"float\", \"double\", or \"bool\""<<endl;
+    cout<<"<branch_type> must be \"int\", \"float\", \"double\", \"bool\", \"vfloat\""<<endl;
     return 1;
   }
 

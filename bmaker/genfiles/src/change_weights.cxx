@@ -50,6 +50,7 @@ int main(int argc, char *argv[]){
   
   for(unsigned int i=0; i<files.size(); i++){
     if(files[i].Contains(regex))
+      cout<<"[Change Weights] File #"<<i+1<<endl;
       change_branch_one(folder, files[i], outfolder, var_type, var, var_val);
   }
 }

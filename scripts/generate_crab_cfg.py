@@ -1,48 +1,40 @@
 #!/usr/bin/env python
-#=======================================================
-# From e.g. cms29 
-
-# export SCRAM_ARCH=slc6_amd64_gcc491 
-# source /cvmfs/cms.cern.ch/cmsset_default.sh 
-
-# # checkout CMSSW 
-# cmsrel CMSSW_7_4_6_patch6 
-# cd CMSSW_7_4_6_patch6/src/ 
-# cmsenv 
-
-# # checkout and compile CfANtupler 
-# git clone git@github.com:manuelfs/babymaker 
-# cd babymaker 
-# ./compile.sh 
-# cd .. 
-
-# # now you will have to edit generate_crab_cfg.py in the scripts directory 
-# # only change is to put the datasets you want in the list at the beginning 
-
-# # setup crab 
-#  source /cvmfs/cms.cern.ch/crab3/crab.sh 
-#  voms-proxy-init --voms cms --valid 168:00 
-
-# # submit crab job 
-# python babymaker/scripts/generate_crab_cfg.py
-#========================================================
-
+import das_client as das
+import json
 import os
 import sys
 
+def getNumberOfEvents(dataset):
+  query = "file dataset=" + dataset + " | sum(file.nevents)"
+
+  data = das.get_data(query)
+  if isinstance(data, basestring):
+    dasjson = json.loads(data)
+  else:
+    dasjson = data
+  status  = dasjson.get('status')
+  if  status == 'ok':
+    data = dasjson.get('data')
+    sumevents=0
+    for idata in data:
+      sumevents+=idata.get('result').get('value')
+    return sumevents
+
 datasets = []
-datasets.append("/TTJets_DiLept_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/MINIAODSIM")
-datasets.append("/TTJets_DiLept_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9_ext1-v1/MINIAODSIM")
-datasets.append("/TTJets_HT-1200to2500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM")
-datasets.append("/TTJets_HT-2500toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM")
-datasets.append("/TTJets_HT-600to800_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM")
-datasets.append("/TTJets_HT-600to800_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9_ext1-v1/MINIAODSIM")
-datasets.append("/TTJets_HT-800to1200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM")
-datasets.append("/TTJets_SingleLeptFromT_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM")
-datasets.append("/TTJets_SingleLeptFromT_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9_ext1-v1/MINIAODSIM")
-datasets.append("/TTJets_SingleLeptFromTbar_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/MINIAODSIM")
-datasets.append("/TTJets_SingleLeptFromTbar_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9_ext1-v1/MINIAODSIM")
-datasets.append("/TTJets_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/MINIAODSIM")
+datasets.append("/ST_s-channel_4f_leptonDecays_13TeV-amcatnlo-pythia8_TuneCUETP8M1/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM")
+
+# datasets.append("/TTJets_DiLept_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/MINIAODSIM")
+# datasets.append("/TTJets_DiLept_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9_ext1-v1/MINIAODSIM")
+# datasets.append("/TTJets_HT-1200to2500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM")
+# datasets.append("/TTJets_HT-2500toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM")
+# datasets.append("/TTJets_HT-600to800_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM")
+# datasets.append("/TTJets_HT-600to800_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9_ext1-v1/MINIAODSIM")
+# datasets.append("/TTJets_HT-800to1200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM")
+# datasets.append("/TTJets_SingleLeptFromT_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM")
+# datasets.append("/TTJets_SingleLeptFromT_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9_ext1-v1/MINIAODSIM")
+# datasets.append("/TTJets_SingleLeptFromTbar_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/MINIAODSIM")
+# datasets.append("/TTJets_SingleLeptFromTbar_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9_ext1-v1/MINIAODSIM")
+# datasets.append("/TTJets_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/MINIAODSIM")
 
 # datasets.append("/SMS-T1tttt_mGluino-1000to1050_mLSP-1to800_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15FSPremix-MCRUN2_74_V9-v1/MINIAODSIM")
 # datasets.append("/SMS-T1tttt_mGluino-1050_mLSP-50to775_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15FSPremix-MCRUN2_74_V9-v1/MINIAODSIM")
@@ -94,7 +86,7 @@ datasets.append("/TTJets_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR7
 
 
 for ids in datasets:
-  nevents = 1000
+  nevents = getNumberOfEvents(ids)
 
   cmssw_base = os.getenv("CMSSW_BASE")
   datasetID = ids.replace('/','',1).replace('/', '_', 1)

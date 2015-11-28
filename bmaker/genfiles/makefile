@@ -4,6 +4,7 @@ SRCDIR := src
 INCDIR := inc
 MAKEDIR := bin
 LIBFILE := $(OBJDIR)/libStatObj.a
+DIR_BASE := ../..
 
 CXX := $(shell root-config --cxx)
 EXTRA_WARNINGS := -Wcast-align -Wcast-qual -Wdisabled-optimization -Wformat=2 -Wformat-nonliteral -Wformat-security -Wformat-y2k -Winit-self -Winvalid-pch -Wlong-long -Wmissing-format-attribute -Wmissing-include-dirs -Wmissing-noreturn -Wpacked -Wpointer-arith -Wredundant-decls -Wstack-protector -Wswitch-default -Wswitch-enum -Wundef -Wunused -Wvariadic-macros -Wwrite-strings -Wabi -Wctor-dtor-privacy -Wnon-virtual-dtor -Wsign-promo -Wsign-compare #-Wunsafe-loop-optimizations -Wfloat-equal -Wsign-conversion -Wunreachable-code
@@ -28,7 +29,7 @@ vpath %.o $(OBJDIR)
 vpath %.exe $(EXEDIR)
 vpath %.d $(MAKEDIR)
 
-all: $(EXECUTABLES) $(CMSSW_BASE)/src/babymaker/bmaker/src/baby_base.cc $(CMSSW_BASE)/src/babymaker/bmaker/interface/baby_base.hh
+all: $(EXECUTABLES) $(DIR_BASE)/bmaker/src/baby_base.cc $(DIR_BASE)/bmaker/interface/baby_base.hh
 
 -include $(addsuffix .d,$(addprefix $(MAKEDIR)/,$(notdir $(basename $(wildcard $(SRCDIR)/*.cc)))))
 -include $(addsuffix .d,$(addprefix $(MAKEDIR)/,$(notdir $(basename $(wildcard $(SRCDIR)/*.cxx)))))
@@ -61,8 +62,8 @@ $(EXEDIR)/%.exe: $(OBJDIR)/%.o $(LIBFILE)
 .SECONDARY: dummy_baby.all 
 .PRECIOUS: generate_baby.o 
 
-$(CMSSW_BASE)/src/babymaker/bmaker/src/baby_base.cc $(CMSSW_BASE)/src/babymaker/bmaker/interface/baby_base.hh: dummy_baby.all
-dummy_baby.all: $(EXEDIR)/generate_baby.exe $(shell find $(CMSSW_BASE)/src/babymaker/variables -type f)
+$(DIR_BASE)/bmaker/src/baby_base.cc $(DIR_BASE)/bmaker/interface/baby_base.hh: dummy_baby.all
+dummy_baby.all: $(EXEDIR)/generate_baby.exe $(shell find $(DIR_BASE)/variables -type f)
 	./$<
 
 .DELETE_ON_ERROR:

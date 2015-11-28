@@ -2,28 +2,27 @@
 
 ## Compiling genfiles which generates baby_base and associated babies
 exit_code=0;
+
 if [ $# -ne 0 ] && [ "$1" == "clean" ]
 then
-    rm -rf run/*.exe bin/*.o bin/*.a bin/*.d *.exe *.out
+    rm -rf run/*.exe bin/*.o bin/*.a bin/*.d *.exe *.out 
     ./run/remove_backups.sh
     exit_code=$?
 else
-    tmp_file=mktemp
-    
-    make -j 4 -k -r -R 2> >(tee $tmp_file >&2)
+    bad_file=$(mktemp -t compile_XXXXXXXXXXXXXXXX)
+
+    make -j 4 -k -r -R 2> $bad_file
     exit_code=$?
     
-    echo
-    
     if [[ $exit_code != 0 ]] ; then
-	echo "ERRORS AND WARNINGS:"
-	cat $tmp_file >&2
+	printf "\n\n\e[01;31m==========  ERRORS AND WARNINGS  ============\e[0m\]\n"
+	cat $bad_file >&2
     else
-	echo "Generated baby header and source code files, and compiled baby scripts :o)"
-	echo
+	printf "\n\e[01;32mCompiled successfully without errors or warnings!\e[0m\n\n"
     fi
     
-    rm -rf $tmp_file
+    rm -rf $bad_file
 fi
 
 exit $exit_code
+

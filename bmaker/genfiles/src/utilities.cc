@@ -22,6 +22,7 @@
 #include "TSystemFile.h"
 #include "TSystem.h"
 #include "TTree.h"
+#include "TRegexp.h"
 
 using namespace std;
 
@@ -29,6 +30,7 @@ using namespace std;
 vector<TString> dirlist(const TString &folder,
                         const TString &inname,
                         const TString &tag){
+  TRegexp regex_tag(tag,true), regex_inname(inname, true);
   TString pwd(gSystem->pwd());
   vector<TString> v_dirs;
   TSystemDirectory dir(folder, folder);
@@ -40,8 +42,8 @@ vector<TString> dirlist(const TString &folder,
     while ((file=static_cast<TSystemFile*>(next()))) {
       fname = file->GetName();
       if (inname=="dir") {
-        if ((file->IsDirectory() && !fname.Contains(".") && fname.Contains(tag))) v_dirs.push_back(fname);
-      } else  if(fname.Contains(inname)) v_dirs.push_back(fname);
+        if ((file->IsDirectory() && !fname.Contains(".") && fname.Contains(regex_tag))) v_dirs.push_back(fname);
+      } else  if(fname.Contains(regex_inname)) v_dirs.push_back(fname);
     }
   } // if(files)
   gSystem->cd(pwd); // The TSystemDirectory object seems to change current folder
@@ -169,7 +171,7 @@ void change_branch_one(TString indir, TString name, TString outdir, vector<TStri
   delete newfile;
 }
 
-void change_branch_one(TString indir, TString name, TString outdir, vector<TString> var_type, vector<TString> var,  vector<vector<TString> > var_val){
+int change_branch_one(TString indir, TString name, TString outdir, vector<TString> var_type, vector<TString> var,  vector<vector<TString> > var_val){
 
   if(var_type.size()!=var.size() || var_type.size()!=var_val.size())
     { cout<<"[Change Branch One] Error: Branch vectors are not the same size"<<endl; exit(0); }
@@ -243,11 +245,9 @@ void change_branch_one(TString indir, TString name, TString outdir, vector<TStri
     oldtree->GetEntry(i);
 
     if((i<100&&i%10==0) || (i<1000&&i%100==0) || (i<10000&&i%1000==0) || (i%10000==0) || (i+1==nentries)){
-      if(isatty(1)){
-        printf("\r[Change Branch One] Processsing File: %i / %i (%i%%)",i+1,nentries,static_cast<int>((i*100./nentries)));
+        printf("\r[Change Branch One] Processsing File: %i / %i (%i%%)",i+1,nentries,static_cast<int>(((i+1.)*100./nentries)));
         fflush(stdout);
-        if((i<100&&i+10>=nentries) || (i<1000&&i+100>=nentries) || (i<10000&&i+1000>=nentries) || (i>=10000&&i+10000>=nentries)) printf("\n");
-      }
+        if(i+1==nentries) printf("\n");
     }
     
     //Set vars
@@ -282,6 +282,7 @@ void change_branch_one(TString indir, TString name, TString outdir, vector<TStri
   newtreeglobal->AutoSave();
   delete oldfile;
   delete newfile;
+  return nentries;
 }
 
 bool eigen2x2(float matrix[2][2], float &eig1, float &eig2){
@@ -446,3 +447,15 @@ vector<double> LinearSpacing(size_t npts, double low, double high){
   return pts;
 }
 
+TString hoursMinSec(long seconds){
+  int minutes((seconds/60)%60), hours(seconds/3600);
+  TString hhmmss("");
+  if(hours<10) hhmmss += "0";
+  hhmmss += hours; hhmmss += ":";
+  if(minutes<10) hhmmss += "0";
+  hhmmss += minutes; hhmmss += ":";
+  if((seconds%60)<10) hhmmss += "0";
+  hhmmss += seconds%60; 
+
+  return hhmmss;
+}

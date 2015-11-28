@@ -4,11 +4,9 @@
 #include <ctime>
 #include <string>
 #include <vector>
-#include <unistd.h>
 
 #include "TChain.h"
 #include "TError.h"
-#include "TRegexp.h"
 
 #include "baby_basic.hh"
 #include "utilities.hh"
@@ -61,16 +59,13 @@ int main(int argc, char *argv[]){
     //Progress meter
     if((ientry<100&&ientry%10==0) || (ientry<1000&&ientry%100==0) || (ientry<10000&&ientry%1000==0) || (ientry%10000==0) 
        || (ientry+1==nentries)){
-      if(isatty(1)){
-        printf("\r[Change Weights] Calculating Weights: %i / %i (%i%%)",ientry+1,nentries,
-	       static_cast<int>(((ientry+1.)*100./nentries)));
-        fflush(stdout);
-        if((ientry<100&&ientry+10>=nentries) || (ientry<1000&&ientry+100>=nentries) || (ientry<10000&&ientry+1000>=nentries) 
-	   || (ientry>=10000&&ientry+10000>=nentries)) printf("\n");
-      }
+      printf("\r[Change Weights] Calculating Weights: %i / %i (%i%%)",ientry+1,nentries,
+	     static_cast<int>(((ientry+1.)*100./nentries)));
+      fflush(stdout);
+      if(ientry+1==nentries) printf("\n");
     }
 
-    if(ch.weight()>0) nent_eff ++; else nent_eff--;
+    if(ch.w_lumi()>0) nent_eff ++; else nent_eff--;
     sum_weff  +=  ch.weight()/(ch.eff_trig()*ch.w_lumi());
     sum_btag  +=  ch.w_btag();
     sum_pu    +=  ch.w_pu();
@@ -95,6 +90,11 @@ int main(int argc, char *argv[]){
       for(unsigned int isys=0;isys<ch.sys_fs_lep().size();isys++)     sum_fs_slep[isys]     +=  ch.sys_fs_lep().at(isys);
     }
   }
+  time(&endtime); 
+  int seconds = difftime(endtime, begtime);
+  float hertz = nentries; hertz /= seconds;
+  cout<<"Calculating sum of weights took "<<seconds<<" seconds ("<<hoursMinSec(seconds)<<") for "<<nentries
+      <<" events -> "<<roundNumber(hertz,1,1000)<<" kHz, "<<roundNumber(1000,2,hertz)<<" ms per event"<<endl<<endl;
 
   //Set type and var name
   var_type.push_back("float");      var.push_back("weight");
@@ -137,17 +137,16 @@ int main(int argc, char *argv[]){
   for(unsigned int idx=0;idx<sum_slep.size();idx++)         var_val[16].push_back("*"+to_string((nent_eff-sum_slep[idx])/nent_zlep));
   for(unsigned int idx=0;idx<sum_fs_slep.size();idx++)      var_val[17].push_back("*"+to_string((nent_eff-sum_fs_slep[idx])/nent_zlep));
 
-
-  vector<TString> files = dirlist(folder,".root");
-  TRegexp regex(sample,true);
-  
+  int totentries(0);
+  vector<TString> files = dirlist(folder,sample);
   for(unsigned int i=0; i<files.size(); i++){
-    if(files[i].Contains(regex)){
-      cout<<"[Change Weights] File #"<<i+1<<endl;
-      cout<<"Entering change_branch_one 1"<<endl;
-      change_branch_one(folder, files[i], outfolder, var_type, var, var_val);
-    }
+    cout<<"[Change Weights] File "<<i+1<<"/"<<files.size()<<": "<<files[i]<<endl;
+    totentries += change_branch_one(folder, files[i], outfolder, var_type, var, var_val);
   }
+
   time(&endtime); 
-  cout<<endl<<"Took "<<difftime(endtime, begtime)<<" seconds"<<endl<<endl;
+  seconds = difftime(endtime, begtime);
+  hertz = totentries; hertz /= seconds;
+  cout<<endl<<"Took "<<seconds<<" seconds ("<<hoursMinSec(seconds)<<") for "<<totentries
+      <<" events -> "<<roundNumber(hertz,1,1000)<<" kHz, "<<roundNumber(1000,2,hertz)<<" ms per event"<<endl<<endl;
 }

@@ -14,7 +14,7 @@
 using namespace std;
 
 namespace{
-  const int NSYSTS = 18;
+  const int NSYSTS = 19;
 }
 
 int main(int argc, char *argv[]){
@@ -38,7 +38,9 @@ int main(int argc, char *argv[]){
   //Setup chains
   baby_basic ch((folder+sample).Data());         
   ch.GetEntry(0); //Set branches to get size
-
+  TChain tglobal("treeglobal"); tglobal.Add(folder+sample);
+  float xsec = tglobal.GetMaximum("xsec");
+ 
   vector<TString> var_type, var; 
   vector<vector<TString> > var_val(NSYSTS);
   double nent_eff=0, sum_weff=0, sum_btag=0, sum_pu=0, sum_toppt=0;
@@ -90,6 +92,10 @@ int main(int argc, char *argv[]){
       for(unsigned int isys=0;isys<ch.sys_fs_lep().size();isys++)     sum_fs_slep[isys]     +=  ch.sys_fs_lep().at(isys);
     }
   }
+  const float luminosity = 1000.;
+  float w_lumi = xsec*luminosity / nent_eff;
+  float w_lumi_corr = w_lumi / fabs(ch.w_lumi());
+
   time(&endtime); 
   int seconds = difftime(endtime, begtime);
   float hertz = nentries; hertz /= seconds;
@@ -115,9 +121,10 @@ int main(int argc, char *argv[]){
   var_type.push_back("float");      var.push_back("w_fs_lep");
   var_type.push_back("vfloat");     var.push_back("sys_lep");
   var_type.push_back("vfloat");     var.push_back("sys_fs_lep");
+  var_type.push_back("float");      var.push_back("w_lumi");            
 
   //Calculate weights
-  var_val[0].push_back("*"+to_string(nent_eff/sum_weff));
+  var_val[0].push_back("*"+to_string(nent_eff*w_lumi_corr/sum_weff));
   var_val[1].push_back("*"+to_string(nent_eff/sum_btag));
   var_val[2].push_back("*"+to_string(nent_eff/sum_pu));
   var_val[3].push_back("*"+to_string(nent_eff/sum_toppt));
@@ -134,8 +141,11 @@ int main(int argc, char *argv[]){
   //Calculate lepton weights
   var_val[14].push_back("*"+to_string((nent_eff-sum_wlep)/nent_zlep));
   var_val[15].push_back("*"+to_string((nent_eff-sum_fs_wlep)/nent_zlep));
-  for(unsigned int idx=0;idx<sum_slep.size();idx++)         var_val[16].push_back("*"+to_string((nent_eff-sum_slep[idx])/nent_zlep));
-  for(unsigned int idx=0;idx<sum_fs_slep.size();idx++)      var_val[17].push_back("*"+to_string((nent_eff-sum_fs_slep[idx])/nent_zlep));
+  for(unsigned int idx=0;idx<sum_slep.size();idx++)         
+    var_val[16].push_back("*"+to_string((nent_eff-sum_slep[idx])/nent_zlep));
+  for(unsigned int idx=0;idx<sum_fs_slep.size();idx++)      
+    var_val[17].push_back("*"+to_string((nent_eff-sum_fs_slep[idx])/nent_zlep));
+  var_val[18].push_back("*"+to_string(w_lumi_corr));
 
   int totentries(0);
   vector<TString> files = dirlist(folder,sample);

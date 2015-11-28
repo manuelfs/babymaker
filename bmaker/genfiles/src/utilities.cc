@@ -177,10 +177,12 @@ void change_branch_one(TString indir, TString name, TString outdir, vector<TStri
   const int nvar = var.size();
   
   //Setup
-  vector<vector<bool> > multiply(nvar,vector<bool>(false));
+  vector<vector<bool> > multiply(nvar);
   for(int isetup=0; isetup<nvar; isetup++){
+    size_t vlength(var_val[isetup].size());
+    multiply[isetup] = vector<bool>(vlength, false);
     //Set multiply
-    for(unsigned int idx=0; idx<var_val[isetup].size(); idx++){
+    for(unsigned int idx=0; idx<vlength; idx++){
       if(var_val[isetup][idx].BeginsWith("*") || var_val[isetup][idx].EndsWith("*")){
 	var_val[isetup][idx].Remove(TString::kBoth,'*');
 	multiply[isetup][idx]=true;
@@ -240,9 +242,9 @@ void change_branch_one(TString indir, TString name, TString outdir, vector<TStri
   for(int i=0; i<nentries; i++){
     oldtree->GetEntry(i);
 
-    if((i<100&&i%10==0) || (i<1000&&i%100==0) || (i<10000&&i%1000==0) || (i%10000==0)){
+    if((i<100&&i%10==0) || (i<1000&&i%100==0) || (i<10000&&i%1000==0) || (i%10000==0) || (i+1==nentries)){
       if(isatty(1)){
-        printf("\r[Change Branch One] Processsing File: %i / %i (%i%%)",i,nentries,static_cast<int>((i*100./nentries)));
+        printf("\r[Change Branch One] Processsing File: %i / %i (%i%%)",i+1,nentries,static_cast<int>((i*100./nentries)));
         fflush(stdout);
         if((i<100&&i+10>=nentries) || (i<1000&&i+100>=nentries) || (i<10000&&i+1000>=nentries) || (i>=10000&&i+10000>=nentries)) printf("\n");
       }

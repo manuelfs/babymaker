@@ -1,9 +1,14 @@
+// change_weight: Produces new ntuples with the weights and systematics normalized to average 1
+
 #include <iostream>
+#include <ctime>
+#include <string>
+#include <vector>
+#include <unistd.h>
+
 #include "TChain.h"
 #include "TError.h"
 #include "TRegexp.h"
-#include <string>
-#include <vector>
 
 #include "baby_basic.hh"
 #include "utilities.hh"
@@ -15,7 +20,9 @@ namespace{
 }
 
 int main(int argc, char *argv[]){
-  gErrorIgnoreLevel=6000; // Turns off ROOT errors due to missing branches                                                                    
+  gErrorIgnoreLevel=6000; // Turns off ROOT errors due to missing branches       
+  time_t begtime, endtime;
+  time(&begtime);
 
   if(argc<1){
     cout<<"Format: ./run/change_weights.exe <infolder>=. <sample>=\"*.root\" <outfolder>=infolder"<<endl;
@@ -52,11 +59,14 @@ int main(int argc, char *argv[]){
     ch.GetEntry(ientry);
 
     //Progress meter
-    if((ientry<100&&ientry%10==0) || (ientry<1000&&ientry%100==0) || (ientry<10000&&ientry%1000==0) || (ientry%10000==0)){
+    if((ientry<100&&ientry%10==0) || (ientry<1000&&ientry%100==0) || (ientry<10000&&ientry%1000==0) || (ientry%10000==0) 
+       || (ientry+1==nentries)){
       if(isatty(1)){
-        printf("\r[Change Weights] Calculating Weights: %i / %i (%i%%)",ientry,nentries,static_cast<int>((ientry*100./nentries)));
+        printf("\r[Change Weights] Calculating Weights: %i / %i (%i%%)",ientry+1,nentries,
+	       static_cast<int>(((ientry+1.)*100./nentries)));
         fflush(stdout);
-        if((ientry<100&&ientry+10>=nentries) || (ientry<1000&&ientry+100>=nentries) || (ientry<10000&&ientry+1000>=nentries) || (ientry>=10000&&ientry+10000>=nentries)) printf("\n");
+        if((ientry<100&&ientry+10>=nentries) || (ientry<1000&&ientry+100>=nentries) || (ientry<10000&&ientry+1000>=nentries) 
+	   || (ientry>=10000&&ientry+10000>=nentries)) printf("\n");
       }
     }
 
@@ -134,7 +144,10 @@ int main(int argc, char *argv[]){
   for(unsigned int i=0; i<files.size(); i++){
     if(files[i].Contains(regex)){
       cout<<"[Change Weights] File #"<<i+1<<endl;
+      cout<<"Entering change_branch_one 1"<<endl;
       change_branch_one(folder, files[i], outfolder, var_type, var, var_val);
     }
   }
+  time(&endtime); 
+  cout<<endl<<"Took "<<difftime(endtime, begtime)<<" seconds"<<endl<<endl;
 }

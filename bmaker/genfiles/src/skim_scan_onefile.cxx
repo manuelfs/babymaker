@@ -1,6 +1,4 @@
 // skim_scan_onefile.cxx: Separate signal scan by mass point
-
-
 #include "utilities.hh"
 
 #include <fstream>
@@ -20,27 +18,25 @@
 #include <ctime>
 
 using namespace std;
-using std::cout;
-using std::endl;
 
 int main(int argc, char *argv[]){
   time_t startTime;
   time(&startTime);
- 
 
   if(argc < 1) {
-    cout<<endl<<"Requires 1 argument: "
-	<<"./run/skim_scan_onefile.exe infile";
+    cout<<endl<<"Requires 1 argument: "<<"./run/skim_scan_onefile.exe infile";
     return 1;
   }
-  
-  
 
   TString infiles(argv[1]);
+  infiles += "/*.root";
+  TString outpath = "";
+  if (argc>1) outpath = argv[2];
   TChain tree("tree");
-  int nfiles = tree.Add(infiles);
+  tree.Add(infiles);
   TChain treeglobal("treeglobal");
   treeglobal.Add(infiles);  
+  //long nentries(tree.GetEntries());
 
   //Project tree into mass plane to find points for skim
   TH2F * mass_plane = new TH2F("mglu_vs_mlsp","mglu_vs_mlsp",3000,-0.5,2999.5,3000,-0.5,2999.5);
@@ -54,12 +50,15 @@ int main(int argc, char *argv[]){
 
   //load all pairs as cuts into vector
   vector<TString> pair_cuts;
+  vector<TString> mass_tag;
   for(int iy=ini_y; iy<=last_y; iy++){
     for(int ix=ini_x; ix<=last_x; ix++){
       if(mass_plane->GetBinContent(ix,iy) > 0){
-	int mglui = static_cast<int>(mass_plane->GetYaxis()->GetBinCenter(iy));
-	int mlsp = static_cast<int>(mass_plane->GetXaxis()->GetBinCenter(ix));
-	pair_cuts.push_back(Form("mgluino==%i&&mlsp==%i",mglui,mlsp));
+        int mglui = static_cast<int>(mass_plane->GetYaxis()->GetBinCenter(iy));
+        int mlsp = static_cast<int>(mass_plane->GetXaxis()->GetBinCenter(ix));
+        pair_cuts.push_back(Form("mgluino==%i&&mlsp==%i",mglui,mlsp));
+        mass_tag.push_back(Form("mGluino-%i_mLSP-%i",mglui,mlsp));
+        cout<<"Found mass point "<<mass_tag.back()<<endl;
       }
     }
   }
@@ -72,56 +71,45 @@ int main(int argc, char *argv[]){
   int seconds(floor(difftime(curTime,startTime)+0.5));
   cout<<"took "<<seconds<<" seconds to fill chain, project and find mass pairs"<<endl;
  
-
-  /*TString folder(infiles);
-  vector<TString > outfiles;
-  folder.Remove(folder.Last('/')+1, folder.Length());*/
-  // gSystem->mkdir(outfolder, kTRUE);
   // Finding outfile names
   for(unsigned int ip = 0; ip<pair_cuts.size(); ip++){
     time_t startloop;
     time(&startloop);
-    TString outfile=infiles;
-    //outfile.Remove(0, outfile.Last('/')); outfile.ReplaceAll("*","");
-    if(outfile.Contains(".root")) outfile.ReplaceAll(".root","_"+pair_cuts.at(ip)+".root");
-    else outfile += ("_"+pair_cuts.at(ip)+".root");
-    outfile.ReplaceAll(">=","ge"); outfile.ReplaceAll("<=","se"); outfile.ReplaceAll("&&","_");
-    outfile.ReplaceAll(">","g"); outfile.ReplaceAll("<","s"); outfile.ReplaceAll("=","");
-    outfile.ReplaceAll("(",""); outfile.ReplaceAll(")",""); outfile.ReplaceAll("+","");
-    outfile.ReplaceAll("[",""); outfile.ReplaceAll("]",""); outfile.ReplaceAll("|","_");
-    outfile.ReplaceAll("/","");
-    //outfile = outfolder+outfile;
-  
-    //cout<<"outfile is"<<outfile<<endl;
-    // Checking if output file exists
-    /*TString outname(outfile);
-    //outname.ReplaceAll(outfolder, ""); outname.ReplaceAll("/", "");
-    vector<TString> existing_outfiles = dirlist(outfolder, outname);
-    if(existing_outfiles.size()>0) {
-      cout<<"File "<<outfile<<" exists. Skipping"<<endl;
-      continue;
-      }*/
+    TString outfile = "";
+    if (outpath==""){
+      outfile=infiles;
+      //outfile.Remove(0, outfile.Last('/')); outfile.ReplaceAll("*","");
+      if(outfile.Contains(".root")) outfile.ReplaceAll(".root","_"+pair_cuts.at(ip)+".root");
+      else outfile += ("_"+pair_cuts.at(ip)+".root");
+      outfile.ReplaceAll(">=","ge"); outfile.ReplaceAll("<=","se"); outfile.ReplaceAll("&&","_");
+      outfile.ReplaceAll(">","g"); outfile.ReplaceAll("<","s"); outfile.ReplaceAll("=","");
+      outfile.ReplaceAll("(",""); outfile.ReplaceAll(")",""); outfile.ReplaceAll("+","");
+      outfile.ReplaceAll("[",""); outfile.ReplaceAll("]",""); outfile.ReplaceAll("|","_");
+      outfile.ReplaceAll("/","");
+      //outfile = outfolder+outfile;
+    } else {
+      outfile = outpath;
+      outfile.ReplaceAll("MASS_TAG",mass_tag[ip]);
+    }
       
-    TFile out_rootfile(outfile.Data(), "CREATE");
+    TFile out_rootfile(outfile.Data(), "RECREATE");
     if(out_rootfile.IsZombie() || !out_rootfile.IsOpen()) return 1;
     out_rootfile.cd();
 
-
     //cout<<"Skimming the "<<nfiles<<" files in "<<infiles<<endl;
-    long nentries(tree.GetEntries());
     TTree * ctree = tree.CopyTree(pair_cuts.at(ip));
     TTree * ctreeglobal = treeglobal.CopyTree("1");
     if(ctree) ctree->Write();
     else cout<<"Could not find tree in "<<infiles<<endl;
     if(ctreeglobal)  ctreeglobal->Write();
     else cout<<"Could not find treeglobal in "<<infiles<<endl;
-    cout<<"Written "<<outfile<<" from "<<nfiles<<" files and "<<nentries<<" entries."<<endl;
+    cout<<"Written "<<outfile<<" with "<<ctree->GetEntries()<<" entries."<<endl;
     out_rootfile.Close();
+
     time_t endloop;
     time(&endloop);
     int secs(floor(difftime(endloop,startloop)+0.5));
     cout<<"took "<<secs<<" seconds to copy tree"<<endl;
-    
-    }
+  }
 }
 

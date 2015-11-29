@@ -16,6 +16,7 @@ config = Configuration()
 config.section_("General")
 config.General.requestName = jobname
 config.General.workArea = 'out_crab'
+config.General.transferLogs = True
 
 config.section_("JobType")
 config.JobType.pluginName = 'Analysis'

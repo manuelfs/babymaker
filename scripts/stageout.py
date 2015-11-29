@@ -3,10 +3,13 @@ import os, glob
 
 # ------------------------------------------------------------------------------------------
 # This script can be used to "manually" download babies that were produced ok, but failed 
-# to actually be transferred to our Tier 3. It *assumes* that all the failed transfers
-# are due to one bad site. But it is ok to use it, even if assumption is wrong... it just
-# will not find the files and you will get a message "FAIL" in red.
-# If we see that there are often >1 bad sites, this can be modified.
+# to actually be transferred to our Tier 3. 
+# Assumption 1: all the failed transfers are due to one bad site. If we see that there 
+#               are often >1 bad sites, this can be modified.
+# Assumption 2: at least one file made it to hadoop.
+# It is ok to use even if the assumptions are wrong, it will just not find the files 
+# and you will get a message "FAIL" in red.
+# 
 # It seems to take ~ 30-50s per file download
 #
 # 1. from the web task monitoring interface open one log file of the type "Job" 
@@ -55,13 +58,19 @@ for task in tasks.keys():
     # for i in good_files: print i
   else:
     print "No files found on hadoop"
+    print "\033[91m -- FAIL\033[0m", task
     continue
 
   # download files
   ndls = 0
   for run in runs:
+    # find a template for a file name corresponding to this run
+    for igf in good_files:
+      if (run==(igf.split('/')[-2])): template = igf
+      break
+    # loop over job ids
     for job in range(1,tasks[task]+1):
-      abspath = good_files[0][0:good_files[0].rfind('_')] + '_'+str(job)+'.root'
+      abspath = template[0:template.rfind('_')] + '_'+str(job)+'.root'
       relpath = abspath.replace(hadoop_base,'')
       # do we already have the file?
       if abspath in good_files: continue

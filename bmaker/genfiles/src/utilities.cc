@@ -50,7 +50,7 @@ vector<TString> dirlist(const TString &folder,
   return v_dirs;
 }
 
-void change_branch_one(TString indir, TString name, TString outdir, vector<TString> var_type, vector<TString> var, vector<TString> var_val){
+int change_branch_one(TString indir, TString name, TString outdir, vector<TString> var_type, vector<TString> var, vector<TString> var_val){
 
   if(var_type.size()!=var.size() || var_type.size()!=var_val.size())
     { cout<<"[Change Branch One] Error: Branch vectors are not the same size"<<endl; exit(0); }
@@ -169,6 +169,7 @@ void change_branch_one(TString indir, TString name, TString outdir, vector<TStri
   newtreeglobal->AutoSave();
   delete oldfile;
   delete newfile;
+  return nentries;
 }
 
 int change_branch_one(TString indir, TString name, TString outdir, vector<TString> var_type, vector<TString> var,  
@@ -262,13 +263,14 @@ int change_branch_one(TString indir, TString name, TString outdir, vector<TStrin
   }
 
   //Set up new tree
-  name.ReplaceAll(".root","_mod.root");
+  name.ReplaceAll(".root","_renorm.root");
   TFile* newfile = new TFile(outdir+name,"recreate");
   TTree* newtree = oldtree->CloneTree(0);
   TTree* newtreeglobal = oldtreeglobal->CloneTree();
 
   //Loop and fill events with new weights
   int nentries = oldtree->GetEntries();
+  cout<<"Starting for loop in change_branch_one"<<endl;
   for(int i=0; i<nentries; i++){
     oldtree->GetEntry(i);
 
@@ -278,8 +280,15 @@ int change_branch_one(TString indir, TString name, TString outdir, vector<TStrin
         if(i+1==nentries) printf("\n");
     }
     
+    float minpdf(1e10);
+
     //Set vars
     for(int iset=0; iset<nvar; iset++){
+      // Hack to recompute sys_pdf[1] which had a 1e-3 cut
+      if(var[iset].Contains("w_pdf")){
+	for(unsigned int isys=0;isys<new_var_vflt_[iset]->size();isys++)  
+	  if(new_var_vflt_[iset]->at(isys) < minpdf) minpdf = new_var_vflt_[iset]->at(isys);
+      }
       if(isLep[iset] && nleps_!=0) continue; // For lepton scale factors    
       for(unsigned int vidx=0; vidx<var_val[iset].size(); vidx++){
 	if(!multiply[iset][vidx]){
@@ -310,6 +319,9 @@ int change_branch_one(TString indir, TString name, TString outdir, vector<TStrin
 	  }
 	} // if multiply
       } // Loop over elements in each variable
+
+      if(var[iset].Contains("sys_pdf"))
+	new_var_vflt_[iset]->at(1) = minpdf*var_val[iset][1].Atof(); 
     } // Loop over variables
     newtree->Fill();
   }

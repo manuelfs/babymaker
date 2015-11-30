@@ -28,9 +28,10 @@ int main(int argc, char *argv[]){
   }
   
   // Take command line arguments
-  TString folder("."), sample("*.root"), outfolder(folder);
+  TString folder("."), sample("*.root"); 
   if(argc>=2) folder=argv[1]; 
   if(argc>=3) sample=argv[2]; 
+  TString outfolder(folder);
   if(argc>=4) outfolder=argv[3]; 
   if(!folder.EndsWith("/")) folder.Append("/");
   if(!outfolder.EndsWith("/")) outfolder.Append("/");
@@ -51,9 +52,10 @@ int main(int argc, char *argv[]){
   vector<double> sum_mur(ch.sys_mur().size()), sum_muf(ch.sys_muf().size()), sum_murf(ch.sys_murf().size());
   double nent_zlep=0, sum_wlep=0, sum_fs_wlep=0;
   vector<double> sum_slep(ch.sys_lep().size()), sum_fs_slep(ch.sys_fs_lep().size());
+  double sum_pdf_min(0.);
+ 
   
-  
-  const int nentries = ch.GetEntries();
+  int nentries = ch.GetEntries();
   //Loop over events and get sum of weights
   for(int ientry=0; ientry<nentries; ientry++){
     ch.GetEntry(ientry);
@@ -83,6 +85,12 @@ int main(int argc, char *argv[]){
     for(unsigned int isys=0;isys<ch.sys_muf().size();isys++)          sum_muf[isys]         +=  ch.sys_muf().at(isys);
     for(unsigned int isys=0;isys<ch.sys_murf().size();isys++)         sum_murf[isys]        +=  ch.sys_murf().at(isys);
 
+    // Hack to recompute sys_pdf[1] which had a 1e-3 cut
+    float minpdf(1e10);
+    for(unsigned int isys=0;isys<ch.w_pdf().size();isys++)  
+      if(ch.w_pdf()[isys] < minpdf) minpdf = ch.w_pdf()[isys];
+    sum_pdf_min += minpdf;
+				      
     //Lepton weights
     if(ch.nleps()==0) nent_zlep++;
     else{
@@ -92,6 +100,9 @@ int main(int argc, char *argv[]){
       for(unsigned int isys=0;isys<ch.sys_fs_lep().size();isys++)     sum_fs_slep[isys]     +=  ch.sys_fs_lep().at(isys);
     }
   }
+  // Hack to recompute sys_pdf[1] which had a 1e-3 cut
+  sum_spdf[1] = sum_pdf_min;
+
   const float luminosity = 1000.;
   float w_lumi = xsec*luminosity / nent_eff;
   float w_lumi_corr = w_lumi / fabs(ch.w_lumi());

@@ -24,7 +24,7 @@ enum varType{kDouble, kvDouble, kFloat, kvFloat, kInt, kvInt, kBool, kvBool};
 std::vector<TString> dirlist(const TString &folder,
                              const TString &inname="dir",
                              const TString &tag="");
-void change_branch_one(TString indir, TString name, TString outdir, std::vector<TString> var_type, std::vector<TString> var, 
+int change_branch_one(TString indir, TString name, TString outdir, std::vector<TString> var_type, std::vector<TString> var, 
 		       std::vector<TString> var_val);
 int change_branch_one(TString indir, TString name, TString outdir, std::vector<TString> var_type, std::vector<TString> var, 
 		      std::vector<std::vector<TString> > var_val);

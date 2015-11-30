@@ -1,3 +1,4 @@
+#include <ctime>
 #include <iostream>
 #include "TFile.h"
 #include "TRegexp.h"
@@ -9,6 +10,8 @@
 using namespace std;
 
 int main(int argc, char *argv[]){
+  time_t begtime, endtime;
+  time(&begtime);
 
   if(argc<5){
     cout<<"Format: ./run/change_branch.exe <infolder> <outfolder> <sample> <branch_type1> <branch_name1> <branch_value1> ... <branch_valueN>"<<endl;
@@ -35,8 +38,11 @@ int main(int argc, char *argv[]){
   
   for(unsigned int i=0; i<files.size(); i++){
     if(files[i].Contains(regex)){
-      cout<<"[Change Branch] File #"<<i+1<<endl;
+      if(i%100==0) cout<<"[Change Branch] File #"<<i+1<<"/"<<files.size()<<endl;
       change_branch_one(folder, files[i], outfolder, var_type, var, var_val);
     }
   }
+
+  time(&endtime); 
+  cout<<endl<<"Took "<<difftime(endtime, begtime)<<" seconds"<<endl<<endl;
 }

@@ -112,7 +112,8 @@ void weight_tools::getPDFWeights(vector<float> &sys_pdf, vector<float> &w_pdf){
     for (unsigned i(0); i<nweights; i++){
       double ipdfw = theoryWeights[i+ind].wgt/theoryWeights[nominal].wgt;
       w_pdf.push_back(ipdfw);
-      if (ipdfw > 1e-3) pdfwgt[i] = ipdfw;
+      //if (ipdfw > 1e-3) pdfwgt[i] = ipdfw;
+      pdfwgt[i] = ipdfw;
     }
     auto result = minmax_element(pdfwgt.begin(), pdfwgt.end());
     sys_pdf.push_back(*result.second); //max

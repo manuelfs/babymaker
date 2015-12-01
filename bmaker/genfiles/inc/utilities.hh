@@ -21,13 +21,10 @@ typedef std::pair<double,double> double_double;
 const long double PI = acos(-1.L);
 enum varType{kDouble, kvDouble, kFloat, kvFloat, kInt, kvInt, kBool, kvBool};
 
-std::vector<TString> dirlist(const TString &folder,
-                             const TString &inname="dir",
-                             const TString &tag="");
+int change_branch_one(TString indir, TString name, TString outdir, std::vector<TString> var_type, std::vector<TString> var, 
+		      std::vector<std::vector<TString> > var_val, int totentries);
 int change_branch_one(TString indir, TString name, TString outdir, std::vector<TString> var_type, std::vector<TString> var, 
 		       std::vector<TString> var_val);
-int change_branch_one(TString indir, TString name, TString outdir, std::vector<TString> var_type, std::vector<TString> var, 
-		      std::vector<std::vector<TString> > var_val);
 bool eigen2x2(float matrix[2][2], float &eig1, float &eig2);
 bool id_big2small(const int_double& left, const int_double& right);
 bool dd_big2small(const double_double& left, const double_double& right);
@@ -53,6 +50,9 @@ void get_count_and_uncertainty(TTree& tree,
                                double& uncertainty);
 void AddPoint(TGraph& graph, const double x, const double y);
 TString hoursMinSec(long seconds);
+std::vector<TString> dirlist(const TString &folder,
+                             const TString &inname="dir",
+                             const TString &tag="");
 
 template<class T>
 bool is_nan(const T &x){return x!=x;}

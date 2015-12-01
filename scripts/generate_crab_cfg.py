@@ -1,4 +1,33 @@
 #!/usr/bin/env python
+
+#=======================================================
+# From e.g. cms29 
+  
+# export SCRAM_ARCH=slc6_amd64_gcc491
+# source /cvmfs/cms.cern.ch/cmsset_default.sh
+  
+# # checkout CMSSW 
+# cmsrel CMSSW_7_4_6_patch6
+# cd CMSSW_7_4_6_patch6/src/
+# cmsenv
+  
+# # checkout and compile CfANtupler 
+# git clone git@github.com:manuelfs/babymaker
+# cd babymaker
+# ./compile.sh
+# cd ..
+  
+# # now you will have to edit generate_crab_cfg.py in the scripts directory 
+# # only change is to put the datasets you want in the list at the beginning 
+  
+# # setup crab 
+#  source /cvmfs/cms.cern.ch/crab3/crab.sh 
+#  voms-proxy-init --voms cms --valid 168:00
+  
+# # submit crab job 
+# python babymaker/scripts/generate_crab_cfg.py
+#========================================================
+
 import das_client as das
 import json
 import os

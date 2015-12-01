@@ -7,6 +7,8 @@
 
 #include "TChain.h"
 #include "TError.h"
+#include "TSystem.h"
+#include "TDirectory.h"
 
 #include "baby_basic.hh"
 #include "utilities.hh"
@@ -35,6 +37,7 @@ int main(int argc, char *argv[]){
   if(argc>=4) outfolder=argv[3]; 
   if(!folder.EndsWith("/")) folder.Append("/");
   if(!outfolder.EndsWith("/")) outfolder.Append("/");
+  gSystem->mkdir(outfolder, kTRUE);
 
   //Setup chains
   baby_basic ch((folder+sample).Data());         
@@ -165,7 +168,7 @@ int main(int argc, char *argv[]){
   vector<TString> files = dirlist(folder,sample);
   for(unsigned int i=0; i<files.size(); i++){
     cout<<"[Change Weights] File "<<i+1<<"/"<<files.size()<<": "<<files[i]<<endl;
-    totentries += change_branch_one(folder, files[i], outfolder, var_type, var, var_val);
+    totentries += change_branch_one(folder, files[i], outfolder, var_type, var, var_val, nentries);
   }
 
   time(&endtime); 

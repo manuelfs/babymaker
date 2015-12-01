@@ -2,9 +2,6 @@
 // utilities - Various functions used accross the code
 //----------------------------------------------------------------------------
 
-#ifndef INT_ROOT
-#include "utilities.hh"
-#endif
 
 #include <cmath>
 #include <deque>
@@ -24,7 +21,203 @@
 #include "TTree.h"
 #include "TRegexp.h"
 
+#include "cross_sections.hh"
+#include "utilities.hh"
+
 using namespace std;
+
+//// Changes the value of branches in TTrees
+int change_branch_one(TString indir, TString name, TString outdir, vector<TString> var_type, vector<TString> var,  
+		      vector<vector<TString> > var_val, int totentries){
+
+  if(var_type.size()!=var.size() || var_type.size()!=var_val.size())
+    { cout<<"[Change Branch One] ERROR: Branch vectors are not the same size"<<endl; exit(0); }
+
+  const int nvar = var.size();
+
+  //Setup
+  vector<varType> ivar_type;
+  vector<bool> isLep(nvar, false);
+  vector<vector<bool> > multiply(nvar);
+  for(int isetup=0; isetup<nvar; isetup++){
+    size_t vlength(var_val[isetup].size());
+    multiply[isetup] = vector<bool>(vlength, false);
+    //Set multiply
+    for(unsigned int idx=0; idx<vlength; idx++){
+      if(var_val[isetup][idx].BeginsWith("*") || var_val[isetup][idx].EndsWith("*")){
+	var_val[isetup][idx].Remove(TString::kBoth,'*');
+	multiply[isetup][idx]=true;
+      }
+    }
+    
+    //Handle bools
+    if(var_type[isetup]=="bool" || var_type[isetup]=="vbool"){
+      for(unsigned int idx=0; idx<var_val[isetup].size(); idx++){
+	if(var_val[isetup][idx]=="true")
+	  var_val[isetup][idx]="1";
+	else if(var_val[isetup][idx]=="false")
+	  var_val[isetup][idx]="0";
+      }
+    }
+
+    // Converting string types to int and bool for speed
+    if(var[isetup].Contains("_lep"))  isLep[isetup] = true;
+
+    if(var_type[isetup]=="int")          ivar_type.push_back(kInt);
+    else if(var_type[isetup]=="float")   ivar_type.push_back(kFloat);
+    else if(var_type[isetup]=="double")  ivar_type.push_back(kDouble);
+    else if(var_type[isetup]=="bool")    ivar_type.push_back(kBool);
+    else if(var_type[isetup]=="vint")    ivar_type.push_back(kvInt);
+    else if(var_type[isetup]=="vfloat")  ivar_type.push_back(kvFloat);
+    else if(var_type[isetup]=="vdouble") ivar_type.push_back(kvDouble);
+    else if(var_type[isetup]=="vbool")   ivar_type.push_back(kvBool);
+    else {
+      cout<<"var_type "<<var_type[isetup]<<" not supported. Exiting"<<endl;
+      exit(1);
+    }
+  } // Loop over variables
+
+  //Set up old tree and branch
+  TFile* oldfile = new TFile(indir+name);
+  TTree* oldtree = static_cast<TTree*>(oldfile->Get("tree"));
+  TTree* oldtreeglobal = static_cast<TTree*>(oldfile->Get("treeglobal"));
+  
+  vector<int> new_var_int_(nvar,-999);
+  vector<float> new_var_flt_(nvar,-999);
+  vector<double> new_var_dbl_(nvar,-999);
+  deque<bool> new_var_bool_(nvar, false); // vector<bool>is not a vector in C++... so can't pass bools by reference
+  vector<vector<int> * > new_var_vint_(nvar);
+  vector<vector<float> * > new_var_vflt_(nvar);
+  vector<vector<double> * > new_var_vdbl_(nvar);
+  vector<vector<bool> * > new_var_vbool_(nvar);
+  
+  //Branches
+  int nleps_=0, mgluino_(0);
+  oldtree->SetBranchAddress("nleps",&nleps_);
+  oldtree->SetBranchAddress("mgluino",&mgluino_);
+
+  for(int ibch=0; ibch<nvar; ibch++){
+    switch (ivar_type[ibch]){
+    default:
+    case kInt:
+      new_var_int_[ibch]   = 0;  oldtree->SetBranchAddress(var[ibch], &new_var_int_[ibch]);  break;
+    case kFloat:
+      new_var_flt_[ibch]   = 0;  oldtree->SetBranchAddress(var[ibch], &new_var_flt_[ibch]);  break;
+    case kDouble:
+      new_var_dbl_[ibch]   = 0;  oldtree->SetBranchAddress(var[ibch], &new_var_dbl_[ibch]);  break;
+    case kBool:
+      new_var_bool_[ibch]  = 0;  oldtree->SetBranchAddress(var[ibch], &new_var_bool_[ibch]); break;
+    case kvInt:
+      new_var_vint_[ibch]  = 0;  oldtree->SetBranchAddress(var[ibch], &new_var_vint_[ibch]); break;
+    case kvFloat:
+      new_var_vflt_[ibch]  = 0;  oldtree->SetBranchAddress(var[ibch], &new_var_vflt_[ibch]); break;
+    case kvDouble:
+      new_var_vdbl_[ibch]  = 0;  oldtree->SetBranchAddress(var[ibch], &new_var_vdbl_[ibch]); break;
+    case kvBool:
+      new_var_vbool_[ibch] = 0;  oldtree->SetBranchAddress(var[ibch], &new_var_vbool_[ibch]);break;
+    }
+  }
+
+  //Set up new tree
+  name.ReplaceAll(".root","_renorm.root");
+  TFile* newfile = new TFile(outdir+name,"recreate");
+  TTree* newtree = oldtree->CloneTree(0);
+
+  //Loop and fill events with new weights
+  int nentries = oldtree->GetEntries();
+  for(int i=0; i<nentries; i++){
+    oldtree->GetEntry(i);
+
+    if((i<100&&i%10==0) || (i<1000&&i%100==0) || (i<10000&&i%1000==0) || (i%10000==0) || (i+1==nentries)){
+            printf("\r[Change Branch One] Processsing File: %i / %i (%i%%)",i,nentries,static_cast<int>(((i+1.)*100./nentries)));
+        fflush(stdout);
+        if(i+1==nentries) printf("\n");
+    }
+   
+    float minpdf(1e10);
+    
+    //Set vars
+    for(int iset=0; iset<nvar; iset++){
+      // Hack to recompute sys_pdf[1] which had a 1e-3 cut
+      if(var[iset].Contains("w_pdf")){
+	for(unsigned int isys=0;isys<new_var_vflt_[iset]->size();isys++)  
+	  if(new_var_vflt_[iset]->at(isys) < minpdf) minpdf = new_var_vflt_[iset]->at(isys);
+      }      
+      if(isLep[iset] && nleps_!=0) continue; // For lepton scale factors    
+      // Hack for empty pdf branches
+      if(var[iset].Contains("w_pdf")){
+	if(new_var_vflt_[iset]->size()==0){
+	  new_var_vflt_[iset]->resize(100,1);
+	  cout<<"\n[Change Branch One] WARNING: Empty branch of \"w_pdf\". Setting values to 1"<<endl;
+	  continue;
+	}
+      }
+      else if(var[iset].Contains("sys_pdf")){
+	if(new_var_vflt_[iset]->size()==0){
+	  new_var_vflt_[iset]->resize(2,1);
+	  cout<<"[Change Branch One] WARNING: Empty branch of \"sys_pdf\". Setting values to 1"<<endl;
+	  continue;
+	}
+      }
+      for(unsigned int vidx=0; vidx<var_val[iset].size(); vidx++){
+	if(!multiply[iset][vidx]){
+	  switch (ivar_type[iset]){
+	  default:
+	  case kInt:     new_var_int_[iset]              =  var_val[iset][vidx].Atoi();  break;
+	  case kFloat:   new_var_flt_[iset]              =  var_val[iset][vidx].Atof();  break;
+	  case kDouble:  new_var_dbl_[iset]              =  static_cast<double>(var_val[iset][vidx].Atof());  break;
+	  case kBool:    new_var_bool_[iset]             =  var_val[iset][vidx].Atoi();  break;
+	  case kvInt:    new_var_vint_[iset]->at(vidx)   =  var_val[iset][vidx].Atoi();  break;
+	  case kvFloat:  new_var_vflt_[iset]->at(vidx)   =  var_val[iset][vidx].Atof();  break;
+	  case kvDouble: new_var_vdbl_[iset]->at(vidx)   =  static_cast<double>(var_val[iset][vidx].Atof());  break;
+	  case kvBool:   new_var_vbool_[iset]->at(vidx)  =  var_val[iset][vidx].Atoi();  break;
+	  }
+	} else {
+	  switch (ivar_type[iset]){
+	  default:
+	  case kInt:     new_var_int_[iset]             *=  var_val[iset][vidx].Atoi();  break;
+	  case kFloat:   new_var_flt_[iset]             *=  var_val[iset][vidx].Atof();  break;
+	  case kDouble:  new_var_dbl_[iset]             *=  static_cast<double>(var_val[iset][vidx].Atof());  break;
+	  case kvInt:    new_var_vint_[iset]->at(vidx)  *=  var_val[iset][vidx].Atoi();  break;
+	  case kvFloat:  new_var_vflt_[iset]->at(vidx)  *=  var_val[iset][vidx].Atof();  break;
+	  case kvDouble: new_var_vdbl_[iset]->at(vidx)  *=  static_cast<double>(var_val[iset][vidx].Atof());  break;
+	  case kBool:
+	  case kvBool:
+	    cout<<"[Change Branch One] WARNING: You cannot multiply Booleans. Skipping branch"<<endl;
+	    break;
+	  }
+	} // if multiply
+      } // Loop over elements in each variable
+      if(var[iset].Contains("sys_pdf")){
+      	new_var_vflt_[iset]->at(1) = minpdf*var_val[iset][1].Atof(); 
+      }
+    } // Loop over variables
+    newtree->Fill();
+  }
+  
+  unsigned int new_nev_sample(0);
+  float new_xsec(0.);
+  double xsec(0.), exsec(0.);
+  oldtreeglobal->SetBranchAddress("nev_sample", &new_nev_sample);
+  if(mgluino_>0) oldtreeglobal->SetBranchAddress("xsec", &new_xsec);
+  TTree* newtreeglobal = oldtreeglobal->CloneTree(0);
+  long nentriesg = oldtreeglobal->GetEntries();
+  for(int i=0; i<nentriesg; i++){
+    oldtreeglobal->GetEntry(i);
+    new_nev_sample = totentries;
+    if(mgluino_>0) {
+      xsec::signalCrossSection(mgluino_, xsec, exsec);
+      new_xsec = xsec;
+    }
+    newtreeglobal->Fill();
+  }
+  //Save tree
+  newtree->AutoSave();
+  newtreeglobal->AutoSave();
+  delete oldfile;
+  delete newfile;
+  return nentries;
+}
 
 // Returns list of directorites or files in folder
 vector<TString> dirlist(const TString &folder,
@@ -161,182 +354,6 @@ int change_branch_one(TString indir, TString name, TString outdir, vector<TStrin
 	    new_var_vdbl_[iset]->at(vidx) *= static_cast<double>(var_val[iset].Atof());
       }
     }
-    newtree->Fill();
-  }
-  
-  //Save tree
-  newtree->AutoSave();
-  newtreeglobal->AutoSave();
-  delete oldfile;
-  delete newfile;
-  return nentries;
-}
-
-int change_branch_one(TString indir, TString name, TString outdir, vector<TString> var_type, vector<TString> var,  
-		      vector<vector<TString> > var_val){
-
-  if(var_type.size()!=var.size() || var_type.size()!=var_val.size())
-    { cout<<"[Change Branch One] ERROR: Branch vectors are not the same size"<<endl; exit(0); }
-
-  const int nvar = var.size();
-
-  //Setup
-  vector<varType> ivar_type;
-  vector<bool> isLep(nvar, false);
-  vector<vector<bool> > multiply(nvar);
-  for(int isetup=0; isetup<nvar; isetup++){
-    size_t vlength(var_val[isetup].size());
-    multiply[isetup] = vector<bool>(vlength, false);
-    //Set multiply
-    for(unsigned int idx=0; idx<vlength; idx++){
-      if(var_val[isetup][idx].BeginsWith("*") || var_val[isetup][idx].EndsWith("*")){
-	var_val[isetup][idx].Remove(TString::kBoth,'*');
-	multiply[isetup][idx]=true;
-      }
-    }
-    
-    //Handle bools
-    if(var_type[isetup]=="bool" || var_type[isetup]=="vbool"){
-      for(unsigned int idx=0; idx<var_val[isetup].size(); idx++){
-	if(var_val[isetup][idx]=="true")
-	  var_val[isetup][idx]="1";
-	else if(var_val[isetup][idx]=="false")
-	  var_val[isetup][idx]="0";
-      }
-    }
-
-    // Converting string types to int and bool for speed
-    if(var[isetup].Contains("_lep"))  isLep[isetup] = true;
-
-    if(var_type[isetup]=="int")          ivar_type.push_back(kInt);
-    else if(var_type[isetup]=="float")   ivar_type.push_back(kFloat);
-    else if(var_type[isetup]=="double")  ivar_type.push_back(kDouble);
-    else if(var_type[isetup]=="bool")    ivar_type.push_back(kBool);
-    else if(var_type[isetup]=="vint")    ivar_type.push_back(kvInt);
-    else if(var_type[isetup]=="vfloat")  ivar_type.push_back(kvFloat);
-    else if(var_type[isetup]=="vdouble") ivar_type.push_back(kvDouble);
-    else if(var_type[isetup]=="vbool")   ivar_type.push_back(kvBool);
-    else {
-      cout<<"var_type "<<var_type[isetup]<<" not supported. Exiting"<<endl;
-      exit(1);
-    }
-  } // Loop over variables
-
-  //Set up old tree and branch
-  TFile* oldfile = new TFile(indir+name);
-  TTree* oldtree = static_cast<TTree*>(oldfile->Get("tree"));
-  TTree* oldtreeglobal = static_cast<TTree*>(oldfile->Get("treeglobal"));
-  
-  vector<int> new_var_int_(nvar,-999);
-  vector<float> new_var_flt_(nvar,-999);
-  vector<double> new_var_dbl_(nvar,-999);
-  deque<bool> new_var_bool_(nvar, false); // vector<bool>is not a vector in C++... so can't pass bools by reference
-  vector<vector<int> * > new_var_vint_(nvar);
-  vector<vector<float> * > new_var_vflt_(nvar);
-  vector<vector<double> * > new_var_vdbl_(nvar);
-  vector<vector<bool> * > new_var_vbool_(nvar);
-
-  //Branches
-  int nleps_=0;
-  oldtree->SetBranchAddress("nleps",&nleps_);
-
-  for(int ibch=0; ibch<nvar; ibch++){
-    switch (ivar_type[ibch]){
-    default:
-    case kInt:
-      new_var_int_[ibch]   = 0;  oldtree->SetBranchAddress(var[ibch], &new_var_int_[ibch]);  break;
-    case kFloat:
-      new_var_flt_[ibch]   = 0;  oldtree->SetBranchAddress(var[ibch], &new_var_flt_[ibch]);  break;
-    case kDouble:
-      new_var_dbl_[ibch]   = 0;  oldtree->SetBranchAddress(var[ibch], &new_var_dbl_[ibch]);  break;
-    case kBool:
-      new_var_bool_[ibch]  = 0;  oldtree->SetBranchAddress(var[ibch], &new_var_bool_[ibch]); break;
-    case kvInt:
-      new_var_vint_[ibch]  = 0;  oldtree->SetBranchAddress(var[ibch], &new_var_vint_[ibch]); break;
-    case kvFloat:
-      new_var_vflt_[ibch]  = 0;  oldtree->SetBranchAddress(var[ibch], &new_var_vflt_[ibch]); break;
-    case kvDouble:
-      new_var_vdbl_[ibch]  = 0;  oldtree->SetBranchAddress(var[ibch], &new_var_vdbl_[ibch]); break;
-    case kvBool:
-      new_var_vbool_[ibch] = 0;  oldtree->SetBranchAddress(var[ibch], &new_var_vbool_[ibch]);break;
-    }
-  }
-
-  //Set up new tree
-  name.ReplaceAll(".root","_renorm.root");
-  TFile* newfile = new TFile(outdir+name,"recreate");
-  TTree* newtree = oldtree->CloneTree(0);
-  TTree* newtreeglobal = oldtreeglobal->CloneTree();
-
-  //Loop and fill events with new weights
-  int nentries = oldtree->GetEntries();
-  for(int i=0; i<nentries; i++){
-    oldtree->GetEntry(i);
-
-    if((i<100&&i%10==0) || (i<1000&&i%100==0) || (i<10000&&i%1000==0) || (i%10000==0) || (i+1==nentries)){
-            printf("\r[Change Branch One] Processsing File: %i / %i (%i%%)",i,nentries,static_cast<int>(((i+1.)*100./nentries)));
-        fflush(stdout);
-        if(i+1==nentries) printf("\n");
-    }
-   
-    float minpdf(1e10);
-    
-    //Set vars
-    for(int iset=0; iset<nvar; iset++){
-      // Hack to recompute sys_pdf[1] which had a 1e-3 cut
-      if(var[iset].Contains("w_pdf")){
-	for(unsigned int isys=0;isys<new_var_vflt_[iset]->size();isys++)  
-	  if(new_var_vflt_[iset]->at(isys) < minpdf) minpdf = new_var_vflt_[iset]->at(isys);
-      }      
-      if(isLep[iset] && nleps_!=0) continue; // For lepton scale factors    
-      // Hack for empty pdf branches
-      if(var[iset].Contains("w_pdf")){
-	if(new_var_vflt_[iset]->size()==0){
-	  new_var_vflt_[iset]->resize(100,1);
-	  cout<<"\n[Change Branch One] WARNING: Empty branch of \"w_pdf\". Setting values to 1"<<endl;
-	  continue;
-	}
-      }
-      else if(var[iset].Contains("sys_pdf")){
-	if(new_var_vflt_[iset]->size()==0){
-	  new_var_vflt_[iset]->resize(2,1);
-	  cout<<"[Change Branch One] WARNING: Empty branch of \"sys_pdf\". Setting values to 1"<<endl;
-	  continue;
-	}
-      }
-      for(unsigned int vidx=0; vidx<var_val[iset].size(); vidx++){
-	if(!multiply[iset][vidx]){
-	  switch (ivar_type[iset]){
-	  default:
-	  case kInt:     new_var_int_[iset]              =  var_val[iset][vidx].Atoi();  break;
-	  case kFloat:   new_var_flt_[iset]              =  var_val[iset][vidx].Atof();  break;
-	  case kDouble:  new_var_dbl_[iset]              =  static_cast<double>(var_val[iset][vidx].Atof());  break;
-	  case kBool:    new_var_bool_[iset]             =  var_val[iset][vidx].Atoi();  break;
-	  case kvInt:    new_var_vint_[iset]->at(vidx)   =  var_val[iset][vidx].Atoi();  break;
-	  case kvFloat:  new_var_vflt_[iset]->at(vidx)   =  var_val[iset][vidx].Atof();  break;
-	  case kvDouble: new_var_vdbl_[iset]->at(vidx)   =  static_cast<double>(var_val[iset][vidx].Atof());  break;
-	  case kvBool:   new_var_vbool_[iset]->at(vidx)  =  var_val[iset][vidx].Atoi();  break;
-	  }
-	} else {
-	  switch (ivar_type[iset]){
-	  default:
-	  case kInt:     new_var_int_[iset]             *=  var_val[iset][vidx].Atoi();  break;
-	  case kFloat:   new_var_flt_[iset]             *=  var_val[iset][vidx].Atof();  break;
-	  case kDouble:  new_var_dbl_[iset]             *=  static_cast<double>(var_val[iset][vidx].Atof());  break;
-	  case kvInt:    new_var_vint_[iset]->at(vidx)  *=  var_val[iset][vidx].Atoi();  break;
-	  case kvFloat:  new_var_vflt_[iset]->at(vidx)  *=  var_val[iset][vidx].Atof();  break;
-	  case kvDouble: new_var_vdbl_[iset]->at(vidx)  *=  static_cast<double>(var_val[iset][vidx].Atof());  break;
-	  case kBool:
-	  case kvBool:
-	    cout<<"[Change Branch One] WARNING: You cannot multiply Booleans. Skipping branch"<<endl;
-	    break;
-	  }
-	} // if multiply
-      } // Loop over elements in each variable
-      if(var[iset].Contains("sys_pdf")){
-      	new_var_vflt_[iset]->at(1) = minpdf*var_val[iset][1].Atof(); 
-      }
-    } // Loop over variables
     newtree->Fill();
   }
   

@@ -63,7 +63,7 @@ int main(int argc, char *argv[]){
     //Progress meter
     if((ientry<100&&ientry%10==0) || (ientry<1000&&ientry%100==0) || (ientry<10000&&ientry%1000==0) || (ientry%10000==0) 
        || (ientry+1==nentries)){
-      printf("\r[Change Weights] Calculating Weights: %i / %i (%i%%)",ientry+1,nentries,
+      printf("\r[Change Weights] Calculating Weights: %i / %i (%i%%)",ientry,nentries,
 	     static_cast<int>(((ientry+1.)*100./nentries)));
       fflush(stdout);
       if(ientry+1==nentries) printf("\n");
@@ -89,7 +89,10 @@ int main(int argc, char *argv[]){
     float minpdf(1e10);
     for(unsigned int isys=0;isys<ch.w_pdf().size();isys++)  
       if(ch.w_pdf()[isys] < minpdf) minpdf = ch.w_pdf()[isys];
-    sum_pdf_min += minpdf;
+    if(ch.w_pdf().size()==0)
+      sum_pdf_min += 1;
+    else
+      sum_pdf_min += minpdf;
 				      
     //Lepton weights
     if(ch.nleps()==0) nent_zlep++;
@@ -110,7 +113,7 @@ int main(int argc, char *argv[]){
   time(&endtime); 
   int seconds = difftime(endtime, begtime);
   float hertz = nentries; hertz /= seconds;
-  cout<<"Calculating sum of weights took "<<seconds<<" seconds ("<<hoursMinSec(seconds)<<") for "<<nentries
+  cout<<"[Change Weights] Completed in "<<seconds<<" seconds ("<<hoursMinSec(seconds)<<") for "<<nentries
       <<" events -> "<<roundNumber(hertz,1,1000)<<" kHz, "<<roundNumber(1000,2,hertz)<<" ms per event"<<endl<<endl;
 
   //Set type and var name

@@ -935,7 +935,7 @@ void bmaker_basic::writeGenInfo(edm::Handle<LHEEventProduct> lhe_info){
 
   } // Loop over generator particles
   
-  if(outname.Contains("T1tttt")){ //Get mgluino and mlsp
+  if(outname.Contains("T1tttt") || outname.Contains("T5ZZ") || outname.Contains("T5qqqqVV") ){ //Get mgluino and mlsp
     
     typedef std::vector<std::string>::const_iterator comments_const_iterator;
     
@@ -946,7 +946,7 @@ void bmaker_basic::writeGenInfo(edm::Handle<LHEEventProduct> lhe_info){
     for(comments_const_iterator cit=c_begin; cit!=c_end; ++cit) {
       size_t found = (*cit).find("model");
       if(found != std::string::npos)   {
-        //std::cout << *cit <<"end"<< std::endl;  
+	//    std::cout <<"BABYMAKER: "<< *cit <<"end"<< std::endl;  
         model_params = *cit;
       }
     }
@@ -971,11 +971,19 @@ void bmaker_basic::writeMC(edm::Handle<reco::GenParticleCollection> genParticles
     bool lastTop(mcTool->isLast(mc,6));
     bool lastGluino(mcTool->isLast(mc,1000021));
     bool lastLSP(mcTool->isLast(mc,1000022));
+    bool lastChi02(mcTool->isLast(mc,1000023));
+    bool lastChi11(mcTool->isLast(mc,1000024));
     bool lastZ(mcTool->isLast(mc,23));
+    bool lastW(mcTool->isLast(mc,24));
+    bool lastGravitino(mcTool->isLast(mc,1000039));
     bool bFromTop(id==5 && momid==6);
+    bool nuFromZ((id==12 || id==14 || id==16) && momid==23);
     bool eFromTopZ(id==11 && (momid==24 || momid==23));
     bool muFromTopZ(id==13 && (momid==24 || momid==23));
-    bool tauFromTop(id==15 && momid==24);
+    bool tauFromTopZ(id==15 && (momid==24 || momid==23));
+  
+
+
     bool fromWOrWTau(mcTool->fromWOrWTau(mc));
     
     //////// Finding p4 of ME ISR system
@@ -983,7 +991,7 @@ void bmaker_basic::writeMC(edm::Handle<reco::GenParticleCollection> genParticles
        (lastZ && outname.Contains("DY"))) isr_p4 -= mc.p4();
 
     //////// Saving interesting true particles
-    if(lastTop || lastGluino || lastLSP || lastZ || bFromTop || eFromTopZ || muFromTopZ || tauFromTop || fromWOrWTau) {
+    if(lastTop || lastGluino || lastLSP || lastChi02 || lastChi11 || lastGravitino || lastZ || lastW || bFromTop || eFromTopZ || muFromTopZ || tauFromTopZ || nuFromZ || fromWOrWTau) {
       baby.mc_id().push_back(mc.pdgId());
       baby.mc_pt().push_back(mc.pt());
       baby.mc_eta().push_back(mc.eta());
@@ -999,7 +1007,7 @@ void bmaker_basic::writeMC(edm::Handle<reco::GenParticleCollection> genParticles
     //////// Counting true leptons
     if(muFromTopZ) baby.ntrumus()++;
     if(eFromTopZ)  baby.ntruels()++;
-    if(tauFromTop){
+    if(tauFromTopZ){
       const reco::GenParticle *tauDaughter(0);
       if(mcTool->decaysTo(mc, 11, tauDaughter) || mcTool->decaysTo(mc, 13, tauDaughter)){
         baby.mc_id().push_back(tauDaughter->pdgId());

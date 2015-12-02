@@ -24,6 +24,12 @@ namespace xsec{
     if(file.Contains("T2tt") && file.Contains("650_"))  xsec = 0.107045;
     if(file.Contains("T2tt") && file.Contains("850_"))  xsec = 0.0189612;
 
+    //NOTE: When you add more topologies, make sure to also add them to list of things to parse for model parameters (search "cit" in bmaker_basic.cc)
+
+    if(file.Contains("T5ZZ")) xsec = 1.0; //filler
+    if(file.Contains("T5qqqqVV")) xsec = 1.0;
+
+
     if(file.Contains("SMS-T2tt_2J_mStop-425_mLSP-325"))  xsec = 1.31169;
     if(file.Contains("SMS-T2tt_2J_mStop-500_mLSP-325"))  xsec = 0.51848;
     if(file.Contains("SMS-T1bbbb_2J_mGl-1500_mLSP-100"))  xsec = 0.0141903;

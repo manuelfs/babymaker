@@ -12,6 +12,7 @@
 
 #include "baby_basic.hh"
 #include "utilities.hh"
+#include "cross_sections.hh"
 
 using namespace std;
 
@@ -42,8 +43,6 @@ int main(int argc, char *argv[]){
   //Setup chains
   baby_basic ch((folder+sample).Data());         
   ch.GetEntry(0); //Set branches to get size
-  TChain tglobal("treeglobal"); tglobal.Add(folder+sample);
-  float xsec = tglobal.GetMaximum("xsec");
  
   vector<TString> var_type, var; 
   vector<vector<TString> > var_val(NSYSTS);
@@ -110,6 +109,8 @@ int main(int argc, char *argv[]){
   sum_spdf[1] = sum_pdf_min;
 
   const float luminosity = 1000.;
+  double xsec(0.), exsec(0.);
+  xsec::signalCrossSection(ch.mgluino(), xsec, exsec);
   float w_lumi = xsec*luminosity / nent_eff;
   float w_lumi_corr = w_lumi / fabs(ch.w_lumi());
 

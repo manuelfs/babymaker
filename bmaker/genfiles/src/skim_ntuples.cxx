@@ -4,6 +4,7 @@
 
 #include "utilities.hh"
 
+#include <ctime>
 #include <fstream>
 #include <iostream>
 #include <cmath>
@@ -26,21 +27,27 @@ using std::endl;
 void onefile_skim(TString infiles, TString outfolder, TString cuts);
 
 int main(int argc, char *argv[]){
+  time_t startTime;
+  time(&startTime);
 
   if(argc < 3) {
     cout<<endl<<"Required at least 2 arguments: "
-	<<"./plot/skim_ntuples.exe infolder outfolder [cuts=\"ht>500&&met>200\"] "
+	<<"./plot/skim_ntuples.exe infolder outfolder [cuts=\"nleps==1&&ht>500&&met>200&&njets>=6&&nbm>=1&&mj>250\"] "
 	<<"[njobs=-1] [ijob=-1]"<<endl<<endl;;
     return 1;
   }
-  TString folder(argv[1]), outfolder(argv[2]), cuts="ht>500&&met>200";
+  TString folder(argv[1]), outfolder(argv[2]), cuts="nleps==1&&ht>500&&met>200&&njets>=6&&nbm>=1&&mj>250";
   if(argc >= 4) cuts = argv[3]; 
   unsigned njobs(0), ijob(0);
   if(argc >= 6) {
     njobs = atoi(argv[4]);
     ijob  = atoi(argv[5]);
   }
-  vector<TString> files = dirlist(folder, ".root");
+  if(cuts=="abcd") cuts="nleps==1&&ht>500&&met>200&&njets>=6&&nbm>=1&&mj>250";
+  if(cuts=="sys_abcd") 
+    cuts = "nleps==1&&max(ht,Max$(sys_ht))>500&&max(met,Max$(sys_met))>200&&max(njets,Max$(sys_njets))>=6&&max(nbm,Max$(sys_nbm))>=1&&max(mj,Max$(sys_mj))>250";
+		     
+  vector<TString> files = dirlist(folder, "*.root");
   unsigned nfiles(files.size()), ini(0), end(nfiles);
   if(njobs>0){
     if(ijob<1 || ijob>njobs){
@@ -61,7 +68,10 @@ int main(int argc, char *argv[]){
   for(unsigned file(ini); file < end; file++){
     onefile_skim(folder+"/"+files[file], outfolder, cuts);
   }
-  return 0;
+
+  time_t curTime;
+  time(&curTime);
+  cout<<endl<<"Took "<< difftime(curTime,startTime)<<" seconds to skim "<< end-ini<<" files."<<endl<<endl;
 }
 
 void onefile_skim(TString infiles, TString outfolder, TString cuts){
@@ -76,6 +86,7 @@ void onefile_skim(TString infiles, TString outfolder, TString cuts){
   outfile.ReplaceAll(">","g"); outfile.ReplaceAll("<","s"); outfile.ReplaceAll("=","");
   outfile.ReplaceAll("(",""); outfile.ReplaceAll(")",""); outfile.ReplaceAll("+","");
   outfile.ReplaceAll("[",""); outfile.ReplaceAll("]",""); outfile.ReplaceAll("|","_");
+  outfile.ReplaceAll("$",""); outfile.ReplaceAll(",","_");
   outfile = outfolder+outfile;
 
   // Checking if output file exists

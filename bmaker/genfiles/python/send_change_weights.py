@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-###### Script to send jobs to the batch changing weights to 20 signal files at a time
+###### Script to send 40 jobs to the batch changing weights to the signal scan
 import os, sys, subprocess
 import pprint
 import glob
@@ -9,8 +9,8 @@ import string
 import time
 
 # Setting folders
-infolder  = "/net/cms2/cms2r0/babymaker/babies/2015_11_27/sms/split_sms/"
-outfolder = "outsms/" 
+infolder  = "/net/cms2/cms2r0/babymaker/babies/2015_11_27/sms/split_sms4/"
+outfolder = "outsms2/" 
 runfolder = outfolder+"run/" 
 if not os.path.exists(runfolder):
   os.system("mkdir -p "+runfolder)
@@ -19,7 +19,8 @@ if not os.path.exists(runfolder):
 inputfiles = [i for i in os.listdir(infolder) if "SMS" in i]
 
 os.system("JobSetup.csh")
-files_job = 20
+njobs = 40
+files_job = (len(inputfiles)+njobs-1)/njobs
 ifile = 0
 ijob = 0
 for file in inputfiles:

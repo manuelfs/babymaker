@@ -103,13 +103,14 @@ int main(int argc, char *argv[]){
     else cout<<"Could not find tree in "<<infiles<<endl;
     if(ctreeglobal)  ctreeglobal->Write();
     else cout<<"Could not find treeglobal in "<<infiles<<endl;
-    cout<<"Written "<<outfile<<" with "<<ctree->GetEntries()<<" entries."<<endl;
-    out_rootfile.Close();
-
+    
     time_t endloop;
     time(&endloop);
     int secs(floor(difftime(endloop,startloop)+0.5));
-    cout<<"took "<<secs<<" seconds to copy tree"<<endl;
+    cout<<"Written "<<outfile<<" with "<<ctree->GetEntries()<<" entries in "<<secs<<" seconds"<<endl;
+    out_rootfile.Close();
   }
+  time(&curTime);
+  cout<<"Took "<< difftime(curTime,startTime)<<" seconds to skim "<< pair_cuts.size()<<" files."<<endl;
 }
 

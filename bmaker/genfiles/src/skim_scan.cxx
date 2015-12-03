@@ -40,7 +40,7 @@ int main(int argc, char *argv[]){
     njobs = atoi(argv[4]);
     ijob  = atoi(argv[5]);
   }
-  vector<TString> files = dirlist(folder, ".root");
+  vector<TString> files = dirlist(folder, "*.root");
   unsigned nfiles(files.size()), ini(0), end(nfiles);
   if(njobs>0){
     if(ijob<1 || ijob>njobs){

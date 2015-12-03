@@ -1,7 +1,6 @@
 #include <ctime>
 #include <iostream>
 #include "TFile.h"
-#include "TRegexp.h"
 #include "TString.h"
 #include "TTree.h"
 
@@ -33,14 +32,10 @@ int main(int argc, char *argv[]){
     var_val.push_back(argv[ivar+2]);
   }
 
-  vector<TString> files = dirlist(folder,".root");
-  TRegexp regex(sample,true);
-  
+  vector<TString> files = dirlist(folder,sample);
   for(unsigned int i=0; i<files.size(); i++){
-    if(files[i].Contains(regex)){
-      if(i%100==0) cout<<"[Change Branch] File #"<<i+1<<"/"<<files.size()<<endl;
-      change_branch_one(folder, files[i], outfolder, var_type, var, var_val);
-    }
+    if(i%100==0) cout<<"[Change Branch] File #"<<i+1<<"/"<<files.size()<<endl;
+    change_branch_one(folder, files[i], outfolder, var_type, var, var_val);
   }
 
   time(&endtime); 

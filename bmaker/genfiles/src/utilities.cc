@@ -91,8 +91,13 @@ int change_branch_one(TString indir, TString name, TString outdir, vector<TStrin
   vector<vector<double> * > new_var_vdbl_(nvar);
   vector<vector<bool> * > new_var_vbool_(nvar);
   
+  // Hack to protect total weight from NaN, and not include w_pu
+  float w_lumi(1.), w_lep(1.), w_fs_lep(1.), w_toppt(1.), w_btag(1.), w_corr(1.);
+
   //Branches
   int nleps_=0, mgluino_(0);
+  float eff_trig_(0);
+  oldtree->SetBranchAddress("eff_trig",&eff_trig_);
   oldtree->SetBranchAddress("nleps",&nleps_);
   oldtree->SetBranchAddress("mgluino",&mgluino_);
 
@@ -129,10 +134,12 @@ int change_branch_one(TString indir, TString name, TString outdir, vector<TStrin
     //if(i==10) break;
     oldtree->GetEntry(i);
 
+    w_corr = 1;
+
     if((i<100&&i%10==0) || (i<1000&&i%100==0) || (i<10000&&i%1000==0) || (i%10000==0) || (i+1==nentries)){
-            printf("\r[Change Branch One] Processsing File: %i / %i (%i%%)",i,nentries,static_cast<int>(((i+1.)*100./nentries)));
-        fflush(stdout);
-        if(i+1==nentries) printf("\n");
+      printf("\r[Change Branch One] Processsing File: %i / %i (%i%%)",i,nentries,static_cast<int>(((i+1.)*100./nentries)));
+      fflush(stdout);
+      if(i+1==nentries) printf("\n");
     }
    
     float minpdf(1e10);
@@ -144,7 +151,14 @@ int change_branch_one(TString indir, TString name, TString outdir, vector<TStrin
 	for(unsigned int isys=0;isys<new_var_vflt_[iset]->size();isys++)  
 	  if(new_var_vflt_[iset]->at(isys) < minpdf) minpdf = new_var_vflt_[iset]->at(isys);
       }      
-      if(isLep[iset] && nleps_!=0) continue; // For lepton scale factors    
+      if(isLep[iset] && nleps_!=0) {
+	// Hack to protect total weight from NaN, and not include w_pu
+	if(var[iset].Contains("w_lep"))    w_lep    = noNaN(new_var_flt_[iset]);
+	if(var[iset].Contains("w_fs_lep")) w_fs_lep = noNaN(new_var_flt_[iset]);
+	continue; // For lepton scale factors    
+      }
+      if(var[iset].Contains("w_toppt"))  {w_toppt  = noNaN(new_var_flt_[iset]); w_corr *= var_val[iset][0].Atof(); }
+      if(var[iset].Contains("w_btag"))   {w_btag   = noNaN(new_var_flt_[iset]); w_corr *= var_val[iset][0].Atof(); }
       // Hack for empty pdf branches
       if(var[iset].Contains("w_pdf")){
 	if(new_var_vflt_[iset]->size()==0){
@@ -191,10 +205,18 @@ int change_branch_one(TString indir, TString name, TString outdir, vector<TStrin
 	if(ivar_type[iset] == kFloat)  new_var_flt_[iset] = noNaN(new_var_flt_[iset]);
 	if(ivar_type[iset] == kvFloat) new_var_vflt_[iset]->at(vidx) = noNaN(new_var_vflt_[iset]->at(vidx));
       } // Loop over elements in each variable
-      if(var[iset].Contains("sys_pdf")){
-      	new_var_vflt_[iset]->at(1) = minpdf*var_val[iset][1].Atof(); 
-      }
+      if(var[iset].Contains("sys_pdf")) new_var_vflt_[iset]->at(1) = minpdf*var_val[iset][1].Atof(); 
+
+      // Hack to protect total weight from NaN, and not include w_pu
+      if(var[iset].Contains("w_lep"))    {w_lep    = new_var_flt_[iset]; w_corr *= var_val[iset][0].Atof(); }
+      if(var[iset].Contains("w_fs_lep")) {w_fs_lep = new_var_flt_[iset]; w_corr *= var_val[iset][0].Atof(); }
+      if(var[iset].Contains("w_lumi"))   {w_lumi   = new_var_flt_[iset]; w_corr *= var_val[iset][0].Atof(); }
     } // Loop over variables
+    // Hack to protect total weight from NaN, and not include w_pu
+    for(int iset=0; iset<nvar; iset++)
+      if(var[iset].Contains("weight"))
+	new_var_flt_[iset] = w_lep * w_fs_lep * w_toppt * w_btag * w_lumi * eff_trig_ * var_val[iset][0].Atof();
+
     newtree->Fill();
   }
   

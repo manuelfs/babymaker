@@ -46,7 +46,7 @@ int main(int argc, char *argv[]){
  
   vector<TString> var_type, var; 
   vector<vector<TString> > var_val(NSYSTS);
-  double nent_eff=0, sum_weff=0, sum_btag=0, sum_pu=0, sum_toppt=0;
+  double nent_eff=0, sum_weff_l0=0, sum_weff_l1=0, sum_btag=0, sum_pu=0, sum_toppt=0;
   vector<double> sum_wpdf(ch.w_pdf().size(),0);
   vector<double> sum_bctag(ch.sys_bctag().size()), sum_udsgtag(ch.sys_udsgtag().size());
   vector<double> sum_fs_bctag(ch.sys_fs_bctag().size()), sum_fs_udsgtag(ch.sys_fs_udsgtag().size());
@@ -72,7 +72,6 @@ int main(int argc, char *argv[]){
     }
 
     if(ch.w_lumi()>0) nent_eff ++; else nent_eff--;
-    sum_weff  +=  noNaN(ch.weight()/(ch.eff_trig()*ch.w_lumi()));
     sum_btag  +=  noNaN(ch.w_btag());
     sum_pu    +=  noNaN(ch.w_pu());
     sum_toppt +=  noNaN(ch.w_toppt());
@@ -96,9 +95,13 @@ int main(int argc, char *argv[]){
     else
       sum_pdf_min += minpdf;
 				      
+    double weight = noNaN(ch.w_lep()) * noNaN(ch.w_fs_lep()) * noNaN(ch.w_toppt()) * noNaN(ch.w_btag());
     //Lepton weights
-    if(ch.nleps()==0) nent_zlep++;
-    else{
+    if(ch.nleps()==0) {
+      nent_zlep++;
+      sum_weff_l0  += weight;
+    } else{
+      sum_weff_l1  += weight;
       sum_wlep     +=  ch.w_lep();
       sum_fs_wlep  +=  ch.w_fs_lep();
       for(unsigned int isys=0;isys<ch.sys_lep().size();isys++)        sum_slep[isys]        +=  ch.sys_lep().at(isys);
@@ -141,8 +144,11 @@ int main(int argc, char *argv[]){
   var_type.push_back("vfloat");     var.push_back("sys_fs_lep");
   var_type.push_back("float");      var.push_back("w_lumi");            
 
+  // cout<<"sum_weff "<<sum_weff<<", wcorr "<<nent_eff*w_lumi_corr/sum_weff<<", nent "<<nent_eff<<
+  //   ", w_lumi_corr "<<w_lumi_corr<<endl;
   //Calculate weights
-  var_val[0].push_back("*"+to_string(nent_eff*w_lumi_corr/sum_weff));
+  float w_corr_l0 = (nent_eff-sum_wlep)/nent_zlep * (nent_eff-sum_fs_wlep)/nent_zlep;
+  var_val[0].push_back("*"+to_string(nent_eff/(sum_weff_l0*w_corr_l0 + sum_weff_l1)));
   var_val[1].push_back("*"+to_string(nent_eff/sum_btag));
   var_val[2].push_back("*"+to_string(nent_eff/sum_pu));
   var_val[3].push_back("*"+to_string(nent_eff/sum_toppt));

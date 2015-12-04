@@ -7,6 +7,7 @@
 
 #include <cstddef>
 #include <cstdio>
+#include <iostream>
 #include <cmath>
 
 #include <string>
@@ -55,7 +56,12 @@ std::vector<TString> dirlist(const TString &folder,
                              const TString &tag="");
 
 template<class T>
-bool is_nan(const T &x){return x!=x;}
+T noNaN(T val, T defval=1.){
+  if(isnan(val)) {
+    std::cout<<"Value is NaN. Returning "<<defval<<std::endl;
+    return defval;
+  } else return val;
+}
 
 template<class T>
 short Sign(T val){

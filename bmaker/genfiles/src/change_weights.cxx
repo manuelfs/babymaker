@@ -72,20 +72,20 @@ int main(int argc, char *argv[]){
     }
 
     if(ch.w_lumi()>0) nent_eff ++; else nent_eff--;
-    sum_weff  +=  ch.weight()/(ch.eff_trig()*ch.w_lumi());
-    sum_btag  +=  ch.w_btag();
-    sum_pu    +=  ch.w_pu();
-    sum_toppt +=  ch.w_toppt();
-    for(unsigned int isys=0;isys<ch.w_pdf().size();isys++)            sum_wpdf[isys]        +=  ch.w_pdf().at(isys);
-    for(unsigned int isys=0;isys<ch.sys_bctag().size();isys++)        sum_bctag[isys]       +=  ch.sys_bctag().at(isys);
-    for(unsigned int isys=0;isys<ch.sys_udsgtag().size();isys++)      sum_udsgtag[isys]     +=  ch.sys_udsgtag().at(isys);
-    for(unsigned int isys=0;isys<ch.sys_fs_bctag().size();isys++)     sum_fs_bctag[isys]    +=  ch.sys_fs_bctag().at(isys);
-    for(unsigned int isys=0;isys<ch.sys_fs_udsgtag().size();isys++)   sum_fs_udsgtag[isys]  +=  ch.sys_fs_udsgtag().at(isys);
-    for(unsigned int isys=0;isys<ch.sys_isr().size();isys++)          sum_isr[isys]         +=  ch.sys_isr().at(isys);
-    for(unsigned int isys=0;isys<ch.sys_pdf().size();isys++)          sum_spdf[isys]        +=  ch.sys_pdf().at(isys);
-    for(unsigned int isys=0;isys<ch.sys_mur().size();isys++)          sum_mur[isys]         +=  ch.sys_mur().at(isys);
-    for(unsigned int isys=0;isys<ch.sys_muf().size();isys++)          sum_muf[isys]         +=  ch.sys_muf().at(isys);
-    for(unsigned int isys=0;isys<ch.sys_murf().size();isys++)         sum_murf[isys]        +=  ch.sys_murf().at(isys);
+    sum_weff  +=  noNaN(ch.weight()/(ch.eff_trig()*ch.w_lumi()));
+    sum_btag  +=  noNaN(ch.w_btag());
+    sum_pu    +=  noNaN(ch.w_pu());
+    sum_toppt +=  noNaN(ch.w_toppt());
+    for(unsigned int isys=0;isys<ch.w_pdf().size();isys++)           sum_wpdf[isys]        +=  noNaN(ch.w_pdf().at(isys));
+    for(unsigned int isys=0;isys<ch.sys_bctag().size();isys++)       sum_bctag[isys]       +=  noNaN(ch.sys_bctag().at(isys));
+    for(unsigned int isys=0;isys<ch.sys_udsgtag().size();isys++)     sum_udsgtag[isys]     +=  noNaN(ch.sys_udsgtag().at(isys));
+    for(unsigned int isys=0;isys<ch.sys_fs_bctag().size();isys++)    sum_fs_bctag[isys]    +=  noNaN(ch.sys_fs_bctag().at(isys));
+    for(unsigned int isys=0;isys<ch.sys_fs_udsgtag().size();isys++)  sum_fs_udsgtag[isys]  +=  noNaN(ch.sys_fs_udsgtag().at(isys));
+    for(unsigned int isys=0;isys<ch.sys_isr().size();isys++)         sum_isr[isys]         +=  noNaN(ch.sys_isr().at(isys));
+    for(unsigned int isys=0;isys<ch.sys_pdf().size();isys++)         sum_spdf[isys]        +=  noNaN(ch.sys_pdf().at(isys));
+    for(unsigned int isys=0;isys<ch.sys_mur().size();isys++)         sum_mur[isys]         +=  noNaN(ch.sys_mur().at(isys));
+    for(unsigned int isys=0;isys<ch.sys_muf().size();isys++)         sum_muf[isys]         +=  noNaN(ch.sys_muf().at(isys));
+    for(unsigned int isys=0;isys<ch.sys_murf().size();isys++)        sum_murf[isys]        +=  noNaN(ch.sys_murf().at(isys));
 
     // Hack to recompute sys_pdf[1] which had a 1e-3 cut
     float minpdf(1e10);

@@ -126,6 +126,7 @@ int change_branch_one(TString indir, TString name, TString outdir, vector<TStrin
   //Loop and fill events with new weights
   int nentries = oldtree->GetEntries();
   for(int i=0; i<nentries; i++){
+    //if(i==10) break;
     oldtree->GetEntry(i);
 
     if((i<100&&i%10==0) || (i<1000&&i%100==0) || (i<10000&&i%1000==0) || (i%10000==0) || (i+1==nentries)){
@@ -187,6 +188,8 @@ int change_branch_one(TString indir, TString name, TString outdir, vector<TStrin
 	    break;
 	  }
 	} // if multiply
+	if(ivar_type[iset] == kFloat)  new_var_flt_[iset] = noNaN(new_var_flt_[iset]);
+	if(ivar_type[iset] == kvFloat) new_var_vflt_[iset]->at(vidx) = noNaN(new_var_vflt_[iset]->at(vidx));
       } // Loop over elements in each variable
       if(var[iset].Contains("sys_pdf")){
       	new_var_vflt_[iset]->at(1) = minpdf*var_val[iset][1].Atof(); 
@@ -539,3 +542,4 @@ TString hoursMinSec(long seconds){
 
   return hhmmss;
 }
+

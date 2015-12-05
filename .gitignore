@@ -40,7 +40,7 @@ out/*.root
 *.aux
 gmon.out
 out
-run
+/run
 logs
 archive
 .nfs*

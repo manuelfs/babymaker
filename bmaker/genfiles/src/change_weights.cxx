@@ -40,6 +40,22 @@ int main(int argc, char *argv[]){
   if(!outfolder.EndsWith("/")) outfolder.Append("/");
   gSystem->mkdir(outfolder, kTRUE);
 
+  float xsec(0.);
+  if (!sample.Contains("SMS")){
+    TChain chglob("treeglobal");
+    chglob.Add((folder+sample).Data());
+    size_t foundent = chglob.GetEntries();
+    if (foundent==0) {
+      cout<<"[Change Weights] ERROR: No entries found! Exit."<<endl;
+      exit(1);
+    } else {
+      cout<<"[Change Weights] Found "<<foundent<<" entries."<<endl;
+    }
+    chglob.SetBranchAddress("xsec", &xsec);
+    chglob.GetEntry(0); 
+    cout<<"Found xsec = "<<xsec<<endl;
+  }
+  
   //Setup chains
   baby_basic ch((folder+sample).Data());         
   ch.GetEntry(0); //Set branches to get size
@@ -50,7 +66,8 @@ int main(int argc, char *argv[]){
   vector<double> sum_wpdf(ch.w_pdf().size(),0);
   vector<double> sum_bctag(ch.sys_bctag().size()), sum_udsgtag(ch.sys_udsgtag().size());
   vector<double> sum_fs_bctag(ch.sys_fs_bctag().size()), sum_fs_udsgtag(ch.sys_fs_udsgtag().size());
-  vector<double> sum_isr(ch.sys_isr().size()), sum_spdf(ch.sys_pdf().size());
+  vector<double> sum_isr(ch.sys_isr().size());
+  vector<double> sum_spdf(2,0.);
   vector<double> sum_mur(ch.sys_mur().size()), sum_muf(ch.sys_muf().size()), sum_murf(ch.sys_murf().size());
   double nent_zlep=0, sum_wlep=0, sum_fs_wlep=0;
   vector<double> sum_slep(ch.sys_lep().size()), sum_fs_slep(ch.sys_fs_lep().size());
@@ -71,7 +88,8 @@ int main(int argc, char *argv[]){
       if(ientry+1==nentries) printf("\n");
     }
 
-    if(ch.w_lumi()>0) nent_eff ++; else nent_eff--;
+    // if(ch.w_lumi()>0) nent_eff ++; else nent_eff--;
+    nent_eff ++;
     sum_btag  +=  noNaN(ch.w_btag());
     sum_pu    +=  noNaN(ch.w_pu());
     sum_toppt +=  noNaN(ch.w_toppt());
@@ -81,10 +99,14 @@ int main(int argc, char *argv[]){
     for(unsigned int isys=0;isys<ch.sys_fs_bctag().size();isys++)    sum_fs_bctag[isys]    +=  noNaN(ch.sys_fs_bctag().at(isys));
     for(unsigned int isys=0;isys<ch.sys_fs_udsgtag().size();isys++)  sum_fs_udsgtag[isys]  +=  noNaN(ch.sys_fs_udsgtag().at(isys));
     for(unsigned int isys=0;isys<ch.sys_isr().size();isys++)         sum_isr[isys]         +=  noNaN(ch.sys_isr().at(isys));
-    for(unsigned int isys=0;isys<ch.sys_pdf().size();isys++)         sum_spdf[isys]        +=  noNaN(ch.sys_pdf().at(isys));
     for(unsigned int isys=0;isys<ch.sys_mur().size();isys++)         sum_mur[isys]         +=  noNaN(ch.sys_mur().at(isys));
     for(unsigned int isys=0;isys<ch.sys_muf().size();isys++)         sum_muf[isys]         +=  noNaN(ch.sys_muf().at(isys));
     for(unsigned int isys=0;isys<ch.sys_murf().size();isys++)        sum_murf[isys]        +=  noNaN(ch.sys_murf().at(isys));
+    if (ch.sys_pdf().size()==0) { 
+      for(unsigned int isys=0;isys<2;isys++)  sum_spdf[isys]  +=  1; 
+    } else {
+      for(unsigned int isys=0;isys<ch.sys_pdf().size();isys++)       sum_spdf[isys]        +=  noNaN(ch.sys_pdf().at(isys));
+    }
 
     // Hack to recompute sys_pdf[1] which had a 1e-3 cut
     float minpdf(1e10);
@@ -112,8 +134,10 @@ int main(int argc, char *argv[]){
   sum_spdf[1] = sum_pdf_min;
 
   const float luminosity = 1000.;
-  double xsec(0.), exsec(0.);
-  xsec::signalCrossSection(ch.mgluino(), xsec, exsec);
+  if (sample.Contains("SMS")){
+    float exsec(0.);
+    xsec::signalCrossSection(ch.mgluino(), xsec, exsec);
+  }
   float w_lumi = xsec*luminosity / nent_eff;
   float w_lumi_corr = w_lumi / fabs(ch.w_lumi());
 
@@ -170,6 +194,7 @@ int main(int argc, char *argv[]){
   for(unsigned int idx=0;idx<sum_fs_slep.size();idx++)      
     var_val[17].push_back("*"+to_string((nent_eff-sum_fs_slep[idx])/nent_zlep));
   var_val[18].push_back("*"+to_string(w_lumi_corr));
+
 
   int totentries(0);
   vector<TString> files = dirlist(folder,sample);

@@ -176,7 +176,7 @@ namespace xsec{
   }
 
 
-  void signalCrossSection(int glu_mass, double &xsec, double &xsec_unc){
+  void signalCrossSection(int glu_mass, float &xsec, float &xsec_unc){
     if (glu_mass == 595) { xsec = 0.; xsec_unc = 0.; return; } // we shouldn't have these points
     else if (glu_mass == 600) { xsec = 9.20353; xsec_unc = 0.137185; return; }
     else if (glu_mass == 605) { xsec = 8.74315; xsec_unc = 0.137502; return; }

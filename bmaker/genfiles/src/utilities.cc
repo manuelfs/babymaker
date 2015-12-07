@@ -28,7 +28,7 @@ using namespace std;
 
 //// Changes the value of branches in TTrees
 int change_branch_one(TString indir, TString name, TString outdir, vector<TString> var_type, vector<TString> var,  
-		      vector<vector<TString> > var_val, int totentries){
+                      vector<vector<TString> > var_val, int totentries){
 
   if(var_type.size()!=var.size() || var_type.size()!=var_val.size())
     { cout<<"[Change Branch One] ERROR: Branch vectors are not the same size"<<endl; exit(0); }
@@ -45,18 +45,18 @@ int change_branch_one(TString indir, TString name, TString outdir, vector<TStrin
     //Set multiply
     for(unsigned int idx=0; idx<vlength; idx++){
       if(var_val[isetup][idx].BeginsWith("*") || var_val[isetup][idx].EndsWith("*")){
-	var_val[isetup][idx].Remove(TString::kBoth,'*');
-	multiply[isetup][idx]=true;
+        var_val[isetup][idx].Remove(TString::kBoth,'*');
+        multiply[isetup][idx]=true;
       }
     }
-    
+
     //Handle bools
     if(var_type[isetup]=="bool" || var_type[isetup]=="vbool"){
       for(unsigned int idx=0; idx<var_val[isetup].size(); idx++){
-	if(var_val[isetup][idx]=="true")
-	  var_val[isetup][idx]="1";
-	else if(var_val[isetup][idx]=="false")
-	  var_val[isetup][idx]="0";
+        if(var_val[isetup][idx]=="true")
+          var_val[isetup][idx]="1";
+        else if(var_val[isetup][idx]=="false")
+          var_val[isetup][idx]="0";
       }
     }
 
@@ -148,62 +148,62 @@ int change_branch_one(TString indir, TString name, TString outdir, vector<TStrin
     for(int iset=0; iset<nvar; iset++){
       // Hack to recompute sys_pdf[1] which had a 1e-3 cut
       if(var[iset].Contains("w_pdf")){
-	for(unsigned int isys=0;isys<new_var_vflt_[iset]->size();isys++)  
-	  if(new_var_vflt_[iset]->at(isys) < minpdf) minpdf = new_var_vflt_[iset]->at(isys);
+        for(unsigned int isys=0;isys<new_var_vflt_[iset]->size();isys++)  
+          if(new_var_vflt_[iset]->at(isys) < minpdf) minpdf = new_var_vflt_[iset]->at(isys);
       }      
       if(isLep[iset] && nleps_!=0) {
-	// Hack to protect total weight from NaN, and not include w_pu
-	if(var[iset].Contains("w_lep"))    w_lep    = noNaN(new_var_flt_[iset]);
-	if(var[iset].Contains("w_fs_lep")) w_fs_lep = noNaN(new_var_flt_[iset]);
-	continue; // For lepton scale factors    
+        // Hack to protect total weight from NaN, and not include w_pu
+        if(var[iset].Contains("w_lep"))    w_lep    = noNaN(new_var_flt_[iset]);
+        if(var[iset].Contains("w_fs_lep")) w_fs_lep = noNaN(new_var_flt_[iset]);
+        continue; // For lepton scale factors    
       }
       if(var[iset].Contains("w_toppt"))  {w_toppt  = noNaN(new_var_flt_[iset]); w_corr *= var_val[iset][0].Atof(); }
       if(var[iset].Contains("w_btag"))   {w_btag   = noNaN(new_var_flt_[iset]); w_corr *= var_val[iset][0].Atof(); }
       // Hack for empty pdf branches
       if(var[iset].Contains("w_pdf")){
-	if(new_var_vflt_[iset]->size()==0){
-	  new_var_vflt_[iset]->resize(100,1);
-	  cout<<"\n[Change Branch One] WARNING: Empty branch of \"w_pdf\". Setting values to 1"<<endl;
-	  continue;
-	}
+        if(new_var_vflt_[iset]->size()==0){
+          new_var_vflt_[iset]->resize(100,1);
+          if (i==0) cout<<"\n[Change Branch One] WARNING: Empty branch of \"w_pdf\". Setting values to 1"<<endl;
+          continue;
+        }
       }
       else if(var[iset].Contains("sys_pdf")){
-	if(new_var_vflt_[iset]->size()==0){
-	  new_var_vflt_[iset]->resize(2,1);
-	  cout<<"[Change Branch One] WARNING: Empty branch of \"sys_pdf\". Setting values to 1"<<endl;
-	  continue;
-	}
+        if(new_var_vflt_[iset]->size()==0){
+          new_var_vflt_[iset]->resize(2,1);
+          if (i==0) cout<<"[Change Branch One] WARNING: Empty branch of \"sys_pdf\". Setting values to 1"<<endl;
+          continue;
+        }
       }
       for(unsigned int vidx=0; vidx<var_val[iset].size(); vidx++){
-	if(!multiply[iset][vidx]){
-	  switch (ivar_type[iset]){
-	  default:
-	  case kInt:     new_var_int_[iset]              =  var_val[iset][vidx].Atoi();  break;
-	  case kFloat:   new_var_flt_[iset]              =  var_val[iset][vidx].Atof();  break;
-	  case kDouble:  new_var_dbl_[iset]              =  static_cast<double>(var_val[iset][vidx].Atof());  break;
-	  case kBool:    new_var_bool_[iset]             =  var_val[iset][vidx].Atoi();  break;
-	  case kvInt:    new_var_vint_[iset]->at(vidx)   =  var_val[iset][vidx].Atoi();  break;
-	  case kvFloat:  new_var_vflt_[iset]->at(vidx)   =  var_val[iset][vidx].Atof();  break;
-	  case kvDouble: new_var_vdbl_[iset]->at(vidx)   =  static_cast<double>(var_val[iset][vidx].Atof());  break;
-	  case kvBool:   new_var_vbool_[iset]->at(vidx)  =  var_val[iset][vidx].Atoi();  break;
-	  }
-	} else {
-	  switch (ivar_type[iset]){
-	  default:
-	  case kInt:     new_var_int_[iset]             *=  var_val[iset][vidx].Atoi();  break;
-	  case kFloat:   new_var_flt_[iset]             *=  var_val[iset][vidx].Atof();  break;
-	  case kDouble:  new_var_dbl_[iset]             *=  static_cast<double>(var_val[iset][vidx].Atof());  break;
-	  case kvInt:    new_var_vint_[iset]->at(vidx)  *=  var_val[iset][vidx].Atoi();  break;
-	  case kvFloat:  new_var_vflt_[iset]->at(vidx)  *=  var_val[iset][vidx].Atof();  break;
-	  case kvDouble: new_var_vdbl_[iset]->at(vidx)  *=  static_cast<double>(var_val[iset][vidx].Atof());  break;
-	  case kBool:
-	  case kvBool:
-	    cout<<"[Change Branch One] WARNING: You cannot multiply Booleans. Skipping branch"<<endl;
-	    break;
-	  }
-	} // if multiply
-	if(ivar_type[iset] == kFloat)  new_var_flt_[iset] = noNaN(new_var_flt_[iset]);
-	if(ivar_type[iset] == kvFloat) new_var_vflt_[iset]->at(vidx) = noNaN(new_var_vflt_[iset]->at(vidx));
+        if(!multiply[iset][vidx]){
+          switch (ivar_type[iset]){
+          default:
+          case kInt:     new_var_int_[iset]              =  var_val[iset][vidx].Atoi();  break;
+          case kFloat:   new_var_flt_[iset]              =  var_val[iset][vidx].Atof();  break;
+          case kDouble:  new_var_dbl_[iset]              =  static_cast<double>(var_val[iset][vidx].Atof());  break;
+          case kBool:    new_var_bool_[iset]             =  var_val[iset][vidx].Atoi();  break;
+          case kvInt:    new_var_vint_[iset]->at(vidx)   =  var_val[iset][vidx].Atoi();  break;
+          case kvFloat:  new_var_vflt_[iset]->at(vidx)   =  var_val[iset][vidx].Atof();  break;
+          case kvDouble: new_var_vdbl_[iset]->at(vidx)   =  static_cast<double>(var_val[iset][vidx].Atof());  break;
+          case kvBool:   new_var_vbool_[iset]->at(vidx)  =  var_val[iset][vidx].Atoi();  break;
+          }
+        } else {
+          switch (ivar_type[iset]){
+          default:
+          case kInt:     new_var_int_[iset]             *=  var_val[iset][vidx].Atoi();  break;
+          case kFloat:   new_var_flt_[iset]             *=  var_val[iset][vidx].Atof();  break;
+          case kDouble:  new_var_dbl_[iset]             *=  static_cast<double>(var_val[iset][vidx].Atof());  break;
+          case kvInt:    new_var_vint_[iset]->at(vidx)  *=  var_val[iset][vidx].Atoi();  break;
+          case kvFloat:  new_var_vflt_[iset]->at(vidx)  *=  var_val[iset][vidx].Atof();  break;
+          case kvDouble: new_var_vdbl_[iset]->at(vidx)  *=  static_cast<double>(var_val[iset][vidx].Atof());  break;
+          case kBool:
+          case kvBool:
+            cout<<"[Change Branch One] WARNING: You cannot multiply Booleans. Skipping branch"<<endl;
+            break;
+          }
+        } // if multiply
+        if(ivar_type[iset] == kFloat)  new_var_flt_[iset] = noNaN(new_var_flt_[iset]);
+        if(ivar_type[iset] == kvFloat) new_var_vflt_[iset]->at(vidx) = noNaN(new_var_vflt_[iset]->at(vidx));
       } // Loop over elements in each variable
       if(var[iset].Contains("sys_pdf")) new_var_vflt_[iset]->at(1) = minpdf*var_val[iset][1].Atof(); 
 
@@ -215,14 +215,14 @@ int change_branch_one(TString indir, TString name, TString outdir, vector<TStrin
     // Hack to protect total weight from NaN, and not include w_pu
     for(int iset=0; iset<nvar; iset++)
       if(var[iset].Contains("weight"))
-	new_var_flt_[iset] = w_lep * w_fs_lep * w_toppt * w_btag * w_lumi * eff_trig_ * var_val[iset][0].Atof();
+        new_var_flt_[iset] = w_lep * w_fs_lep * w_toppt * w_btag * w_lumi * eff_trig_ * var_val[iset][0].Atof();
 
     newtree->Fill();
   }
   
   unsigned int new_nev_sample(0);
   float new_xsec(0.);
-  double xsec(0.), exsec(0.);
+  float xsec(0.), exsec(0.);
   oldtreeglobal->SetBranchAddress("nev_sample", &new_nev_sample);
   if(mgluino_>0) oldtreeglobal->SetBranchAddress("xsec", &new_xsec);
   TTree* newtreeglobal = oldtreeglobal->CloneTree(0);
@@ -347,36 +347,36 @@ int change_branch_one(TString indir, TString name, TString outdir, vector<TStrin
     for(int iset=0; iset<nvar; iset++){
       if(var[iset].Contains("_lep")&&nleps_!=0) continue; // For lepton scale factors
       if(!multiply[iset]){
-	if(var_type[iset]=="int")             new_var_int_[iset]  = var_val[iset].Atoi();
-	else if(var_type[iset]=="float")      new_var_flt_[iset]  = var_val[iset].Atof();
-	else if(var_type[iset]=="double")     new_var_dbl_[iset]  = static_cast<double>(var_val[iset].Atof());
-	else if(var_type[iset]=="bool")       new_var_bool_[iset] = var_val[iset].Atoi();
-	else if(var_type[iset]=="vint")     	  
-	  for(unsigned int vidx=0; vidx<new_var_vint_[iset]->size(); vidx++)
-	    new_var_vint_[iset]->at(vidx) = var_val[iset].Atoi();
-	else if(var_type[iset]=="vfloat")     	  
-	  for(unsigned int vidx=0; vidx<new_var_vflt_[iset]->size(); vidx++)
-	    new_var_vflt_[iset]->at(vidx) = var_val[iset].Atof();
-	else if(var_type[iset]=="vdouble")     	  
-	  for(unsigned int vidx=0; vidx<new_var_vdbl_[iset]->size(); vidx++)
-	    new_var_vdbl_[iset]->at(vidx) = static_cast<double>(var_val[iset].Atof());
-	else if(var_type[iset]=="vbool")     	  
-	  for(unsigned int vidx=0; vidx<new_var_vbool_[iset]->size(); vidx++)
-	    new_var_vbool_[iset]->at(vidx) = var_val[iset].Atoi();
+        if(var_type[iset]=="int")             new_var_int_[iset]  = var_val[iset].Atoi();
+        else if(var_type[iset]=="float")      new_var_flt_[iset]  = var_val[iset].Atof();
+        else if(var_type[iset]=="double")     new_var_dbl_[iset]  = static_cast<double>(var_val[iset].Atof());
+        else if(var_type[iset]=="bool")       new_var_bool_[iset] = var_val[iset].Atoi();
+        else if(var_type[iset]=="vint")           
+          for(unsigned int vidx=0; vidx<new_var_vint_[iset]->size(); vidx++)
+            new_var_vint_[iset]->at(vidx) = var_val[iset].Atoi();
+        else if(var_type[iset]=="vfloat")         
+          for(unsigned int vidx=0; vidx<new_var_vflt_[iset]->size(); vidx++)
+            new_var_vflt_[iset]->at(vidx) = var_val[iset].Atof();
+        else if(var_type[iset]=="vdouble")        
+          for(unsigned int vidx=0; vidx<new_var_vdbl_[iset]->size(); vidx++)
+            new_var_vdbl_[iset]->at(vidx) = static_cast<double>(var_val[iset].Atof());
+        else if(var_type[iset]=="vbool")          
+          for(unsigned int vidx=0; vidx<new_var_vbool_[iset]->size(); vidx++)
+            new_var_vbool_[iset]->at(vidx) = var_val[iset].Atoi();
       }
       else {
-	if(var_type[iset]=="int")             new_var_int_[iset]  *= var_val[iset].Atoi(); 
-	else if(var_type[iset]=="float")      new_var_flt_[iset]  *= var_val[iset].Atof(); 
-	else if(var_type[iset]=="double")     new_var_dbl_[iset]  *= var_val[iset].Atof(); 
-	else if(var_type[iset]=="vint")     	  
-	  for(unsigned int vidx=0; vidx<new_var_vint_[iset]->size(); vidx++)
-	    new_var_vint_[iset]->at(vidx) *= var_val[iset].Atoi();
-	else if(var_type[iset]=="vfloat")     	  
-	  for(unsigned int vidx=0; vidx<new_var_vflt_[iset]->size(); vidx++)
-	    new_var_vflt_[iset]->at(vidx) *= var_val[iset].Atof();
-	else if(var_type[iset]=="vdouble")     	  
-	  for(unsigned int vidx=0; vidx<new_var_vdbl_[iset]->size(); vidx++)
-	    new_var_vdbl_[iset]->at(vidx) *= static_cast<double>(var_val[iset].Atof());
+        if(var_type[iset]=="int")             new_var_int_[iset]  *= var_val[iset].Atoi(); 
+        else if(var_type[iset]=="float")      new_var_flt_[iset]  *= var_val[iset].Atof(); 
+        else if(var_type[iset]=="double")     new_var_dbl_[iset]  *= var_val[iset].Atof(); 
+        else if(var_type[iset]=="vint")           
+          for(unsigned int vidx=0; vidx<new_var_vint_[iset]->size(); vidx++)
+            new_var_vint_[iset]->at(vidx) *= var_val[iset].Atoi();
+        else if(var_type[iset]=="vfloat")         
+          for(unsigned int vidx=0; vidx<new_var_vflt_[iset]->size(); vidx++)
+            new_var_vflt_[iset]->at(vidx) *= var_val[iset].Atof();
+        else if(var_type[iset]=="vdouble")        
+          for(unsigned int vidx=0; vidx<new_var_vdbl_[iset]->size(); vidx++)
+            new_var_vdbl_[iset]->at(vidx) *= static_cast<double>(var_val[iset].Atof());
       }
     }
     newtree->Fill();

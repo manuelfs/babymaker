@@ -1240,7 +1240,6 @@ void bmaker_basic::writeWeights(const vCands &sig_leps, edm::Handle<GenEventInfo
   baby.sys_murf().push_back(weightTool->theoryWeight(weight_tools::muRdown_muFdown));
   // PDF variations
   weightTool->getPDFWeights(baby.sys_pdf(), baby.w_pdf());
-  if(writeAllPDFWeights) weightTool->getPDFWeightsAll(baby.w_pdf_all());
 
 }
 
@@ -1268,7 +1267,6 @@ bmaker_basic::bmaker_basic(const edm::ParameterSet& iConfig):
   addBTagWeights(iConfig.getParameter<bool>("addBTagWeights")),
   isFastSim(iConfig.getParameter<bool>("isFastSim")),
   doSystematics(iConfig.getParameter<bool>("doSystematics")),
-  writeAllPDFWeights(iConfig.getParameter<bool>("writeAllPDFWeights")),
   debug(iConfig.getParameter<bool>("debugMode"))
 {
   time(&startTime);

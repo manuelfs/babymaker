@@ -287,7 +287,6 @@ float w_lep
 float w_fs_lep
 float eff_trig
 std::vector<float> w_pdf
-std::vector<float> w_pdf_all
 
 ################  Systematic variations   ##################
 # variations have index 0 (JER smearing), 1 (JEC up) and 2 (JEC down)

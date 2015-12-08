@@ -61,7 +61,6 @@ os.system("JobSetup.csh")
 ijob = 0
 for ifile in infiles:
   ijob += 1
-  if ijob == 1: continue
   exename = runfolder+"/change_weights_"+str(ijob)+".sh"
   fexe = open(exename,"w")
   os.system("chmod u+x "+exename)

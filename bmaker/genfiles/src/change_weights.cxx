@@ -87,25 +87,26 @@ int main(int argc, char *argv[]){
       fflush(stdout);
       if(ientry+1==nentries) printf("\n");
     }
+    float lsign = ch.w_lumi()>0 ? 1:-1;
+    nent_eff += lsign;
 
-    // if(ch.w_lumi()>0) nent_eff ++; else nent_eff--;
-    nent_eff ++;
-    sum_btag  +=  noNaN(ch.w_btag());
-    sum_pu    +=  noNaN(ch.w_pu());
-    sum_toppt +=  noNaN(ch.w_toppt());
-    for(unsigned int isys=0;isys<ch.w_pdf().size();isys++)           sum_wpdf[isys]        +=  noNaN(ch.w_pdf().at(isys));
-    for(unsigned int isys=0;isys<ch.sys_bctag().size();isys++)       sum_bctag[isys]       +=  noNaN(ch.sys_bctag().at(isys));
-    for(unsigned int isys=0;isys<ch.sys_udsgtag().size();isys++)     sum_udsgtag[isys]     +=  noNaN(ch.sys_udsgtag().at(isys));
-    for(unsigned int isys=0;isys<ch.sys_fs_bctag().size();isys++)    sum_fs_bctag[isys]    +=  noNaN(ch.sys_fs_bctag().at(isys));
-    for(unsigned int isys=0;isys<ch.sys_fs_udsgtag().size();isys++)  sum_fs_udsgtag[isys]  +=  noNaN(ch.sys_fs_udsgtag().at(isys));
-    for(unsigned int isys=0;isys<ch.sys_isr().size();isys++)         sum_isr[isys]         +=  noNaN(ch.sys_isr().at(isys));
-    for(unsigned int isys=0;isys<ch.sys_mur().size();isys++)         sum_mur[isys]         +=  noNaN(ch.sys_mur().at(isys));
-    for(unsigned int isys=0;isys<ch.sys_muf().size();isys++)         sum_muf[isys]         +=  noNaN(ch.sys_muf().at(isys));
-    for(unsigned int isys=0;isys<ch.sys_murf().size();isys++)        sum_murf[isys]        +=  noNaN(ch.sys_murf().at(isys));
+    // nent_eff ++;
+    sum_btag  +=  lsign*noNaN(ch.w_btag());
+    sum_pu    +=  lsign*noNaN(ch.w_pu());
+    sum_toppt +=  lsign*noNaN(ch.w_toppt());
+    for(unsigned int isys=0;isys<ch.w_pdf().size();isys++)           sum_wpdf[isys]        +=  lsign*noNaN(ch.w_pdf().at(isys));
+    for(unsigned int isys=0;isys<ch.sys_bctag().size();isys++)       sum_bctag[isys]       +=  lsign*noNaN(ch.sys_bctag().at(isys));
+    for(unsigned int isys=0;isys<ch.sys_udsgtag().size();isys++)     sum_udsgtag[isys]     +=  lsign*noNaN(ch.sys_udsgtag().at(isys));
+    for(unsigned int isys=0;isys<ch.sys_fs_bctag().size();isys++)    sum_fs_bctag[isys]    +=  lsign*noNaN(ch.sys_fs_bctag().at(isys));
+    for(unsigned int isys=0;isys<ch.sys_fs_udsgtag().size();isys++)  sum_fs_udsgtag[isys]  +=  lsign*noNaN(ch.sys_fs_udsgtag().at(isys));
+    for(unsigned int isys=0;isys<ch.sys_isr().size();isys++)         sum_isr[isys]         +=  lsign*noNaN(ch.sys_isr().at(isys));
+    for(unsigned int isys=0;isys<ch.sys_mur().size();isys++)         sum_mur[isys]         +=  lsign*noNaN(ch.sys_mur().at(isys));
+    for(unsigned int isys=0;isys<ch.sys_muf().size();isys++)         sum_muf[isys]         +=  lsign*noNaN(ch.sys_muf().at(isys));
+    for(unsigned int isys=0;isys<ch.sys_murf().size();isys++)        sum_murf[isys]        +=  lsign*noNaN(ch.sys_murf().at(isys));
     if (ch.sys_pdf().size()==0) { 
-      for(unsigned int isys=0;isys<2;isys++)  sum_spdf[isys]  +=  1; 
+      for(unsigned int isys=0;isys<2;isys++)  sum_spdf[isys]  +=  lsign; 
     } else {
-      for(unsigned int isys=0;isys<ch.sys_pdf().size();isys++)       sum_spdf[isys]        +=  noNaN(ch.sys_pdf().at(isys));
+      for(unsigned int isys=0;isys<ch.sys_pdf().size();isys++)       sum_spdf[isys]        +=  lsign*noNaN(ch.sys_pdf().at(isys));
     }
 
     // Hack to recompute sys_pdf[1] which had a 1e-3 cut
@@ -113,21 +114,21 @@ int main(int argc, char *argv[]){
     for(unsigned int isys=0;isys<ch.w_pdf().size();isys++)  
       if(ch.w_pdf()[isys] < minpdf) minpdf = ch.w_pdf()[isys];
     if(ch.w_pdf().size()==0)
-      sum_pdf_min += 1;
+      sum_pdf_min += lsign;
     else
-      sum_pdf_min += minpdf;
+      sum_pdf_min += lsign*minpdf;
 				      
-    double weight = noNaN(ch.w_lep()) * noNaN(ch.w_fs_lep()) * noNaN(ch.w_toppt()) * noNaN(ch.w_btag());
+    double weight = lsign * noNaN(ch.w_lep()) * noNaN(ch.w_fs_lep()) * noNaN(ch.w_toppt()) * noNaN(ch.w_btag());
     //Lepton weights
     if(ch.nleps()==0) {
-      nent_zlep++;
+      nent_zlep += lsign;
       sum_weff_l0  += weight;
     } else{
       sum_weff_l1  += weight;
-      sum_wlep     +=  ch.w_lep();
-      sum_fs_wlep  +=  ch.w_fs_lep();
-      for(unsigned int isys=0;isys<ch.sys_lep().size();isys++)        sum_slep[isys]        +=  ch.sys_lep().at(isys);
-      for(unsigned int isys=0;isys<ch.sys_fs_lep().size();isys++)     sum_fs_slep[isys]     +=  ch.sys_fs_lep().at(isys);
+      sum_wlep     +=  lsign*ch.w_lep();
+      sum_fs_wlep  +=  lsign*ch.w_fs_lep();
+      for(unsigned int isys=0;isys<ch.sys_lep().size();isys++)        sum_slep[isys]        +=  lsign*ch.sys_lep().at(isys);
+      for(unsigned int isys=0;isys<ch.sys_fs_lep().size();isys++)     sum_fs_slep[isys]     +=  lsign*ch.sys_fs_lep().at(isys);
     }
   }
   // Hack to recompute sys_pdf[1] which had a 1e-3 cut

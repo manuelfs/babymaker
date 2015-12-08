@@ -101,6 +101,7 @@ process.baby_basic = cms.EDAnalyzer('bmaker_basic',
                                     nEventsSample = cms.uint32(options.nEventsSample),
                                     doMetRebalancing = cms.bool(True),
                                     doSystematics = cms.bool(doSystematics),
+                                    writeAllPDFWeights = cms.bool(False),
                                     addBTagWeights = cms.bool(True),
                                     isFastSim = cms.bool(fastsim),
                                     debugMode = cms.bool(False)

@@ -49,6 +49,9 @@ namespace xsec{
       if(file.Contains("600to800")) xsec = 2.61537118;
 
     }
+    // The efficiency of the mtt>1000 cut is taken from sigma(mtt>1000)/sigma(inclusive) from mcm
+    double mtt_1000_eff=(11.16/670.3);
+    if(file.Contains("TTJets_Mtt-1000toInf")) xsec = 815.96*mtt_1000_eff;
 
     if(file.Contains("TTJets_DiLept")) xsec = 85.66; // (3*0.108)^2*815.96
     if(file.Contains("TTJets_SingleLept")) xsec = 178.7; //(1- ((1-3*0.108)^2+(3*0.108)^2))*815.96*0.5 per half
@@ -174,6 +177,7 @@ namespace xsec{
 
     if(file.Contains("TTTT_TuneCUETP8M1_13TeV-amcatnlo"))       fneg = 0.41; // from MCM
     if(file.Contains("VVTo2L2Nu_13TeV_amcatnloFXFX"))       fneg = 0.20; // from MCM
+    if(file.Contains("TTJets_Mtt-1000toInf"))                   fneg = 0.376996;
 
     // Single top
     if (file.Contains("ST_s-channel_4f_leptonDecays_13TeV-amcatnlo-pythia8")) fneg = 0.1884;

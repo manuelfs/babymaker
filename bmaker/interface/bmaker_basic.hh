@@ -143,6 +143,7 @@ public:
   bool addBTagWeights;
   bool isFastSim;
   bool doSystematics;
+  bool writeAllPDFWeights;
   bool debug;
 
   static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);

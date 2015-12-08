@@ -339,6 +339,18 @@ float jet_met_tools::getMCTagEfficiency(int pdgId, float pT, float eta)
   }
 }
 
+// get deltaR between two b-tagged CSVM jets
+void jet_met_tools::getDeltaRbb(vector<float> & deltaRbb, const vector<LVector> &jets, const vector<float> &jets_csv)
+{
+  for(size_t ijet(0); ijet<jets.size(); ijet++) {
+    for(size_t jjet=ijet+1; jjet<jets.size(); jjet++) {
+      if(jets_csv[ijet]<CSVMedium || jets_csv[jjet]<CSVMedium) continue;
+      deltaRbb.push_back(deltaR(jets.at(ijet), jets.at(jjet)));
+    }
+  }
+
+}
+
 void jet_met_tools::clusterFatJets(int &nfjets, float &mj,
                                   vector<float> &fjets_pt, 
                                   vector<float> &fjets_eta,

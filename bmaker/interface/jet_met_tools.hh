@@ -86,6 +86,7 @@ public:
   float jetBTagWeight(const pat::Jet &jet, const LVector &jetp4, bool isBTagged, 
                       btagVariation readerTypeBC, btagVariation readerTypeUDSG,
                       btagVariation readerTypeBC_fs = kBTagCentral, btagVariation readerTypeUDSG_fs = kBTagCentral);
+  void getDeltaRbb(std::vector<float> & deltaRbb, const std::vector<LVector> &jets, const std::vector<float> &jets_csv);
 
   void clusterFatJets(int &nfjets, float &mj,
           std::vector<float> &fjets_pt, 

@@ -120,3 +120,14 @@ void weight_tools::getPDFWeights(vector<float> &sys_pdf, vector<float> &w_pdf){
     sys_pdf.push_back(*result.first);  //min
   } 
 }
+
+void weight_tools::getPDFWeightsAll(vector<float> &w_pdf_all){
+  if(theoryWeights.size()!=0) {
+    unsigned ind(10), nweights(100); //index of the first pdf weight and number of replicas
+    vector<double> pdfwgt = vector<double>(nweights,1.);
+    for (unsigned i(0); i<nweights; i++){
+      double ipdfw = theoryWeights[i+ind].wgt/theoryWeights[nominal].wgt;
+      w_pdf_all.push_back(ipdfw);
+    }
+  }
+}

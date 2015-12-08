@@ -516,6 +516,10 @@ void bmaker_basic::writeJets(edm::Handle<pat::JetCollection> alljets,
   baby.jetsys_nob_pt()  = jetsys_nob_p4.pt();
   baby.jetsys_nob_eta() = jetsys_nob_p4.eta();
   baby.jetsys_nob_phi() = jetsys_nob_p4.phi();
+
+  // write deltaR between csvm jets
+  jetTool->getDeltaRbb(baby.dr_bb(), jets, baby.jets_csv());
+
 }
 
 void bmaker_basic::writeFatJets(vector<LVector> &jets){
@@ -962,7 +966,10 @@ void bmaker_basic::writeMC(edm::Handle<reco::GenParticleCollection> genParticles
   baby.ntruleps()=0; baby.ntrumus()=0; baby.ntruels()=0; baby.ntrutaush()=0; baby.ntrutausl()=0;
   baby.nleps_tm()=0;
   baby.fromGS()=false;
+  baby.m_tt()=0;
   vector<float> top_pt;
+  int topIndex=-1;
+  int antitopIndex=-1;
   for (size_t imc(0); imc < genParticles->size(); imc++) {
     const reco::GenParticle &mc = (*genParticles)[imc];
 
@@ -981,7 +988,7 @@ void bmaker_basic::writeMC(edm::Handle<reco::GenParticleCollection> genParticles
     bool eFromTopZ(id==11 && (momid==24 || momid==23));
     bool muFromTopZ(id==13 && (momid==24 || momid==23));
     bool tauFromTopZ(id==15 && (momid==24 || momid==23));
-  
+    if(lastTop) mc.pdgId()>0 ? topIndex=imc : antitopIndex=imc;
 
 
     bool fromWOrWTau(mcTool->fromWOrWTau(mc));
@@ -1091,7 +1098,14 @@ void bmaker_basic::writeMC(edm::Handle<reco::GenParticleCollection> genParticles
     // don't need to check for gluon splitting if flag is already set
     if(!baby.fromGS()) baby.fromGS()|=mcTool->isFromGSP(dynamic_cast<const reco::Candidate*>(&mc));
   } // Loop over genParticles
-  
+  // calculate invariant mass of ttbar pair
+  if(topIndex>=0 && antitopIndex>=0) {
+    reco::Candidate::LorentzVector topP4 = genParticles->at(topIndex).p4();
+    reco::Candidate::LorentzVector antitopP4 = genParticles->at(antitopIndex).p4();
+    reco::Candidate::LorentzVector ttbarP4 = topP4+antitopP4;
+    baby.m_tt()=ttbarP4.mass();
+  }
+
   baby.ntruleps() = baby.ntrumus()+baby.ntruels()+baby.ntrutaush()+baby.ntrutausl();
   baby.isr_tru_pt() = isr_p4.pt();
   baby.isr_tru_eta() = isr_p4.eta();
@@ -1226,6 +1240,7 @@ void bmaker_basic::writeWeights(const vCands &sig_leps, edm::Handle<GenEventInfo
   baby.sys_murf().push_back(weightTool->theoryWeight(weight_tools::muRdown_muFdown));
   // PDF variations
   weightTool->getPDFWeights(baby.sys_pdf(), baby.w_pdf());
+  if(writeAllPDFWeights) weightTool->getPDFWeightsAll(baby.w_pdf_all());
 
 }
 
@@ -1253,6 +1268,7 @@ bmaker_basic::bmaker_basic(const edm::ParameterSet& iConfig):
   addBTagWeights(iConfig.getParameter<bool>("addBTagWeights")),
   isFastSim(iConfig.getParameter<bool>("isFastSim")),
   doSystematics(iConfig.getParameter<bool>("doSystematics")),
+  writeAllPDFWeights(iConfig.getParameter<bool>("writeAllPDFWeights")),
   debug(iConfig.getParameter<bool>("debugMode"))
 {
   time(&startTime);

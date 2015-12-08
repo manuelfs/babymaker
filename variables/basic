@@ -167,6 +167,10 @@ float mumuv_eta
 float mumuv_phi
 float mumuv_w
 
+##################   Di-jets   ###################
+
+std::vector<float> dr_bb
+
 ##################   Photons   ###################
 int nph
 std::vector<float> ph_pt
@@ -260,6 +264,7 @@ std::vector<float> mc_phi
 std::vector<float> mc_mass
 std::vector<int>   mc_id
 std::vector<int>   mc_mom
+float m_tt
 bool fromGS
 int ntruleps
 int ntrumus
@@ -282,6 +287,7 @@ float w_lep
 float w_fs_lep
 float eff_trig
 std::vector<float> w_pdf
+std::vector<float> w_pdf_all
 
 ################  Systematic variations   ##################
 # variations have index 0 (JER smearing), 1 (JEC up) and 2 (JEC down)

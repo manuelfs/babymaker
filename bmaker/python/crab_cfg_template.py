@@ -4,8 +4,9 @@
 dataset = 'DATASETNAME'
 nevents = NEVENTS
 
-jobname = dataset[1:].replace('/','__')
-jobname = jobname.replace(':','___')
+# CRAB3 task names can no longer be greater than 100 characters; need to shorten task name
+taskname = dataset[1:].replace('/','__').replace('RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2','MiniAODv2')
+taskname = jobname.replace(':','___')
 
 datasetID = dataset.replace('/','',1).replace('/', '_', 1)
 datasetID = datasetID[0:datasetID.find('/')]
@@ -14,7 +15,7 @@ from WMCore.Configuration import Configuration
 config = Configuration()
 
 config.section_("General")
-config.General.requestName = jobname
+config.General.requestName = taskname
 config.General.workArea = 'out_crab'
 config.General.transferLogs = True
 

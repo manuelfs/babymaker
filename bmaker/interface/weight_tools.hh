@@ -32,7 +32,7 @@ public:
   float topPtWeight(float top_pt1,float top_pt2);
   float isrWeight(float isrpt);
   void getPDFWeights(std::vector<float> &sys_pdf, std::vector<float> &w_pdf);
-
+  void getPDFWeightsAll(std::vector<float> &w_pdf_all);
   weight_tools();
   ~weight_tools();
 };

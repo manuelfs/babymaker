@@ -6,23 +6,27 @@
 #include <sstream>
 #include <string>
 #include <set>
+#include <getopt.h>
+#include <sys/stat.h>
 
 #include "TFile.h"
 #include "TString.h"
 #include "TTree.h"
+#include "TSystem.h"
+#include "TDirectory.h"
 
 #include "utilities.hh"
 
 using namespace std;
 
 map<int, set<long> > getFilterList(string filter);
-void change_filter_one(TString indir, TString name, TString outdir, map<int, set<long> > filter_list, TString filter_name);
+long change_filter_one(TString indir, TString name, TString outdir, map<int, set<long> > filter_list, TString filter_name);
 
 int main(int argc, char *argv[]){
   time_t begtime, endtime;
   time(&begtime);
 
-  TString filter(""), infolder("."), sample("*.root"), outfolder(""), filter_var("");
+  TString filter("csc2015_ee4sc_Dec01.txt"), infolder("."), sample("*.root"), outfolder("out"), filter_var("pass_cschalo");
   int c(0);
   while((c=getopt(argc, argv, "f:i:s:o:v:"))!=-1){
     switch(c){
@@ -48,24 +52,42 @@ int main(int argc, char *argv[]){
 
   if(filter=="" || filter_var==""){
     cout<<endl<<"Specify filter file and filter variable: "
-        <<"./run/change_filter.exe -f <filter_file> -i <infolder>=. -s <sample>=\"*.root\" -o <outfolder>=<infolder> -v <filter_var>"<<endl<<endl;
+        <<"./run/change_filter.exe -f <filter_file=csc2015_ee4sc_Dec01.txt> -i <infolder>=. -s <sample>=\"*.root\" "
+	<<"-o <outfolder=out> "
+	<<"-v <filter_var=pass_cschalo>"<<endl<<endl;
     return 1;
   }
     
   if(outfolder=="") outfolder=infolder;
   if(!infolder.EndsWith("/")) infolder.Append("/");
   if(!outfolder.EndsWith("/")) outfolder.Append("/");
+  gSystem->mkdir(outfolder, kTRUE);
+
+  // Checking if the text file with the event list to filter exist
+  struct stat buffer;   
+  if(stat (filter, &buffer) != 0) {
+    cout<<endl<<filter<<" does not exist. Downloading and uncompressing "<<filter<<endl<<endl;
+    execute("wget http://hep.ucsb.edu/people/manuelf/ra4/csc2015_ee4sc_Dec01.txt.gz");
+    execute("tar -xvzf csc2015_ee4sc_Dec01.txt.gz");
+  }
 
   map<int, set<long> > event_list = getFilterList(filter.Data());
+  time(&endtime);
+  int seconds = difftime(endtime, begtime);
+  cout<<endl<<"Took "<<seconds<<" seconds to read filter event list"<<endl;
 
+  long totentries(0);
   vector<TString> files = dirlist(infolder,sample);
   for(unsigned int i=0; i<files.size(); i++){
-    if(i%100==0) cout<<"[Change Filter] File #"<<i+1<<"/"<<files.size()<<endl;
-    change_filter_one(infolder, files[i], outfolder, event_list, filter_var);
+    cout<<"[Change filter] File "<<i+1<<"/"<<files.size()<<": "<<files[i]<<endl;
+    totentries += change_filter_one(infolder, files[i], outfolder, event_list, filter_var);
   }
 
   time(&endtime);
-  cout<<endl<<"Took "<<difftime(endtime, begtime)<<" seconds"<<endl<<endl;
+  seconds = difftime(endtime, begtime);
+  float hertz = totentries; hertz /= seconds;
+  cout<<endl<<"Took "<<seconds<<" seconds ("<<hoursMinSec(seconds)<<") for "<<totentries
+      <<" events -> "<<roundNumber(hertz,1,1000)<<" kHz, "<<roundNumber(1000,2,hertz)<<" ms per event"<<endl<<endl;
 
 }
 
@@ -92,7 +114,7 @@ map<int, set<long> > getFilterList(string filter){
 }
 
 
-void change_filter_one(TString indir, TString name, TString outdir, map<int, set<long> > filter_list, TString filter_name){
+long change_filter_one(TString indir, TString name, TString outdir, map<int, set<long> > filter_list, TString filter_name){
 
   //Set up old file/tree
   TFile *oldfile = new TFile(indir+name);
@@ -150,4 +172,6 @@ void change_filter_one(TString indir, TString name, TString outdir, map<int, set
   newtreeglobal->AutoSave();
   delete oldfile;
   delete newfile;
+
+  return nentries;
 }

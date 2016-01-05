@@ -223,8 +223,7 @@ if (host=="sd"):
   print "INFO: Creating babymaker tarball to transfer to work node..."
   tarcmd = "tar --directory=../ --exclude=\"babymaker/out\" --exclude=\"babymaker/run\""
   tarcmd += " --exclude=\"babymaker/logs\" --exclude=\"bmaker/interface/release.hh\""
-  ## The CSC filter lists are large, so we exclude them for MC
-  if len(data_wishlist) == 0: tarcmd += " --exclude=\"babymaker/data/csc_beamhalo_filter\""
+  tarcmd += " --exclude=\"babymaker/data/csc_beamhalo_filter\""
   tarcmd += " -c babymaker | xz > ../babymaker.tar.xz"
   os.system(tarcmd)
 

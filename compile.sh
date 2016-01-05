@@ -11,6 +11,17 @@ then
     fi
 fi
 
+## Checking if the event filter list file exist, and if not, download it
+if [ ! -e data/csc_beamhalo_filter/csc2015_ee4sc_Dec01.txt ]
+then
+    echo "Donwloading filter list file"
+    cd data/csc_beamhalo_filter/
+    wget http://hep.ucsb.edu/people/manuelf/ra4/csc2015_ee4sc_Dec01.txt.gz
+    tar -xzf csc2015_ee4sc_Dec01.txt.gz
+    rm csc2015_ee4sc_Dec01.txt.gz
+    cd ../..
+fi
+
 ## Compiling genfiles which generates baby_base and associated babies
 cd bmaker/genfiles
 exit_code=0;

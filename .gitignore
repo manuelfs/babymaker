@@ -11,6 +11,9 @@ bmaker/interface/release.hh
 *__init_*
 ._*
 
+# Big event list file
+data/csc_beamhalo_filter/*
+
 # Compiled Dynamic libraries
 *.so
 *.d

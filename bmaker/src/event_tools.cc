@@ -74,20 +74,12 @@ void event_tools::fillBeamHaloMap(string eventList){
 event_tools::event_tools(TString outname):
   VRunLumi2015nonblind(MakeVRunLumi("nonblind")){
 
-  doBeamHalo = false;
-  string command("printf ${CMSSW_BASE}/src/babymaker/data/csc_beamhalo_filter/eventlist_");
-  string eventList = execute(command.c_str());
-  vector<string> datasets = {"SingleElectron", "SingleMuon", "MET", "HTMHT", "JetHT", "DoubleMuon", "DoubleEG"};
-  for(size_t ind(0); ind < datasets.size(); ind++){
-    if(outname.Contains(datasets[ind].c_str())){
-	doBeamHalo = true;
-	eventList += datasets[ind];
-	eventList += "_csc2015.txt";
-	break;
-      }
-  } // Loop over datasets for which we have CSC Beam Halo event lists with bad events
-  
-  if(doBeamHalo) fillBeamHaloMap(eventList);
+  doBeamHalo = outname.Contains("Run2015");
+  if(doBeamHalo) { 
+    string command("printf ${CMSSW_BASE}/src/babymaker/data/csc_beamhalo_filter/csc2015_ee4sc_Dec01.txt");
+    string eventList = execute(command.c_str());
+    fillBeamHaloMap(eventList);
+  }
 }
 // const std::vector<std::vector<int> > VRunLumi2015golden(MakeVRunLumi("golden"));
 

@@ -358,9 +358,9 @@ double lepton_tools::getScaleFactorUncertaintyFs(const reco::Muon &lep, int npv)
 
   // Systematics : https://twiki.cern.ch/twiki/bin/view/CMS/SUSLeptonSFMC#Recommendations
   float syst=0;
-  if(lep.pt()>10 && lep.pt()<=20)	syst = val*0.10;
-  else if(lep.pt()>20 && lep.pt()<=30)	syst = val*0.03;
-  else if(lep.pt()>30)			syst = val*0.03; 
+  if(lep.pt()>10 && lep.pt()<=20)	syst = val*0.03;
+  else if(lep.pt()>20 && lep.pt()<=30)	syst = val*0.01;
+  else if(lep.pt()>30)			syst = val*0.01; 
   return syst;
 }
 
@@ -378,9 +378,9 @@ double lepton_tools::getScaleFactorUncertaintyFs(const pat::Electron &lep, int n
 
   // Systematics : https://twiki.cern.ch/twiki/bin/view/CMS/SUSLeptonSFMC#Recommendations
   float syst=0;
-  if(lep.pt()>10 && lep.pt()<=20)	syst=val*0.15;
+  if(lep.pt()>10 && lep.pt()<=20)	syst=val*0.10;
   else if(lep.pt()>20 && lep.pt()<=30)	syst=val*0.08;
-  else if(lep.pt()>30)			syst=val*0.08; 
+  else if(lep.pt()>30)			syst=val*0.05; 
   return syst;
 }
 

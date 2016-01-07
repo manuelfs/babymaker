@@ -221,9 +221,10 @@ for pd in data_wishlist:
 # If on UCSD prep also tarball
 if (host=="sd"): 
   print "INFO: Creating babymaker tarball to transfer to work node..."
-  tarcmd = "tar --directory=../ --exclude=\"babymaker/out\" --exclude=\"babymaker/run\""
-  tarcmd += " --exclude=\"babymaker/logs\" --exclude=\"bmaker/interface/release.hh\""
-  tarcmd += " --exclude=\"babymaker/data/csc_beamhalo_filter\""
+  tarcmd = "tar --directory=../ --exclude=\"out\" --exclude=\"run\""
+  tarcmd += " --exclude=\"logs\" --exclude=\"bmaker/interface/release.hh\""
+  tarcmd += " --exclude=\"data/csc_beamhalo_filter/*\""
+  tarcmd += " --exclude=\".git\""
   tarcmd += " -c babymaker | xz > ../babymaker.tar.xz"
   os.system(tarcmd)
 

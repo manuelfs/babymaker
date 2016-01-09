@@ -1190,7 +1190,7 @@ void bmaker_basic::writeWeights(const vCands &sig_leps, edm::Handle<GenEventInfo
   // Initializing weights
   if(isData) {
     baby.eff_trig() = baby.w_btag() = baby.w_pu() = baby.w_lep() = baby.w_fs_lep() = baby.w_toppt() = 1.;
-    baby.w_lumi() = baby.weight() = 1.;
+    baby.eff_jetid() = baby.w_lumi() = baby.weight() = 1.;
     return;
   }
 
@@ -1223,11 +1223,14 @@ void bmaker_basic::writeWeights(const vCands &sig_leps, edm::Handle<GenEventInfo
   // VVVL trigger efficiency
   baby.eff_trig() = weightTool->triggerEfficiency(baby.nmus(), baby.nels(), baby.sys_trig());
   
+  // In FastSim the JetID is broken, so we just apply 0.99 +- 0.01
+  if(isFastSim) baby.eff_jetid() = 0.99;
+  else baby.eff_jetid() = 1.;
   ////////////  Total weight  ////////////
   // w_btag calculated in writeJets
   // w_toppt and sys_isr calculated in writeMC
-  baby.weight() = baby.w_lumi() * baby.w_pu() * baby.w_lep() * baby.w_fs_lep() * baby.w_toppt() * baby.w_btag() 
-    * baby.eff_trig();
+  baby.weight() = baby.w_lumi() * baby.w_lep() * baby.w_fs_lep() * baby.w_toppt() * baby.w_btag() 
+    * baby.eff_trig() * baby.eff_jetid();
 
   /////// Systematics that do not change central value /////////
   weightTool->getTheoryWeights(lhe_info);

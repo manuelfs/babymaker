@@ -286,6 +286,7 @@ float w_toppt
 float w_lep
 float w_fs_lep
 float eff_trig
+float eff_jetid
 std::vector<float> w_pdf
 
 ################  Systematic variations   ##################

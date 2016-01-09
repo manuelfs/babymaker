@@ -58,8 +58,9 @@ int main(int argc, char *argv[]){
     }
   }
 
-  map<int, set<int> > events;
-  int event, run;
+  map<int, set<Long64_t> > events;
+  Long64_t event;
+  int run;
 
   for(unsigned idata(0); idata < datasets.size(); idata++){
     TChain chain("tree"), treeglobal("treeglobal");
@@ -96,7 +97,7 @@ int main(int argc, char *argv[]){
 	    <<setw(4)<<roundNumber(entry,1,seconds*1000.)<<" kHz"<<endl;
       }
       
-      if(events.find(run) == events.end()) events[run] = set<int>(); // New run
+      if(events.find(run) == events.end()) events[run] = set<Long64_t>(); // New run
       if(events[run].find(event) == events[run].end()){ // New event
 	events[run].insert(event);
 	outtree->Fill();
@@ -119,7 +120,7 @@ int main(int argc, char *argv[]){
   TString txtname(outfolder+"/runs_"+basename+".txt");
   ofstream txtfile(txtname);
   int prevrun(0);
-  for(map<int, set<int> >::const_iterator it = events.begin(); it != events.end(); ++it) {
+  for(map<int, set<Long64_t> >::const_iterator it = events.begin(); it != events.end(); ++it) {
     run = it->first;
     if(run/1000 != prevrun){
       prevrun = run/1000;

@@ -215,7 +215,7 @@ int change_branch_one(TString indir, TString name, TString outdir, vector<TStrin
     // Hack to protect total weight from NaN, and not include w_pu
     for(int iset=0; iset<nvar; iset++)
       if(var[iset].Contains("weight"))
-        new_var_flt_[iset] = w_lep * w_fs_lep * w_toppt * w_btag * w_lumi * eff_trig_ * var_val[iset][0].Atof();
+        new_var_flt_[iset] = w_lep * w_fs_lep * w_toppt * w_btag * w_lumi * eff_trig_ * var_val[iset][0].Atof() * 0.99; // the 0.99 is for jetId
 
     newtree->Fill();
   }

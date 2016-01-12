@@ -73,7 +73,6 @@ int main(int argc, char *argv[]){
   vector<double> sum_slep(ch.sys_lep().size()), sum_fs_slep(ch.sys_fs_lep().size());
   double sum_pdf_min(0.);
  
-  
   int nentries = ch.GetEntries();
   //Loop over events and get sum of weights
   for(int ientry=0; ientry<nentries; ientry++){
@@ -143,6 +142,14 @@ int main(int argc, char *argv[]){
   float w_lumi = xsec*luminosity / nent_eff;
   float w_lumi_corr = w_lumi / fabs(ch.w_lumi());
 
+  // Average w_toppt in bins of ht_isr_me found in inclusive TTJets (SingleLept and DiLept)
+  double wanted_toppt(1.);
+  if(sample.Contains("TTJets_HT-600to800"))   wanted_toppt = 0.8577;
+  if(sample.Contains("TTJets_HT-800to1200"))  wanted_toppt = 0.8352;
+  if(sample.Contains("TTJets_HT-1200to2500")) wanted_toppt = 0.8201;
+  if(sample.Contains("TTJets_HT-2500toInf"))  wanted_toppt = 0.8198;
+
+
   time(&endtime); 
   int seconds = difftime(endtime, begtime);
   float hertz = nentries; hertz /= seconds;
@@ -174,10 +181,10 @@ int main(int argc, char *argv[]){
   //   ", w_lumi_corr "<<w_lumi_corr<<endl;
   //Calculate weights
   float w_corr_l0 = (nent-sum_wlep)/nent_zlep * (nent-sum_fs_wlep)/nent_zlep;
-  var_val[0].push_back("*"+to_string(nent/(sum_weff_l0*w_corr_l0 + sum_weff_l1)));
+  var_val[0].push_back("*"+to_string(nent*wanted_toppt/(sum_weff_l0*w_corr_l0 + sum_weff_l1)));
   var_val[1].push_back("*"+to_string(nent/sum_btag));
   var_val[2].push_back("*"+to_string(nent/sum_pu));
-  var_val[3].push_back("*"+to_string(nent/sum_toppt));
+  var_val[3].push_back("*"+to_string(nent*wanted_toppt/sum_toppt));
   for(unsigned int idx=0;idx<sum_wpdf.size();idx++)         var_val[4].push_back("*"+to_string(nent/sum_wpdf[idx]));
   for(unsigned int idx=0;idx<sum_bctag.size();idx++)        var_val[5].push_back("*"+to_string(nent/sum_bctag[idx]));
   for(unsigned int idx=0;idx<sum_udsgtag.size();idx++)      var_val[6].push_back("*"+to_string(nent/sum_udsgtag[idx]));

@@ -46,7 +46,19 @@ int main(int argc, char *argv[]){
   if(cuts=="abcd") cuts="nleps==1&&ht>500&&met>200&&njets>=6&&nbm>=1&&mj>250";
   if(cuts=="sys_abcd") 
     cuts = "nleps==1&&max(ht,Max$(sys_ht))>500&&max(met,Max$(sys_met))>200&&max(njets,Max$(sys_njets))>=6&&max(nbm,Max$(sys_nbm))>=1&&max(mj,Max$(sys_mj))>250";
-		     
+  if(cuts=="zisr")
+    cuts = "nvleps==2&&nleps>=1&&Max$(leps_pt)>30&&((elelv_m>80&&elelv_m<100)||(mumuv_m>80&&mumuv_m<100))";
+  if(cuts=="dy_ht300")
+    cuts = "nvleps==2&&nleps>=1&&Max$(leps_pt)>30&&((elelv_m>80&&elelv_m<100)||(mumuv_m>80&&mumuv_m<100))&&ht>300";
+  if(cuts=="ttisr")
+    cuts = "nvleps==2&&nleps>=1&&Max$(leps_pt)>30&&njets>=2&&nbm==2";
+  if(cuts=="ttdilep_ht300")
+    cuts = "nels==1&&nmus==1&&Max$(leps_pt)>30&&ht>300&&met>100&&nbm>=1";
+  if(cuts=="qcd")
+    cuts = "ht>1000&&met<50&&(nvmus+nvels)==0";
+  if(cuts=="qcd_njet10")
+     cuts = "ht>1000&&met<50&&(nvmus+nvels)==0&&njets>=10";
+	     
   vector<TString> files = dirlist(folder, "*.root");
   unsigned nfiles(files.size()), ini(0), end(nfiles);
   if(njobs>0){

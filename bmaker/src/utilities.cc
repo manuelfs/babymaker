@@ -23,6 +23,7 @@ namespace utilities{
   }
 
   float getMT2(float pt1, float phi1, float pt2, float phi2, float met, float met_phi){
+    asymm_mt2_lester_bisect::disableCopyrightMessage();
     double mVisA = 0; // mass of visible object on side A.  Must be >=0.
     double pxA = pt1*cos(phi1); // x momentum of visible object on side A.
     double pyA = pt1*sin(phi1); // y momentum of visible object on side A.

@@ -388,7 +388,7 @@ double lepton_tools::getPFIsolation(edm::Handle<pat::PackedCandidateCollection> 
                                     const reco::Candidate* ptcl,
                                     double r_iso_min, double r_iso_max, double kt_scale,
                                     double rho, bool charged_only) {
-  if (ptcl->pt()<5.) return 99999.;
+  if (ptcl->pt()<1.) return 99999.;
 
   double deadcone_nh(0.), deadcone_ch(0.), deadcone_ph(0.), deadcone_pu(0.);
   if(ptcl->isElectron()) {
@@ -488,16 +488,18 @@ vCands lepton_tools::getRA4IsoTracks(edm::Handle<pat::PackedCandidateCollection>
 
   vCands tks;
   //common parameters
-  float eta_max = 2.5;
-  float dz_max = 0.1;
+  // float eta_max = 2.5;
+  //float dz_max = 0.1;
   // float cone_size = 0.3;
+  float eta_max = 5;
+  float dz_max = 5;
 
   for (size_t i(0); i < pfcands->size(); i++) {
     const pat::PackedCandidate &tk = (*pfcands)[i];
     unsigned int id = abs(tk.pdgId());
 
     //id-specific parameters
-    float pt_min = id==211 ? 10. : 5.;
+    float pt_min = id==211 ? 5. : 5.;
     // float iso_max = id==211 ? 0.1 : 0.2;
 
     // track selection
@@ -516,7 +518,7 @@ vCands lepton_tools::getRA4IsoTracks(edm::Handle<pat::PackedCandidateCollection>
     else
       iso = getPFIsolation(pfcands, dynamic_cast<const reco::Candidate *>(&tk), 0.05, 0.2, 10., rhoEventCentral, true);
 
-    if(iso>0.5) continue;
+    if(iso>1.0) continue;
     isos.push_back(iso);
     tks.push_back(dynamic_cast<const reco::Candidate *>(&tk));
   }

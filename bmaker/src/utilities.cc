@@ -4,10 +4,24 @@
 #include <iostream>
 #include "babymaker/bmaker/interface/utilities.hh"
 #include "babymaker/bmaker/interface/lester_mt2_bisect.h"
+#include "TMath.h"
 
 using namespace std;
 
 namespace utilities{
+
+
+  float dPhi(float phi1, float phi2){
+    float delphi = TMath::Abs(TMath::Abs(TMath::Abs(phi1 - phi2) - TMath::Pi())-TMath::Pi());
+    return delphi;
+  }
+
+  float dR(float phi1, float phi2, float eta1, float eta2){
+    float dr = sqrt(pow(eta1-eta2,2)+pow(dPhi(phi1,phi2),2));
+    return dr;
+    
+  }
+
 
   bool greaterPt(const reco::Candidate *a, const reco::Candidate *b) {
     return a->pt() > b->pt();

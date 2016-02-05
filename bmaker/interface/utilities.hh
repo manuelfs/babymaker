@@ -16,6 +16,8 @@ namespace utilities{
 
   enum SysEnum{kSysJER, kSysJECUp, kSysJECDn, kSysLast};
 
+  float dPhi(float phi1, float phi2);
+  float dR(float phi1, float phi2, float eta1, float eta2);
   bool greaterPt(const reco::Candidate *a, const reco::Candidate *b);
   bool greaterM(const fastjet::PseudoJet &a, const fastjet::PseudoJet &b);
   float getMT(float pt1, float phi1, float pt2, float phi2);

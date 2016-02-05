@@ -131,10 +131,16 @@ int nveto
 std::vector<float> tks_pt
 std::vector<float> tks_eta
 std::vector<float> tks_phi
+std::vector<float> tks_d0
+std::vector<float> tks_dz
 std::vector<int> tks_pdg
 std::vector<float> tks_miniso
 std::vector<float> tks_mt2
 std::vector<float> tks_mt
+std::vector<bool> tks_tm
+
+
+
 
 
 ###################   Trigger   ##################
@@ -201,6 +207,23 @@ float isr_tru_eta
 float isr_tru_phi
 int mgluino
 int mlsp
+
+int nlost
+std::vector<float> lost_pt
+std::vector<float> lost_dpt
+std::vector<float> lost_d0
+std::vector<float> lost_dz
+std::vector<float> lost_miniso
+std::vector<float> lost_eta
+std::vector<float> lost_phi
+std::vector<int>  lost_pdg
+std::vector<bool> lost_id
+std::vector<bool> lost_sigid
+std::vector<bool> lost_vertex
+std::vector<bool>  lost_has_trk
+std::vector<bool>  lost_has_pat
+std::vector<bool>  lost_from_tau
+std::vector<int>  lost_num_chg_siblings
 
 ################  Weights   ##################
 float weight

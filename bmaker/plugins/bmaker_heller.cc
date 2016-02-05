@@ -155,23 +155,34 @@ void bmaker_heller::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
       vector<float> tks_pt;
       vector<float> tks_eta;
       vector<float> tks_phi;
+      vector<float> tks_d0;
+      vector<float> tks_dz;
       vector<int> tks_pdg;
       vector<float> tks_miniso;
       vector<float> tks_mt2;
       vector<float> tks_mt;
+      vector<bool> tks_tm;
+     
       int nveto=0;
 
       for(unsigned i=0;i<ra4tks.size();i++){
         tks_pt.push_back(ra4tks.at(i)->pt());
         tks_eta.push_back(ra4tks.at(i)->eta());
         tks_phi.push_back(ra4tks.at(i)->phi());
+	tks_d0.push_back( sqrt(pow(ra4tks.at(i)->vx()-vtx->at(0).x(),2) + pow(vtx->at(0).y()-ra4tks.at(i)->vy(),2)));
+        tks_dz.push_back(ra4tks.at(i)->vz()-vtx->at(0).z());
         tks_pdg.push_back(ra4tks.at(i)->pdgId());
         tks_miniso.push_back(isos.at(i));
+	tks_tm.push_back(false); //filled in writeMC
         tks_mt2.push_back(getMT2(baby.leps_pt().at(0),baby.leps_phi().at(0),tks_pt.back(),tks_phi.back(),baby.met(),baby.met_phi()));
         tks_mt.push_back(getMT(tks_pt.back(),tks_phi.back(),baby.met(),baby.met_phi()));
         if(fabs(tks_pdg.back())==211 && tks_pt.back()>15. && tks_miniso.back()<0.05 && tks_mt2.back()<100) nveto++;
         else if (fabs(tks_pdg.back())==13 && tks_pt.back()>10. && tks_miniso.back()<0.2 && tks_mt2.back()<100) nveto++;
         else if (fabs(tks_pdg.back())==11 && tks_pt.back()>10. && tks_miniso.back()<0.1 && tks_mt2.back()<100) nveto++;
+
+	
+
+
       }
       baby.tks_pt() = tks_pt;
       baby.tks_eta() = tks_eta;
@@ -180,6 +191,7 @@ void bmaker_heller::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
       baby.tks_miniso() = tks_miniso;
       baby.tks_mt2() = tks_mt2;
       baby.tks_mt() = tks_mt;
+      baby.tks_tm() = tks_tm;
       baby.nveto()=nveto;
 
     }  
@@ -242,7 +254,7 @@ void bmaker_heller::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     if (debug) cout<<"INFO: Writing MC particles..."<<endl;
     edm::Handle<reco::GenParticleCollection> genParticles;
     iEvent.getByLabel("prunedGenParticles", genParticles);
-    writeMC(genParticles, all_mus, all_els, photons);
+    writeMC(genParticles, all_mus, all_els, photons,pfcands, rhoEventCentral,vtx,allmuons,allelectrons);
   }
 
   ////////////////// resolution-corrected MET /////////////////////////
@@ -694,7 +706,7 @@ void bmaker_heller::writeGenInfo(edm::Handle<LHEEventProduct> lhe_info){
 } // writeGenInfo
 
 void bmaker_heller::writeMC(edm::Handle<reco::GenParticleCollection> genParticles, 
-                           vCands &all_mus, vCands &all_els, vCands &photons){
+			    vCands &all_mus, vCands &all_els, vCands &photons,  edm::Handle<pat::PackedCandidateCollection> pfcands, double rhoEventCentral,edm::Handle<reco::VertexCollection> vtx, edm::Handle<pat::MuonCollection> muons, edm::Handle<pat::ElectronCollection> electrons){
   LVector isr_p4;
   float metw_tru_x(0.), metw_tru_y(0.);
   float lep_tru_pt(0.), lep_tru_phi(0.);
@@ -704,7 +716,9 @@ void bmaker_heller::writeMC(edm::Handle<reco::GenParticleCollection> genParticle
   baby.m_tt()=0;
   vector<float> top_pt;
   int topIndex=-1;
+  int nlost=0;
   int antitopIndex=-1;
+  //cout<<"starting event with nleps = "<<baby.nleps()<<endl;
   for (size_t imc(0); imc < genParticles->size(); imc++) {
     const reco::GenParticle &mc = (*genParticles)[imc];
 
@@ -723,10 +737,16 @@ void bmaker_heller::writeMC(edm::Handle<reco::GenParticleCollection> genParticle
     bool eFromTopZ(id==11 && (momid==24 || momid==23));
     bool muFromTopZ(id==13 && (momid==24 || momid==23));
     bool tauFromTopZ(id==15 && (momid==24 || momid==23));
+    bool fromWOrWTau(mcTool->fromWOrWTau(mc));
+    bool chgPionFromTau(id==211 && momid==15 && fromWOrWTau);
+    // bool laste(mcTool->isLast(mc,11));
+    //bool lastmu(mcTool->isLast(mc,13));
+    //bool lasttau(mcTool->isLast(mc,15));
+    
     if(lastTop) mc.pdgId()>0 ? topIndex=imc : antitopIndex=imc;
 
 
-    bool fromWOrWTau(mcTool->fromWOrWTau(mc));
+   
     
     //////// Finding p4 of ME ISR system
     if((lastTop && outname.Contains("TTJets")) || (lastGluino && outname.Contains("SMS")) || 
@@ -761,8 +781,186 @@ void bmaker_heller::writeMC(edm::Handle<reco::GenParticleCollection> genParticle
       } else baby.ntrutaush()++;
     }
 
+    //cout<<"ntruels, ntrumus, ntrutausl, ntrutaush"<<baby.ntruels()<<", "<<baby.ntrumus()<<", "<<baby.ntrutausl()<<", "<<baby.ntrutaush()<<endl;
+    
+    
+    //Find lost leptons (without any signal lepton)
+    //use slightly looser tolerance
+    float relptThres(2.), drThres(0.15); 
+    //if(mcTool->fromWOrWTau(mc) && (laste||lastmu||lasttau|| (mcTool->fromTau(mc) && abs(mc.pdgId())==211))){
+    if(eFromTopZ|| muFromTopZ || chgPionFromTau){
+      //cout<<"New prompt lep, pdgid = "<<mc.pdgId()<<endl;
+      //first, decide if this gen lepton is lost
+      //by default, hadronic taus are considered lost
+      double mindr(999.);
+      int minind(-1);
+      
+      for(size_t ind(0); ind < baby.leps_pt().size(); ind++) {
+	double dr = dR(baby.leps_phi()[ind],mc.phi(),baby.leps_eta()[ind],mc.eta());
+	//	cout<<"mc lep eta phi = "<<mc.eta()<<" "<<mc.phi()<<", reco lep eta phi "<<baby.leps_eta()[ind]<<" "<<baby.leps_phi()[ind]<<", dr = "<<dr<<endl;
+	double drelpt(fabs((baby.leps_pt()[ind] - mc.pt())/mc.pt()));
+	if(dr > drThres || drelpt > relptThres) continue;
+	if(dr < mindr){
+	  mindr = dr;
+	  minind = ind;
+	}
+      }
+      
+
+
+      if(minind<0){ // this lepton is lost	  
+	nlost++;
+	
+	float miniso=-1;
+	float dpt=-999.;
+
+	float dz=-999.;
+	float d0 =-999.;
+	
+	bool has_track=false;
+	bool has_pat=false;
+	bool vertex=false;
+	bool id=false;
+	bool sigid=false;
+	bool from_tau= mcTool->fromTau(mc);
+	int num_chg_siblings=0;
+	
+	
+	
+
+	// see if it even has a track, unless it is the tau itself
+	double mindrtrk=999.;
+	int minindtrk=-1;
+	//	if(abs(mc.pdgId())!=15){
+	for (size_t ipf(0); ipf< pfcands->size(); ipf++) {
+	  const pat::PackedCandidate &pfc = (*pfcands)[ipf];
+	  if(pfc.pdgId() != mc.pdgId() ) continue;
+	  double dr = deltaR(pfc, mc);
+	  double drelpt = (fabs((pfc.pt() - mc.pt())/mc.pt()));
+	  if(dr > drThres || drelpt > relptThres) continue;
+	  if(dr < mindrtrk){
+	    mindrtrk = dr;
+	    minindtrk=ipf;
+	  }
+	}
+	  //	}
+	
+	//Has a track
+	if(minindtrk>=0){
+	  has_track=true;
+	  const pat::PackedCandidate &track = (*pfcands)[minindtrk];
+	  //if it has a track, use isolation of the track itself
+	  if(abs(mc.pdgId())==11 || abs(mc.pdgId())==13) miniso = lepTool->getPFIsolation(pfcands, dynamic_cast<const reco::Candidate *>(&track), 0.05, 0.2, 10., rhoEventCentral, false);	  
+	  else miniso = lepTool->getPFIsolation(pfcands, dynamic_cast<const reco::Candidate *>(&track), 0.05, 0.2, 10., rhoEventCentral, true);
+	  
+	  dz = fabs(track.vz()-vtx->at(0).z());
+	  d0 = fabs(track.dxy()-vtx->at(0).x()*sin(track.phi())+vtx->at(0).y()*cos(track.phi()));
+    
+	  if(dz <= 0.5 && d0 <= 0.2) vertex=true;
+	 
+	  dpt = track.pt()-mc.pt();
+	  
+	}
+
+
+	//Now look at pat objects
+	double mindrpat=999.;
+	int minindpat=-1;
+
+	if(abs(mc.pdgId())==11){
+	  for (size_t ielec(0); ielec < electrons->size(); ielec++) {
+	    const pat::Electron &elec = (*electrons)[ielec];    
+	    double dr = deltaR(elec, mc);
+	    double drelpt = (fabs((elec.pt() - mc.pt())/mc.pt()));
+	    if(dr > drThres || drelpt > relptThres) continue;
+	    if(dr < mindrpat){
+	      mindrpat = dr;
+	      minindpat=ielec;
+	      
+	    }	
+	  }
+
+	  if(minindpat>=0){ //pat electron found
+	    const pat::Electron &elecsel = (*electrons)[minindpat];
+	    has_pat=true;
+	    double elec_iso(lepTool->getPFIsolation(pfcands, dynamic_cast<const reco::Candidate *>(&elecsel), 0.05, 0.2, 10., rhoEventCentral, false)); //need to recalculate in case there is no track
+	    id = lepTool->isVetoElectron(elecsel, vtx, elec_iso);
+	    sigid = lepTool->isSignalElectron(elecsel, vtx, elec_iso);
+	    //Only use pat values if track is not found
+	    if(dpt<-900.) dpt = elecsel.pt()-mc.pt();
+	    if(miniso<0) miniso = elec_iso;
+	  }
+	}
+
+	else if(abs(mc.pdgId())==13){
+	  for (size_t imu(0); imu < muons->size(); imu++) {
+	    const pat::Muon &mu = (*muons)[imu];    
+	    double dr = deltaR(mu, mc);
+	    double drelpt = (fabs((mu.pt() - mc.pt())/mc.pt()));
+	    if(dr > drThres || drelpt > relptThres) continue;
+	    if(dr < mindrpat){
+	      mindrpat = dr;
+	      minindpat=imu;
+	      
+	    }	
+	  }
+
+	  if(minindpat>=0){
+	    has_pat=true;
+	    const pat::Muon &musel = (*muons)[minindpat];    
+	    double mu_iso(lepTool->getPFIsolation(pfcands, dynamic_cast<const reco::Candidate *>(&musel), 0.05, 0.2, 10., rhoEventCentral, false)); //need to recalculate in case there is no track
+	    id = lepTool->isVetoMuon(musel, vtx, mu_iso);
+	    sigid = lepTool->isSignalMuon(musel, vtx, mu_iso);
+	    //Only use pat values if track is not found
+	    if(dpt<-900.) dpt = musel.pt()-mc.pt();
+	    if(miniso<0) miniso = mu_iso;
+	  }
+	}
+
+	//tau specific
+	if(from_tau && abs(mc.pdgId())==211){
+	  const reco::GenParticle *mcMom;
+	  mcTool->mom(mc, mcMom);
+	  num_chg_siblings = mcTool->numChargeDaughters(*mcMom)-1; 
+	}
+
+
+	/*	else if(abs(mc.pdgId())==15){
+	  num_chg_daughters = mcTool->numChargeDaughters(mc);
+
+	  if(mcTool->hasDaughter(mc, 11))
+	    daughter=11;
+	  else if(mcTool->hasDaughter(mc, 13))
+	    daughter=13;
+	  else
+	    daughter=211;
+
+
+	    }*/
+
+	baby.lost_pdg().push_back(mc.pdgId());
+	baby.lost_pt().push_back(mc.pt());
+	baby.lost_dpt().push_back(dpt);
+	baby.lost_d0().push_back(d0);
+	baby.lost_dz().push_back(dz);
+	baby.lost_eta().push_back(mc.eta());
+	baby.lost_phi().push_back(mc.phi());
+	baby.lost_id().push_back(id);
+	baby.lost_sigid().push_back(sigid);
+	baby.lost_from_tau().push_back(from_tau);
+	baby.lost_vertex().push_back(vertex);
+	baby.lost_has_trk().push_back(has_track);
+	baby.lost_has_pat().push_back(has_pat);
+	baby.lost_miniso().push_back(miniso);
+	baby.lost_num_chg_siblings().push_back(num_chg_siblings);
+      }
+    }
+    baby.nlost() = nlost;
+
+
+    
     //////// Finding truth-matched leptons
-    const float relptThreshold(0.3), drThreshold(0.1);      
+    const float relptThreshold(0.3), drThreshold(0.1);    
     if(id==11 && mcTool->fromWOrWTau(mc)){
       double mindr(999.);
       int minind(-1);
@@ -775,6 +973,7 @@ void bmaker_heller::writeMC(edm::Handle<reco::GenParticleCollection> genParticle
           minind = ind;
         }
       } // Loop over all_els
+      
       if(minind >= 0) {
         baby.els_tm()[minind] = true;
         if(baby.els_sig()[minind]) baby.nleps_tm()++;
@@ -805,6 +1004,27 @@ void bmaker_heller::writeMC(edm::Handle<reco::GenParticleCollection> genParticle
         lep_tru_phi = mc.phi();
       } // Lepton pt to find mt_tru
     } // If it is a muon
+    
+    if((id==13||id==11) && mcTool->fromWOrWTau(mc)){
+      double mindr(999.);
+      int minind(-1);
+      for(size_t ind(0); ind < baby.tks_pt().size(); ind++) {
+        double dr = dR(baby.tks_phi()[ind],mc.phi(),baby.tks_eta()[ind],mc.eta());
+        double drelpt(fabs((baby.tks_pt()[ind] - mc.pt())/mc.pt()));
+        if(dr > drThreshold || drelpt > relptThres) continue;
+        if(dr < mindr){
+          mindr = dr;
+          minind = ind;
+        }
+      } // Loop over tks
+      if(minind >= 0) {
+        baby.tks_tm()[minind] = true;
+      }
+     
+    } // If it is a lepton
+    
+
+    
     if(id==22){
       double mindr(999.);
       int minind(-1);

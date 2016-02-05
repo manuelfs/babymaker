@@ -104,8 +104,8 @@ public:
   void writeVertices(edm::Handle<reco::VertexCollection> vtx,
 		     edm::Handle<std::vector< PileupSummaryInfo > >  pu_info);  
   void writeGenInfo(edm::Handle<LHEEventProduct> lhe_info);
-  void writeMC(edm::Handle<reco::GenParticleCollection> genParticles, vCands &all_mus, vCands &all_els, vCands &photons);
-
+  //void writeMC(edm::Handle<reco::GenParticleCollection> genParticles, vCands &all_mus, vCands &all_els, vCands &photons);
+  void writeMC(edm::Handle<reco::GenParticleCollection> genParticles, vCands &all_mus, vCands &all_els, vCands &photons,  edm::Handle<pat::PackedCandidateCollection> pfcands, double rhoEventCentral,edm::Handle<reco::VertexCollection> vtx, edm::Handle<pat::MuonCollection> muons, edm::Handle<pat::ElectronCollection> electrons);
   void reportTime(const edm::Event& iEvent);
 
   // functions for calculating rebalanced MET

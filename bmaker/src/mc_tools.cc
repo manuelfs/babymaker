@@ -15,6 +15,16 @@ bool mc_tools::hasDaughter(const reco::GenParticle &mc, size_t id){
   return false;
 }
 
+
+int mc_tools::numChargeDaughters(const reco::GenParticle &mc){
+  int ncharged=0;
+  for(size_t idau(0); idau < mc.numberOfDaughters(); idau++) 
+    if(abs(mc.daughter(idau)->charge())!=0) ncharged++;
+
+  return ncharged;
+}
+
+
 // Checks if "mc" is "id" and does not decay to itself
 bool mc_tools::isLast(const reco::GenParticle &mc, size_t id){
   return (abs(mc.pdgId())==id && !hasDaughter(mc, id));
@@ -27,6 +37,15 @@ bool mc_tools::fromWOrWTau(const reco::GenParticle &mc){
   if(momId == 15 && abs(mom(*mcMom, mcMom)) == 24) return true;
   return false;
 }
+
+
+bool mc_tools::fromTau(const reco::GenParticle &mc){
+  const reco::GenParticle *mcMom;
+  int momId = abs(mom(mc, mcMom));
+  if(momId == 15 && abs(mom(*mcMom, mcMom)) == 24) return true;
+  return false;
+}
+
 
 // Returns the id and the pointer to the mother of "mc" not being itself
 int mc_tools::mom(const reco::GenParticle &mc, const reco::GenParticle *&mcMom){

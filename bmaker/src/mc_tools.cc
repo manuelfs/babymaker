@@ -109,7 +109,8 @@ void mc_tools::printParticle(const reco::GenParticle &mc){
   cout<<setw(8)<<mc.pdgId()<<",  mom "<<setw(8)<<momid<<",  status "<<setw(3)<<mc.status()
       <<",  (pt,eta,phi) = ("<<setw(7)<<roundNumber(mc.pt(),2)<<", "
       <<setw(5)<<roundNumber(mc.eta(),2)<<", "<<setw(5)<<roundNumber(mc.phi(),2)
-      <<"),  nDau "<<setw(2)<<mc.numberOfDaughters()<<": ";
+      <<"), mass "<<setw(6)<<roundNumber(mc.mass(),1)
+      <<",  nDau "<<setw(2)<<mc.numberOfDaughters()<<": ";
   for(size_t idau(0); idau < mc.numberOfDaughters(); idau++) {
     cout<<mc.daughter(idau)->pdgId();
     if(idau < mc.numberOfDaughters()-1) cout<<", ";
@@ -120,14 +121,12 @@ void mc_tools::printParticle(const reco::GenParticle &mc){
 
 void mc_tools::getMassPoints(TString mpoints, int &mgluino, int &mlsp){
 
-  int idxstart = mpoints.First("_")+1;
-  int idxmid = mpoints.Index("_",idxstart+1)+1;
-  int idxend = mpoints.Length();
-
-  TString mg = mpoints(idxstart,idxmid-(idxstart+1));
-  TString ml = mpoints(idxmid,idxend);
+  TString ml(mpoints), mg(mpoints);
+  ml.Remove(0, ml.Last('_')+1);
   ml.ReplaceAll("\n","");
-  
+  mg.Remove(mg.Last('_'));
+  mg.Remove(0, mg.Last('_')+1);
+
   if(!mg.IsFloat() || !ml.IsFloat()){
     cout<<"ERROR: Improper parsing of mass points"<<endl;
     cout<<"Mass of gluino parsed as \""<<mg<<"\""<<endl;

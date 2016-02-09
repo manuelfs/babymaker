@@ -938,7 +938,7 @@ void bmaker_basic::writeGenInfo(edm::Handle<LHEEventProduct> lhe_info){
 
   } // Loop over generator particles
   
-  if(outname.Contains("T1tttt") || outname.Contains("T5ZZ") || outname.Contains("T5qqqqVV") ){ //Get mgluino and mlsp
+  if(outname.Contains("SMS")){ //Get mgluino and mlsp
     
     typedef std::vector<std::string>::const_iterator comments_const_iterator;
     
@@ -969,20 +969,19 @@ void bmaker_basic::writeMC(edm::Handle<reco::GenParticleCollection> genParticles
   vector<float> top_pt;
   int topIndex=-1;
   int antitopIndex=-1;
+  const size_t bsmid(1000000);
   for (size_t imc(0); imc < genParticles->size(); imc++) {
     const reco::GenParticle &mc = (*genParticles)[imc];
+    // mcTool->printParticle(mc); // Prints various properties of the MC particle
 
     size_t id(abs(mc.pdgId())), momid(0);
     if(mc.mother()) momid = abs(mc.mother()->pdgId());
     bool lastTop(mcTool->isLast(mc,6));
+    bool lastNewPhysics(id>=bsmid && mcTool->isLast(mc,id));
     bool lastGluino(mcTool->isLast(mc,1000021));
-    bool lastLSP(mcTool->isLast(mc,1000022));
-    bool lastChi02(mcTool->isLast(mc,1000023));
-    bool lastChi11(mcTool->isLast(mc,1000024));
     bool lastZ(mcTool->isLast(mc,23));
     bool lastW(mcTool->isLast(mc,24));
-    bool lastGravitino(mcTool->isLast(mc,1000039));
-    bool bFromTop(id==5 && momid==6);
+    bool bTopOrBSM(id==5 && (momid==6 || momid>=bsmid));
     bool nuFromZ((id==12 || id==14 || id==16) && momid==23);
     bool eFromTopZ(id==11 && (momid==24 || momid==23));
     bool muFromTopZ(id==13 && (momid==24 || momid==23));
@@ -997,7 +996,8 @@ void bmaker_basic::writeMC(edm::Handle<reco::GenParticleCollection> genParticles
        (lastZ && outname.Contains("DY"))) isr_p4 -= mc.p4();
 
     //////// Saving interesting true particles
-    if(lastTop || lastGluino || lastLSP || lastChi02 || lastChi11 || lastGravitino || lastZ || lastW || bFromTop || eFromTopZ || muFromTopZ || tauFromTopZ || nuFromZ || fromWOrWTau) {
+    if(lastTop || lastNewPhysics || lastZ || lastW || bTopOrBSM || eFromTopZ || muFromTopZ 
+       || tauFromTopZ || nuFromZ || fromWOrWTau) {
       baby.mc_id().push_back(mc.pdgId());
       baby.mc_pt().push_back(mc.pt());
       baby.mc_eta().push_back(mc.eta());

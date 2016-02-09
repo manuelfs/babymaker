@@ -60,7 +60,7 @@ if "Run2015D" in outName: jecLabel = 'Summer15_25nsV6_DATA' # for 7.4.12 data
 elif "RunIISpring15FSPremix" in outName: jecLabel = 'MCRUN2_74_V9'
 else: jecLabel = 'Summer15_25nsV6_MC'
 
-if "FSPremix" in outName: fastsim = True
+if "FSPremix" in outName or "Fast" in outName: fastsim = True
 else: fastsim = False
 
 if "Run2015" in outName:

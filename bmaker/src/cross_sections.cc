@@ -13,6 +13,10 @@ namespace xsec{
     if(file.Contains("Run2015"))   xsec = 1.;
 
 
+    //NOTE: When you add more topologies, make sure to also add them to list of things to parse 
+    //for model parameters (search "cit" in bmaker_basic.cc)
+    if(file.Contains("SMS")) xsec = 1.0; // Filler to avoid crashes in the SMS scans
+
     // From https://twiki.cern.ch/twiki/bin/view/LHCPhysics/SUSYCrossSections13TeVgluglu
     if(file.Contains("T1tttt")) xsec = 0.0856418; //just to avoid crash on scans
     if(file.Contains("T1tttt") && file.Contains("825_"))   xsec = 1.2167;
@@ -24,11 +28,7 @@ namespace xsec{
     if(file.Contains("T2tt") && file.Contains("650_"))  xsec = 0.107045;
     if(file.Contains("T2tt") && file.Contains("850_"))  xsec = 0.0189612;
 
-    //NOTE: When you add more topologies, make sure to also add them to list of things to parse for model parameters (search "cit" in bmaker_basic.cc)
-
-    if(file.Contains("T5ZZ")) xsec = 1.0; //filler
-    if(file.Contains("T5qqqqVV")) xsec = 1.0;
-
+ 
 
     if(file.Contains("SMS-T2tt_2J_mStop-425_mLSP-325"))  xsec = 1.31169;
     if(file.Contains("SMS-T2tt_2J_mStop-500_mLSP-325"))  xsec = 0.51848;

@@ -3,14 +3,24 @@
 # in case we decide to use David's batch:
 import os, sys, pprint, glob
 
-ntup_date = '2016_01_11'
-outname = "baby_SMS-T1tttt_MASS_TAG_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15FSPremix-MCRUN2_74_V9.root"
-outfolder = "/net/cms2/cms2r0/babymaker/babies/"+ntup_date+"/to_normalize/sms" 
+ntup_date = '2016_02_09'
+model = "T2tt"
+
+if model == "T1tttt":
+  outname = "baby_SMS-T1tttt_MASS_TAG_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15FSPremix-MCRUN2_74_V9.root"
+if model == "T5tttt":
+  outname = "baby_SMS-T5ttttDM175_MASS_TAG_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15MiniAODv2-FastAsympt25ns_74X_mcRun2_asymptotic_v2-v1.root"
+if model == "T6ttWW":
+  outname = "baby_SMS-T6ttWW-mLSP50_MASS_TAG_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15FSPremix-MCRUN2_74_V9-v1.root"
+if model == "T2tt":
+  outname = "baby_SMS-T2tt_MASS_TAG_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15FSPremix-MCRUN2_74_V9-v1.root"
+
+outfolder = "/net/cms2/cms2r0/babymaker/babies/"+ntup_date+"/to_normalize/"+model 
 if not os.path.exists(outfolder):
   os.system("mkdir -p "+outfolder)
 
 # CHANGE ACCORDING TO NEEDS: Only sending a specific mass point for a given date here
-dirs = [i for i in glob.glob("/mnt/hadoop/cms/store/user/manuelf/*/*/*/*/") if "1601" in i and "1950_mLSP-700to950" in i]
+dirs = [i for i in glob.glob("/mnt/hadoop/cms/store/user/manuelf/*/*/*/*/") if model in i]
 
 os.system("JobSetup.csh")
 for infolder in dirs:

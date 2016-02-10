@@ -137,7 +137,8 @@ int main(int argc, char *argv[]){
   const float luminosity = 1000.;
   if (sample.Contains("SMS")){
     float exsec(0.);
-    xsec::signalCrossSection(ch.mgluino(), xsec, exsec);
+    if(sample.Contains("T1") || sample.Contains("T5")) xsec::signalCrossSection(ch.mgluino(), xsec, exsec);
+    else  xsec::stopCrossSection(ch.mgluino(), xsec, exsec);
   }
   float w_lumi = xsec*luminosity / nent_eff;
   float w_lumi_corr = w_lumi / fabs(ch.w_lumi());

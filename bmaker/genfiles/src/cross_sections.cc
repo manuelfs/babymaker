@@ -462,7 +462,7 @@ namespace xsec{
     else {xsec = 0.; xsec_unc = 0.;} 
   }
 
-  void stopCrossSection(int stop_mass, double &xsec, double &xsec_unc){
+  void stopCrossSection(int stop_mass, float &xsec, float &xsec_unc){
     
     if(stop_mass == 100) { xsec = 1521.11; xsec_unc = 0.154038; return; }
     else if(stop_mass == 105) { xsec = 1233.18; xsec_unc = 0.154059; return; }

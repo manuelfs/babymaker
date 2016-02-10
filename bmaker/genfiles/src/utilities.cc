@@ -234,7 +234,8 @@ int change_branch_one(TString indir, TString name, TString outdir, vector<TStrin
     oldtreeglobal->GetEntry(i);
     new_nev_sample = totentries;
     if(mgluino_>0) {
-      xsec::signalCrossSection(mgluino_, xsec, exsec);
+      if(name.Contains("T1") || name.Contains("T5")) xsec::signalCrossSection(mgluino_, xsec, exsec);
+      else  xsec::stopCrossSection(mgluino_, xsec, exsec);
       new_xsec = xsec;
     }
     newtreeglobal->Fill();

@@ -9,8 +9,8 @@ import string
 import time
 
 # Setting folders
-infolder  = "/net/cms2/cms2r0/babymaker/babies/2015_11_27/sms/split_sms4/"
-outfolder = "outsms2/" 
+infolder  = "/net/cms2/cms2r0/babymaker/babies/2016_02_09/to_normalize/T6ttWW/"
+outfolder = "renorm_T6ttWW/" 
 runfolder = outfolder+"run/" 
 if not os.path.exists(runfolder):
   os.system("mkdir -p "+runfolder)
@@ -19,7 +19,7 @@ if not os.path.exists(runfolder):
 inputfiles = [i for i in os.listdir(infolder) if "SMS" in i]
 
 os.system("JobSetup.csh")
-njobs = 40
+njobs = 20
 files_job = (len(inputfiles)+njobs-1)/njobs
 ifile = 0
 ijob = 0

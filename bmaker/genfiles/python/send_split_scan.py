@@ -4,7 +4,7 @@
 import os, sys, pprint, glob
 
 ntup_date = '2016_02_09'
-model = "T2tt"
+model = "T6ttWW"
 
 if model == "T1tttt":
   outname = "baby_SMS-T1tttt_MASS_TAG_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15FSPremix-MCRUN2_74_V9.root"
@@ -21,6 +21,7 @@ if not os.path.exists(outfolder):
 
 # CHANGE ACCORDING TO NEEDS: Only sending a specific mass point for a given date here
 dirs = [i for i in glob.glob("/mnt/hadoop/cms/store/user/manuelf/*/*/*/*/") if model in i]
+dirs = [i for i in glob.glob("/net/cms27/cms27r0/manuelf/hadoop/*/*/*/*/") if model in i]
 
 os.system("JobSetup.csh")
 for infolder in dirs:
@@ -28,7 +29,7 @@ for infolder in dirs:
   print cmd+"\n"
   os.system(cmd)
 
-
+ 
 ##### For condor submission
 
 # import os, sys, subprocess

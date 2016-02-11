@@ -24,7 +24,7 @@ using namespace std;
 using std::cout;
 using std::endl;
 
-void onefile_skim(TString infiles, TString outfolder, TString cuts);
+void onefile_skim(TString infiles, TString outfolder, TString cuts, TString tag);
 
 int main(int argc, char *argv[]){
   time_t startTime;
@@ -43,6 +43,7 @@ int main(int argc, char *argv[]){
     njobs = atoi(argv[4]);
     ijob  = atoi(argv[5]);
   }
+  TString tag = cuts; // Using tag to avoid file names too long for TFile
   if(cuts=="abcd") cuts="nleps==1&&ht>500&&met>200&&njets>=6&&nbm>=1&&mj>250";
   if(cuts=="sys_abcd") 
     cuts = "nleps==1&&max(ht,Max$(sys_ht))>500&&max(met,Max$(sys_met))>200&&max(njets,Max$(sys_njets))>=6&&max(nbm,Max$(sys_nbm))>=1&&max(mj,Max$(sys_mj))>250";
@@ -59,6 +60,7 @@ int main(int argc, char *argv[]){
   if(cuts=="qcd_njet10")
      cuts = "ht>1000&&met<50&&(nvmus+nvels)==0&&njets>=10";
 	     
+
   vector<TString> files = dirlist(folder, "*.root");
   unsigned nfiles(files.size()), ini(0), end(nfiles);
   if(njobs>0){
@@ -78,7 +80,7 @@ int main(int argc, char *argv[]){
   }
   cout<<"Doing files "<<ini+1<<" to "<<end<<" out of "<<nfiles<<endl;
   for(unsigned file(ini); file < end; file++){
-    onefile_skim(folder+"/"+files[file], outfolder, cuts);
+    onefile_skim(folder+"/"+files[file], outfolder, cuts, tag);
   }
 
   time_t curTime;
@@ -86,14 +88,14 @@ int main(int argc, char *argv[]){
   cout<<endl<<"Took "<< difftime(curTime,startTime)<<" seconds to skim "<< end-ini<<" files."<<endl<<endl;
 }
 
-void onefile_skim(TString infiles, TString outfolder, TString cuts){
+void onefile_skim(TString infiles, TString outfolder, TString cuts, TString tag){
   TString folder(infiles), outfile(infiles);
   folder.Remove(folder.Last('/')+1, folder.Length());
 
   // Finding outfile name
   outfile.Remove(0, outfile.Last('/')); outfile.ReplaceAll("*","");
-  if(outfile.Contains(".root")) outfile.ReplaceAll(".root","_"+cuts+".root");
-  else outfile += ("_"+cuts+".root");
+  if(outfile.Contains(".root")) outfile.ReplaceAll(".root","_"+tag+".root");
+  else outfile += ("_"+tag+".root");
   outfile.ReplaceAll(">=","ge"); outfile.ReplaceAll("<=","se"); outfile.ReplaceAll("&","_");
   outfile.ReplaceAll(">","g"); outfile.ReplaceAll("<","s"); outfile.ReplaceAll("=","");
   outfile.ReplaceAll("(",""); outfile.ReplaceAll(")",""); outfile.ReplaceAll("+","");

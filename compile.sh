@@ -33,7 +33,7 @@ then
 else
     tmp_file=mktemp
     
-    make -j 4 -k -r -R 2> >(tee $tmp_file >&2)
+    make -j $(getconf _NPROCESSORS_ONLN) -k -r -R 2> >(tee $tmp_file >&2)
     exit_code=$?
     
     echo

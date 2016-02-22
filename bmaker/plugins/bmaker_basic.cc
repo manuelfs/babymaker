@@ -974,8 +974,8 @@ void bmaker_basic::writeMC(edm::Handle<reco::GenParticleCollection> genParticles
     const reco::GenParticle &mc = (*genParticles)[imc];
     // mcTool->printParticle(mc); // Prints various properties of the MC particle
 
-    size_t id(abs(mc.pdgId())), momid(0);
-    if(mc.mother()) momid = abs(mc.mother()->pdgId());
+    const reco::GenParticle *mom = nullptr;
+    size_t id(abs(mc.pdgId())), momid(mcTool->mom(mc, mom));
     bool lastTop(mcTool->isLast(mc,6));
     bool lastNewPhysics(id>=bsmid && mcTool->isLast(mc,id));
     bool lastGluino(mcTool->isLast(mc,1000021));
@@ -988,8 +988,7 @@ void bmaker_basic::writeMC(edm::Handle<reco::GenParticleCollection> genParticles
     bool tauFromTopZ(id==15 && (momid==24 || momid==23));
     if(lastTop) mc.pdgId()>0 ? topIndex=imc : antitopIndex=imc;
 
-
-    bool fromWOrWTau(mcTool->fromWOrWTau(mc));
+    bool fromWOrWTau(mcTool->fromWOrWTau(mc) && mcTool->isLast(mc,id));
     
     //////// Finding p4 of ME ISR system
     if((lastTop && outname.Contains("TTJets")) || (lastGluino && outname.Contains("SMS")) || 
@@ -1003,7 +1002,7 @@ void bmaker_basic::writeMC(edm::Handle<reco::GenParticleCollection> genParticles
       baby.mc_eta().push_back(mc.eta());
       baby.mc_phi().push_back(mc.phi());
       baby.mc_mass().push_back(mc.mass());
-      baby.mc_mom().push_back(mc.mother()->pdgId());
+      baby.mc_mom().push_back(mcTool->mom(mc,mom));
     }
     if(lastTop && outname.Contains("TTJets")){
       top_pt.push_back(mc.pt());
@@ -1020,7 +1019,7 @@ void bmaker_basic::writeMC(edm::Handle<reco::GenParticleCollection> genParticles
         baby.mc_pt().push_back(tauDaughter->pt());
         baby.mc_eta().push_back(tauDaughter->eta());
         baby.mc_phi().push_back(tauDaughter->phi());
-        baby.mc_mom().push_back(tauDaughter->mother()->pdgId());
+        baby.mc_mom().push_back(mcTool->mom(*tauDaughter,mom));
         baby.ntrutausl()++;
       } else baby.ntrutaush()++;
     }

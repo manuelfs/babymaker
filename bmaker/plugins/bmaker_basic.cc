@@ -972,131 +972,136 @@ void bmaker_basic::writeMC(edm::Handle<reco::GenParticleCollection> genParticles
   const size_t bsmid(1000000);
   for (size_t imc(0); imc < genParticles->size(); imc++) {
     const reco::GenParticle &mc = (*genParticles)[imc];
+    size_t id = abs(mc.pdgId());
+    bool isLast = mcTool->isLast(mc, id);
     // mcTool->printParticle(mc); // Prints various properties of the MC particle
 
     const reco::GenParticle *mom = nullptr;
-    size_t id(abs(mc.pdgId())), momid(mcTool->mom(mc, mom));
-    bool lastTop(mcTool->isLast(mc,6));
-    bool lastNewPhysics(id>=bsmid && mcTool->isLast(mc,id));
-    bool lastGluino(mcTool->isLast(mc,1000021));
-    bool lastZ(mcTool->isLast(mc,23));
-    bool lastW(mcTool->isLast(mc,24));
+    size_t momid = abs(mcTool->mom(mc, mom));
+    bool isTop(id==6);
+    bool isNewPhysics(id>=bsmid);
+    bool isGluino(id==1000021);
+    bool isZ(id==23);
+    bool isW(id==24);
     bool bTopOrBSM(id==5 && (momid==6 || momid>=bsmid));
     bool nuFromZ((id==12 || id==14 || id==16) && momid==23);
     bool eFromTopZ(id==11 && (momid==24 || momid==23));
     bool muFromTopZ(id==13 && (momid==24 || momid==23));
     bool tauFromTopZ(id==15 && (momid==24 || momid==23));
-    if(lastTop) mc.pdgId()>0 ? topIndex=imc : antitopIndex=imc;
+    bool fromWOrWTau(mcTool->fromWOrWTau(mc));
 
-    bool fromWOrWTau(mcTool->fromWOrWTau(mc) && mcTool->isLast(mc,id));
-    
-    //////// Finding p4 of ME ISR system
-    if((lastTop && outname.Contains("TTJets")) || (lastGluino && outname.Contains("SMS")) || 
-       (lastZ && outname.Contains("DY"))) isr_p4 -= mc.p4();
+    if(isLast){
+      if(isTop) mc.pdgId()>0 ? topIndex=imc : antitopIndex=imc;
 
-    //////// Saving interesting true particles
-    if(lastTop || lastNewPhysics || lastZ || lastW || bTopOrBSM || eFromTopZ || muFromTopZ 
-       || tauFromTopZ || nuFromZ || fromWOrWTau) {
-      baby.mc_id().push_back(mc.pdgId());
-      baby.mc_pt().push_back(mc.pt());
-      baby.mc_eta().push_back(mc.eta());
-      baby.mc_phi().push_back(mc.phi());
-      baby.mc_mass().push_back(mc.mass());
-      baby.mc_mom().push_back(mcTool->mom(mc,mom));
-    }
-    if(lastTop && outname.Contains("TTJets")){
-      top_pt.push_back(mc.pt());
-    }
-   
-    
-    //////// Counting true leptons
-    if(muFromTopZ) baby.ntrumus()++;
-    if(eFromTopZ)  baby.ntruels()++;
-    if(tauFromTopZ){
-      const reco::GenParticle *tauDaughter(0);
-      if(mcTool->decaysTo(mc, 11, tauDaughter) || mcTool->decaysTo(mc, 13, tauDaughter)){
-        baby.mc_id().push_back(tauDaughter->pdgId());
-        baby.mc_pt().push_back(tauDaughter->pt());
-        baby.mc_eta().push_back(tauDaughter->eta());
-        baby.mc_phi().push_back(tauDaughter->phi());
-        baby.mc_mom().push_back(mcTool->mom(*tauDaughter,mom));
-        baby.ntrutausl()++;
-      } else baby.ntrutaush()++;
+      //////// Finding p4 of ME ISR system
+      if((isTop && outname.Contains("TTJets"))
+	 || (isGluino && outname.Contains("SMS"))
+	 || (isZ && outname.Contains("DY"))) isr_p4 -= mc.p4();
+
+      //////// Saving interesting true particles
+      if(isTop || isNewPhysics || isZ
+	 || isW || bTopOrBSM || eFromTopZ || muFromTopZ 
+	 || tauFromTopZ || nuFromZ || fromWOrWTau){
+	baby.mc_id().push_back(mc.pdgId());
+	baby.mc_pt().push_back(mc.pt());
+	baby.mc_eta().push_back(mc.eta());
+	baby.mc_phi().push_back(mc.phi());
+	baby.mc_mass().push_back(mc.mass());
+	baby.mc_mom().push_back(mcTool->mom(mc,mom));
+      }
+      if(isTop && outname.Contains("TTJets")){
+	top_pt.push_back(mc.pt());
+      }
+
+      //////// Counting true leptons
+      if(muFromTopZ) baby.ntrumus()++;
+      if(eFromTopZ)  baby.ntruels()++;
+      if(tauFromTopZ){
+	const reco::GenParticle *tauDaughter(0);
+	if(mcTool->decaysTo(mc, 11, tauDaughter) || mcTool->decaysTo(mc, 13, tauDaughter)){
+	  baby.mc_id().push_back(tauDaughter->pdgId());
+	  baby.mc_pt().push_back(tauDaughter->pt());
+	  baby.mc_eta().push_back(tauDaughter->eta());
+	  baby.mc_phi().push_back(tauDaughter->phi());
+	  baby.mc_mom().push_back(mcTool->mom(*tauDaughter,mom));
+	  baby.ntrutausl()++;
+	} else baby.ntrutaush()++;
+      }
     }
 
     //////// Finding truth-matched leptons
     const float relptThreshold(0.3), drThreshold(0.1);      
-    if(id==11 && mcTool->fromWOrWTau(mc)){
+    if(id==11 && fromWOrWTau){
       double mindr(999.);
       int minind(-1);
       for(size_t ind(0); ind < all_els.size(); ind++) {
-        double dr(deltaR(mc, *(all_els[ind])));
-        double drelpt(fabs((all_els[ind]->pt() - mc.pt())/mc.pt()));
-        if(dr > drThreshold || drelpt > relptThreshold) continue;
-        if(dr < mindr){
-          mindr = dr;
-          minind = ind;
-        }
+	double dr(deltaR(mc, *(all_els[ind])));
+	double drelpt(fabs((all_els[ind]->pt() - mc.pt())/mc.pt()));
+	if(dr > drThreshold || drelpt > relptThreshold) continue;
+	if(dr < mindr){
+	  mindr = dr;
+	  minind = ind;
+	}
       } // Loop over all_els
       if(minind >= 0) {
-        baby.els_tm()[minind] = true;
-        if(baby.els_sig()[minind]) baby.nleps_tm()++;
+	baby.els_tm()[minind] = true;
+	if(baby.els_sig()[minind]) baby.nleps_tm()++;
       }
       if(lep_tru_pt < mc.pt()){
-        lep_tru_pt = mc.pt();
-        lep_tru_phi = mc.phi();
+	lep_tru_pt = mc.pt();
+	lep_tru_phi = mc.phi();
       } // Lepton pt to find mt_tru
     } // If it is an electron
-    if(id==13 && mcTool->fromWOrWTau(mc)){
+    if(id==13 && fromWOrWTau){
       double mindr(999.);
       int minind(-1);
       for(size_t ind(0); ind < all_mus.size(); ind++) {
-        double dr(deltaR(mc, *(all_mus[ind])));
-        double drelpt(fabs((all_mus[ind]->pt() - mc.pt())/mc.pt()));
-        if(dr > drThreshold || drelpt > relptThreshold) continue;
-        if(dr < mindr){
-          mindr = dr;
-          minind = ind;
-        }
+	double dr(deltaR(mc, *(all_mus[ind])));
+	double drelpt(fabs((all_mus[ind]->pt() - mc.pt())/mc.pt()));
+	if(dr > drThreshold || drelpt > relptThreshold) continue;
+	if(dr < mindr){
+	  mindr = dr;
+	  minind = ind;
+	}
       } // Loop over all_mus
       if(minind >= 0) {
-        baby.mus_tm()[minind] = true;
-        if(baby.mus_sig()[minind]) baby.nleps_tm()++;
+	baby.mus_tm()[minind] = true;
+	if(baby.mus_sig()[minind]) baby.nleps_tm()++;
       }
       if(lep_tru_pt < mc.pt()){
-        lep_tru_pt = mc.pt();
-        lep_tru_phi = mc.phi();
+	lep_tru_pt = mc.pt();
+	lep_tru_phi = mc.phi();
       } // Lepton pt to find mt_tru
     } // If it is a muon
     if(id==22){
       double mindr(999.);
       int minind(-1);
       for(size_t ind(0); ind < photons.size(); ind++) {
-        double dr(deltaR(mc, *(photons[ind])));
-        double drelpt(fabs((photons[ind]->pt() - mc.pt())/mc.pt()));
-        if(dr > drThreshold || drelpt > relptThreshold) continue;
-        if(dr < mindr){
-          mindr = dr;
-          minind = ind;
-        }
+	double dr(deltaR(mc, *(photons[ind])));
+	double drelpt(fabs((photons[ind]->pt() - mc.pt())/mc.pt()));
+	if(dr > drThreshold || drelpt > relptThreshold) continue;
+	if(dr < mindr){
+	  mindr = dr;
+	  minind = ind;
+	}
       } // Loop over photons
       if(minind >= 0) baby.ph_tm()[minind] = true;
     } // If it is a photon
 
     //////// Finding true MET
     if((id==12 || id==14 || id==16 || id==18 || id==1000012 || id==1000014 || id==1000016
-        || id==1000022 || id==1000023 || id==1000025 || id==1000035 || id==1000039) &&
+	|| id==1000022 || id==1000023 || id==1000025 || id==1000035 || id==1000039) &&
        id != momid){ // neutrinos decay to themselves
-      if(mcTool->fromWOrWTau(mc)) {
-        metw_tru_x += mc.px();
-        metw_tru_y += mc.py();
+      if(fromWOrWTau) {
+	metw_tru_x += mc.px();
+	metw_tru_y += mc.py();
       }
     } // If undetected neutral particle
 
     // don't need to check for gluon splitting if flag is already set
     if(!baby.fromGS()) baby.fromGS()|=mcTool->isFromGSP(dynamic_cast<const reco::Candidate*>(&mc));
   } // Loop over genParticles
-  // calculate invariant mass of ttbar pair
+    // calculate invariant mass of ttbar pair
   if(topIndex>=0 && antitopIndex>=0) {
     reco::Candidate::LorentzVector topP4 = genParticles->at(topIndex).p4();
     reco::Candidate::LorentzVector antitopP4 = genParticles->at(antitopIndex).p4();
@@ -1108,7 +1113,7 @@ void bmaker_basic::writeMC(edm::Handle<reco::GenParticleCollection> genParticles
   baby.isr_tru_pt() = isr_p4.pt();
   baby.isr_tru_eta() = isr_p4.eta();
   baby.isr_tru_phi() = isr_p4.phi();
-  
+
   vector<float> isr_sys;
   if(outname.Contains("SMS")){
     isr_sys.push_back(1. + weightTool->isrWeight(baby.isr_tru_pt()));
@@ -1125,7 +1130,6 @@ void bmaker_basic::writeMC(edm::Handle<reco::GenParticleCollection> genParticles
 
   baby.mt_tru()     = getMT(baby.met_tru(),     baby.met_tru_phi(),     lep_tru_pt, lep_tru_phi);
   baby.mt_tru_nuw() = getMT(baby.met_tru_nuw(), baby.met_tru_nuw_phi(), lep_tru_pt, lep_tru_phi);
-
 } // writeMC
 
 // Finds the jet that minimizes the MET when a variation is performed

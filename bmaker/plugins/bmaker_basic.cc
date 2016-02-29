@@ -3,6 +3,8 @@
 
 // System include files
 #include <cmath>
+
+#include <limits>
 #include <memory>
 #include <iostream>
 #include <stdlib.h>
@@ -27,6 +29,8 @@
 #include "babymaker/bmaker/interface/bmaker_basic.hh"
 #include "babymaker/bmaker/interface/baby_basic.hh"
 #include "babymaker/bmaker/interface/cross_sections.hh"
+#include "babymaker/bmaker/interface/mt2_bisect.hh"
+#include "babymaker/bmaker/interface/mt2w_bisect.hh"
 
 using namespace std;
 using namespace utilities;
@@ -398,8 +402,16 @@ void bmaker_basic::writeJets(edm::Handle<pat::JetCollection> alljets,
       else baby.jets_pt_res().push_back(-99999.);
       baby.jets_hflavor().push_back(jet.hadronFlavour());
       baby.jets_csv().push_back(csv);
+      baby.jets_pflavor().push_back(jet.partonFlavour());
+      baby.jets_charge().push_back(jet.jetCharge());
+      baby.jets_3charge().push_back(jet.threeCharge());
+      baby.jets_area().push_back(jet.jetArea());
+      baby.jets_tower_area().push_back(jet.towersArea());
+      baby.jets_em_frac().push_back(jet.chargedEmEnergyFraction());
+      baby.jets_nconst().push_back(jet.nConstituents());
+      baby.jets_n60().push_back(jet.n60());
+      baby.jets_n90().push_back(jet.n90());
       jets.push_back(jetp4);
-
 
       if(!isLep){
         if(addBTagWeights) {
@@ -1132,6 +1144,87 @@ void bmaker_basic::writeMC(edm::Handle<reco::GenParticleCollection> genParticles
   baby.mt_tru_nuw() = getMT(baby.met_tru_nuw(), baby.met_tru_nuw_phi(), lep_tru_pt, lep_tru_phi);
 } // writeMC
 
+void bmaker_basic::writeMt2(edm::Handle<pat::JetCollection> alljets,
+			    vCands &sig_leps, vCands &veto_leps){
+  size_t icsv1, icsv2;
+  icsv1 = -1;
+  icsv2 = -1;
+  float csv1, csv2;
+  csv1 = -numeric_limits<float>::max();
+  csv2 = -numeric_limits<float>::max();
+  for(size_t ijet = 0; ijet < alljets->size(); ++ijet){
+    const pat::Jet &jet = (*alljets)[ijet];
+    if(fabs(jet.eta()) > 5) continue;
+    float csv(jet.bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags"));
+    bool isLep = jetTool->leptonInJet(jet, sig_leps);
+    bool looseID = jetTool->idJet(jet, jetTool->kLoose);
+    bool goodPtEta = jet.pt() > jetTool->JetPtCut && fabs(jet.eta()) <= jetTool->JetEtaCut;
+    if(!looseID || !goodPtEta || isLep) continue;
+    if(csv > csv1){
+      csv2 = csv1;
+      csv1 = csv;
+      icsv2 = icsv1;
+      icsv1 = ijet;
+    }else if(csv > csv2){
+      csv2 = csv;
+      icsv2 = ijet;
+    }
+  }
+
+  size_t ilep;
+  ilep = -1;
+  float maxpt;
+  maxpt = -numeric_limits<float>::max();
+  for(size_t i = 0; i < sig_leps.size(); ++i){
+    if(sig_leps.at(i)->pt() > maxpt){
+      maxpt = sig_leps.at(i)->pt();
+      ilep = i;
+    }
+  }
+
+  if(icsv2 > alljets->size()){
+    baby.mt2() = -1.;
+    baby.mt2w() = -1.;
+  }else{
+    const pat::Jet &jet1 = (*alljets)[icsv1];
+    const pat::Jet &jet2 = (*alljets)[icsv2];
+
+    double pa0[3], pb0[3], pmiss0[3];
+    pa0[0] = jet1.mass();
+    pa0[1] = jet1.px();
+    pa0[2] = jet1.py();
+    pb0[0] = jet2.mass();
+    pb0[1] = jet2.px();
+    pb0[2] = jet2.py();
+    pmiss0[0] = 0.; //not used
+    pmiss0[1] = baby.met() * cos(baby.met_phi());
+    pmiss0[2] = baby.met() * sin(baby.met_phi());
+
+    mt2_bisect::mt2 mt2;
+    mt2.set_momenta(pa0, pb0, pmiss0);
+    mt2.set_mn(80.385);
+    baby.mt2() = mt2.get_mt2();
+
+    if(ilep < sig_leps.size()){
+      mt2w_bisect::mt2w mt2w(1000., 999., 0.5);
+      mt2w.set_momenta(sig_leps.at(ilep)->energy(), sig_leps.at(ilep)->px(), sig_leps.at(ilep)->py(), sig_leps.at(ilep)->pz(),
+		       jet1.energy(), jet1.px(), jet1.py(), jet1.pz(),
+		       jet2.energy(), jet2.px(), jet2.py(), jet2.pz(),
+		       pmiss0[1], pmiss0[2]);
+      double mt2wa = mt2w.get_mt2w();
+      mt2w.set_momenta(sig_leps.at(ilep)->energy(), sig_leps.at(ilep)->px(), sig_leps.at(ilep)->py(), sig_leps.at(ilep)->pz(),
+		       jet2.energy(), jet2.px(), jet2.py(), jet2.pz(),
+		       jet1.energy(), jet1.px(), jet1.py(), jet1.pz(),
+		       pmiss0[1], pmiss0[2]);
+      double mt2wb = mt2w.get_mt2w();
+      baby.mt2w() = mt2wa < mt2wb ? mt2wa : mt2wb;
+    }else{
+      baby.mt2w() = -1.;
+    }
+  }
+}//writeMt2
+
+
 // Finds the jet that minimizes the MET when a variation is performed
 void bmaker_basic::rebalancedMET( double& minMET, double& minMETPhi)
 {
@@ -1243,9 +1336,6 @@ void bmaker_basic::writeWeights(const vCands &sig_leps, edm::Handle<GenEventInfo
   baby.sys_muf().push_back(weightTool->theoryWeight(weight_tools::muFdown));
   baby.sys_murf().push_back(weightTool->theoryWeight(weight_tools::muRup_muFup));
   baby.sys_murf().push_back(weightTool->theoryWeight(weight_tools::muRdown_muFdown));
-  // PDF variations
-  weightTool->getPDFWeights(baby.sys_pdf(), baby.w_pdf());
-
 }
 
 /*

@@ -26,6 +26,8 @@ float mt_tru_nuw
 float mt_rebal
 float dphi_wlep
 bool jetmismeas
+float mt2
+float mt2w
 
 ###################   MET   ##################
 float met
@@ -74,6 +76,15 @@ std::vector<bool>  jets_islep
 std::vector<int>   jets_fjet_index
 std::vector<int>   jets_fjet08_index
 std::vector<int>   jets_hflavor
+std::vector<int>   jets_pflavor
+std::vector<float> jets_charge
+std::vector<int>   jets_3charge
+std::vector<float> jets_area
+std::vector<float> jets_tower_area
+std::vector<float> jets_em_frac
+std::vector<int>   jets_nconst
+std::vector<int>   jets_n60
+std::vector<int>   jets_n90
 
 ##################   Leptons   ################
 int nleps
@@ -287,7 +298,6 @@ float w_lep
 float w_fs_lep
 float eff_trig
 float eff_jetid
-std::vector<float> w_pdf
 
 ################  Systematic variations   ##################
 # variations have index 0 (JER smearing), 1 (JEC up) and 2 (JEC down)

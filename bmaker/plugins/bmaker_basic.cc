@@ -308,6 +308,8 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
   iEvent.getByLabel("generator", gen_event_info);
   writeWeights(sig_leps, gen_event_info, lhe_info);
 
+  ////////////////// Filling MT2 //////////////////
+  writeMt2(alljets, sig_leps);
 
   ////////////////// Filling the tree //////////////////
   baby.Fill();
@@ -1145,7 +1147,7 @@ void bmaker_basic::writeMC(edm::Handle<reco::GenParticleCollection> genParticles
 } // writeMC
 
 void bmaker_basic::writeMt2(edm::Handle<pat::JetCollection> alljets,
-			    vCands &sig_leps, vCands &veto_leps){
+			    vCands &sig_leps){
   size_t icsv1, icsv2;
   icsv1 = -1;
   icsv2 = -1;

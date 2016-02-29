@@ -111,7 +111,7 @@ public:
   void writeGenInfo(edm::Handle<LHEEventProduct> lhe_info);
   void writeMC(edm::Handle<reco::GenParticleCollection> genParticles, vCands &all_mus, vCands &all_els, vCands &photons);
   void writeMt2(edm::Handle<pat::JetCollection> alljets,
-		vCands &sig_leps, vCands &veto_leps);
+		vCands &sig_leps);
 
   void reportTime(const edm::Event& iEvent);
 

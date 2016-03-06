@@ -76,7 +76,11 @@ public:
                         const reco::Candidate* ptcl,
                         double r_iso_min, double r_iso_max, double kt_scale,
                         double rho, bool charged_only);
-
+  double getActivity(edm::Handle<pat::PackedCandidateCollection> pfcands,
+		     const reco::Candidate* ptcl,
+		     double r_iso_min, double r_iso_max, double kt_scale, double r_activity,
+		     double rho, bool charged_only);
+  
   vCands getIsoTracks(edm::Handle<pat::PackedCandidateCollection> pfcands, double met, double met_phi);
   vCands getRA4IsoTracks(edm::Handle<pat::PackedCandidateCollection> pfcands, double met, double met_phi,double rhoEventCentral,std::vector<float> &isos, int primary_pdg);
 

@@ -440,6 +440,62 @@ double lepton_tools::getPFIsolation(edm::Handle<pat::PackedCandidateCollection> 
   return iso/ptcl->pt();
 }
 
+double lepton_tools::getActivity(edm::Handle<pat::PackedCandidateCollection> pfcands,
+				 const reco::Candidate* ptcl,
+				 double r_iso_min, double r_iso_max, double kt_scale, double r_activity,
+				 double rho, bool charged_only) {
+  if (ptcl->pt()<1.) return 99999.;
+
+  double deadcone_nh(0.), deadcone_ch(0.), deadcone_ph(0.), deadcone_pu(0.);
+  if(ptcl->isElectron()) {
+    if (fabs(ptcl->eta())>1.479) {deadcone_ch = 0.015; deadcone_pu = 0.015; deadcone_ph = 0.08;}
+  } else if(ptcl->isMuon()) {
+    deadcone_ch = 0.0001; deadcone_pu = 0.01; deadcone_ph = 0.01;deadcone_nh = 0.01;
+  } else {
+    //deadcone_ch = 0.0001; deadcone_pu = 0.01; deadcone_ph = 0.01;deadcone_nh = 0.01; // maybe use muon cones??
+  }
+  double iso_nh(0.), iso_ch(0.), iso_ph(0.), iso_pu(0.);
+  double ptThresh(0.5), r_mini(kt_scale/ptcl->pt());
+  if(ptcl->isElectron()) ptThresh = 0;
+  double r_iso(max(r_iso_min, min(r_iso_max, r_mini)));
+
+  for (const pat::PackedCandidate &pfc : *pfcands) {
+    if (abs(pfc.pdgId())<7) continue;
+    double dr = deltaR(pfc, *ptcl);
+    if (dr <= r_iso || dr > r_activity) continue;
+    if (&pfc == ptcl) continue;
+    if (pfc.charge()==0){ //neutrals
+      if (pfc.pt()>ptThresh) {
+        if (abs(pfc.pdgId())==22) { //photons
+          if(dr < deadcone_ph) continue;
+          iso_ph += pfc.pt();
+        } else if (abs(pfc.pdgId())==130) { //neutral hadrons
+          if(dr < deadcone_nh) continue;
+          iso_nh += pfc.pt();
+        }
+      }
+    } else if (pfc.fromPV()>1){ //charged from PV
+      if (abs(pfc.pdgId())==211) {
+        if(dr < deadcone_ch) continue;
+        iso_ch += pfc.pt();
+      }
+    } else {
+      if (pfc.pt()>ptThresh){ //charged from PU
+        if(dr < deadcone_pu) continue;
+        iso_pu += pfc.pt();
+      }
+    }
+  } // Loop over pf cands
+
+  double effarea = ptcl->isElectron() ? getEffAreaElectron(ptcl->eta()) : getEffAreaMuon(ptcl->eta());
+  double pu_corr = rho*effarea*pow(r_iso/0.3, 2);
+  double iso(0.);
+  if (charged_only) iso = iso_ch;
+  else iso = iso_ch + max(0.,iso_ph + iso_nh - pu_corr);
+
+  return iso/ptcl->pt();
+}
+
 vCands lepton_tools::getIsoTracks(edm::Handle<pat::PackedCandidateCollection> pfcands, double met, double met_phi){
 
   vCands tks;

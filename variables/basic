@@ -80,7 +80,6 @@ std::vector<int>   jets_pflavor
 std::vector<float> jets_charge
 std::vector<int>   jets_3charge
 std::vector<float> jets_area
-std::vector<float> jets_tower_area
 std::vector<float> jets_em_frac
 std::vector<int>   jets_nconst
 std::vector<int>   jets_n60
@@ -102,6 +101,7 @@ std::vector<float> mus_eta
 std::vector<float> mus_phi
 std::vector<float> mus_miniso
 std::vector<float> mus_reliso
+std::vector<float> mus_activity
 std::vector<float> mus_dz
 std::vector<float> mus_d0
 std::vector<bool> mus_sig
@@ -124,6 +124,7 @@ std::vector<float> els_sceta
 std::vector<float> els_phi
 std::vector<float> els_miniso
 std::vector<float> els_reliso
+std::vector<float> els_activity
 std::vector<float> els_dz
 std::vector<float> els_d0
 std::vector<bool> els_ispf

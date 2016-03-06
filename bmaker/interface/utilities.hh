@@ -5,9 +5,14 @@
 
 #include <vector>
 #include <string>
+#include <iostream>
+#include <stdexcept>
 #include "DataFormats/PatCandidates/interface/Electron.h"
 #include <fastjet/PseudoJet.hh>
 #include "TString.h"
+
+#define ERROR(x) do{throw std::runtime_error(string("Error in file ")+__FILE__+" at line "+to_string(__LINE__)+" (in "+__func__+"): "+x);}while(false)
+#define DBG(x) do{std::cerr << "In " << __FILE__ << " at line " << __LINE__ << " (in function " << __func__ << "): " << x << std::endl;}while(false)
 
 typedef std::vector<const reco::Candidate*> vCands;
 typedef reco::Candidate::LorentzVector LVector;

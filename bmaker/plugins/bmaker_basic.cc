@@ -408,7 +408,6 @@ void bmaker_basic::writeJets(edm::Handle<pat::JetCollection> alljets,
       baby.jets_charge().push_back(jet.jetCharge());
       baby.jets_3charge().push_back(jet.threeCharge());
       baby.jets_area().push_back(jet.jetArea());
-      baby.jets_tower_area().push_back(jet.towersArea());
       baby.jets_em_frac().push_back(jet.chargedEmEnergyFraction());
       baby.jets_nconst().push_back(jet.nConstituents());
       baby.jets_n60().push_back(jet.n60());
@@ -566,6 +565,7 @@ vCands bmaker_basic::writeMuons(edm::Handle<pat::MuonCollection> muons,
 
     double lep_iso(lepTool->getPFIsolation(pfcands, dynamic_cast<const reco::Candidate *>(&lep), 0.05, 0.2, 10., rhoEventCentral, false));
     double lep_reliso(lepTool->getRelIsolation(lep, rhoEventCentral));
+    double lep_act(lepTool->getActivity(pfcands, dynamic_cast<const reco::Candidate *>(&lep), 0.05, 0.2, 10., 0.4, rhoEventCentral, false));
     double dz(0.), d0(0.);
     lepTool->vertexMuon(lep, vtx, dz, d0); // Calculating dz and d0
 
@@ -579,6 +579,7 @@ vCands bmaker_basic::writeMuons(edm::Handle<pat::MuonCollection> muons,
     baby.mus_tight().push_back(lepTool->idMuon(lep, vtx, lepTool->kTight));
     baby.mus_miniso().push_back(lep_iso);
     baby.mus_reliso().push_back(lep_reliso);
+    baby.mus_activity().push_back(lep_act);
     baby.mus_tm().push_back(false);        // Filled in writeMC
     baby.mus_inz().push_back(false);       // Filled in writeDiLep
     baby.mus_inzv().push_back(false);      // Filled in writeDiLep
@@ -616,6 +617,7 @@ vCands bmaker_basic::writeElectrons(edm::Handle<pat::ElectronCollection> electro
 
     double lep_iso(lepTool->getPFIsolation(pfcands, dynamic_cast<const reco::Candidate *>(&lep), 0.05, 0.2, 10., rhoEventCentral, false));
     double lep_reliso(lepTool->getRelIsolation(lep, rhoEventCentral));
+    double lep_act(lepTool->getActivity(pfcands, dynamic_cast<const reco::Candidate *>(&lep), 0.05, 0.2, 10., 0.4, rhoEventCentral, false));
     double dz(0.), d0(0.);
     lepTool->vertexElectron(lep, vtx, dz, d0); // Calculating dz and d0
 
@@ -631,6 +633,7 @@ vCands bmaker_basic::writeElectrons(edm::Handle<pat::ElectronCollection> electro
     baby.els_tight().push_back(lepTool->idElectron(lep, vtx, lepTool->kTight));
     baby.els_miniso().push_back(lep_iso);
     baby.els_reliso().push_back(lep_reliso);
+    baby.els_activity().push_back(lep_act);
     baby.els_tm().push_back(false);       // Filled in writeMC
     baby.els_inz().push_back(false);      // Filled in writeDiLep
     baby.els_inzv().push_back(false);     // Filled in writeDiLep

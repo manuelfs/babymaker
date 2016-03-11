@@ -19,6 +19,7 @@
 #include "TSystemFile.h"
 #include "TSystem.h"
 #include "TTree.h"
+#include "TChain.h"
 #include "TRegexp.h"
 
 #include "cross_sections.hh"
@@ -272,12 +273,14 @@ vector<TString> dirlist(const TString &folder,
   return v_dirs;
 }
 
-int change_branch_one(TString indir, TString name, TString outdir, vector<TString> var_type, vector<TString> var, vector<TString> var_val){
+int change_branch_one(TString indir, TString name, TString outdir, vector<TString> var_type, vector<TString> var, 
+		      vector<TString> var_val, TString newname){
 
   if(var_type.size()!=var.size() || var_type.size()!=var_val.size())
     { cout<<"[Change Branch One] Error: Branch vectors are not the same size"<<endl; exit(0); }
 
   const int nvar = var.size();
+  bool verbose = false;
 
   //Setup
   vector<bool> multiply(nvar,false);
@@ -296,7 +299,7 @@ int change_branch_one(TString indir, TString name, TString outdir, vector<TStrin
   }
 
   //Set up old tree and branch
-  TFile* oldfile = new TFile(indir+name);
+  TFile* oldfile = new TFile(indir+"/"+name);
   TTree* oldtree = static_cast<TTree*>(oldfile->Get("tree"));
   TTree* oldtreeglobal = static_cast<TTree*>(oldfile->Get("treeglobal"));
   
@@ -329,8 +332,11 @@ int change_branch_one(TString indir, TString name, TString outdir, vector<TStrin
   }
 
   //Set up new tree
-  name.ReplaceAll(".root","_mod.root");
-  TFile* newfile = new TFile(outdir+name,"recreate");
+  if(newname=="empty"){
+    newname = name;
+    newname.ReplaceAll(".root","_mod.root");
+  }
+  TFile* newfile = new TFile(outdir+newname,"recreate");
   TTree* newtree = oldtree->CloneTree(0);
   TTree* newtreeglobal = oldtreeglobal->CloneTree();
 
@@ -339,7 +345,7 @@ int change_branch_one(TString indir, TString name, TString outdir, vector<TStrin
   for(int i=0; i<nentries; i++){
     oldtree->GetEntry(i);
 
-    if((i<100&&i%10==0) || (i<1000&&i%100==0) || (i<10000&&i%1000==0) || (i%10000==0)){
+    if(verbose && ((i<100&&i%10==0) || (i<1000&&i%100==0) || (i<10000&&i%1000==0) || (i%10000==0))){
       if(isatty(1)){
         printf("\r[Change Branch One] Processsing File: %i / %i (%i%%)",i,nentries,static_cast<int>((i*100./nentries)));
         fflush(stdout);
@@ -569,3 +575,21 @@ TString hoursMinSec(long seconds){
   return hhmmss;
 }
 
+void mergeNtuples(vector<TString> ntuples, TString outname){
+
+  // Merging tree TTrees
+  TChain chain("tree");
+  for(size_t ind=0; ind<ntuples.size(); ind++) chain.Add(ntuples[ind]);
+  chain.Merge(outname);
+
+  // Merging treeglobal TTrees
+  TChain chaing("treeglobal");
+  for(size_t ind=0; ind<ntuples.size(); ind++) chaing.Add(ntuples[ind]);
+  TTree *tglobal = chaing.CopyTree("1");
+  tglobal->SetDirectory(0);
+  TFile rootfile(outname, "UPDATE");
+  rootfile.cd();
+  tglobal->Write();
+  rootfile.Close();
+
+}

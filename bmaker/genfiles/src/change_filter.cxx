@@ -26,7 +26,7 @@ int main(int argc, char *argv[]){
   time_t begtime, endtime;
   time(&begtime);
 
-  TString filter("csc2015_ee4sc_Dec01.txt"), infolder("."), sample("*.root"), outfolder("out"), filter_var("pass_cschalo");
+  TString filter("csc2015_ee4sc_Jan13.txt"), infolder("."), sample("*.root"), outfolder("out"), filter_var("pass_cschalo");
   int c(0);
   while((c=getopt(argc, argv, "f:i:s:o:v:"))!=-1){
     switch(c){
@@ -52,7 +52,7 @@ int main(int argc, char *argv[]){
 
   if(filter=="" || filter_var==""){
     cout<<endl<<"Specify filter file and filter variable: "
-        <<"./run/change_filter.exe -f <filter_file=csc2015_ee4sc_Dec01.txt> -i <infolder>=. -s <sample>=\"*.root\" "
+        <<"./run/change_filter.exe -f <filter_file=csc2015_ee4sc_Jan13.txt> -i <infolder>=. -s <sample>=\"*.root\" "
 	<<"-o <outfolder=out> "
 	<<"-v <filter_var=pass_cschalo>"<<endl<<endl;
     return 1;
@@ -67,8 +67,8 @@ int main(int argc, char *argv[]){
   struct stat buffer;   
   if(stat (filter, &buffer) != 0) {
     cout<<endl<<filter<<" does not exist. Downloading and uncompressing "<<filter<<endl<<endl;
-    execute("wget http://hep.ucsb.edu/people/manuelf/ra4/csc2015_ee4sc_Dec01.txt.gz");
-    execute("tar -xvzf csc2015_ee4sc_Dec01.txt.gz");
+    execute("wget http://hep.ucsb.edu/people/manuelf/ra4/csc2015_ee4sc_Jan13.txt");
+
   }
 
   map<int, set<long> > event_list = getFilterList(filter.Data());

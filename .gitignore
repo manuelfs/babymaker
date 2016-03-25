@@ -28,6 +28,7 @@ data/csc_beamhalo_filter/*
 
 # Generated source files
 bin/*
+crab_cfg_*.py
 
 # emacs backups
 *~

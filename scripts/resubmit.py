@@ -6,6 +6,10 @@ from pprint import pprint
 import ROOT
 import argparse
 
+def touch(filename):
+  if not os.path.exists(filename):
+    open(filename, 'a').close()
+
 parser = argparse.ArgumentParser()
 parser.add_argument("-p","--logpath")
 parser.add_argument("-t","--timestamp")
@@ -52,6 +56,8 @@ xrootd_err = set()
 for flog in loglist:
   ferr = flog.rstrip(".log") + ".err"
   fout = flog.rstrip(".log") + ".out"
+  touch(ferr)
+  touch(fout)
   bname = flog.split("/").pop().rstrip(".log")
   logfile = open(flog).read()
   if "Job was aborted by the user" in logfile:

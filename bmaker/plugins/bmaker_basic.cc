@@ -341,8 +341,8 @@ void bmaker_basic::writeMET(edm::Handle<pat::METCollection> mets, edm::Handle<pa
     baby.met_tru_phi() = mets->at(0).genMET()->phi();
   }
   if(isnan(baby.met())) {
-    cout<<"MET is NaN. Perhaps you are running on old miniAOD with a new release. Exiting"<<endl;
-    exit(1);
+    cout<<"MET is NaN. Perhaps you are running on old miniAOD with a new release. Setting MET to zero."<<endl;
+    baby.met() = 0;
   }
 }
 
@@ -995,7 +995,7 @@ void bmaker_basic::writeMC(edm::Handle<reco::GenParticleCollection> genParticles
 
       //////// Finding p4 of ME ISR system
       if((isTop && outname.Contains("TTJets"))
-	 || (isGluino && outname.Contains("SMS"))
+	 || (isGluino && (outname.Contains("SMS") || outname.Contains("RPV")))
 	 || (isZ && outname.Contains("DY"))) isr_p4 -= mc.p4();
 
       //////// Saving interesting true particles
@@ -1009,7 +1009,7 @@ void bmaker_basic::writeMC(edm::Handle<reco::GenParticleCollection> genParticles
 	baby.mc_mass().push_back(mc.mass());
 	baby.mc_mom().push_back(mcTool->mom(mc,mom));
       }
-      if(isTop && outname.Contains("TTJets")){
+      if(isTop && (outname.Contains("TTJets") || outname.Contains("TT_"))){
 	top_pt.push_back(mc.pt());
       }
 
@@ -1115,14 +1115,14 @@ void bmaker_basic::writeMC(edm::Handle<reco::GenParticleCollection> genParticles
   baby.isr_tru_phi() = isr_p4.phi();
 
   vector<float> isr_sys;
-  if(outname.Contains("SMS")){
+  if(outname.Contains("SMS") || outname.Contains("RPV")){
     isr_sys.push_back(1. + weightTool->isrWeight(baby.isr_tru_pt()));
     isr_sys.push_back(1. - weightTool->isrWeight(baby.isr_tru_pt()));
   }
   else{ isr_sys.push_back(1.); isr_sys.push_back(1.);}
   baby.sys_isr()=isr_sys;
 
-  if(outname.Contains("TTJets") && top_pt.size() == 2) baby.w_toppt() = weightTool->topPtWeight(top_pt.at(0),top_pt.at(1));
+  if((outname.Contains("TTJets") || outname.Contains("TT_")) && top_pt.size() == 2) baby.w_toppt() = weightTool->topPtWeight(top_pt.at(0),top_pt.at(1));
   else baby.w_toppt() = 1.;
 
   baby.met_tru_nuw() = hypot(metw_tru_x, metw_tru_y);

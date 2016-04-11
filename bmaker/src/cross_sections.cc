@@ -39,6 +39,13 @@ namespace xsec{
     if(file.Contains("SMS-T2bb_2J_mStop-600_mLSP-580"))  xsec = 0.174599;
     if(file.Contains("SMS-T2bb_2J_mStop-900_mLSP-100"))  xsec = 0.0128895;
 
+    if(file.Contains("RPV") && file.Contains("1000"))  xsec = 0.325388;
+    if(file.Contains("RPV") && file.Contains("1100"))  xsec = 0.163491;
+    if(file.Contains("RPV") && file.Contains("1200"))  xsec = 0.0856418;
+    if(file.Contains("RPV") && file.Contains("1300"))  xsec = 0.0460525;
+    if(file.Contains("RPV") && file.Contains("1400"))  xsec = 0.0252977;
+
+
     //  Cross-section taken from https://twiki.cern.ch/twiki/bin/view/LHCPhysics/TtbarNNLO
     // Alternative option: https://twiki.cern.ch/twiki/bin/view/Sandbox/FullNNLOcrossSections#Top_cross_section_for_13_TeV
     if(file.Contains("TTJets_Tune") || file.Contains("TT_"))  xsec = 815.96;
@@ -59,8 +66,9 @@ namespace xsec{
     // cross sections from mcm
     if(file.Contains("TTG")) xsec = 3.697;                
     if(file.Contains("TTTT_TuneCUETP8M1_13TeV-amcatnlo")) xsec = 0.009103;
-    if(file.Contains("WJetsToQQ_HT-600ToInf")) xsec = 95.14;
-    if(file.Contains("ZJetsToQQ_HT600toInf")) xsec = 5.67;
+    // mcm cross section times the same kfactors used for leptonic samples
+    if(file.Contains("WJetsToQQ_HT-600ToInf")) xsec = 95.14*1.21;
+    if(file.Contains("ZJetsToQQ_HT600toInf")) xsec = 5.67*1.23;
     
     // From https://cms-pdmv.cern.ch/mcm
     // k-factors from https://mangano.web.cern.ch/mangano/public/MECCA/samples_50ns_miniaod.txt

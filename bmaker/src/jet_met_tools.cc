@@ -292,7 +292,12 @@ float jet_met_tools::jetBTagWeight(const pat::Jet &jet, const LVector &jetp4, bo
     // maximum pt in the parameterizations is 670 GeV
     if(jetpttemp>670) jetpttemp=669.99;
     try {
-      double eff = getMCTagEfficiency(abs(hadronFlavour), jetpttemp, fabs(jetp4.eta()));
+      double eff = 1.0;
+      // loose b-tags have a different tagging efficiecy
+      if(readerTypeBC==kBTagUpLoose
+	 || readerTypeBC==kBTagCentralLoose
+	 || readerTypeBC==kBTagDownLoose) eff = getMCTagEfficiency(abs(hadronFlavour), jetpttemp, fabs(jetp4.eta()), true);
+      else eff = getMCTagEfficiency(abs(hadronFlavour), jetpttemp, fabs(jetp4.eta()), false);
       double sf(1.), sf_fs(1.); 
       // procedure from https://twiki.cern.ch/twiki/bin/view/CMS/BTagSFMethods#1a_Event_reweighting_using_scale
       switch ( abs(hadronFlavour) ) {
@@ -324,18 +329,30 @@ float jet_met_tools::jetBTagWeight(const pat::Jet &jet, const LVector &jetp4, bo
   return jet_scalefactor;
 }
 
-float jet_met_tools::getMCTagEfficiency(int pdgId, float pT, float eta)
+float jet_met_tools::getMCTagEfficiency(int pdgId, float pT, float eta, bool loose=false)
 {
-  // for testing purposes, just use a plausible efficiency
-  // need to add code for getting efficiencies
-  if(abs(pdgId)==4 || abs(pdgId)==5) {
-    int bin = btagEfficiencyParameterization->FindBin(eta, pT, pdgId);
-    return btagEfficiencyParameterization->GetBinContent(bin);
+  if(loose) {
+    if(abs(pdgId)==4 || abs(pdgId)==5) {
+      int bin = btagEfficiencyParameterizationLoose->FindBin(eta, pT, pdgId);
+      return btagEfficiencyParameterizationLoose->GetBinContent(bin);
+    }
+    else {
+      // in the ghost clustering scheme to determine flavor, there are only b, c and other (id=0) flavors
+      int bin = btagEfficiencyParameterizationLoose->FindBin(eta, pT, 0);
+      return btagEfficiencyParameterizationLoose->GetBinContent(bin);
+    }
   }
   else {
-    // in the ghost clustering scheme to determine flavor, there are only b, c and other (id=0) flavors
-    int bin = btagEfficiencyParameterization->FindBin(eta, pT, 0);
-    return btagEfficiencyParameterization->GetBinContent(bin);
+    if(abs(pdgId)==4 || abs(pdgId)==5) {
+      int bin = btagEfficiencyParameterization->FindBin(eta, pT, pdgId);
+      return btagEfficiencyParameterization->GetBinContent(bin);
+    }
+    else {
+      // in the ghost clustering scheme to determine flavor, there are only b, c and other (id=0) flavors
+      int bin = btagEfficiencyParameterization->FindBin(eta, pT, 0);
+      return btagEfficiencyParameterization->GetBinContent(bin);
+    }
+
   }
 }
 
@@ -477,17 +494,20 @@ jet_met_tools::jet_met_tools(TString ijecName, bool doSys, bool fastSim):
   scaleFactorFile+="/src/babymaker/bmaker/data/CSVv2.csv";
   calib   = new BTagCalibration("csvv1", scaleFactorFile);
   std::vector<std::string> variationTypes = {"central", "up", "down"};
-  for(auto itype : variationTypes) {
-    // BC full sim
-    readersBC.push_back(new BTagCalibrationReader(calib, // calibration instance 
-					    BTagEntry::OP_MEDIUM, // operating point
-					    "mujets", // measurement type ("comb" or "mujets")
-					    itype)); // systematics type ("central", "up", or "down")
-    // UDSG full sim
-    readersUDSG.push_back(new BTagCalibrationReader(calib, // calibration instance 
-					      BTagEntry::OP_MEDIUM, // operating point
-					      "comb", // measurement type ("comb" or "mujets")
-					      itype)); // systematics type ("central", "up", or "down")
+  std::vector<BTagEntry::OperatingPoint> operatingPoints = {BTagEntry::OP_MEDIUM, BTagEntry::OP_LOOSE};
+  for(BTagEntry::OperatingPoint op : operatingPoints) {
+    for(auto itype : variationTypes) {
+      // BC full sim
+      readersBC.push_back(new BTagCalibrationReader(calib, // calibration instance
+						    op, // operating point
+						    "mujets", // measurement type ("comb" or "mujets")
+						    itype)); // systematics type ("central", "up", or "down")
+      // UDSG full sim
+      readersUDSG.push_back(new BTagCalibrationReader(calib, // calibration instance
+						      op, // operating point
+						      "comb", // measurement type ("comb" or "mujets")
+						      itype)); // systematics type ("central", "up", or "down")
+    }
   }
   if (isFastSim){
     std::string scaleFactorFileFastSim(getenv("CMSSW_BASE"));
@@ -512,6 +532,7 @@ jet_met_tools::jet_met_tools(TString ijecName, bool doSys, bool fastSim):
   TFile *efficiencyFile = TFile::Open(filename.c_str());
   if(efficiencyFile->IsOpen()) {
     btagEfficiencyParameterization = static_cast<TH3F*>(efficiencyFile->Get("btagEfficiency"));
+    btagEfficiencyParameterizationLoose = static_cast<TH3F*>(efficiencyFile->Get("btagEfficiency_loose"));
   }
   else {
     throw cms::Exception("FileNotFound") 

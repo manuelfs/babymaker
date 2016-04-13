@@ -359,6 +359,7 @@ void bmaker_basic::writeJets(edm::Handle<pat::JetCollection> alljets,
   baby.pass_jets() = true; baby.pass_jets_nohf() = true; baby.pass_jets_tight() = true; 
   baby.pass_jets_ra2() = true; baby.pass_jets_tight_ra2() = true; 
   baby.sys_bctag().resize(2, 1.); baby.sys_udsgtag().resize(2, 1.);
+  baby.sys_bctag_loose().resize(2, 1.); baby.sys_udsgtag_loose().resize(2, 1.);
   baby.w_btag() = 1.;
   if (isFastSim){ baby.sys_fs_bctag().resize(2, 1.); baby.sys_fs_udsgtag().resize(2, 1.);}
   if (doSystematics) {
@@ -404,7 +405,9 @@ void bmaker_basic::writeJets(edm::Handle<pat::JetCollection> alljets,
       if(!isLep){
         if(addBTagWeights) {
           bool btag(csv > jetTool->CSVMedium);
+          bool btagLoose(csv > jetTool->CSVLoose);
           jet_met_tools::btagVariation central(jetTool->kBTagCentral), up(jetTool->kBTagUp), down(jetTool->kBTagDown);
+          jet_met_tools::btagVariation centralLoose(jetTool->kBTagCentralLoose), upLoose(jetTool->kBTagUpLoose), downLoose(jetTool->kBTagDownLoose);
           //central weight for fastsim taken into account together with the fullsim inside jetTool->jetBTagWeight()
           baby.w_btag()         *= jetTool->jetBTagWeight(jet, jetp4, btag, central, central);
           // now, vary only the full sim scale factor, regardless of whether we run on Fast or Full sim
@@ -413,6 +416,10 @@ void bmaker_basic::writeJets(edm::Handle<pat::JetCollection> alljets,
           baby.sys_bctag()[1]   *= jetTool->jetBTagWeight(jet, jetp4, btag, down,    central);
           baby.sys_udsgtag()[0] *= jetTool->jetBTagWeight(jet, jetp4, btag, central, up);
           baby.sys_udsgtag()[1] *= jetTool->jetBTagWeight(jet, jetp4, btag, central, down);
+          baby.sys_bctag_loose()[0]   *= jetTool->jetBTagWeight(jet, jetp4, btagLoose, upLoose,      centralLoose);
+          baby.sys_bctag_loose()[1]   *= jetTool->jetBTagWeight(jet, jetp4, btagLoose, downLoose,    centralLoose);
+          baby.sys_udsgtag_loose()[0] *= jetTool->jetBTagWeight(jet, jetp4, btagLoose, centralLoose, upLoose);
+          baby.sys_udsgtag_loose()[1] *= jetTool->jetBTagWeight(jet, jetp4, btagLoose, centralLoose, downLoose);
           if (isFastSim) { 
             // now we vary only the FastSim SF
             baby.sys_fs_bctag()[0]   *= jetTool->jetBTagWeight(jet, jetp4, btag, central, central, up,      central);

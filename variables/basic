@@ -308,6 +308,8 @@ std::vector<float> sys_murf
 std::vector<float> sys_pdf
 std::vector<float> sys_bctag
 std::vector<float> sys_udsgtag
+std::vector<float> sys_bctag_loose
+std::vector<float> sys_udsgtag_loose
 std::vector<float> sys_isr
 std::vector<float> sys_lep
 std::vector<float> sys_fs_lep

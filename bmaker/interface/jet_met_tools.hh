@@ -26,7 +26,7 @@
 
 class jet_met_tools{
 private:
-  float getMCTagEfficiency(int pdgId, float pT, float eta);
+  float getMCTagEfficiency(int pdgId, float pT, float eta, bool loose);
 
 public:
 
@@ -43,7 +43,7 @@ public:
   const float sizeJet      = 0.4;
 
   enum CutLevel{kLoose, kTight, kPBNR};
-  enum btagVariation { kBTagCentral, kBTagUp, kBTagDown};
+  enum btagVariation { kBTagCentral, kBTagUp, kBTagDown, kBTagCentralLoose, kBTagUpLoose, kBTagDownLoose};
 
   TString jecName;
   bool doSystematics;
@@ -67,6 +67,7 @@ public:
   std::vector<BTagCalibrationReader*> readersBC_fs;
   std::vector<BTagCalibrationReader*> readersUDSG_fs;
   TH3F *btagEfficiencyParameterization;
+  TH3F *btagEfficiencyParameterizationLoose;
 
   bool leptonInJet(const pat::Jet &jet, vCands leptons);
   bool jetMatched(const pat::Jet &jet, vCands objects);

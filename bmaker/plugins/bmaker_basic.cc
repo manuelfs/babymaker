@@ -517,7 +517,7 @@ void bmaker_basic::writeJets(edm::Handle<pat::JetCollection> alljets,
   baby.jetsys_nob_phi() = jetsys_nob_p4.phi();
 
   // write deltaR between csvm jets
-  jetTool->getDeltaRbb(baby.dr_bb(), jets, baby.jets_csv());
+  jetTool->getDeltaRbb(baby.dr_bb(), jets, baby.jets_csv(), baby.jets_islep());
 
 }
 
@@ -1191,7 +1191,7 @@ void bmaker_basic::writeWeights(const vCands &sig_leps, edm::Handle<GenEventInfo
 
   // Initializing weights
   if(isData) {
-    baby.eff_trig() = baby.w_btag() = baby.w_pu() = baby.w_lep() = baby.w_fs_lep() = baby.w_toppt() = 1.;
+    baby.eff_trig() = baby.w_btag() = baby.w_pu() = baby.w_pu_rpv() = baby.w_lep() = baby.w_fs_lep() = baby.w_toppt() = 1.;
     baby.eff_jetid() = baby.w_lumi() = baby.weight() = 1.;
     return;
   }
@@ -1203,6 +1203,10 @@ void bmaker_basic::writeWeights(const vCands &sig_leps, edm::Handle<GenEventInfo
   
   // Pile-up weight
   baby.w_pu() = weightTool->pileupWeight(baby.ntrupv_mean());
+  baby.w_pu_rpv() = weightTool->pileupWeightRPV(baby.ntrupv_mean(), 0);
+  baby.sys_pu_rpv().resize(2, 1.);
+  baby.sys_pu_rpv()[0] = weightTool->pileupWeightRPV(baby.ntrupv_mean(), 1)/baby.w_pu_rpv();
+  baby.sys_pu_rpv()[1] = weightTool->pileupWeightRPV(baby.ntrupv_mean(), -1)/baby.w_pu_rpv();
 
   // Lepton SFs
   double sf  = lepTool->getScaleFactor(sig_leps);
@@ -1233,6 +1237,8 @@ void bmaker_basic::writeWeights(const vCands &sig_leps, edm::Handle<GenEventInfo
   // w_toppt and sys_isr calculated in writeMC
   baby.weight() = baby.w_lumi() * baby.w_lep() * baby.w_fs_lep() * baby.w_toppt() * baby.w_btag() 
     * baby.eff_trig() * baby.eff_jetid();
+  baby.weight_rpv() = baby.w_lumi() * baby.w_lep() * baby.w_fs_lep() * baby.w_toppt() * baby.w_btag()
+    * baby.w_pu_rpv() * baby.eff_jetid();
 
   /////// Systematics that do not change central value /////////
   weightTool->getTheoryWeights(lhe_info);

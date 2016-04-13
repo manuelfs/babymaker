@@ -10,6 +10,9 @@ class weight_tools{
 private:
   std::vector<gen::WeightsInfo> theoryWeights;
   std::vector<double> pileupWeights;
+  std::vector<double> pileupWeightsPlus1Sigma;
+  std::vector<double> pileupWeightsCentral;
+  std::vector<double> pileupWeightsMinus1Sigma;
 
 public:
   // the enum index corresponds to the index of the variation
@@ -28,6 +31,7 @@ public:
   float theoryWeight(variationType variation);
   void getTheoryWeights(edm::Handle<LHEEventProduct> lhe_info);
   float pileupWeight(unsigned int ntrupv);
+  float pileupWeightRPV(unsigned int ntrupv, int type);
   float triggerEfficiency(int &nmus, int &nels, std::vector<float> &sys_trig);
   float topPtWeight(float top_pt1,float top_pt2);
   float isrWeight(float isrpt);

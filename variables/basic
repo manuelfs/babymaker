@@ -284,6 +284,7 @@ float w_lumi
 float w_pu
 float w_pu_rpv
 float w_btag
+float w_btag_loose
 float w_toppt
 float w_lep
 float w_fs_lep

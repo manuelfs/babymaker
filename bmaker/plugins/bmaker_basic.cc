@@ -360,7 +360,7 @@ void bmaker_basic::writeJets(edm::Handle<pat::JetCollection> alljets,
   baby.pass_jets_ra2() = true; baby.pass_jets_tight_ra2() = true; 
   baby.sys_bctag().resize(2, 1.); baby.sys_udsgtag().resize(2, 1.);
   baby.sys_bctag_loose().resize(2, 1.); baby.sys_udsgtag_loose().resize(2, 1.);
-  baby.w_btag() = 1.;
+  baby.w_btag() = baby.w_btag_loose() = 1.;
   if (isFastSim){ baby.sys_fs_bctag().resize(2, 1.); baby.sys_fs_udsgtag().resize(2, 1.);}
   if (doSystematics) {
     baby.sys_njets().resize(kSysLast, 0); baby.sys_nbm().resize(kSysLast, 0); 
@@ -416,6 +416,7 @@ void bmaker_basic::writeJets(edm::Handle<pat::JetCollection> alljets,
           baby.sys_bctag()[1]   *= jetTool->jetBTagWeight(jet, jetp4, btag, down,    central);
           baby.sys_udsgtag()[0] *= jetTool->jetBTagWeight(jet, jetp4, btag, central, up);
           baby.sys_udsgtag()[1] *= jetTool->jetBTagWeight(jet, jetp4, btag, central, down);
+          baby.w_btag_loose()         *= jetTool->jetBTagWeight(jet, jetp4, btagLoose, centralLoose, centralLoose);
           baby.sys_bctag_loose()[0]   *= jetTool->jetBTagWeight(jet, jetp4, btagLoose, upLoose,      centralLoose);
           baby.sys_bctag_loose()[1]   *= jetTool->jetBTagWeight(jet, jetp4, btagLoose, downLoose,    centralLoose);
           baby.sys_udsgtag_loose()[0] *= jetTool->jetBTagWeight(jet, jetp4, btagLoose, centralLoose, upLoose);
@@ -510,6 +511,8 @@ void bmaker_basic::writeJets(edm::Handle<pat::JetCollection> alljets,
   for (unsigned i(0); i<2; i++){
     baby.sys_bctag()[i] /= baby.w_btag();
     baby.sys_udsgtag()[i] /= baby.w_btag();
+    baby.sys_bctag_loose()[i] /= baby.w_btag_loose();
+    baby.sys_udsgtag_loose()[i] /= baby.w_btag_loose();
     if (isFastSim) { 
       baby.sys_fs_bctag()[i] /= baby.w_btag();
       baby.sys_fs_udsgtag()[i] /= baby.w_btag();
@@ -1198,7 +1201,7 @@ void bmaker_basic::writeWeights(const vCands &sig_leps, edm::Handle<GenEventInfo
 
   // Initializing weights
   if(isData) {
-    baby.eff_trig() = baby.w_btag() = baby.w_pu() = baby.w_pu_rpv() = baby.w_lep() = baby.w_fs_lep() = baby.w_toppt() = 1.;
+    baby.eff_trig() = baby.w_btag() = baby.w_btag_loose() = baby.w_pu() = baby.w_pu_rpv() = baby.w_lep() = baby.w_fs_lep() = baby.w_toppt() = 1.;
     baby.eff_jetid() = baby.w_lumi() = baby.weight() = 1.;
     return;
   }

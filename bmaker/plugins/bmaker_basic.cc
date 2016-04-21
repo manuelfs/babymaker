@@ -1202,7 +1202,7 @@ void bmaker_basic::writeWeights(const vCands &sig_leps, edm::Handle<GenEventInfo
   // Initializing weights
   if(isData) {
     baby.eff_trig() = baby.w_btag() = baby.w_btag_loose() = baby.w_pu() = baby.w_pu_rpv() = baby.w_lep() = baby.w_fs_lep() = baby.w_toppt() = 1.;
-    baby.eff_jetid() = baby.w_lumi() = baby.weight() = 1.;
+    baby.eff_jetid() = baby.w_lumi() = baby.weight() = baby.weight_rpv() = 1.;
     return;
   }
 

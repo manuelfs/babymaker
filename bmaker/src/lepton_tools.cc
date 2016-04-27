@@ -484,42 +484,48 @@ vCands lepton_tools::getIsoTracks(edm::Handle<pat::PackedCandidateCollection> pf
   return tks;
 }
 
-vCands lepton_tools::getRA4IsoTracks(edm::Handle<pat::PackedCandidateCollection> pfcands, double met, double met_phi, double rhoEventCentral, vector<float> &isos, int primary_pdg){
+vCands lepton_tools::getRA4IsoTracks(edm::Handle<pat::PackedCandidateCollection> pfcands, double met, double met_phi, double rhoEventCentral, vector<float> &isos, vector<float> &relisos, int primary_pdg){
 
   vCands tks;
-  //common parameters
-  // float eta_max = 2.5;
-  //float dz_max = 0.1;
-  // float cone_size = 0.3;
-  float eta_max = 5;
-  float dz_max = 5;
+  //Very loose cuts to have flexibility, not the veto definition
+  float dz_max = 0.5;
+  float pt_min = 5;
+  float iso_max = 1.;
 
   for (size_t i(0); i < pfcands->size(); i++) {
     const pat::PackedCandidate &tk = (*pfcands)[i];
     unsigned int id = abs(tk.pdgId());
 
-    //id-specific parameters
-    float pt_min = id==211 ? 5. : 5.;
-    // float iso_max = id==211 ? 0.1 : 0.2;
-
     // track selection
-    if (tk.charge()==0 || tk.charge()==(-primary_pdg)) continue;
+    if (tk.charge()==0) continue;
     if (id!=11 && id!=13 && id!=211) continue;
     if (tk.pt() < pt_min) continue;
-    if (fabs(tk.eta()) > eta_max) continue;
     if (fabs(tk.dz()) > dz_max) continue;
 
-    //if (mt_max>0.01 && getMT(met, met_phi,  tk.pt(), tk.phi())>mt_max) continue;
+    //Only save opposite sign tracks
+    if(id == 211){
+      if(tk.pdgId() * primary_pdg < 0 ) continue;
+    }
+    else{
+      if(tk.pdgId() * primary_pdg > 0 ) continue;
+    }
+     
 
     // calculate track isolation
     double iso = 0.;
-    if(id!=211)
+    double reliso=0.;
+    if(id!=211){ //Use charged+neutral for e's and mu's
       iso = getPFIsolation(pfcands, dynamic_cast<const reco::Candidate *>(&tk), 0.05, 0.2, 10., rhoEventCentral, false);
-    else
+      reliso = getPFIsolation(pfcands, dynamic_cast<const reco::Candidate *>(&tk), 0.3, 0.3, 10., rhoEventCentral, false);
+    }
+    else{ //Use charged only for hadronic tracks
       iso = getPFIsolation(pfcands, dynamic_cast<const reco::Candidate *>(&tk), 0.05, 0.2, 10., rhoEventCentral, true);
-
-    if(iso>1.0) continue;
+      reliso =  getPFIsolation(pfcands, dynamic_cast<const reco::Candidate *>(&tk), 0.3, 0.3, 10., rhoEventCentral, true);
+    }
+    
+    if(iso>iso_max && reliso>iso_max) continue; //Save tracks that pass a very loose isolation cut, for either isolation
     isos.push_back(iso);
+    relisos.push_back(reliso);
     tks.push_back(dynamic_cast<const reco::Candidate *>(&tk));
   }
 

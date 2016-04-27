@@ -1,5 +1,5 @@
 ###########################################################
-### Configuration file to make basic babies from miniAOD
+### Configuration file to make full babies from miniAOD
 ###########################################################
 import math, sys
 from   os import environ

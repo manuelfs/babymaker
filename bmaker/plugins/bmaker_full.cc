@@ -149,41 +149,8 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
     baby.ntks() = tks.size();
 
     // RA4 track veto
-    if(baby.leps_id().size()>0){    
-      vector<float> isos;
-      ra4tks = lepTool->getRA4IsoTracks(pfcands, baby.met(), baby.met_phi(),rhoEventCentral,isos,baby.leps_id().at(0));
-      vector<float> tks_pt;
-      vector<float> tks_eta;
-      vector<float> tks_phi;
-      vector<int> tks_pdg;
-      vector<float> tks_miniso;
-      vector<float> tks_mt2;
-      vector<float> tks_mt;
-      int nveto=0;
-
-      for(unsigned i=0;i<ra4tks.size();i++){
-        tks_pt.push_back(ra4tks.at(i)->pt());
-        tks_eta.push_back(ra4tks.at(i)->eta());
-        tks_phi.push_back(ra4tks.at(i)->phi());
-        tks_pdg.push_back(ra4tks.at(i)->pdgId());
-        tks_miniso.push_back(isos.at(i));
-        tks_mt2.push_back(getMT2(baby.leps_pt().at(0),baby.leps_phi().at(0),tks_pt.back(),tks_phi.back(),baby.met(),baby.met_phi()));
-        tks_mt.push_back(getMT(tks_pt.back(),tks_phi.back(),baby.met(),baby.met_phi()));
-        if(fabs(tks_pdg.back())==211 && tks_pt.back()>15. && tks_miniso.back()<0.05 && tks_mt2.back()<100) nveto++;
-        else if (fabs(tks_pdg.back())==13 && tks_pt.back()>10. && tks_miniso.back()<0.2 && tks_mt2.back()<100) nveto++;
-        else if (fabs(tks_pdg.back())==11 && tks_pt.back()>10. && tks_miniso.back()<0.1 && tks_mt2.back()<100) nveto++;
-      }
-      baby.tks_pt() = tks_pt;
-      baby.tks_eta() = tks_eta;
-      baby.tks_phi() = tks_phi;
-      baby.tks_pdg() = tks_pdg;
-      baby.tks_miniso() = tks_miniso;
-      baby.tks_mt2() = tks_mt2;
-      baby.tks_mt() = tks_mt;
-      baby.nveto()=nveto;
-
-    }  
-  } // if goodPV
+    writeTks(pfcands,vtx,rhoEventCentral);
+  }
 
   /// Jets
   if (debug) cout<<"INFO: Writing jets..."<<endl;
@@ -702,6 +669,41 @@ void bmaker_full::writeLeptons(vCands &leptons){
   } // Loop over leptons
 }
 
+ void bmaker_full::writeTks(edm::Handle<pat::PackedCandidateCollection> pfcands,edm::Handle<reco::VertexCollection> vtx, double rhoEventCentral ){
+   if(baby.leps_id().size()>0){    
+     vector<float> isos;
+     vector<float> relisos;
+     vCands ra4tks;
+     ra4tks = lepTool->getRA4IsoTracks(pfcands, baby.met(), baby.met_phi(),rhoEventCentral,isos,relisos,baby.leps_id().at(0));
+     
+     int nveto=0;
+
+     for(unsigned i=0;i<ra4tks.size();i++){
+       baby.tks_pt().push_back(ra4tks.at(i)->pt());
+       baby.tks_eta().push_back(ra4tks.at(i)->eta());
+       baby.tks_phi().push_back(ra4tks.at(i)->phi());
+       baby.tks_d0().push_back( sqrt(pow(ra4tks.at(i)->vx()-vtx->at(0).x(),2) + pow(vtx->at(0).y()-ra4tks.at(i)->vy(),2)));
+       baby.tks_dz().push_back(ra4tks.at(i)->vz()-vtx->at(0).z());
+       baby.tks_pdg().push_back(ra4tks.at(i)->pdgId());
+       baby.tks_miniso().push_back(isos.at(i));
+       baby.tks_reliso().push_back(relisos.at(i));
+       baby.tks_tm().push_back(false); //filled in writeMC
+							
+       baby.tks_mt2().push_back(getMT2(baby.leps_pt().at(0),baby.leps_phi().at(0),baby.tks_pt().back(),baby.tks_phi().back(),baby.met(),baby.met_phi()));
+       baby.tks_mt().push_back(getMT(baby.tks_pt().back(),baby.tks_phi().back(),baby.met(),baby.met_phi()));
+       
+       if(fabs(baby.tks_pdg().back())==211  && baby.tks_pt().back()>15. && baby.tks_miniso().back()<0.1 && baby.tks_mt2().back()<60 && baby.tks_dz().back()<0.07 && baby.tks_d0().back()<0.05 ) nveto++;
+       else if (fabs(baby.tks_pdg().back())==13 && baby.tks_pt().back()>10. && baby.tks_miniso().back()<0.2 && baby.tks_mt2().back()<80 && baby.tks_dz().back()<0.07 && baby.tks_d0().back()<0.05) nveto++;
+       else if (fabs(baby.tks_pdg().back())==11 && baby.tks_pt().back()>10. && baby.tks_miniso().back()<0.2 && baby.tks_mt2().back()<80 && baby.tks_dz().back()<0.07 && baby.tks_d0().back()<0.05) nveto++;
+
+     }
+ 
+     baby.nveto()=nveto;
+
+   }  
+ } // if goodPV
+
+ 
 void bmaker_full::writeDiLep(vCands &sig_mus, vCands &sig_els, vCands &veto_mus, vCands &veto_els){
   setDiLepMass(sig_mus,  &baby_base::mumu_m,  &baby_base::mumu_pt1,  &baby_base::mumu_pt2,  &baby_base::mumu_pt,
                &baby_base::mumu_eta,  &baby_base::mumu_phi, &baby_base::mus_pt, &baby_base::mus_inz,
@@ -1038,7 +1040,11 @@ void bmaker_full::writeMC(edm::Handle<reco::GenParticleCollection> genParticles,
     bool eFromTopZ(id==11 && (momid==24 || momid==23));
     bool muFromTopZ(id==13 && (momid==24 || momid==23));
     bool tauFromTopZ(id==15 && (momid==24 || momid==23));
+    bool fromTau(mcTool->fromTau(mc));
     bool fromWOrWTau(mcTool->fromWOrWTau(mc));
+    bool chgPionFromTau(id==211 && momid==15 && fromWOrWTau);
+    bool eFromTopZtau(id==11 && (momid==24 || momid==23 || fromTau ));
+    bool muFromTopZtau(id==13 && (momid==24 || momid==23 || fromTau ));
 
     if(isLast){
       if(isTop) mc.pdgId()>0 ? topIndex=imc : antitopIndex=imc;
@@ -1079,8 +1085,48 @@ void bmaker_full::writeMC(edm::Handle<reco::GenParticleCollection> genParticles,
       }
     }
 
+    //Finding lost leptons
+    const float relptThreshold(0.3), drThreshold(0.1); 
+    float relptThres(2.), drThres(0.15); 
+    //if(mcTool->fromWOrWTau(mc) && (laste||lastmu||lasttau|| (mcTool->fromTau(mc) && abs(mc.pdgId())==211))){
+    if(eFromTopZtau|| muFromTopZtau || chgPionFromTau){
+      double mindr(999.);
+      int minind(-1);
+      
+      for(size_t ind(0); ind < baby.leps_pt().size(); ind++) {
+	double dr = dR(baby.leps_phi()[ind],mc.phi(),baby.leps_eta()[ind],mc.eta());
+	//	cout<<"mc lep eta phi = "<<mc.eta()<<" "<<mc.phi()<<", reco lep eta phi "<<baby.leps_eta()[ind]<<" "<<baby.leps_phi()[ind]<<", dr = "<<dr<<endl;
+	double drelpt(fabs((baby.leps_pt()[ind] - mc.pt())/mc.pt()));
+	if(dr > drThres || drelpt > relptThres) continue;
+	if(dr < mindr){
+	  mindr = dr;
+	  minind = ind;
+	}
+      }
+      
+    
+      if(minind<0){ //Lepton is lost
+	//Try to match to veto track collection
+	double min_dr(999.);
+	int minindex(-1);
+	for(size_t ind(0); ind < baby.tks_pt().size(); ind++) {
+	  double dr = dR(baby.tks_phi()[ind],mc.phi(),baby.tks_eta()[ind],mc.eta());
+	  double drelpt(fabs((baby.tks_pt()[ind] - mc.pt())/mc.pt()));
+	  if(dr > drThreshold || drelpt > relptThres) continue; //use loose pt comparison in case lost lepton is very poorly measured
+	  if(dr < min_dr){
+	    min_dr = dr;
+	    minindex = ind;
+	  }
+	} // Loop over tks
+	if(minindex >= 0) {
+	  baby.tks_tm()[minindex] = true;
+	}
+
+
+      }
+    }
     //////// Finding truth-matched leptons
-    const float relptThreshold(0.3), drThreshold(0.1);      
+    //const float relptThreshold(0.3), drThreshold(0.1);  needed earlier    
     if(id==11 && fromWOrWTau){
       double mindr(999.);
       int minind(-1);

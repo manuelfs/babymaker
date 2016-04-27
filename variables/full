@@ -190,11 +190,14 @@ int nveto
 std::vector<float> tks_pt
 std::vector<float> tks_eta
 std::vector<float> tks_phi
+std::vector<float> tks_d0
+std::vector<float> tks_dz
 std::vector<int> tks_pdg
 std::vector<float> tks_miniso
+std::vector<float> tks_reliso
 std::vector<float> tks_mt2
 std::vector<float> tks_mt
-
+std::vector<bool> tks_tm
 
 ###################   Trigger   ##################
 std::vector<bool> trig;

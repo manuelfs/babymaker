@@ -93,7 +93,7 @@ public:
 		   baby_float ll_pt, baby_float ll_eta, baby_float ll_phi,
 		   baby_float ll_w);
   void writeLeptons(vCands &leptons); 
-
+  void writeTks(edm::Handle<pat::PackedCandidateCollection> pfcands,edm::Handle<reco::VertexCollection> vtx, double rhoEventCentral);
   vCands writePhotons(edm::Handle<pat::PhotonCollection> allphotons, edm::Handle<std::vector<pat::Electron> > &electrons,
 		      edm::Handle<reco::ConversionCollection> &conversions, edm::Handle<reco::BeamSpot> &beamspot, double rho);
 

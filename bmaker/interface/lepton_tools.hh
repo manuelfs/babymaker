@@ -78,7 +78,7 @@ public:
                         double rho, bool charged_only);
 
   vCands getIsoTracks(edm::Handle<pat::PackedCandidateCollection> pfcands, double met, double met_phi);
-  vCands getRA4IsoTracks(edm::Handle<pat::PackedCandidateCollection> pfcands, double met, double met_phi,double rhoEventCentral,std::vector<float> &isos, int primary_pdg);
+  vCands getRA4IsoTracks(edm::Handle<pat::PackedCandidateCollection> pfcands, double met, double met_phi,double rhoEventCentral,std::vector<float> &isos,  std::vector<float> &relisos, int primary_pdg);
 
 private:
   static const TH2D muon_id_sf, muon_iso_sf, electron_id_sf, electron_iso_sf;

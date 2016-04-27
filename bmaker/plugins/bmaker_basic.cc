@@ -150,8 +150,8 @@ void bmaker_basic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 
     // RA4 track veto
     if(baby.leps_id().size()>0){    
-      vector<float> isos;
-      ra4tks = lepTool->getRA4IsoTracks(pfcands, baby.met(), baby.met_phi(),rhoEventCentral,isos,baby.leps_id().at(0));
+      vector<float> isos,relisos;
+      ra4tks = lepTool->getRA4IsoTracks(pfcands, baby.met(), baby.met_phi(),rhoEventCentral,isos,relisos,baby.leps_id().at(0));
       vector<float> tks_pt;
       vector<float> tks_eta;
       vector<float> tks_phi;

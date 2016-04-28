@@ -325,6 +325,7 @@ void bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
                              edm::Handle<edm::View <reco::GenJet> > genjets,
                              vCands &sig_leps, vCands &veto_leps, vCands &photons, vCands &tks,
                              vector<LVector> &jets, vector<vector<LVector> > &sys_jets){
+  vector<int> hi_csv(5,0); // Indices of the 5 jets with highest CSV
   vCands jets_ra2;
   LVector jetsys_p4, jetsys_nob_p4;
   baby.njets() = 0; baby.nbl() = 0; baby.nbm() = 0;  baby.nbt() = 0;  
@@ -356,9 +357,9 @@ void bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
     //   RA4 Jet Quality filters
     //--------------------------------
     if(jetp4.pt() > jetTool->JetPtCut && !isLep) {
-        if(goodPtEta && !looseID) baby.pass_jets_nohf() = false;
-        if(!looseID) baby.pass_jets() = false;
-        if(!tightID) baby.pass_jets_tight() = false;
+      if(goodPtEta && !looseID) baby.pass_jets_nohf() = false;
+      if(!looseID) baby.pass_jets() = false;
+      if(!tightID) baby.pass_jets_tight() = false;
     }
 
     //    RA4 Jet Variables
@@ -374,6 +375,18 @@ void bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
       baby.jets_hflavor().push_back(jet.hadronFlavour());
       baby.jets_csv().push_back(csv);
       jets.push_back(jetp4);
+      baby.jets_h1().push_back(false);
+      baby.jets_h2().push_back(false);
+
+      // Finding the N jets with highest CSV values
+      for(size_t ind(0); ind<hi_csv.size(); ind++){
+	int icsv = hi_csv[ind];
+	if(csv > baby.jets_csv()[icsv]){
+	  for(size_t ind2(ind+1); ind2<hi_csv.size(); ind2++) hi_csv[ind2] = hi_csv[ind2-1];
+	  hi_csv[ind] = baby.jets_csv().size()-1;
+	  break;
+	}
+      } // Loop over highest CSV jets
 
 
       if(!isLep){
@@ -502,6 +515,69 @@ void bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
 
   // write deltaR between csvm jets
   jetTool->getDeltaRbb(baby.dr_bb(), jets, baby.jets_csv(), baby.jets_islep());
+
+  //// Variables for the Higgsino analysis
+  // hig_p4 has the p4 of the jet if row==col, and if not the sum of the p4 for the row-th and col-th jets 
+  vector<vector<LVector> > hig_p4;
+  for(size_t row=0; row<hi_csv.size(); row++){
+    hig_p4.push_back(vector<LVector>());
+    for(size_t col=0; col<=row; col++){
+      LVector jetp4(jets[hi_csv[row]]);
+      hig_p4.back().push_back(jetp4);
+      if(row!=col) hig_p4.back().back() += hig_p4[row][row];
+    } // Loop over columns in hig_p4
+  } // Loop over rows in hig_p4
+
+  // Loop over all possible Higgs combination in the first nCSVs jets of highest CSV
+  size_t nCSVs = hi_csv.size();
+  nCSVs = 4;
+  vector<int> hig_ind(4,-1);
+  float minDm(9999.);
+  for(size_t ind0=0; ind0<nCSVs; ind0++){
+    for(size_t ind1=0; ind1<ind0; ind1++){
+      for(size_t ind2=0; ind2<nCSVs; ind2++){
+	if(ind2==ind0 || ind2==ind1) continue;
+	for(size_t ind3=0; ind3<ind2; ind3++){
+	  if(ind3==ind0 || ind3==ind1) continue;
+	  float thisDm = fabs(hig_p4[ind0][ind1].mass() - hig_p4[ind2][ind3].mass());
+	  if(thisDm < minDm) {
+	    hig_ind[0] = ind0; hig_ind[1] = ind1; hig_ind[2] = ind2; hig_ind[3] = ind3;
+	    minDm = thisDm;
+	  }
+	} // ind4
+      } // ind3
+    } // ind2
+  } // ind1
+  baby.jets_h1()[hig_ind[0]] = true; baby.jets_h1()[hig_ind[1]] = true; 
+  baby.jets_h2()[hig_ind[2]] = true; baby.jets_h2()[hig_ind[3]] = true; 
+
+  LVector hig1 = hig_p4[hig_ind[0]][hig_ind[1]], hig2 = hig_p4[hig_ind[2]][hig_ind[3]];
+  baby.hig_dm()	  = fabs(hig1.mass() - hig2.mass());
+  baby.hig_am()	  = (hig1.mass() + hig2.mass())/2.;
+  baby.hig1_pt()  = hig1.pt();
+  baby.hig1_eta() = hig1.eta();
+  baby.hig1_phi() = hig1.phi();
+  baby.hig1_m()	  = hig1.mass();
+  baby.hig2_pt()  = hig2.pt();
+  baby.hig2_eta() = hig2.eta();
+  baby.hig2_phi() = hig2.phi();
+  baby.hig2_m()	  = hig2.mass();
+
+  // Setting up the ABCD bin: 
+  // 2 -> SIG, 1 -> SB, 0 -> in between, not used
+  if(baby.hig_dm()<20 && baby.hig_am()>100 && baby.hig_am()<140) baby.hig_bin() = 2;
+  else if(baby.hig_dm()>30 || baby.hig_am()<90 || baby.hig_am()>150) baby.hig_bin() = 1;
+  else baby.hig_bin() = 0;
+  // 20 -> 2b, 30 -> 3b, 40 -> 4b
+  if(baby.nbt()>=2) {
+    baby.hig_bin() += 20;
+    if(baby.nbm()>=3) {
+      baby.hig_bin() += 10;
+      if(baby.nbl()>=4) baby.hig_bin() += 10;
+    }
+  }
+
+
 
 }
 
@@ -1035,6 +1111,7 @@ void bmaker_full::writeMC(edm::Handle<reco::GenParticleCollection> genParticles,
     bool isGluino(id==1000021);
     bool isZ(id==23);
     bool isW(id==24);
+    bool isH(id==25);
     bool bTopOrBSM(id==5 && (momid==6 || momid>=bsmid));
     bool nuFromZ((id==12 || id==14 || id==16) && momid==23);
     bool eFromTopZ(id==11 && (momid==24 || momid==23));
@@ -1045,8 +1122,11 @@ void bmaker_full::writeMC(edm::Handle<reco::GenParticleCollection> genParticles,
     bool chgPionFromTau(id==211 && momid==15 && fromWOrWTau);
     bool eFromTopZtau(id==11 && (momid==24 || momid==23 || fromTau ));
     bool muFromTopZtau(id==13 && (momid==24 || momid==23 || fromTau ));
+    bool fromHiggs(momid==25);
+    bool fromTop(momid==6);
+    bool mg_me = mc.status()==22 || mc.status()==23;
 
-    if(isLast){
+    if(isLast || mg_me){
       if(isTop) mc.pdgId()>0 ? topIndex=imc : antitopIndex=imc;
 
       //////// Finding p4 of ME ISR system
@@ -1055,9 +1135,9 @@ void bmaker_full::writeMC(edm::Handle<reco::GenParticleCollection> genParticles,
 	 || (isZ && outname.Contains("DY"))) isr_p4 -= mc.p4();
 
       //////// Saving interesting true particles
-      if(isTop || isNewPhysics || isZ
+      if(isTop || isNewPhysics || isZ || isH || fromHiggs
 	 || isW || bTopOrBSM || eFromTopZ || muFromTopZ 
-	 || tauFromTopZ || nuFromZ || fromWOrWTau){
+	 || tauFromTopZ || nuFromZ || fromWOrWTau || fromTop || mg_me){
 	baby.mc_id().push_back(mc.pdgId());
 	baby.mc_pt().push_back(mc.pt());
 	baby.mc_eta().push_back(mc.eta());

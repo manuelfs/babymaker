@@ -44,6 +44,21 @@ float met_tru_nuw
 float met_tru_nuw_phi
 float met_rebal
 
+###################   Higgsinos   ##################
+int   hig_bin
+float hig_dm
+float hig_am
+float hig_drmax
+float hig_dphi
+float hig1_pt
+float hig1_eta
+float hig1_phi
+float hig1_m
+float hig2_pt
+float hig2_eta
+float hig2_phi
+float hig2_m
+
 ###################   Jets   ##################
 int njets
 int nbl
@@ -78,6 +93,8 @@ std::vector<int>   jets_fjet14_index
 std::vector<int>   jets_fjet15_index
 std::vector<int>   jets_fjet16_index
 std::vector<int>   jets_hflavor
+std::vector<bool>  jets_h1
+std::vector<bool>  jets_h2
 
 ##################   Leptons   ################
 int nleps

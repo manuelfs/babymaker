@@ -28,6 +28,7 @@ namespace xsec{
     if(file.Contains("T2tt") && file.Contains("650_"))  xsec = 0.107045;
     if(file.Contains("T2tt") && file.Contains("850_"))  xsec = 0.0189612;
 
+    if(file.Contains("TChiHH") && file.Contains("-400"))  xsec = 0.0887325;
  
 
     if(file.Contains("SMS-T2tt_2J_mStop-425_mLSP-325"))  xsec = 1.31169;

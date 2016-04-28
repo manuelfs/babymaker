@@ -49,6 +49,9 @@ int   hig_bin
 float hig_dm
 float hig_am
 float hig_drmax
+float hig5_dm
+float hig5_am
+float hig5_drmax
 float hig_dphi
 float hig1_pt
 float hig1_eta
@@ -332,6 +335,7 @@ std::vector<float> mc_phi
 std::vector<float> mc_mass
 std::vector<int>   mc_id
 std::vector<int>   mc_mom
+std::vector<int>   mc_status
 float m_tt
 bool fromGS
 int ntruleps

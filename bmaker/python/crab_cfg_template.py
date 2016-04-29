@@ -30,9 +30,9 @@ config.JobType.pyCfgParams = ['nEventsSample=' + str(nevents), 'outputFile=fullb
 config.section_("Data")
 config.Data.inputDataset = dataset
 config.Data.inputDBS = 'global'
-if "Run2015" in TaskName:
+if "Run2015" in taskname:
     config.Data.splitting = 'LumiBased'
-    config.Data.unitsPerJob = 30
+    config.Data.unitsPerJob = 10
     config.Data.lumiMask = 'https://cms-service-dqm.web.cern.ch/cms-service-dqm/CAF/certification/Collisions15/13TeV/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON_v2.txt'
 
 else:

@@ -25,16 +25,22 @@ config.JobType.pluginName = 'Analysis'
 config.JobType.psetName = 'babymaker/bmaker/python/bmaker_full_cfg.py'
 config.JobType.disableAutomaticOutputCollection = True
 config.JobType.outputFiles = ['fullbaby_' + datasetID + '.root']
-config.JobType.pyCfgParams = ['nEventsSample=' + str(nevents), 'outputFile=baby_' + datasetID + '.root']
+config.JobType.pyCfgParams = ['nEventsSample=' + str(nevents), 'outputFile=fullbaby_' + datasetID + '.root']
 
 config.section_("Data")
 config.Data.inputDataset = dataset
 config.Data.inputDBS = 'global'
-config.Data.splitting = 'FileBased'
-config.Data.unitsPerJob = 5
+if "Run2015" in TaskName:
+    config.Data.splitting = 'LumiBased'
+    config.Data.unitsPerJob = 30
+    config.Data.lumiMask = 'https://cms-service-dqm.web.cern.ch/cms-service-dqm/CAF/certification/Collisions15/13TeV/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON_v2.txt'
+
+else:
+    config.Data.splitting = 'FileBased'
+    config.Data.unitsPerJob = 5
+
 config.Data.publication = False # used to be True for cfA production
 # config.Data.publishDBS = 'phys03'
-#config.Data.lumiMask = 'https://cms-service-dqm.web.cern.ch/cms-service-dqm/CAF/certification/Collisions15/13TeV/Cert_246908-251252_13TeV_PromptReco_Collisions15_JSON.txt'
 
 config.section_("Site")
 config.Site.storageSite = 'T3_US_UCSB' #'T3_US_UCSB'

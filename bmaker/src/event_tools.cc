@@ -76,7 +76,7 @@ event_tools::event_tools(TString outname):
 
   doBeamHalo = outname.Contains("Run2015");
   if(doBeamHalo) { 
-    string command("printf ${CMSSW_BASE}/src/babymaker/data/csc_beamhalo_filter/csc2015_ee4sc_Dec01.txt");
+    string command("printf ${CMSSW_BASE}/src/babymaker/data/csc_beamhalo_filter/csc2015_ee4sc_Jan13.txt");
     string eventList = execute(command.c_str());
     fillBeamHaloMap(eventList);
   }

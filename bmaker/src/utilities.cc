@@ -36,13 +36,24 @@ namespace utilities{
     return sqrt(2.*pt1*pt2*(1.-cos(phi2-phi1)));
   }
 
+  float getMT(float m1, float pt1, float phi1,
+	      float m2, float pt2, float phi2){
+    return sqrt(m1*m1+m2*m2+2.*(sqrt((m1*m1+pt1*pt1)*(m2*m2+pt2*pt2))-pt1*pt2*cos(phi1-phi2)));
+  }
+
   float getMT2(float pt1, float phi1, float pt2, float phi2, float met, float met_phi){
+    return getMT2(0., pt1, phi1, 0., pt2, phi2, met, met_phi);
+  }
+
+  float getMT2(float m1, float pt1, float phi1,
+	       float m2, float pt2, float phi2,
+	       float met, float met_phi){
     asymm_mt2_lester_bisect::disableCopyrightMessage();
-    double mVisA = 0; // mass of visible object on side A.  Must be >=0.
+    double mVisA = m1; // mass of visible object on side A.  Must be >=0.
     double pxA = pt1*cos(phi1); // x momentum of visible object on side A.
     double pyA = pt1*sin(phi1); // y momentum of visible object on side A.
  
-    double mVisB = 0; // mass of visible object on side B.  Must be >=0.
+    double mVisB = m2; // mass of visible object on side B.  Must be >=0.
     double pxB = pt2*cos(phi2); // x momentum of visible object on side B.
     double pyB = pt2*sin(phi2); // y momentum of visible object on side B.
  

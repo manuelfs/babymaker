@@ -88,6 +88,63 @@ public:
                       btagVariation readerTypeBC, btagVariation readerTypeUDSG,
                       btagVariation readerTypeBC_fs = kBTagCentral, btagVariation readerTypeUDSG_fs = kBTagCentral);
   void getDeltaRbb(std::vector<float> & deltaRbb, const std::vector<LVector> &jets, const std::vector<float> &jets_csv, const std::vector<bool> &jets_islep);
+  static std::vector<size_t> getBRanking(const std::vector<LVector> &momentum, const std::vector<float> &csv,
+					 const std::vector<bool> &is_lep);
+  static float getDeltaRbb(const std::vector<LVector> &momentum, const std::vector<size_t> &brank);
+  static float getDeltaRbbMax(const std::vector<LVector> &momentum, const std::vector<size_t> &brank,
+			      size_t nb);
+  static float getDeltaRbbMin(const std::vector<LVector> &momentum, const std::vector<size_t> &brank,
+			      size_t nb);
+  static float getDeltaPhibb(const std::vector<LVector> &momentum, const std::vector<size_t> &brank);
+  static float getDeltaPhibbMax(const std::vector<LVector> &momentum, const std::vector<size_t> &brank,
+				size_t nb);
+  static float getDeltaPhibbMin(const std::vector<LVector> &momentum, const std::vector<size_t> &brank,
+				size_t nb);
+  static float getMbb(const std::vector<LVector> &momentum, const std::vector<size_t> &brank);
+  static float getMbbMax(const std::vector<LVector> &momentum, const std::vector<size_t> &brank,
+			 size_t nb);
+  static float getMbbMin(const std::vector<LVector> &momentum, const std::vector<size_t> &brank,
+			 size_t nb);
+  static float getMblepMax2(const std::vector<LVector> &jets, const std::vector<size_t> &brank,
+			    const LVector &lep);
+  static float getMblepMin2(const std::vector<LVector> &jets, const std::vector<size_t> &brank,
+			    const LVector &lep);
+  static float getMblepMax(const std::vector<LVector> &jets, const std::vector<size_t> &brank,
+			   size_t nb, const LVector &lep);
+  static float getMblepMin(const std::vector<LVector> &jets, const std::vector<size_t> &brank,
+			   size_t nb, const LVector &lep);
+  static float getDeltaRblepMax2(const std::vector<LVector> &jets, const std::vector<size_t> &brank,
+				 const LVector &lep);
+  static float getDeltaRblepMin2(const std::vector<LVector> &jets, const std::vector<size_t> &brank,
+				 const LVector &lep);
+  static float getDeltaRblepMax(const std::vector<LVector> &jets, const std::vector<size_t> &brank,
+				size_t nb, const LVector &lep);
+  static float getDeltaRblepMin(const std::vector<LVector> &jets, const std::vector<size_t> &brank,
+				size_t nb, const LVector &lep);
+  static float getDeltaPhiblepMax2(const std::vector<LVector> &jets, const std::vector<size_t> &brank,
+				   const LVector &lep);
+  static float getDeltaPhiblepMin2(const std::vector<LVector> &jets, const std::vector<size_t> &brank,
+				   const LVector &lep);
+  static float getDeltaPhiblepMax(const std::vector<LVector> &jets, const std::vector<size_t> &brank,
+				  size_t nb, const LVector &lep);
+  static float getDeltaPhiblepMin(const std::vector<LVector> &jets, const std::vector<size_t> &brank,
+				  size_t nb, const LVector &lep);
+  static float getMTbmetMax2(const std::vector<LVector> &jets, const std::vector<size_t> &brank,
+			     float met, float met_phi);
+  static float getMTbmetMin2(const std::vector<LVector> &jets, const std::vector<size_t> &brank,
+			     float met, float met_phi);
+  static float getMTbmetMax(const std::vector<LVector> &jets, const std::vector<size_t> &brank,
+			    size_t nb, float met, float met_phi);
+  static float getMTbmetMin(const std::vector<LVector> &jets, const std::vector<size_t> &brank,
+			    size_t nb, float met, float met_phi);
+  static float getDeltaPhibmetMax2(const std::vector<LVector> &jets, const std::vector<size_t> &brank,
+				   float met_phi);
+  static float getDeltaPhibmetMin2(const std::vector<LVector> &jets, const std::vector<size_t> &brank,
+				   float met_phi);
+  static float getDeltaPhibmetMax(const std::vector<LVector> &jets, const std::vector<size_t> &brank,
+				  size_t nb, float met_phi);
+  static float getDeltaPhibmetMin(const std::vector<LVector> &jets, const std::vector<size_t> &brank,
+				  size_t nb, float met_phi);
 
   void clusterFatJets(int &nfjets, float &mj,
           std::vector<float> &fjets_pt, 

@@ -21,7 +21,12 @@ namespace utilities{
   bool greaterPt(const reco::Candidate *a, const reco::Candidate *b);
   bool greaterM(const fastjet::PseudoJet &a, const fastjet::PseudoJet &b);
   float getMT(float pt1, float phi1, float pt2, float phi2);
+  float getMT(float m1, float pt1, float phi1,
+	      float m2, float pt2, float phi2);
   float getMT2(float pt1, float phi1, float pt2, float phi2, float met, float met_phi);
+  float getMT2(float m1, float pt1, float phi1,
+	       float m2, float pt2, float phi2,
+	       float met, float met_phi);
   std::string execute(const std::string &cmd);
   TString roundNumber(double num, int decimals, double denom=1.);
   TString addCommas(double num);

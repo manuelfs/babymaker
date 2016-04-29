@@ -519,6 +519,51 @@ void bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
   // write deltaR between csvm jets
   jetTool->getDeltaRbb(baby.dr_bb(), jets, baby.jets_csv(), baby.jets_islep());
 
+  vector<size_t> branks = jet_met_tools::getBRanking(jets, baby.jets_csv(), baby.jets_islep());
+  baby.dr_bb_2() = jet_met_tools::getDeltaRbb(jets, branks);
+  baby.dr_bb_max() = jet_met_tools::getDeltaRbbMax(jets, branks, baby.nbm());
+  baby.dr_bb_min() = jet_met_tools::getDeltaRbbMax(jets, branks, baby.nbm());
+  baby.dphi_bb_2() = jet_met_tools::getDeltaPhibb(jets, branks);
+  baby.dphi_bb_max() = jet_met_tools::getDeltaPhibbMax(jets, branks, baby.nbm());
+  baby.dphi_bb_min() = jet_met_tools::getDeltaPhibbMax(jets, branks, baby.nbm());
+  baby.m_bb_2() = jet_met_tools::getMbb(jets, branks);
+  baby.m_bb_max() = jet_met_tools::getMbbMax(jets, branks, baby.nbm());
+  baby.m_bb_min() = jet_met_tools::getMbbMin(jets, branks, baby.nbm());
+
+  baby.dr_bl_min() = jet_met_tools::getDeltaRblepMin(jets, branks, baby.nbm(), sig_leps.at(0)->p4());
+  baby.dr_bl_max() = jet_met_tools::getDeltaRblepMax(jets, branks, baby.nbm(), sig_leps.at(0)->p4());
+  baby.dr_bl_min2() = jet_met_tools::getDeltaRblepMin2(jets, branks, sig_leps.at(0)->p4());
+  baby.dr_bl_max2() = jet_met_tools::getDeltaRblepMax2(jets, branks, sig_leps.at(0)->p4());
+  baby.dphi_bl_min() = jet_met_tools::getDeltaPhiblepMin(jets, branks, baby.nbm(), sig_leps.at(0)->p4());
+  baby.dphi_bl_max() = jet_met_tools::getDeltaPhiblepMax(jets, branks, baby.nbm(), sig_leps.at(0)->p4());
+  baby.dphi_bl_min2() = jet_met_tools::getDeltaPhiblepMin2(jets, branks, sig_leps.at(0)->p4());
+  baby.dphi_bl_max2() = jet_met_tools::getDeltaPhiblepMax2(jets, branks, sig_leps.at(0)->p4());
+  baby.m_bl_min() = jet_met_tools::getMblepMin(jets, branks, baby.nbm(), sig_leps.at(0)->p4());
+  baby.m_bl_max() = jet_met_tools::getMblepMax(jets, branks, baby.nbm(), sig_leps.at(0)->p4());
+  baby.m_bl_min2() = jet_met_tools::getMblepMin2(jets, branks, sig_leps.at(0)->p4());
+  baby.m_bl_max2() = jet_met_tools::getMblepMax2(jets, branks, sig_leps.at(0)->p4());
+
+  baby.dphi_bmet_min() = jet_met_tools::getDeltaPhibmetMin(jets, branks, baby.nbm(), baby.met_phi());
+  baby.dphi_bmet_max() = jet_met_tools::getDeltaPhibmetMax(jets, branks, baby.nbm(), baby.met_phi());
+  baby.dphi_bmet_min2() = jet_met_tools::getDeltaPhibmetMin2(jets, branks, baby.met_phi());
+  baby.dphi_bmet_max2() = jet_met_tools::getDeltaPhibmetMax2(jets, branks, baby.met_phi());
+  baby.mt_bmet_min() = jet_met_tools::getMTbmetMin(jets, branks, baby.nbm(), baby.met(), baby.met_phi());
+  baby.mt_bmet_max() = jet_met_tools::getMTbmetMax(jets, branks, baby.nbm(), baby.met(), baby.met_phi());
+  baby.mt_bmet_min2() = jet_met_tools::getMTbmetMin2(jets, branks, baby.met(), baby.met_phi());
+  baby.mt_bmet_max2() = jet_met_tools::getMTbmetMax2(jets, branks, baby.met(), baby.met_phi());
+
+  baby.dphi_lmet() = reco::deltaPhi(sig_leps.at(0)->phi(), baby.met_phi());
+
+  if(baby.nbm() >= 2){
+    const auto jet1 = jets.at(branks.at(0));
+    const auto jet2 = jets.at(branks.at(2));
+    baby.mt2() = getMT2(jet1.mass(), jet1.pt(), jet1.phi(),
+			jet2.mass(), jet2.pt(), jet2.phi(),
+			baby.met(), baby.met_phi());
+  }else{
+    baby.mt2() = -1.;
+  }
+
   //// Variables for the Higgsino analysis
   if(hi_csv[3]>=0){
     // hig_p4 has the p4 of the jet if row==col, and if not the sum of the p4 for the row-th and col-th jets 

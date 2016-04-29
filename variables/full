@@ -24,6 +24,7 @@ float mt_nohf
 float mt_tru
 float mt_tru_nuw
 float mt_rebal
+float mt2
 float dphi_wlep
 bool jetmismeas
 
@@ -194,6 +195,42 @@ float mumuv_w
 ##################   Di-jets   ###################
 
 std::vector<float> dr_bb
+
+##################   Di-objects   ################
+
+float dr_bb_2
+float dr_bb_max
+float dr_bb_min
+float dphi_bb_2
+float dphi_bb_max
+float dphi_bb_min
+float m_bb_2
+float m_bb_max
+float m_bb_min
+
+float dr_bl_min
+float dr_bl_max
+float dr_bl_min2
+float dr_bl_max2
+float dphi_bl_min
+float dphi_bl_max
+float dphi_bl_min2
+float dphi_bl_max2
+float m_bl_min
+float m_bl_max
+float m_bl_min2
+float m_bl_max2
+
+float dphi_bmet_min
+float dphi_bmet_max
+float dphi_bmet_min2
+float dphi_bmet_max2
+float mt_bmet_min
+float mt_bmet_max
+float mt_bmet_min2
+float mt_bmet_max2
+
+float dphi_lmet
 
 ##################   Photons   ###################
 int nph

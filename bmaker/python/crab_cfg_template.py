@@ -22,9 +22,9 @@ config.General.transferLogs = True
 
 config.section_("JobType")
 config.JobType.pluginName = 'Analysis'
-config.JobType.psetName = 'babymaker/bmaker/python/bmaker_basic_cfg.py'
+config.JobType.psetName = 'babymaker/bmaker/python/bmaker_full_cfg.py'
 config.JobType.disableAutomaticOutputCollection = True
-config.JobType.outputFiles = ['baby_' + datasetID + '.root']
+config.JobType.outputFiles = ['fullbaby_' + datasetID + '.root']
 config.JobType.pyCfgParams = ['nEventsSample=' + str(nevents), 'outputFile=baby_' + datasetID + '.root']
 
 config.section_("Data")

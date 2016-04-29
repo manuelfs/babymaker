@@ -520,7 +520,7 @@ void bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
   jetTool->getDeltaRbb(baby.dr_bb(), jets, baby.jets_csv(), baby.jets_islep());
 
   //// Variables for the Higgsino analysis
-  if(baby.jets_h1().size()>=4){
+  if(hi_csv[3]>=0){
     // hig_p4 has the p4 of the jet if row==col, and if not the sum of the p4 for the row-th and col-th jets 
     vector<vector<LVector> > hig_p4;
     for(size_t row=0; row<hi_csv.size(); row++){
@@ -538,8 +538,8 @@ void bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
     float minDm(9999.);
     for(size_t ind0=0; ind0<nCSVs; ind0++){
       for(size_t ind1=0; ind1<ind0; ind1++){
-	for(size_t ind2=0; ind2<nCSVs; ind2++){
-	  if(ind2==ind0 || ind2==ind1) continue;
+	for(size_t ind2=ind0+1; ind2<nCSVs; ind2++){
+	  if(ind2==ind1) continue;
 	  for(size_t ind3=0; ind3<ind2; ind3++){
 	    if(ind3==ind0 || ind3==ind1) continue;
 	    float thisDm = fabs(hig_p4[ind0][ind1].mass() - hig_p4[ind2][ind3].mass());
@@ -583,15 +583,16 @@ void bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
       }
     }
 
-    nCSVs = 5;
+    if(hi_csv[4]>=0) nCSVs = 5; // If there are 5 jets, find all combinations of those 5
     minDm = 9999.;
     for(size_t ind0=0; ind0<nCSVs; ind0++){
       for(size_t ind1=0; ind1<ind0; ind1++){
-	for(size_t ind2=0; ind2<nCSVs; ind2++){
-	  if(ind2==ind0 || ind2==ind1) continue;
+	for(size_t ind2=ind0+1; ind2<nCSVs; ind2++){
+	  if(ind2==ind1) continue;
 	  for(size_t ind3=0; ind3<ind2; ind3++){
 	    if(ind3==ind0 || ind3==ind1) continue;
 	    float thisDm = fabs(hig_p4[ind0][ind1].mass() - hig_p4[ind2][ind3].mass());
+	    //cout<<ind0<<"-"<<ind1<<", "<<ind2<<"-"<<ind3<<", thisDM "<<thisDm<<", minDm "<<minDm<<endl;
 	    if(thisDm < minDm) {
 	      hig_ind[0] = ind0; hig_ind[1] = ind1; hig_ind[2] = ind2; hig_ind[3] = ind3;
 	      minDm = thisDm;

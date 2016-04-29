@@ -49,15 +49,15 @@ def getNumberOfEvents(dataset):
       sumevents+=idata.get('result').get('value')
     return sumevents
 
-do_data = True
+do_data = False
 do_ttbar = True
-do_qcd = True
-do_dy = True
-do_singletop = True
-do_wjets = True
-do_other = True
-do_fullsim_t1tttt = True
-do_fastsim_t1tttt = True
+do_qcd = False
+do_dy = False
+do_singletop = False
+do_wjets = False
+do_other = False
+do_fullsim_t1tttt = False
+do_fastsim_t1tttt = False
 
 datasets = [[]]
 
@@ -168,13 +168,13 @@ if do_other:
   datasets.append(["/WZTo3LNu_TuneCUETP8M1_13TeV-powheg-pythia8/RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v1/MINIAODSIM"])
 
 # FullSim T1tttt
-if True:
+if do_fullsim_t1tttt:
   datasets.append(["/SMS-T1tttt_mGluino-1200_mLSP-800_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v1/MINIAODSIM"])
   datasets.append(["/SMS-T1tttt_mGluino-1500_mLSP-100_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v1/MINIAODSIM"])
   #datasets.append(["/SMS-T1tttt_mGluino-1500_mLSP-100_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15MiniAODv2-Asympt25nsReco_74X_mcRun2_asymptotic_v2-v1/MINIAODSIM"])
 
 # FastSim T1tttt
-if True:
+if do_fastsim_t1tttt:
   datasets.append(["/SMS-T1tttt_mGluino-825to850_mLSP-200to600_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15MiniAODv2-FastAsympt25ns_74X_mcRun2_asymptotic_v2-v1/MINIAODSIM"])
   datasets.append(["/SMS-T1tttt_mGluino-850to875_mLSP-450to625_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15MiniAODv2-FastAsympt25ns_74X_mcRun2_asymptotic_v2-v1/MINIAODSIM"])
   datasets.append(["/SMS-T1tttt_mGluino-875to900_mLSP-1to650_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15MiniAODv2-FastAsympt25ns_74X_mcRun2_asymptotic_v2-v1/MINIAODSIM"])

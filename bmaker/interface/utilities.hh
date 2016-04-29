@@ -5,6 +5,8 @@
 
 #include <vector>
 #include <string>
+#include <iostream>
+#include <stdexcept>
 #include "DataFormats/PatCandidates/interface/Electron.h"
 #include <fastjet/PseudoJet.hh>
 #include "TString.h"
@@ -12,10 +14,14 @@
 typedef std::vector<const reco::Candidate*> vCands;
 typedef reco::Candidate::LorentzVector LVector;
 
+#define ERROR(x) do{throw std::runtime_error(string("Error in file ")+__FILE__+" at line "+to_string(__LINE__)+" (in "+__func__+"): "+x);}while(false)
+#define DBG(x) do{std::cerr << "In " << __FILE__ << " at line " << __LINE__ << " (in function " << __func__ << "): " << x << std::endl;}while(false)
+
 namespace utilities{
 
   enum SysEnum{kSysJER, kSysJECUp, kSysJECDn, kSysLast};
 
+  float sumMass(const LVector &a, const LVector &b);
   float dPhi(float phi1, float phi2);
   float dR(float phi1, float phi2, float eta1, float eta2);
   bool greaterPt(const reco::Candidate *a, const reco::Candidate *b);

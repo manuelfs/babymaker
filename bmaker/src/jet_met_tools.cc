@@ -5,7 +5,6 @@
 #include <cstdlib>
 #include <iostream>
 #include <string>
-#include <limits>
 
 #include "CommonTools/Utils/interface/StringCutObjectSelector.h"
 #include <DataFormats/Math/interface/deltaR.h>
@@ -284,8 +283,8 @@ void jet_met_tools::getMETWithJEC(edm::Handle<pat::METCollection> mets, float &m
 
 // the jetp4 and isBTaggged are technically redundant but avoid recalculating information
 float jet_met_tools::jetBTagWeight(const pat::Jet &jet, const LVector &jetp4, bool isBTagged, 
-				   btagVariation readerTypeBC, btagVariation readerTypeUDSG,
-				   btagVariation readerTypeBC_fs, btagVariation readerTypeUDSG_fs) {
+                                   btagVariation readerTypeBC, btagVariation readerTypeUDSG,
+                                   btagVariation readerTypeBC_fs, btagVariation readerTypeUDSG_fs) {
   double jet_scalefactor = 1.0;
   int hadronFlavour = abs(jet.hadronFlavour());
   // only apply weights if readers are initialized
@@ -297,8 +296,8 @@ float jet_met_tools::jetBTagWeight(const pat::Jet &jet, const LVector &jetp4, bo
       double eff = 1.0;
       // loose b-tags have a different tagging efficiecy
       if(readerTypeBC==kBTagUpLoose
-	 || readerTypeBC==kBTagCentralLoose
-	 || readerTypeBC==kBTagDownLoose) eff = getMCTagEfficiency(abs(hadronFlavour), jetpttemp, fabs(jetp4.eta()), true);
+         || readerTypeBC==kBTagCentralLoose
+         || readerTypeBC==kBTagDownLoose) eff = getMCTagEfficiency(abs(hadronFlavour), jetpttemp, fabs(jetp4.eta()), true);
       else eff = getMCTagEfficiency(abs(hadronFlavour), jetpttemp, fabs(jetp4.eta()), false);
       double sf(1.), sf_fs(1.); 
       // procedure from https://twiki.cern.ch/twiki/bin/view/CMS/BTagSFMethods#1a_Event_reweighting_using_scale
@@ -373,13 +372,13 @@ void jet_met_tools::getDeltaRbb(vector<float> & deltaRbb, const vector<LVector> 
 
 // ranks jets by CSV, breaking ties by pt and mass, with jets matched to leptons last
 vector<size_t> jet_met_tools::getBRanking(const vector<LVector> &momentum, const vector<float> &csv,
-					  const vector<bool> &is_lep){
+                                          const vector<bool> &is_lep){
   typedef tuple<bool, float, float, float> Bness;
   vector<pair<Bness, long> > jets;
   for(size_t i = 0; i < momentum.size(); ++i){
-    jets.push_back(pair<Bness, size_t>(Bness(!is_lep.at(i), csv.at(i), momentum.at(i).pt(), momentum.at(i).mass()), -i));
+    jets.push_back(pair<Bness, size_t>(Bness(!is_lep.at(i), csv.at(i), momentum.at(i).pt(), momentum.at(i).M()), -i));
   }
-  sort(jets.begin(), jets.end());
+  sort(jets.rbegin(), jets.rend());
   vector<size_t> indices(jets.size());
   for(size_t i = 0; i < jets.size(); ++i){
     indices.at(i) = -jets.at(i).second;
@@ -387,12 +386,12 @@ vector<size_t> jet_met_tools::getBRanking(const vector<LVector> &momentum, const
   return indices;
 }
 
-float jet_met_tools::getDeltaRbb(const vector<LVector> &momentum, const vector<size_t> &brank){
-  return brank.size() > 1 ? deltaR(momentum.at(brank.at(0)), momentum.at(brank.at(1))) : -1.;
+float jet_met_tools::getDeltaRbb(const vector<LVector> &momentum, const vector<size_t> &brank, size_t nb){
+  return (brank.size() > 1 && nb > 1) ? deltaR(momentum.at(brank.at(0)), momentum.at(brank.at(1))) : -1.;
 }
 
 float jet_met_tools::getDeltaRbbMax(const vector<LVector> &momentum, const vector<size_t> &brank,
-				     size_t nb){
+                                    size_t nb){
   float max = -1.;
   for(size_t i = 0; i < nb && i < brank.size(); ++i){
     for(size_t j = i + 1; j < nb && j < brank.size(); ++j){
@@ -404,23 +403,23 @@ float jet_met_tools::getDeltaRbbMax(const vector<LVector> &momentum, const vecto
 }
 
 float jet_met_tools::getDeltaRbbMin(const vector<LVector> &momentum, const vector<size_t> &brank,
-				     size_t nb){
-  float min = numeric_limits<float>::infinity();;
+                                    size_t nb){
+  float min = -1.;
   for(size_t i = 0; i < nb && i < brank.size(); ++i){
     for(size_t j = i + 1; j < nb && j < brank.size(); ++j){
       float x = deltaR(momentum.at(brank.at(i)), momentum.at(brank.at(j)));
-      if(x < min) min = x;
+      if(x < min || min < 0.) min = x;
     }
   }
   return min;
 }
 
-float jet_met_tools::getDeltaPhibb(const vector<LVector> &momentum, const vector<size_t> &brank){
-  return brank.size() > 1 ? fabs(reco::deltaPhi(momentum.at(brank.at(0)).phi(), momentum.at(brank.at(1)).phi())) : -1.;
+float jet_met_tools::getDeltaPhibb(const vector<LVector> &momentum, const vector<size_t> &brank, size_t nb){
+  return (brank.size() > 1 && nb > 1) ? fabs(reco::deltaPhi(momentum.at(brank.at(0)).phi(), momentum.at(brank.at(1)).phi())) : -1.;
 }
 
 float jet_met_tools::getDeltaPhibbMax(const vector<LVector> &momentum, const vector<size_t> &brank,
-				      size_t nb){
+                                      size_t nb){
   float max = -1.;
   for(size_t i = 0; i < nb && i < brank.size(); ++i){
     for(size_t j = i + 1; j < nb && j < brank.size(); ++j){
@@ -432,27 +431,27 @@ float jet_met_tools::getDeltaPhibbMax(const vector<LVector> &momentum, const vec
 }
 
 float jet_met_tools::getDeltaPhibbMin(const vector<LVector> &momentum, const vector<size_t> &brank,
-				     size_t nb){
-  float min = numeric_limits<float>::infinity();;
+                                      size_t nb){
+  float min = -1.;
   for(size_t i = 0; i < nb && i < brank.size(); ++i){
     for(size_t j = i + 1; j < nb && j < brank.size(); ++j){
       float x = fabs(reco::deltaPhi(momentum.at(brank.at(i)).phi(), momentum.at(brank.at(j)).phi()));
-      if(x < min) min = x;
+      if(x < min || min < 0.) min = x;
     }
   }
   return min;
 }
 
-float jet_met_tools::getMbb(const vector<LVector> &momentum, const vector<size_t> &brank){
-  return brank.size() > 1 ? (momentum.at(brank.at(0))+momentum.at(brank.at(1))).mass() : -1.;
+float jet_met_tools::getMbb(const vector<LVector> &momentum, const vector<size_t> &brank, size_t nb){
+  return (brank.size() > 1 && nb > 1) ? sumMass(momentum.at(brank.at(0)), momentum.at(brank.at(1))) : -1.;
 }
 
 float jet_met_tools::getMbbMax(const vector<LVector> &momentum, const vector<size_t> &brank,
-				      size_t nb){
+                               size_t nb){
   float max = -1.;
   for(size_t i = 0; i < nb && i < brank.size(); ++i){
     for(size_t j = i + 1; j < nb && j < brank.size(); ++j){
-      float x = (momentum.at(brank.at(i))+momentum.at(brank.at(j))).mass();
+      float x = sumMass(momentum.at(brank.at(i)), momentum.at(brank.at(j)));
       if(x > max) max = x;
     }
   }
@@ -460,64 +459,64 @@ float jet_met_tools::getMbbMax(const vector<LVector> &momentum, const vector<siz
 }
 
 float jet_met_tools::getMbbMin(const vector<LVector> &momentum, const vector<size_t> &brank,
-			       size_t nb){
-  float min = numeric_limits<float>::infinity();;
+                               size_t nb){
+  float min = -1.;
   for(size_t i = 0; i < nb && i < brank.size(); ++i){
     for(size_t j = i + 1; j < nb && j < brank.size(); ++j){
-      float x = (momentum.at(brank.at(i))+momentum.at(brank.at(j))).mass();
-      if(x < min) min = x;
+      float x = sumMass(momentum.at(brank.at(i)), momentum.at(brank.at(j)));
+      if(x < min || min < 0.) min = x;
     }
   }
   return min;
 }
 
 float jet_met_tools::getMblepMax2(const vector<LVector> &jets, const vector<size_t> &brank,
-				  const LVector &lep){
-  switch(brank.size()){
+                                  size_t nb, const LVector &lep){
+  switch(nb){
   case 0: return -1.;
-  case 1: return (jets.at(brank.at(0))+lep).mass();
+  case 1: return sumMass(jets.at(brank.at(0)), lep);
   default:
-    float a = (jets.at(brank.at(0))+lep).mass();
-    float b = (jets.at(brank.at(1))+lep).mass();
+    float a = sumMass(jets.at(brank.at(0)), lep);
+    float b = sumMass(jets.at(brank.at(1)), lep);
     return max(a,b);
   }
 }
 
 float jet_met_tools::getMblepMin2(const vector<LVector> &jets, const vector<size_t> &brank,
-				  const LVector &lep){
-  switch(brank.size()){
+                                  size_t nb, const LVector &lep){
+  switch(nb){
   case 0: return -1.;
-  case 1: return (jets.at(brank.at(0))+lep).mass();
+  case 1: return sumMass(jets.at(brank.at(0)), lep);
   default:
-    float a = (jets.at(brank.at(0))+lep).mass();
-    float b = (jets.at(brank.at(1))+lep).mass();
+    float a = sumMass(jets.at(brank.at(0)), lep);
+    float b = sumMass(jets.at(brank.at(1)), lep);
     return min(a,b);
   }
 }
 
 float jet_met_tools::getMblepMax(const vector<LVector> &jets, const vector<size_t> &brank,
-				 size_t nb, const LVector &lep){
+                                 size_t nb, const LVector &lep){
   float max = -1.;
   for(size_t i = 0; i < nb && i < brank.size(); ++i){
-    float m = (jets.at(brank.at(i))+lep).mass();
-    if(m>max) m = max;
+    float m = sumMass(jets.at(brank.at(i)), lep);
+    if(m>max) max = m;
   }
   return max;
 }
 
 float jet_met_tools::getMblepMin(const vector<LVector> &jets, const vector<size_t> &brank,
-				 size_t nb, const LVector &lep){
-  float min = numeric_limits<float>::infinity();
+                                 size_t nb, const LVector &lep){
+  float min = -1.;
   for(size_t i = 0; i < nb && i < brank.size(); ++i){
-    float m = (jets.at(brank.at(i))+lep).mass();
-    if(m<min) m = min;
+    float m = sumMass(jets.at(brank.at(i)), lep);
+    if(m<min || min<0.) min = m;
   }
   return min;
 }
 
 float jet_met_tools::getDeltaRblepMax2(const vector<LVector> &jets, const vector<size_t> &brank,
-				       const LVector &lep){
-  switch(brank.size()){
+                                       size_t nb, const LVector &lep){
+  switch(nb){
   case 0: return -1.;
   case 1: return deltaR(jets.at(brank.at(0)), lep);
   default:
@@ -528,8 +527,8 @@ float jet_met_tools::getDeltaRblepMax2(const vector<LVector> &jets, const vector
 }
 
 float jet_met_tools::getDeltaRblepMin2(const vector<LVector> &jets, const vector<size_t> &brank,
-				       const LVector &lep){
-  switch(brank.size()){
+                                       size_t nb, const LVector &lep){
+  switch(nb){
   case 0: return -1.;
   case 1: return deltaR(jets.at(brank.at(0)), lep);
   default:
@@ -540,7 +539,7 @@ float jet_met_tools::getDeltaRblepMin2(const vector<LVector> &jets, const vector
 }
 
 float jet_met_tools::getDeltaRblepMax(const vector<LVector> &jets, const vector<size_t> &brank,
-				      size_t nb, const LVector &lep){
+                                      size_t nb, const LVector &lep){
   float max = -1.;
   for(size_t i = 0; i < nb && i < brank.size(); ++i){
     float m = deltaR(jets.at(brank.at(i)), lep);
@@ -550,18 +549,18 @@ float jet_met_tools::getDeltaRblepMax(const vector<LVector> &jets, const vector<
 }
 
 float jet_met_tools::getDeltaRblepMin(const vector<LVector> &jets, const vector<size_t> &brank,
-				      size_t nb, const LVector &lep){
-  float min = numeric_limits<float>::infinity();
+                                      size_t nb, const LVector &lep){
+  float min = -1.;
   for(size_t i = 0; i < nb && i < brank.size(); ++i){
     float m = deltaR(jets.at(brank.at(i)), lep);
-    if(m<min) min = m;
+    if(m<min || min < 0.) min = m;
   }
   return min;
 }
 
 float jet_met_tools::getDeltaPhiblepMax2(const vector<LVector> &jets, const vector<size_t> &brank,
-					 const LVector &lep){
-  switch(brank.size()){
+                                         size_t nb, const LVector &lep){
+  switch(nb){
   case 0: return -1.;
   case 1: return fabs(reco::deltaPhi(jets.at(brank.at(0)).phi(), lep.phi()));
   default:
@@ -572,8 +571,8 @@ float jet_met_tools::getDeltaPhiblepMax2(const vector<LVector> &jets, const vect
 }
 
 float jet_met_tools::getDeltaPhiblepMin2(const vector<LVector> &jets, const vector<size_t> &brank,
-					 const LVector &lep){
-  switch(brank.size()){
+                                         size_t nb, const LVector &lep){
+  switch(nb){
   case 0: return -1.;
   case 1: return fabs(reco::deltaPhi(jets.at(brank.at(0)).phi(), lep.phi()));
   default:
@@ -584,7 +583,7 @@ float jet_met_tools::getDeltaPhiblepMin2(const vector<LVector> &jets, const vect
 }
 
 float jet_met_tools::getDeltaPhiblepMax(const vector<LVector> &jets, const vector<size_t> &brank,
-					size_t nb, const LVector &lep){
+                                        size_t nb, const LVector &lep){
   float max = -1.;
   for(size_t i = 0; i < nb && i < brank.size(); ++i){
     float m = fabs(reco::deltaPhi(jets.at(brank.at(i)).phi(), lep.phi()));
@@ -594,72 +593,72 @@ float jet_met_tools::getDeltaPhiblepMax(const vector<LVector> &jets, const vecto
 }
 
 float jet_met_tools::getDeltaPhiblepMin(const vector<LVector> &jets, const vector<size_t> &brank,
-					size_t nb, const LVector &lep){
-  float min = numeric_limits<float>::infinity();
+                                        size_t nb, const LVector &lep){
+  float min = -1.;
   for(size_t i = 0; i < nb && i < brank.size(); ++i){
     float m = fabs(reco::deltaPhi(jets.at(brank.at(i)).phi(), lep.phi()));
-    if(m<min) min = m;
+    if(m<min || min < 0.) min = m;
   }
   return min;
 }
 
 float jet_met_tools::getMTbmetMax2(const vector<LVector> &jets, const vector<size_t> &brank,
-				   float met, float met_phi){
-  if(brank.size() == 0){
+                                   size_t nb, float met, float met_phi){
+  if(nb == 0){
     return -1.;
-  }else if(brank.size() == 1){
+  }else if(nb == 1){
     const auto &j = jets.at(brank.at(0));
-    return getMT(j.mass(), j.pt(), j.phi(), 0., met, met_phi);
+    return getMT(j.M(), j.pt(), j.phi(), 0., met, met_phi);
   }else{
     const auto &ja = jets.at(brank.at(0));
     const auto &jb = jets.at(brank.at(1));
-    float a = getMT(ja.mass(), ja.pt(), ja.phi(), 0., met, met_phi);
-    float b = getMT(jb.mass(), jb.pt(), jb.phi(), 0., met, met_phi);
+    float a = getMT(ja.M(), ja.pt(), ja.phi(), 0., met, met_phi);
+    float b = getMT(jb.M(), jb.pt(), jb.phi(), 0., met, met_phi);
     return max(a,b);
   }
 }
 
 float jet_met_tools::getMTbmetMin2(const vector<LVector> &jets, const vector<size_t> &brank,
-				   float met, float met_phi){
-  if(brank.size() == 0){
+                                   size_t nb, float met, float met_phi){
+  if(nb == 0){
     return -1.;
-  }else if(brank.size() == 1){
+  }else if(nb == 1){
     const auto &j = jets.at(brank.at(0));
-    return getMT(j.mass(), j.pt(), j.phi(), 0., met, met_phi);
+    return getMT(j.M(), j.pt(), j.phi(), 0., met, met_phi);
   }else{
     const auto &ja = jets.at(brank.at(0));
     const auto &jb = jets.at(brank.at(1));
-    float a = getMT(ja.mass(), ja.pt(), ja.phi(), 0., met, met_phi);
-    float b = getMT(jb.mass(), jb.pt(), jb.phi(), 0., met, met_phi);
+    float a = getMT(ja.M(), ja.pt(), ja.phi(), 0., met, met_phi);
+    float b = getMT(jb.M(), jb.pt(), jb.phi(), 0., met, met_phi);
     return min(a,b);
   }
 }
 
 float jet_met_tools::getMTbmetMax(const vector<LVector> &jets, const vector<size_t> &brank,
-				 size_t nb, float met, float met_phi){
+                                  size_t nb, float met, float met_phi){
   float max = -1.;
   for(size_t i = 0; i < nb && i < brank.size(); ++i){
     const auto &jet = jets.at(brank.at(i));
-    float m = getMT(jet.mass(), jet.pt(), jet.phi(), 0., met, met_phi);
+    float m = getMT(jet.M(), jet.pt(), jet.phi(), 0., met, met_phi);
     if(m>max) m = max;
   }
   return max;
 }
 
 float jet_met_tools::getMTbmetMin(const vector<LVector> &jets, const vector<size_t> &brank,
-				 size_t nb, float met, float met_phi){
-  float min = numeric_limits<float>::infinity();
+                                  size_t nb, float met, float met_phi){
+  float min = -1.;
   for(size_t i = 0; i < nb && i < brank.size(); ++i){
     const auto &jet = jets.at(brank.at(i));
-    float m = getMT(jet.mass(), jet.pt(), jet.phi(), 0., met, met_phi);
-    if(m<min) m = min;
+    float m = getMT(jet.M(), jet.pt(), jet.phi(), 0., met, met_phi);
+    if(m<min || min<0.) m = min;
   }
   return min;
 }
 
 float jet_met_tools::getDeltaPhibmetMax2(const vector<LVector> &jets, const vector<size_t> &brank,
-					 float met_phi){
-  switch(brank.size()){
+                                         size_t nb, float met_phi){
+  switch(nb){
   case 0: return -1.;
   case 1: return fabs(reco::deltaPhi(jets.at(brank.at(0)).phi(), met_phi));
   default:
@@ -670,8 +669,8 @@ float jet_met_tools::getDeltaPhibmetMax2(const vector<LVector> &jets, const vect
 }
 
 float jet_met_tools::getDeltaPhibmetMin2(const vector<LVector> &jets, const vector<size_t> &brank,
-					 float met_phi){
-  switch(brank.size()){
+                                         size_t nb, float met_phi){
+  switch(nb){
   case 0: return -1.;
   case 1: return fabs(reco::deltaPhi(jets.at(brank.at(0)).phi(), met_phi));
   default:
@@ -682,7 +681,7 @@ float jet_met_tools::getDeltaPhibmetMin2(const vector<LVector> &jets, const vect
 }
 
 float jet_met_tools::getDeltaPhibmetMax(const vector<LVector> &jets, const vector<size_t> &brank,
-					size_t nb, float met_phi){
+                                        size_t nb, float met_phi){
   float max = -1.;
   for(size_t i = 0; i < nb && i < brank.size(); ++i){
     float m = fabs(reco::deltaPhi(jets.at(brank.at(i)).phi(), met_phi));
@@ -692,28 +691,28 @@ float jet_met_tools::getDeltaPhibmetMax(const vector<LVector> &jets, const vecto
 }
 
 float jet_met_tools::getDeltaPhibmetMin(const vector<LVector> &jets, const vector<size_t> &brank,
-					size_t nb, float met_phi){
-  float min = numeric_limits<float>::infinity();
+                                        size_t nb, float met_phi){
+  float min = -1;
   for(size_t i = 0; i < nb && i < brank.size(); ++i){
     float m = fabs(reco::deltaPhi(jets.at(brank.at(i)).phi(), met_phi));
-    if(m<min) min = m;
+    if(m<min || min < 0.) min = m;
   }
   return min;
 }
 
 void jet_met_tools::clusterFatJets(int &nfjets, float &mj,
-                                  vector<float> &fjets_pt, 
-                                  vector<float> &fjets_eta,
-                                  vector<float> &fjets_phi, 
-                                  vector<float> &fjets_m,
-                                  vector<int> &fjets_nconst,
-                                  vector<float> &fjets_sumcsv,
-                                  vector<float> &fjets_poscsv,
-                                  vector<int> &fjets_btags,
-                                  vector<int> &jets_fjet_index,
-                                  double radius,
-                                  vector<LVector> &jets,
-                                  vector<float> &jets_csv){
+                                   vector<float> &fjets_pt, 
+                                   vector<float> &fjets_eta,
+                                   vector<float> &fjets_phi, 
+                                   vector<float> &fjets_m,
+                                   vector<int> &fjets_nconst,
+                                   vector<float> &fjets_sumcsv,
+                                   vector<float> &fjets_poscsv,
+                                   vector<int> &fjets_btags,
+                                   vector<int> &jets_fjet_index,
+                                   double radius,
+                                   vector<LVector> &jets,
+                                   vector<float> &jets_csv){
 
   vector<fastjet::PseudoJet> sjets(0);
   vector<float> csvs(0);
@@ -808,7 +807,7 @@ jet_met_tools::jet_met_tools(TString ijecName, bool doSys, bool fastSim):
     vector<JetCorrectorParameters> jecFiles;
     if (doJEC) cout<<endl<<"BABYMAKER: jet_met_tools: Applying JECs on-the-fly with files "<<basename.c_str()<<"*.txt"<<endl<<endl;
     else       cout<<endl<<"BABYMAKER: jet_met_tools: Reading JECs needed to determine "
-                         <<"residuals uncertainty with files "<<basename.c_str()<<"*.txt"<<endl<<endl;
+                   <<"residuals uncertainty with files "<<basename.c_str()<<"*.txt"<<endl<<endl;
     jecFiles.push_back(JetCorrectorParameters(basename+"_L1FastJet_AK4PFchs.txt"));
     jecFiles.push_back(JetCorrectorParameters(basename+"_L2Relative_AK4PFchs.txt"));
     jecFiles.push_back(JetCorrectorParameters(basename+"_L3Absolute_AK4PFchs.txt"));
@@ -831,14 +830,14 @@ jet_met_tools::jet_met_tools(TString ijecName, bool doSys, bool fastSim):
     for(auto itype : variationTypes) {
       // BC full sim
       readersBC.push_back(new BTagCalibrationReader(calib, // calibration instance
-						    op, // operating point
-						    "mujets", // measurement type ("comb" or "mujets")
-						    itype)); // systematics type ("central", "up", or "down")
+                                                    op, // operating point
+                                                    "mujets", // measurement type ("comb" or "mujets")
+                                                    itype)); // systematics type ("central", "up", or "down")
       // UDSG full sim
       readersUDSG.push_back(new BTagCalibrationReader(calib, // calibration instance
-						      op, // operating point
-						      "comb", // measurement type ("comb" or "mujets")
-						      itype)); // systematics type ("central", "up", or "down")
+                                                      op, // operating point
+                                                      "comb", // measurement type ("comb" or "mujets")
+                                                      itype)); // systematics type ("central", "up", or "down")
     }
   }
   if (isFastSim){
@@ -848,14 +847,14 @@ jet_met_tools::jet_met_tools(TString ijecName, bool doSys, bool fastSim):
     for(auto itype : variationTypes) {
       // BC fastsim
       readersBC_fs.push_back(new BTagCalibrationReader(calibFS, // calibration instance 
-  					    BTagEntry::OP_MEDIUM, // operating point
-  					    "fastsim", // measurement type ("comb" or "mujets")
-  					    itype)); // systematics type ("central", "up", or "down")
+                                                       BTagEntry::OP_MEDIUM, // operating point
+                                                       "fastsim", // measurement type ("comb" or "mujets")
+                                                       itype)); // systematics type ("central", "up", or "down")
       // UDSG fastsim
       readersUDSG_fs.push_back(new BTagCalibrationReader(calibFS, // calibration instance 
-  					      BTagEntry::OP_MEDIUM, // operating point
-  					      "fastsim", // measurement type ("comb" or "mujets")
-  					      itype)); // systematics type ("central", "up", or "down")
+                                                         BTagEntry::OP_MEDIUM, // operating point
+                                                         "fastsim", // measurement type ("comb" or "mujets")
+                                                         itype)); // systematics type ("central", "up", or "down")
     }
   }
 
@@ -894,4 +893,3 @@ jet_met_tools::~jet_met_tools(){
   for(auto ireader : readersBC) delete ireader;
   for(auto ireader : readersUDSG) delete ireader;
 }
-

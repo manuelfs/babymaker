@@ -10,6 +10,9 @@ using namespace std;
 
 namespace utilities{
 
+  float sumMass(const LVector &a, const LVector &b){
+    return sqrt(a.mass2()+b.mass2()+2.*(a.E()*b.E()-a.Px()*b.Px()-a.Py()*b.Py()-a.Pz()*b.Pz()));
+  }
 
   float dPhi(float phi1, float phi2){
     float delphi = TMath::Abs(TMath::Abs(TMath::Abs(phi1 - phi2) - TMath::Pi())-TMath::Pi());

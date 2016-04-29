@@ -288,14 +288,14 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 
 
 /*
-______                      _                     _ _   _             
-| ___ \                    | |                   (_) | (_)            
-| |_/ /_ __ __ _ _ __   ___| |__   __      ___ __ _| |_ _ _ __   __ _ 
-| ___ \ '__/ _` | '_ \ / __| '_ \  \ \ /\ / / '__| | __| | '_ \ / _` |
-| |_/ / | | (_| | | | | (__| | | |  \ V  V /| |  | | |_| | | | | (_| |
-\____/|_|  \__,_|_| |_|\___|_| |_|   \_/\_/ |_|  |_|\__|_|_| |_|\__, |
-                                                                 __/ |
-                                                                |___/ 
+  ______                      _                     _ _   _             
+  | ___ \                    | |                   (_) | (_)            
+  | |_/ /_ __ __ _ _ __   ___| |__   __      ___ __ _| |_ _ _ __   __ _ 
+  | ___ \ '__/ _` | '_ \ / __| '_ \  \ \ /\ / / '__| | __| | '_ \ / _` |
+  | |_/ / | | (_| | | | | (__| | | |  \ V  V /| |  | | |_| | | | | (_| |
+  \____/|_|  \__,_|_| |_|\___|_| |_|   \_/\_/ |_|  |_|\__|_|_| |_|\__, |
+  __/ |
+  |___/ 
 */
 
 // Requires having called jetTool->getJetCorrections(alljets, rhoEvent_) beforehand
@@ -322,9 +322,9 @@ void bmaker_full::writeMET(edm::Handle<pat::METCollection> mets, edm::Handle<pat
 
 // Requires having called jetTool->getJetCorrections(alljets, rhoEvent_) beforehand
 void bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets, 
-                             edm::Handle<edm::View <reco::GenJet> > genjets,
-                             vCands &sig_leps, vCands &veto_leps, vCands &photons, vCands &tks,
-                             vector<LVector> &jets, vector<vector<LVector> > &sys_jets){
+                            edm::Handle<edm::View <reco::GenJet> > genjets,
+                            vCands &sig_leps, vCands &veto_leps, vCands &photons, vCands &tks,
+                            vector<LVector> &jets, vector<vector<LVector> > &sys_jets){
   vector<int> hi_csv(5,-1); // Indices of the 5 jets with highest CSV
   vCands jets_ra2;
   LVector jetsys_p4, jetsys_nob_p4;
@@ -383,12 +383,12 @@ void bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
 
       // Finding the N jets with highest CSV values
       for(size_t ind(0); ind<hi_csv.size(); ind++){
-	int icsv = hi_csv[ind];
-	if(icsv==-1 || csv > baby.jets_csv()[icsv]){
-	  for(size_t ind2(hi_csv.size()-1); ind2>=ind+1; ind2--) hi_csv[ind2] = hi_csv[ind2-1];
-	  hi_csv[ind] = baby.jets_csv().size()-1;
-	  break;
-	}
+        int icsv = hi_csv[ind];
+        if(icsv==-1 || csv > baby.jets_csv()[icsv]){
+          for(size_t ind2(hi_csv.size()-1); ind2>=ind+1; ind2--) hi_csv[ind2] = hi_csv[ind2-1];
+          hi_csv[ind] = baby.jets_csv().size()-1;
+          break;
+        }
       } // Loop over highest CSV jets
 
 
@@ -520,46 +520,67 @@ void bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
   jetTool->getDeltaRbb(baby.dr_bb(), jets, baby.jets_csv(), baby.jets_islep());
 
   vector<size_t> branks = jet_met_tools::getBRanking(jets, baby.jets_csv(), baby.jets_islep());
-  baby.dr_bb_2() = jet_met_tools::getDeltaRbb(jets, branks);
+  baby.dr_bb_2() = jet_met_tools::getDeltaRbb(jets, branks, baby.nbm());
   baby.dr_bb_max() = jet_met_tools::getDeltaRbbMax(jets, branks, baby.nbm());
-  baby.dr_bb_min() = jet_met_tools::getDeltaRbbMax(jets, branks, baby.nbm());
-  baby.dphi_bb_2() = jet_met_tools::getDeltaPhibb(jets, branks);
+  baby.dr_bb_min() = jet_met_tools::getDeltaRbbMin(jets, branks, baby.nbm());
+  baby.dphi_bb_2() = jet_met_tools::getDeltaPhibb(jets, branks, baby.nbm());
   baby.dphi_bb_max() = jet_met_tools::getDeltaPhibbMax(jets, branks, baby.nbm());
-  baby.dphi_bb_min() = jet_met_tools::getDeltaPhibbMax(jets, branks, baby.nbm());
-  baby.m_bb_2() = jet_met_tools::getMbb(jets, branks);
+  baby.dphi_bb_min() = jet_met_tools::getDeltaPhibbMin(jets, branks, baby.nbm());
+  baby.m_bb_2() = jet_met_tools::getMbb(jets, branks, baby.nbm());
   baby.m_bb_max() = jet_met_tools::getMbbMax(jets, branks, baby.nbm());
   baby.m_bb_min() = jet_met_tools::getMbbMin(jets, branks, baby.nbm());
 
-  baby.dr_bl_min() = jet_met_tools::getDeltaRblepMin(jets, branks, baby.nbm(), sig_leps.at(0)->p4());
-  baby.dr_bl_max() = jet_met_tools::getDeltaRblepMax(jets, branks, baby.nbm(), sig_leps.at(0)->p4());
-  baby.dr_bl_min2() = jet_met_tools::getDeltaRblepMin2(jets, branks, sig_leps.at(0)->p4());
-  baby.dr_bl_max2() = jet_met_tools::getDeltaRblepMax2(jets, branks, sig_leps.at(0)->p4());
-  baby.dphi_bl_min() = jet_met_tools::getDeltaPhiblepMin(jets, branks, baby.nbm(), sig_leps.at(0)->p4());
-  baby.dphi_bl_max() = jet_met_tools::getDeltaPhiblepMax(jets, branks, baby.nbm(), sig_leps.at(0)->p4());
-  baby.dphi_bl_min2() = jet_met_tools::getDeltaPhiblepMin2(jets, branks, sig_leps.at(0)->p4());
-  baby.dphi_bl_max2() = jet_met_tools::getDeltaPhiblepMax2(jets, branks, sig_leps.at(0)->p4());
-  baby.m_bl_min() = jet_met_tools::getMblepMin(jets, branks, baby.nbm(), sig_leps.at(0)->p4());
-  baby.m_bl_max() = jet_met_tools::getMblepMax(jets, branks, baby.nbm(), sig_leps.at(0)->p4());
-  baby.m_bl_min2() = jet_met_tools::getMblepMin2(jets, branks, sig_leps.at(0)->p4());
-  baby.m_bl_max2() = jet_met_tools::getMblepMax2(jets, branks, sig_leps.at(0)->p4());
+  if(sig_leps.size() > 0){
+    baby.dr_bl_min() = jet_met_tools::getDeltaRblepMin(jets, branks, baby.nbm(), sig_leps.at(0)->p4());
+    baby.dr_bl_max() = jet_met_tools::getDeltaRblepMax(jets, branks, baby.nbm(), sig_leps.at(0)->p4());
+    baby.dr_bl_min2() = jet_met_tools::getDeltaRblepMin2(jets, branks, baby.nbm(), sig_leps.at(0)->p4());
+    baby.dr_bl_max2() = jet_met_tools::getDeltaRblepMax2(jets, branks, baby.nbm(), sig_leps.at(0)->p4());
+    baby.dphi_bl_min() = jet_met_tools::getDeltaPhiblepMin(jets, branks, baby.nbm(), sig_leps.at(0)->p4());
+    baby.dphi_bl_max() = jet_met_tools::getDeltaPhiblepMax(jets, branks, baby.nbm(), sig_leps.at(0)->p4());
+    baby.dphi_bl_min2() = jet_met_tools::getDeltaPhiblepMin2(jets, branks, baby.nbm(), sig_leps.at(0)->p4());
+    baby.dphi_bl_max2() = jet_met_tools::getDeltaPhiblepMax2(jets, branks, baby.nbm(), sig_leps.at(0)->p4());
+    baby.m_bl_min() = jet_met_tools::getMblepMin(jets, branks, baby.nbm(), sig_leps.at(0)->p4());
+    baby.m_bl_max() = jet_met_tools::getMblepMax(jets, branks, baby.nbm(), sig_leps.at(0)->p4());
+    baby.m_bl_min2() = jet_met_tools::getMblepMin2(jets, branks, baby.nbm(), sig_leps.at(0)->p4());
+    baby.m_bl_max2() = jet_met_tools::getMblepMax2(jets, branks, baby.nbm(), sig_leps.at(0)->p4());
+    baby.dphi_lmet() = fabs(reco::deltaPhi(sig_leps.at(0)->phi(), baby.met_phi()));
+  }else{
+    baby.dr_bl_min() = -1.;
+    baby.dr_bl_max() = -1.;
+    baby.dr_bl_min2() = -1.;
+    baby.dr_bl_max2() = -1.;
+    baby.dphi_bl_min() = -1.;
+    baby.dphi_bl_max() = -1.;
+    baby.dphi_bl_min2() = -1.;
+    baby.dphi_bl_max2() = -1.;
+    baby.m_bl_min() = -1.;
+    baby.m_bl_max() = -1.;
+    baby.m_bl_min2() = -1.;
+    baby.m_bl_max2() = -1.;
+    baby.dphi_lmet() = -1.;
+  }
 
   baby.dphi_bmet_min() = jet_met_tools::getDeltaPhibmetMin(jets, branks, baby.nbm(), baby.met_phi());
   baby.dphi_bmet_max() = jet_met_tools::getDeltaPhibmetMax(jets, branks, baby.nbm(), baby.met_phi());
-  baby.dphi_bmet_min2() = jet_met_tools::getDeltaPhibmetMin2(jets, branks, baby.met_phi());
-  baby.dphi_bmet_max2() = jet_met_tools::getDeltaPhibmetMax2(jets, branks, baby.met_phi());
+  baby.dphi_bmet_min2() = jet_met_tools::getDeltaPhibmetMin2(jets, branks, baby.nbm(), baby.met_phi());
+  baby.dphi_bmet_max2() = jet_met_tools::getDeltaPhibmetMax2(jets, branks, baby.nbm(), baby.met_phi());
   baby.mt_bmet_min() = jet_met_tools::getMTbmetMin(jets, branks, baby.nbm(), baby.met(), baby.met_phi());
   baby.mt_bmet_max() = jet_met_tools::getMTbmetMax(jets, branks, baby.nbm(), baby.met(), baby.met_phi());
-  baby.mt_bmet_min2() = jet_met_tools::getMTbmetMin2(jets, branks, baby.met(), baby.met_phi());
-  baby.mt_bmet_max2() = jet_met_tools::getMTbmetMax2(jets, branks, baby.met(), baby.met_phi());
+  baby.mt_bmet_min2() = jet_met_tools::getMTbmetMin2(jets, branks, baby.nbm(), baby.met(), baby.met_phi());
+  baby.mt_bmet_max2() = jet_met_tools::getMTbmetMax2(jets, branks, baby.nbm(), baby.met(), baby.met_phi());
 
-  baby.dphi_lmet() = reco::deltaPhi(sig_leps.at(0)->phi(), baby.met_phi());
 
-  if(baby.nbm() >= 2){
-    const auto jet1 = jets.at(branks.at(0));
-    const auto jet2 = jets.at(branks.at(2));
+  if(baby.nbm() >= 2 && sig_leps.size()>0){
+    const auto &jet1 = jets.at(branks.at(0));
+    const auto &jet2 = jets.at(branks.at(1));
+    double px = baby.met()*cos(baby.met_phi())+sig_leps.at(0)->px();
+    double py = baby.met()*sin(baby.met_phi())+sig_leps.at(0)->py();
     baby.mt2() = getMT2(jet1.mass(), jet1.pt(), jet1.phi(),
-			jet2.mass(), jet2.pt(), jet2.phi(),
-			baby.met(), baby.met_phi());
+                        jet2.mass(), jet2.pt(), jet2.phi(),
+                        hypot(px, py), atan2(py, px));
+    baby.mt2_0mass() = getMT2(0., jet1.pt(), jet1.phi(),
+			      0., jet2.pt(), jet2.phi(),
+			      hypot(px, py), atan2(py, px));
   }else{
     baby.mt2() = -1.;
   }
@@ -571,9 +592,9 @@ void bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
     for(size_t row=0; row<hi_csv.size(); row++){
       hig_p4.push_back(vector<LVector>());
       for(size_t col=0; col<=row; col++){
-	LVector jetp4(jets[hi_csv[row]]);
-	hig_p4.back().push_back(jetp4);
-	if(row!=col) hig_p4.back().back() += hig_p4[col][col];
+        LVector jetp4(jets[hi_csv[row]]);
+        hig_p4.back().push_back(jetp4);
+        if(row!=col) hig_p4.back().back() += hig_p4[col][col];
       } // Loop over columns in hig_p4
     } // Loop over rows in hig_p4
     // Loop over all possible Higgs combination in the first nCSVs jets of highest CSV
@@ -583,17 +604,17 @@ void bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
     float minDm(9999.);
     for(size_t ind0=0; ind0<nCSVs; ind0++){
       for(size_t ind1=0; ind1<ind0; ind1++){
-	for(size_t ind2=ind0+1; ind2<nCSVs; ind2++){
-	  if(ind2==ind1) continue;
-	  for(size_t ind3=0; ind3<ind2; ind3++){
-	    if(ind3==ind0 || ind3==ind1) continue;
-	    float thisDm = fabs(hig_p4[ind0][ind1].mass() - hig_p4[ind2][ind3].mass());
-	    if(thisDm < minDm) {
-	      hig_ind[0] = ind0; hig_ind[1] = ind1; hig_ind[2] = ind2; hig_ind[3] = ind3;
-	      minDm = thisDm;
-	    }
-	  } // ind3
-	} // ind2
+        for(size_t ind2=ind0+1; ind2<nCSVs; ind2++){
+          if(ind2==ind1) continue;
+          for(size_t ind3=0; ind3<ind2; ind3++){
+            if(ind3==ind0 || ind3==ind1) continue;
+            float thisDm = fabs(hig_p4[ind0][ind1].mass() - hig_p4[ind2][ind3].mass());
+            if(thisDm < minDm) {
+              hig_ind[0] = ind0; hig_ind[1] = ind1; hig_ind[2] = ind2; hig_ind[3] = ind3;
+              minDm = thisDm;
+            }
+          } // ind3
+        } // ind2
       } // ind1
     } // ind0
     baby.jets_h1()[hi_csv[hig_ind[0]]] = true; baby.jets_h1()[hi_csv[hig_ind[1]]] = true; 
@@ -603,7 +624,7 @@ void bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
     baby.hig_dm()   = fabs(hig1.mass() - hig2.mass());
     baby.hig_am()   = (hig1.mass() + hig2.mass())/2.;
     baby.hig_drmax() = max(deltaR(jets[hi_csv[hig_ind[0]]], jets[hi_csv[hig_ind[1]]]),
-			   deltaR(jets[hi_csv[hig_ind[2]]], jets[hi_csv[hig_ind[3]]]));
+                           deltaR(jets[hi_csv[hig_ind[2]]], jets[hi_csv[hig_ind[3]]]));
 
     baby.hig1_pt()  = hig1.pt();
     baby.hig1_eta() = hig1.eta();
@@ -623,8 +644,8 @@ void bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
     if(baby.nbt()>=2) {
       baby.hig_bin() += 20;
       if(baby.nbm()>=3) {
-	baby.hig_bin() += 10;
-	if(baby.nbl()>=4) baby.hig_bin() += 10;
+        baby.hig_bin() += 10;
+        if(baby.nbl()>=4) baby.hig_bin() += 10;
       }
     }
 
@@ -632,25 +653,25 @@ void bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
     minDm = 9999.;
     for(size_t ind0=0; ind0<nCSVs; ind0++){
       for(size_t ind1=0; ind1<ind0; ind1++){
-	for(size_t ind2=ind0+1; ind2<nCSVs; ind2++){
-	  if(ind2==ind1) continue;
-	  for(size_t ind3=0; ind3<ind2; ind3++){
-	    if(ind3==ind0 || ind3==ind1) continue;
-	    float thisDm = fabs(hig_p4[ind0][ind1].mass() - hig_p4[ind2][ind3].mass());
-	    //cout<<ind0<<"-"<<ind1<<", "<<ind2<<"-"<<ind3<<", thisDM "<<thisDm<<", minDm "<<minDm<<endl;
-	    if(thisDm < minDm) {
-	      hig_ind[0] = ind0; hig_ind[1] = ind1; hig_ind[2] = ind2; hig_ind[3] = ind3;
-	      minDm = thisDm;
-	    }
-	  } // ind3
-	} // ind2
+        for(size_t ind2=ind0+1; ind2<nCSVs; ind2++){
+          if(ind2==ind1) continue;
+          for(size_t ind3=0; ind3<ind2; ind3++){
+            if(ind3==ind0 || ind3==ind1) continue;
+            float thisDm = fabs(hig_p4[ind0][ind1].mass() - hig_p4[ind2][ind3].mass());
+            //cout<<ind0<<"-"<<ind1<<", "<<ind2<<"-"<<ind3<<", thisDM "<<thisDm<<", minDm "<<minDm<<endl;
+            if(thisDm < minDm) {
+              hig_ind[0] = ind0; hig_ind[1] = ind1; hig_ind[2] = ind2; hig_ind[3] = ind3;
+              minDm = thisDm;
+            }
+          } // ind3
+        } // ind2
       } // ind1
     } // ind0
     hig1 = hig_p4[hig_ind[0]][hig_ind[1]]; hig2 = hig_p4[hig_ind[2]][hig_ind[3]];
     baby.hig5_dm()   = fabs(hig1.mass() - hig2.mass());
     baby.hig5_am()   = (hig1.mass() + hig2.mass())/2.;
     baby.hig5_drmax() = max(deltaR(jets[hi_csv[hig_ind[0]]], jets[hi_csv[hig_ind[1]]]),
-			   deltaR(jets[hi_csv[hig_ind[2]]], jets[hi_csv[hig_ind[3]]]));
+                            deltaR(jets[hi_csv[hig_ind[2]]], jets[hi_csv[hig_ind[3]]]));
 
 
   } // if njets >= 4
@@ -709,9 +730,9 @@ void bmaker_full::writeFatJets(vector<LVector> &jets){
 }
 
 vCands bmaker_full::writeMuons(edm::Handle<pat::MuonCollection> muons, 
-                                edm::Handle<pat::PackedCandidateCollection> pfcands, 
-                                edm::Handle<reco::VertexCollection> vtx,
-                                vCands &veto_mus, vCands &all_mus, double rhoEventCentral){
+                               edm::Handle<pat::PackedCandidateCollection> pfcands, 
+                               edm::Handle<reco::VertexCollection> vtx,
+                               vCands &veto_mus, vCands &all_mus, double rhoEventCentral){
   vCands sig_mus; 
   veto_mus.clear(); all_mus.clear();
   baby.nmus() = 0; baby.nvmus() = 0;
@@ -759,9 +780,9 @@ vCands bmaker_full::writeMuons(edm::Handle<pat::MuonCollection> muons,
 
 
 vCands bmaker_full::writeElectrons(edm::Handle<pat::ElectronCollection> electrons, 
-                                    edm::Handle<pat::PackedCandidateCollection> pfcands, 
-                                    edm::Handle<reco::VertexCollection> vtx,
-                                    vCands &veto_els, vCands &all_els, double rhoEventCentral){
+                                   edm::Handle<pat::PackedCandidateCollection> pfcands, 
+                                   edm::Handle<reco::VertexCollection> vtx,
+                                   vCands &veto_els, vCands &all_els, double rhoEventCentral){
   vCands sig_els; 
   veto_els.clear(); all_els.clear();
   baby.nels() = 0; baby.nvels() = 0;
@@ -821,39 +842,39 @@ void bmaker_full::writeLeptons(vCands &leptons){
   } // Loop over leptons
 }
 
- void bmaker_full::writeTks(edm::Handle<pat::PackedCandidateCollection> pfcands,edm::Handle<reco::VertexCollection> vtx, double rhoEventCentral ){
-   if(baby.leps_id().size()>0){    
-     vector<float> isos;
-     vector<float> relisos;
-     vCands ra4tks;
-     ra4tks = lepTool->getRA4IsoTracks(pfcands, baby.met(), baby.met_phi(),rhoEventCentral,isos,relisos,baby.leps_id().at(0));
+void bmaker_full::writeTks(edm::Handle<pat::PackedCandidateCollection> pfcands,edm::Handle<reco::VertexCollection> vtx, double rhoEventCentral ){
+  if(baby.leps_id().size()>0){    
+    vector<float> isos;
+    vector<float> relisos;
+    vCands ra4tks;
+    ra4tks = lepTool->getRA4IsoTracks(pfcands, baby.met(), baby.met_phi(),rhoEventCentral,isos,relisos,baby.leps_id().at(0));
      
-     int nveto=0;
+    int nveto=0;
 
-     for(unsigned i=0;i<ra4tks.size();i++){
-       baby.tks_pt().push_back(ra4tks.at(i)->pt());
-       baby.tks_eta().push_back(ra4tks.at(i)->eta());
-       baby.tks_phi().push_back(ra4tks.at(i)->phi());
-       baby.tks_d0().push_back( sqrt(pow(ra4tks.at(i)->vx()-vtx->at(0).x(),2) + pow(vtx->at(0).y()-ra4tks.at(i)->vy(),2)));
-       baby.tks_dz().push_back(ra4tks.at(i)->vz()-vtx->at(0).z());
-       baby.tks_pdg().push_back(ra4tks.at(i)->pdgId());
-       baby.tks_miniso().push_back(isos.at(i));
-       baby.tks_reliso().push_back(relisos.at(i));
-       baby.tks_tm().push_back(false); //filled in writeMC
-							
-       baby.tks_mt2().push_back(getMT2(baby.leps_pt().at(0),baby.leps_phi().at(0),baby.tks_pt().back(),baby.tks_phi().back(),baby.met(),baby.met_phi()));
-       baby.tks_mt().push_back(getMT(baby.tks_pt().back(),baby.tks_phi().back(),baby.met(),baby.met_phi()));
+    for(unsigned i=0;i<ra4tks.size();i++){
+      baby.tks_pt().push_back(ra4tks.at(i)->pt());
+      baby.tks_eta().push_back(ra4tks.at(i)->eta());
+      baby.tks_phi().push_back(ra4tks.at(i)->phi());
+      baby.tks_d0().push_back( sqrt(pow(ra4tks.at(i)->vx()-vtx->at(0).x(),2) + pow(vtx->at(0).y()-ra4tks.at(i)->vy(),2)));
+      baby.tks_dz().push_back(ra4tks.at(i)->vz()-vtx->at(0).z());
+      baby.tks_pdg().push_back(ra4tks.at(i)->pdgId());
+      baby.tks_miniso().push_back(isos.at(i));
+      baby.tks_reliso().push_back(relisos.at(i));
+      baby.tks_tm().push_back(false); //filled in writeMC
+                                                        
+      baby.tks_mt2().push_back(getMT2(baby.leps_pt().at(0),baby.leps_phi().at(0),baby.tks_pt().back(),baby.tks_phi().back(),baby.met(),baby.met_phi()));
+      baby.tks_mt().push_back(getMT(baby.tks_pt().back(),baby.tks_phi().back(),baby.met(),baby.met_phi()));
        
-       if(fabs(baby.tks_pdg().back())==211  && baby.tks_pt().back()>15. && baby.tks_miniso().back()<0.1 && baby.tks_mt2().back()<60 && baby.tks_dz().back()<0.07 && baby.tks_d0().back()<0.05 ) nveto++;
-       else if (fabs(baby.tks_pdg().back())==13 && baby.tks_pt().back()>10. && baby.tks_miniso().back()<0.2 && baby.tks_mt2().back()<80 && baby.tks_dz().back()<0.07 && baby.tks_d0().back()<0.05) nveto++;
-       else if (fabs(baby.tks_pdg().back())==11 && baby.tks_pt().back()>10. && baby.tks_miniso().back()<0.2 && baby.tks_mt2().back()<80 && baby.tks_dz().back()<0.07 && baby.tks_d0().back()<0.05) nveto++;
+      if(fabs(baby.tks_pdg().back())==211  && baby.tks_pt().back()>15. && baby.tks_miniso().back()<0.1 && baby.tks_mt2().back()<60 && baby.tks_dz().back()<0.07 && baby.tks_d0().back()<0.05 ) nveto++;
+      else if (fabs(baby.tks_pdg().back())==13 && baby.tks_pt().back()>10. && baby.tks_miniso().back()<0.2 && baby.tks_mt2().back()<80 && baby.tks_dz().back()<0.07 && baby.tks_d0().back()<0.05) nveto++;
+      else if (fabs(baby.tks_pdg().back())==11 && baby.tks_pt().back()>10. && baby.tks_miniso().back()<0.2 && baby.tks_mt2().back()<80 && baby.tks_dz().back()<0.07 && baby.tks_d0().back()<0.05) nveto++;
 
-     }
+    }
  
-     baby.nveto()=nveto;
+    baby.nveto()=nveto;
 
-   }  
- } // if goodPV
+  }  
+} // if goodPV
 
  
 void bmaker_full::writeDiLep(vCands &sig_mus, vCands &sig_els, vCands &veto_mus, vCands &veto_els){
@@ -877,8 +898,8 @@ void bmaker_full::writeDiLep(vCands &sig_mus, vCands &sig_els, vCands &veto_mus,
 }
 
 void bmaker_full::setDiLepMass(vCands leptons, baby_float ll_m, baby_float ll_pt1, baby_float ll_pt2, 
-                                baby_float ll_pt, baby_float ll_eta, baby_float ll_phi, baby_vfloat l_pt, baby_vbool l_inz,
-                                baby_float ll_w){
+                               baby_float ll_pt, baby_float ll_eta, baby_float ll_phi, baby_vfloat l_pt, baby_vbool l_inz,
+                               baby_float ll_w){
   for(size_t lep1(0); lep1 < leptons.size(); lep1++){
     for(size_t lep2(lep1+1); lep2 < leptons.size(); lep2++){
       if(leptons[lep1]->charge()*leptons[lep2]->charge()<0){
@@ -903,8 +924,8 @@ void bmaker_full::setDiLepMass(vCands leptons, baby_float ll_m, baby_float ll_pt
 }
 
 void bmaker_full::setElMuMass(vCands leptons1, vCands leptons2, baby_float ll_m, baby_float ll_pt1, baby_float ll_pt2, 
-                               baby_float ll_pt, baby_float ll_eta, baby_float ll_phi,
-                               baby_float ll_w){
+                              baby_float ll_pt, baby_float ll_eta, baby_float ll_phi,
+                              baby_float ll_w){
   for(size_t lep1(0); lep1 < leptons1.size(); lep1++){
     for(size_t lep2(0); lep2 < leptons2.size(); lep2++){
       if(leptons1[lep1]->charge()*leptons2[lep2]->charge()<0){
@@ -926,9 +947,9 @@ void bmaker_full::setElMuMass(vCands leptons1, vCands leptons2, baby_float ll_m,
 
 
 vCands bmaker_full::writePhotons(edm::Handle<pat::PhotonCollection> allphotons, 
-                                  edm::Handle<std::vector<pat::Electron> > &electrons,
-                                  edm::Handle<reco::ConversionCollection> &conversions,
-                                  edm::Handle<reco::BeamSpot> &beamspot, double rho){
+                                 edm::Handle<std::vector<pat::Electron> > &electrons,
+                                 edm::Handle<reco::ConversionCollection> &conversions,
+                                 edm::Handle<reco::BeamSpot> &beamspot, double rho){
   vCands photons;
   baby.nph() = 0;
 
@@ -952,8 +973,8 @@ vCands bmaker_full::writePhotons(edm::Handle<pat::PhotonCollection> allphotons,
 } // writePhotons
 
 bool bmaker_full::writeTriggers(const edm::TriggerNames &names, 
-                                 edm::Handle<edm::TriggerResults> triggerBits, 
-                                 edm::Handle<pat::PackedTriggerPrescales> triggerPrescales){
+                                edm::Handle<edm::TriggerResults> triggerBits, 
+                                edm::Handle<pat::PackedTriggerPrescales> triggerPrescales){
   bool keep(false);
   baby.trig().resize(trig_name.size(), false);
   baby.trig_prescale().resize(trig_name.size(), -1.);
@@ -971,8 +992,8 @@ bool bmaker_full::writeTriggers(const edm::TriggerNames &names,
 }
 
 void bmaker_full::writeHLTObjects(const edm::TriggerNames &names, 
-                                   edm::Handle<pat::TriggerObjectStandAloneCollection> triggerObjects, 
-                                   vCands &all_mus, vCands &all_els, vCands &photons){
+                                  edm::Handle<pat::TriggerObjectStandAloneCollection> triggerObjects, 
+                                  vCands &all_mus, vCands &all_els, vCands &photons){
   baby.nmus_vvvl() = 0; baby.nmus_isomu18() = 0; 
   baby.nels_vvvl() = 0; baby.nels_ele23() = 0; 
   const float relptThreshold(1), drThreshold(0.3);      
@@ -1079,8 +1100,8 @@ void bmaker_full::writeHLTObjects(const edm::TriggerNames &names,
 
 // From https://twiki.cern.ch/twiki/bin/viewauth/CMS/MissingETOptionalFiltersRun2
 void bmaker_full::writeFilters(const edm::TriggerNames &fnames,
-                                  edm::Handle<edm::TriggerResults> filterBits,
-                                  edm::Handle<reco::VertexCollection> vtx){
+                               edm::Handle<edm::TriggerResults> filterBits,
+                               edm::Handle<reco::VertexCollection> vtx){
   baby.pass_goodv() = true; baby.pass_cschalo() = true; baby.pass_eebadsc() = true;
   for (size_t i(0); i < filterBits->size(); ++i) {
     string name = fnames.triggerName(i);
@@ -1110,7 +1131,7 @@ void bmaker_full::writeFilters(const edm::TriggerNames &fnames,
 }
 
 void bmaker_full::writeVertices(edm::Handle<reco::VertexCollection> vtx,
-                                 edm::Handle<std::vector< PileupSummaryInfo > >  pu_info){  
+                                edm::Handle<std::vector< PileupSummaryInfo > >  pu_info){  
   baby.npv() = vtx->size();
   if(pu_info.isValid()){
     for(size_t bc(0); bc<pu_info->size(); ++bc){
@@ -1136,8 +1157,8 @@ void bmaker_full::writeGenInfo(edm::Handle<LHEEventProduct> lhe_info){
 
     if(status==1 && (pdgid<6 || pdgid==21) && mom1id!=6 && mom2id!=6 && mom1id!=24 && mom2id!=24 
        && mom1id!=23 && mom2id!=23 && mom1id!=25 && mom2id!=25) {
-       baby.nisr_me()++;
-       baby.ht_isr_me() += pt;
+      baby.nisr_me()++;
+      baby.ht_isr_me() += pt;
     }
 
   } // Loop over generator particles
@@ -1153,7 +1174,7 @@ void bmaker_full::writeGenInfo(edm::Handle<LHEEventProduct> lhe_info){
     for(comments_const_iterator cit=c_begin; cit!=c_end; ++cit) {
       size_t found = (*cit).find("model");
       if(found != std::string::npos)   {
-	//    std::cout <<"BABYMAKER: "<< *cit <<"end"<< std::endl;  
+        //    std::cout <<"BABYMAKER: "<< *cit <<"end"<< std::endl;  
         model_params = *cit;
       }
     }
@@ -1162,7 +1183,7 @@ void bmaker_full::writeGenInfo(edm::Handle<LHEEventProduct> lhe_info){
 } // writeGenInfo
 
 void bmaker_full::writeMC(edm::Handle<reco::GenParticleCollection> genParticles, 
-                           vCands &all_mus, vCands &all_els, vCands &photons){
+                          vCands &all_mus, vCands &all_els, vCands &photons){
   LVector isr_p4;
   float metw_tru_x(0.), metw_tru_y(0.);
   float lep_tru_pt(0.), lep_tru_phi(0.);
@@ -1210,7 +1231,7 @@ void bmaker_full::writeMC(edm::Handle<reco::GenParticleCollection> genParticles,
     //////// Saving interesting true particles
     if((isLast && (isTop || isNewPhysics || isZ || isH))
        || (isFirst && (fromHiggs || isW || bTopOrBSM || eFromTopZ || muFromTopZ 
-		       || tauFromTopZ || nuFromZ || fromWOrWTau || fromTop))
+                       || tauFromTopZ || nuFromZ || fromWOrWTau || fromTop))
        || mg_me){
       baby.mc_status().push_back(mc.status());
       baby.mc_id().push_back(mc.pdgId());
@@ -1226,21 +1247,21 @@ void bmaker_full::writeMC(edm::Handle<reco::GenParticleCollection> genParticles,
 
       //////// Finding p4 of ME ISR system
       if((isTop && outname.Contains("TTJets"))
-	 || (isGluino && (outname.Contains("SMS") || outname.Contains("RPV")))
-	 || (isZ && outname.Contains("DY"))) isr_p4 -= mc.p4();
+         || (isGluino && (outname.Contains("SMS") || outname.Contains("RPV")))
+         || (isZ && outname.Contains("DY"))) isr_p4 -= mc.p4();
 
       if(isTop && (outname.Contains("TTJets") || outname.Contains("TT_"))){
-	top_pt.push_back(mc.pt());
+        top_pt.push_back(mc.pt());
       }
 
       //////// Counting true leptons
       if(muFromTopZ) baby.ntrumus()++;
       if(eFromTopZ)  baby.ntruels()++;
       if(tauFromTopZ){
-	const reco::GenParticle *tauDaughter(0);
-	if(mcTool->decaysTo(mc, 11, tauDaughter) || mcTool->decaysTo(mc, 13, tauDaughter)){
-	  baby.ntrutausl()++;
-	} else baby.ntrutaush()++;
+        const reco::GenParticle *tauDaughter(0);
+        if(mcTool->decaysTo(mc, 11, tauDaughter) || mcTool->decaysTo(mc, 13, tauDaughter)){
+          baby.ntrutausl()++;
+        } else baby.ntrutaush()++;
       }
     }
 
@@ -1253,33 +1274,33 @@ void bmaker_full::writeMC(edm::Handle<reco::GenParticleCollection> genParticles,
       int minind(-1);
       
       for(size_t ind(0); ind < baby.leps_pt().size(); ind++) {
-	double dr = dR(baby.leps_phi()[ind],mc.phi(),baby.leps_eta()[ind],mc.eta());
-	//	cout<<"mc lep eta phi = "<<mc.eta()<<" "<<mc.phi()<<", reco lep eta phi "<<baby.leps_eta()[ind]<<" "<<baby.leps_phi()[ind]<<", dr = "<<dr<<endl;
-	double drelpt(fabs((baby.leps_pt()[ind] - mc.pt())/mc.pt()));
-	if(dr > drThres || drelpt > relptThres) continue;
-	if(dr < mindr){
-	  mindr = dr;
-	  minind = ind;
-	}
+        double dr = dR(baby.leps_phi()[ind],mc.phi(),baby.leps_eta()[ind],mc.eta());
+        //      cout<<"mc lep eta phi = "<<mc.eta()<<" "<<mc.phi()<<", reco lep eta phi "<<baby.leps_eta()[ind]<<" "<<baby.leps_phi()[ind]<<", dr = "<<dr<<endl;
+        double drelpt(fabs((baby.leps_pt()[ind] - mc.pt())/mc.pt()));
+        if(dr > drThres || drelpt > relptThres) continue;
+        if(dr < mindr){
+          mindr = dr;
+          minind = ind;
+        }
       }
       
     
       if(minind<0){ //Lepton is lost
-	//Try to match to veto track collection
-	double min_dr(999.);
-	int minindex(-1);
-	for(size_t ind(0); ind < baby.tks_pt().size(); ind++) {
-	  double dr = dR(baby.tks_phi()[ind],mc.phi(),baby.tks_eta()[ind],mc.eta());
-	  double drelpt(fabs((baby.tks_pt()[ind] - mc.pt())/mc.pt()));
-	  if(dr > drThreshold || drelpt > relptThres) continue; //use loose pt comparison in case lost lepton is very poorly measured
-	  if(dr < min_dr){
-	    min_dr = dr;
-	    minindex = ind;
-	  }
-	} // Loop over tks
-	if(minindex >= 0) {
-	  baby.tks_tm()[minindex] = true;
-	}
+        //Try to match to veto track collection
+        double min_dr(999.);
+        int minindex(-1);
+        for(size_t ind(0); ind < baby.tks_pt().size(); ind++) {
+          double dr = dR(baby.tks_phi()[ind],mc.phi(),baby.tks_eta()[ind],mc.eta());
+          double drelpt(fabs((baby.tks_pt()[ind] - mc.pt())/mc.pt()));
+          if(dr > drThreshold || drelpt > relptThres) continue; //use loose pt comparison in case lost lepton is very poorly measured
+          if(dr < min_dr){
+            min_dr = dr;
+            minindex = ind;
+          }
+        } // Loop over tks
+        if(minindex >= 0) {
+          baby.tks_tm()[minindex] = true;
+        }
 
 
       }
@@ -1290,66 +1311,66 @@ void bmaker_full::writeMC(edm::Handle<reco::GenParticleCollection> genParticles,
       double mindr(999.);
       int minind(-1);
       for(size_t ind(0); ind < all_els.size(); ind++) {
-	double dr(deltaR(mc, *(all_els[ind])));
-	double drelpt(fabs((all_els[ind]->pt() - mc.pt())/mc.pt()));
-	if(dr > drThreshold || drelpt > relptThreshold) continue;
-	if(dr < mindr){
-	  mindr = dr;
-	  minind = ind;
-	}
+        double dr(deltaR(mc, *(all_els[ind])));
+        double drelpt(fabs((all_els[ind]->pt() - mc.pt())/mc.pt()));
+        if(dr > drThreshold || drelpt > relptThreshold) continue;
+        if(dr < mindr){
+          mindr = dr;
+          minind = ind;
+        }
       } // Loop over all_els
       if(minind >= 0) {
-	baby.els_tm()[minind] = true;
-	if(baby.els_sig()[minind]) baby.nleps_tm()++;
+        baby.els_tm()[minind] = true;
+        if(baby.els_sig()[minind]) baby.nleps_tm()++;
       }
       if(lep_tru_pt < mc.pt()){
-	lep_tru_pt = mc.pt();
-	lep_tru_phi = mc.phi();
+        lep_tru_pt = mc.pt();
+        lep_tru_phi = mc.phi();
       } // Lepton pt to find mt_tru
     } // If it is an electron
     if(id==13 && fromWOrWTau){
       double mindr(999.);
       int minind(-1);
       for(size_t ind(0); ind < all_mus.size(); ind++) {
-	double dr(deltaR(mc, *(all_mus[ind])));
-	double drelpt(fabs((all_mus[ind]->pt() - mc.pt())/mc.pt()));
-	if(dr > drThreshold || drelpt > relptThreshold) continue;
-	if(dr < mindr){
-	  mindr = dr;
-	  minind = ind;
-	}
+        double dr(deltaR(mc, *(all_mus[ind])));
+        double drelpt(fabs((all_mus[ind]->pt() - mc.pt())/mc.pt()));
+        if(dr > drThreshold || drelpt > relptThreshold) continue;
+        if(dr < mindr){
+          mindr = dr;
+          minind = ind;
+        }
       } // Loop over all_mus
       if(minind >= 0) {
-	baby.mus_tm()[minind] = true;
-	if(baby.mus_sig()[minind]) baby.nleps_tm()++;
+        baby.mus_tm()[minind] = true;
+        if(baby.mus_sig()[minind]) baby.nleps_tm()++;
       }
       if(lep_tru_pt < mc.pt()){
-	lep_tru_pt = mc.pt();
-	lep_tru_phi = mc.phi();
+        lep_tru_pt = mc.pt();
+        lep_tru_phi = mc.phi();
       } // Lepton pt to find mt_tru
     } // If it is a muon
     if(id==22){
       double mindr(999.);
       int minind(-1);
       for(size_t ind(0); ind < photons.size(); ind++) {
-	double dr(deltaR(mc, *(photons[ind])));
-	double drelpt(fabs((photons[ind]->pt() - mc.pt())/mc.pt()));
-	if(dr > drThreshold || drelpt > relptThreshold) continue;
-	if(dr < mindr){
-	  mindr = dr;
-	  minind = ind;
-	}
+        double dr(deltaR(mc, *(photons[ind])));
+        double drelpt(fabs((photons[ind]->pt() - mc.pt())/mc.pt()));
+        if(dr > drThreshold || drelpt > relptThreshold) continue;
+        if(dr < mindr){
+          mindr = dr;
+          minind = ind;
+        }
       } // Loop over photons
       if(minind >= 0) baby.ph_tm()[minind] = true;
     } // If it is a photon
 
     //////// Finding true MET
     if((id==12 || id==14 || id==16 || id==18 || id==1000012 || id==1000014 || id==1000016
-	|| id==1000022 || id==1000023 || id==1000025 || id==1000035 || id==1000039) &&
+        || id==1000022 || id==1000023 || id==1000025 || id==1000035 || id==1000039) &&
        id != momid){ // neutrinos decay to themselves
       if(fromWOrWTau) {
-	metw_tru_x += mc.px();
-	metw_tru_y += mc.py();
+        metw_tru_x += mc.px();
+        metw_tru_y += mc.py();
       }
     } // If undetected neutral particle
 
@@ -1441,7 +1462,7 @@ double bmaker_full::calculateRebalancedMET(unsigned int jetIdx, double mu, doubl
 }
 
 void bmaker_full::writeWeights(const vCands &sig_leps, edm::Handle<GenEventInfoProduct> &gen_event_info, 
-                                edm::Handle<LHEEventProduct> &lhe_info){
+                               edm::Handle<LHEEventProduct> &lhe_info){
   if (debug) cout<<"INFO: Filling weights..."<<endl;
 
   // Initializing weights
@@ -1510,12 +1531,12 @@ void bmaker_full::writeWeights(const vCands &sig_leps, edm::Handle<GenEventInfoP
 }
 
 /*
- _____                 _                   _                 
-/  __ \               | |                 | |                
-| /  \/ ___  _ __  ___| |_ _ __ _   _  ___| |_ ___  _ __ ___ 
-| |    / _ \| '_ \/ __| __| '__| | | |/ __| __/ _ \| '__/ __|
-| \__/\ (_) | | | \__ \ |_| |  | |_| | (__| || (_) | |  \__ \
- \____/\___/|_| |_|___/\__|_|   \__,_|\___|\__\___/|_|  |___/
+  _____                 _                   _                 
+  /  __ \               | |                 | |                
+  | /  \/ ___  _ __  ___| |_ _ __ _   _  ___| |_ ___  _ __ ___ 
+  | |    / _ \| '_ \/ __| __| '__| | | |/ __| __/ _ \| '__/ __|
+  | \__/\ (_) | | | \__ \ |_| |  | |_| | (__| || (_) | |  \__ \
+  \____/\___/|_| |_|___/\__|_|   \__,_|\___|\__\___/|_|  |___/
 */
 
 bmaker_full::bmaker_full(const edm::ParameterSet& iConfig):
@@ -1731,34 +1752,34 @@ void bmaker_full::endJob() {
 
 // ------------ method called when starting to processes a run  ------------
 /*
-void 
-bmaker_full::beginRun(edm::Run const&, edm::EventSetup const&)
-{
-}
+  void 
+  bmaker_full::beginRun(edm::Run const&, edm::EventSetup const&)
+  {
+  }
 */
 
 // ------------ method called when ending the processing of a run  ------------
 /*
-void 
-bmaker_full::endRun(edm::Run const&, edm::EventSetup const&)
-{
-}
+  void 
+  bmaker_full::endRun(edm::Run const&, edm::EventSetup const&)
+  {
+  }
 */
 
 // ------------ method called when starting to processes a luminosity block  ------------
 /*
-void 
-bmaker_full::beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
-{
-}
+  void 
+  bmaker_full::beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
+  {
+  }
 */
 
 // ------------ method called when ending the processing of a luminosity block  ------------
 /*
-void 
-bmaker_full::endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
-{
-}
+  void 
+  bmaker_full::endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
+  {
+  }
 */
 
 // ------------ method fills 'descriptions' with the allowed parameters for the module  ------------

@@ -6,7 +6,7 @@ nevents = NEVENTS
 
 # CRAB3 task names can no longer be greater than 100 characters; need to shorten task name
 taskname = dataset[1:].replace('/','__').replace('RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2','MiniAODv2').replace('TuneCUETP8M1_13TeV-madgraphMLM-pythia8','13TeV-MG-PY8')
-taskname.replace('RunIISpring15MiniAODv2-Asympt25ns_74X_mcRun2_asymptotic_v2','MiniAODv2')
+taskname = taskname.replace('RunIISpring15MiniAODv2-Asympt25ns_74X_mcRun2_asymptotic_v2','MiniAODv2')
 taskname = taskname.replace(':','___')
 if(len(taskname)>100): taskname = taskname[0:99]
 
@@ -23,7 +23,7 @@ config.General.transferLogs = True
 
 config.section_("JobType")
 config.JobType.pluginName = 'Analysis'
-config.JobType.psetName = 'babymaker/bmaker/python/bmaker_full_cfg.py'
+config.JobType.psetName = 'bmaker/python/bmaker_full_cfg.py'
 config.JobType.disableAutomaticOutputCollection = True
 config.JobType.outputFiles = ['fullbaby_' + datasetID + '.root']
 config.JobType.pyCfgParams = ['nEventsSample=' + str(nevents), 'outputFile=fullbaby_' + datasetID + '.root']
@@ -33,7 +33,7 @@ config.Data.inputDataset = dataset
 config.Data.inputDBS = 'global'
 if "Run2015" in taskname:
     config.Data.splitting = 'LumiBased'
-    config.Data.unitsPerJob = 10
+    config.Data.unitsPerJob = 100
     config.Data.lumiMask = 'https://cms-service-dqm.web.cern.ch/cms-service-dqm/CAF/certification/Collisions15/13TeV/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON_v2.txt'
 
 else:
@@ -44,6 +44,7 @@ config.Data.publication = False # used to be True for cfA production
 # config.Data.publishDBS = 'phys03'
 
 config.section_("Site")
+#config.Site.storageSite = 'T2_US_UCSD'
 config.Site.storageSite = 'T3_US_UCSB'
 #config.Site.whitelist = ['T2_US_Caltech','T2_US_Florida', 'T2_US_MIT', 'T2_US_Nebraska', 'T2_US_Purdue', 'T2_US_UCSD', 'T2_US_Vanderbilt', 'T2_US_Wisconsin', 'T1_US_FNAL','T2_US_MIT', 'T3_US_UCSB']
 config.Site.blacklist = ['T1_RU_JINR']

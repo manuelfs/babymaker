@@ -83,6 +83,10 @@ namespace xsec{
     if(file.Contains("WJetsToLNu_HT-200To400"))  xsec = 360.*1.21;
     if(file.Contains("WJetsToLNu_HT-400To600"))  xsec = 48.98*1.21;
     if(file.Contains("WJetsToLNu_HT-600ToInf"))  xsec = 18.77*1.21;
+    if(file.Contains("WJetsToLNu_HT-600To800"))  xsec = 12.05*1.21;
+    if(file.Contains("WJetsToLNu_HT-800To1200"))  xsec = 5.501*1.21;
+    if(file.Contains("WJetsToLNu_HT-1200To2500"))  xsec = 1.329*1.21;
+    if(file.Contains("WJetsToLNu_HT-2500ToInf"))  xsec = 0.03216*1.21;
     if(file.Contains("WToENu"))   xsec = 16000.0;
     if(file.Contains("WToMuNu"))  xsec = 16100.0;
 
@@ -156,6 +160,8 @@ namespace xsec{
     if(file.Contains("WWToLNuQQ_13TeV-powheg"))   xsec = 49.997; //NNLO
     if(file.Contains("ttHJetTobb_M125_13TeV_amcatnloFXFX"))   xsec = 0.2934;
 
+    if(file.Contains("WZTo1L3Nu_13TeV_amcatnloFXFX"))   xsec = 3.05;
+    if(file.Contains("WZTo1L1Nu2Q_13TeV_amcatnloFXFX"))   xsec = 10.96;
     if(file.Contains("WZTo2L2Q_13TeV_amcatnloFXFX"))   xsec = 5.595;
     if(file.Contains("WZTo3LNu_TuneCUETP8M1_13TeV-powheg-"))   xsec = 4.42965;
     if(file.Contains("VVTo2L2Nu_13TeV_amcatnloFXFX"))   xsec = 11.95;
@@ -168,6 +174,8 @@ namespace xsec{
     if(file.Contains("ZH_HToBB_ZToLL_M-125_13TeV"))      xsec = 0.883*0.5824*0.033658;
     if(file.Contains("ZH_HToBB_ZToNuNu_M-125_13TeV"))    xsec = 0.883*0.5824*0.2;
     if(file.Contains("WH_HToBB_WToLNu_M-125_13TeV"))     xsec = 1.373*0.5824*(0.1071+0.1063+0.1138);
+    if(file.Contains("ZH_HToBB_ZToNuNu_M125_13TeV"))    xsec = 0.883*0.5824*0.2;
+    if(file.Contains("WH_HToBB_WToLNu_M125_13TeV"))     xsec = 1.373*0.5824*(0.1071+0.1063+0.1138);
 
     if(xsec<=0) std::cout<<"BABYMAKER: Cross section not found for "<<file<<std::endl;
 

@@ -265,7 +265,7 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   if (!isData) {
     iEvent.getByLabel("externalLHEProducer", lhe_info);
     if(!lhe_info.isValid()) iEvent.getByLabel("source", lhe_info);
-    writeGenInfo(lhe_info);
+    if(lhe_info.isValid()) writeGenInfo(lhe_info);
     if((outname.Contains("TTJets") && outname.Contains("Lept") && baby.ht_isr_me()>600)
        || (outname.Contains("DYJetsToLL_M-50_TuneCUETP8M")  && baby.ht_isr_me()>100))
       baby.stitch() = false;
@@ -1517,7 +1517,7 @@ void bmaker_full::writeWeights(const vCands &sig_leps, edm::Handle<GenEventInfoP
     * baby.w_pu_rpv() * baby.eff_jetid();
 
   /////// Systematics that do not change central value /////////
-  weightTool->getTheoryWeights(lhe_info);
+  if(lhe_info.isValid()) weightTool->getTheoryWeights(lhe_info);
   // Renormalization and Factorization scales
   baby.sys_mur().push_back(weightTool->theoryWeight(weight_tools::muRup));
   baby.sys_mur().push_back(weightTool->theoryWeight(weight_tools::muRdown));

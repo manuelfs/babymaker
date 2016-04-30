@@ -6,6 +6,7 @@ nevents = NEVENTS
 
 # CRAB3 task names can no longer be greater than 100 characters; need to shorten task name
 taskname = dataset[1:].replace('/','__').replace('RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2','MiniAODv2').replace('TuneCUETP8M1_13TeV-madgraphMLM-pythia8','13TeV-MG-PY8')
+taskname.replace('RunIISpring15MiniAODv2-Asympt25ns_74X_mcRun2_asymptotic_v2','MiniAODv2')
 taskname = taskname.replace(':','___')
 if(len(taskname)>100): taskname = taskname[0:99]
 

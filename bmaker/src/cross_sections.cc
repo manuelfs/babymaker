@@ -159,14 +159,15 @@ namespace xsec{
     if(file.Contains("WZTo2L2Q_13TeV_amcatnloFXFX"))   xsec = 5.595;
     if(file.Contains("WZTo3LNu_TuneCUETP8M1_13TeV-powheg-"))   xsec = 4.42965;
     if(file.Contains("VVTo2L2Nu_13TeV_amcatnloFXFX"))   xsec = 11.95;
+    if(file.Contains("ZZ_TuneCUETP8M1"))   xsec = 16.523;
 
     // Calculated at 13 TeV in
     // https://twiki.cern.ch/twiki/bin/view/LHCPhysics/CERNYellowReportPageAt1314TeV
     // Higgs branching ratios from
     // https://twiki.cern.ch/twiki/bin/view/LHCPhysics/CERNYellowReportPageBR
-    if(file.Contains("ZH_HToBB_ZToLL_M-125_13TeV_powheg-herwigpp"))    xsec = 0.569*0.033658*0.8696;
-    if(file.Contains("ZH_HToBB_ZToNuNu_M-125_13TeV_powheg-herwigpp"))    xsec = 0.569*0.2*0.8696;
-    if(file.Contains("WH_HToBB_WToLNu_M-125_13TeV_powheg-herwigpp"))    xsec = 0.569*0.1086*1.380;
+    if(file.Contains("ZH_HToBB_ZToLL_M-125_13TeV"))      xsec = 0.883*0.5824*0.033658;
+    if(file.Contains("ZH_HToBB_ZToNuNu_M-125_13TeV"))    xsec = 0.883*0.5824*0.2;
+    if(file.Contains("WH_HToBB_WToLNu_M-125_13TeV"))     xsec = 1.373*0.5824*(0.1071+0.1063+0.1138);
 
     if(xsec<=0) std::cout<<"BABYMAKER: Cross section not found for "<<file<<std::endl;
 

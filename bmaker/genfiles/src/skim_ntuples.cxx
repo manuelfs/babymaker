@@ -44,6 +44,7 @@ int main(int argc, char *argv[]){
     ijob  = atoi(argv[5]);
   }
   TString tag = cuts; // Using tag to avoid file names too long for TFile
+  if(cuts=="standard") cuts="nleps>=1&&ht>500&&met>200";
   if(cuts=="abcd") cuts="nleps==1&&ht>500&&met>200&&njets>=6&&nbm>=1&&mj>250";
   if(cuts=="baseline") cuts="nleps==1&&ht>500&&met>200&&njets>=6&&nbm>=1";
   if(cuts=="sys_abcd") 

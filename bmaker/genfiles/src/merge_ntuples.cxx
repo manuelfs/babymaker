@@ -7,6 +7,7 @@
 #include "TChain.h"
 #include "TFile.h"
 #include "TString.h"
+#include "TSystem.h"
 
 using namespace std;
 using std::cout;
@@ -16,30 +17,32 @@ int main(int argc, char *argv[]){
   time_t startTime, endtime;
   time(&startTime);
 
-  if(argc < 3) {
-    cout<<endl<<"Required at least 2 arguments: "
-	<<"./plot/merge_ntuples.exe ntuples name"<<endl<<endl;;
+  if(argc < 4) {
+    cout<<endl<<"Requires at least 3 arguments: ./plot/merge_ntuples.exe infolder outfolder ntuples_tag <out_tag>"<<endl<<endl;;
     return 1;
   }
 
-  TString ntuples(argv[1]), rootname(argv[2]);
-  if(!rootname.Contains(".root")) rootname += ".root";
+  TString folder(argv[1]), outfolder(argv[2]), ntuples_tag(argv[3]), out_tag("");
+  gSystem->mkdir(outfolder, kTRUE);
+  if(argc>4) out_tag = argv[4];
+  TString ntuples = folder+"/*"+ntuples_tag+"*";
 
   // Merging tree TTrees
   TChain chain("tree");
-  chain.Add(ntuples);
-  chain.Merge(rootname);
+  int nfiles = chain.Add(ntuples);
+  TString outname = outfolder+"/mergedbaby_"+ntuples_tag+"_"+out_tag+"_nfiles_"+to_string(nfiles)+".root";
+  chain.Merge(outname);
 
   // Merging treeglobal TTrees
   TChain chaing("treeglobal");
   chaing.Add(ntuples);
   TTree *tglobal = chaing.CopyTree("1");
   tglobal->SetDirectory(0);
-  TFile rootfile(rootname, "UPDATE");
+  TFile rootfile(outname, "UPDATE");
   rootfile.cd();
   tglobal->Write();
   rootfile.Close();
 
   time(&endtime); 
-  cout<<"Took "<<difftime(endtime, startTime)<<" seconds to merge "<<ntuples<<" into "<<rootname<<endl<<endl;  
+  cout<<"Took "<<difftime(endtime, startTime)<<" seconds to merge "<<ntuples<<" into "<<outname<<endl<<endl;  
  }

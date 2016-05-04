@@ -11,8 +11,6 @@ import time
 # Setting folders
 folder    = '/net/cms27/cms27r0/babymaker/2016_04_29/mc/'
 skims = ['abcd', 'baseline', 'sys_abcd', '1lht500met200']
-skims = ['abcd']
-
 
 
 os.system("JobSetup.csh")
@@ -33,7 +31,7 @@ for skim in skims:
     if ("TTJets_Tune" not in tag) and ("DYJetsToLL_M-50_Tune" not in tag): tag = tag.split("Tune")[0]
     tag = tag.split("13TeV")[0]
     tag = tag.split("baby_")[1]
-    if "DYJetsToLL_M-50_Tune" in tag: infiles.add("_"+tag)
+    infiles.add("_"+tag)
 
   # Sending jobs for each tag
   runfolder = outfolder+"run/" 

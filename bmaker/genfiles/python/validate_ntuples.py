@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 ###### Script that compares the yields in old and new ntuples
-from ROOT import TChain
+from ROOT import TChain, TH1D
 import os, sys, subprocess
 import pprint
 import glob
@@ -21,19 +21,34 @@ class bcolors:
     UNDERLINE = '\033[4m'
 
 # Setting folders
-oldfolder    = '/net/cms2/cms2r0/babymaker/babies/2015_11_28/mc/skim_abcd'
-newfolder    = '/net/cms27/cms27r0/babymaker/2016_04_29/mc/merged_abcd'
-#oldfolder    = '/net/cms2/cms2r0/babymaker/babies/2016_01_11/mc/T1tttt/skim_abcd/'
-#newfolder    = '/net/cms26/cms26r0/babymaker/2016_04_29/normalized/T1tttt/skim_abcd/'
+oldfolder    = '/net/cms2/cms2r0/babymaker/babies/2016_01_11/mc/T1tttt/skim_abcd/'
+newfolder    = '/net/cms26/cms26r0/babymaker/2016_04_29/normalized/T1tttt/skim_abcd/'
+
+oldfolder    = '/net/cms2/cms2r0/babymaker/babies/2016_01_11/mc/T1tttt/'
+newfolder    = '/net/cms26/cms26r0/babymaker/2016_04_29/normalized/T1tttt/'
+
+newfolder    = '/net/cms27/cms27r0/babymaker/2016_04_29/mc/skim_met100nb2nj4nl0'
+oldfolder    = '/net/cms27/cms27r0/babymaker/2016_04_29/mc/merged_met100nb2nj4nl0'
+
+oldfolder    = '/net/cms2/cms2r0/babymaker/babies/2015_11_28/mc/skim_1lht500met200'
+newfolder    = '/net/cms27/cms27r0/babymaker/2016_04_29/mc/merged_1lht500met200'
 
 ## Finding tags for each dataset
 infiles = set()
-for file in glob.glob(oldfolder+'/*.root'):
+for file in glob.glob(newfolder+'/*.root'):
   tag = file.split("RunII")[0]
   if ("TTJets_Tune" not in tag) and ("DYJetsToLL_M-50_Tune" not in tag): tag = tag.split("Tune")[0]
   tag = tag.split("13TeV")[0]
+  tag = tag.split("pythia")[0]
   tag = tag.split("baby_")[1]
-  infiles.add("_"+tag)
+  tag = tag.split("__")[0]
+  if tag[0] != '_': tag = "_"+tag
+  if tag[-1] != '_': tag = tag+"_"
+  infiles.add(tag)
+sortedfiles = list()
+for file in infiles:
+    sortedfiles.append(file)
+sortedfiles = sorted(sortedfiles)
 
 print '\nOLD FOLDER: '+oldfolder
 print 'NEW FOLDER: '+newfolder
@@ -44,7 +59,8 @@ not_in_old = list()
 not_in_new = list()
 rows = list()
 line = 1
-for ifile in infiles:
+histo = TH1D("histo","",10,0,10)
+for ifile in sortedfiles:
   ochain = TChain("tree")
   oldntuples = oldfolder+"/*"+ifile+'*root'
   no = ochain.Add(oldntuples)
@@ -57,33 +73,30 @@ for ifile in infiles:
   if nn == 0:
     not_in_new.append(ifile)
     continue;
-  #print 'Comparing '+oldntuples+' and '+newntuples
 
-  no = ochain.Draw("1","weight","goff")
-  oldtot = 0
-  for ind in range(ochain.GetSelectedRows()) :
-    temp = ochain.GetW()[ind]
-    if not math.isnan(temp) : oldtot += temp
-  nn = nchain.Draw("1","weight","goff")
-  newtot = 0
-  for ind in range(nchain.GetSelectedRows()) :
-    temp = nchain.GetW()[ind]
-    if not math.isnan(temp) : newtot += temp
-
-  if oldtot != 0 : diff = abs(newtot-oldtot)*100/oldtot
+  no = ochain.Draw("1>>histo","weight","goff")
+  oldtot = histo.Integral()
+  nn = nchain.Draw("1>>histo","weight","goff")
+  newtot = histo.Integral()
+    
+  if oldtot != 0 : diff = (newtot-oldtot)*100/oldtot
   elif newtot == 0 : diff = 0
   else :  diff = 999
 
+  pretag = ""
+  posttag = ""
+  ## Appending rows with significant differences for later printing
+  if abs(diff) > 150/math.sqrt(no+1) and abs(diff) > 150/math.sqrt(nn+1): 
+    rows.append([ifile, abs(diff), oldtot, newtot, no, nn])
+    pretag = bcolors.FAIL
+    posttag = bcolors.ENDC
   ## Printing all rows
-  print '{:>40}'.format(ifile)+'{:>14.2f}'.format(diff)+' %'+'{:>17.2f}'.format(oldtot),
-  print '{:>17.2f}'.format(newtot)+'{:>17}'.format(no)+'{:>17}'.format(nn)
+  print pretag+'{:>40}'.format(ifile)+'{:>14.2f}'.format(diff)+' %'+'{:>17.2f}'.format(oldtot),
+  print '{:>17.2f}'.format(newtot)+'{:>17}'.format(no)+'{:>17}'.format(nn)+posttag
   if line == 5 : 
     print
     line = 0
   line += 1
-  ## Appending rows with significant differences for later printing
-  if diff > 150/math.sqrt(no+1) and diff > 150/math.sqrt(nn+1): 
-    rows.append([ifile, diff, oldtot, newtot, no, nn])
 
 ## Sorting rows by difference
 if len(rows) > 0: 

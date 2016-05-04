@@ -8,7 +8,7 @@ using namespace std;
 namespace xsec{
 
   float crossSection(const TString &file){
-    float xsec(0.);
+    float xsec(0.), Htobb(0.5824);
 
     if(file.Contains("Run2015"))   xsec = 1.;
 
@@ -28,7 +28,7 @@ namespace xsec{
     if(file.Contains("T2tt") && file.Contains("650_"))  xsec = 0.107045;
     if(file.Contains("T2tt") && file.Contains("850_"))  xsec = 0.0189612;
 
-    if(file.Contains("TChiHH") && file.Contains("-400"))  xsec = 0.0887325;
+    if(file.Contains("TChiHH") && file.Contains("-400"))  xsec = 0.0887325*Htobb*Htobb;
  
 
     if(file.Contains("SMS-T2tt_2J_mStop-425_mLSP-325"))  xsec = 1.31169;
@@ -171,11 +171,11 @@ namespace xsec{
     // https://twiki.cern.ch/twiki/bin/view/LHCPhysics/CERNYellowReportPageAt1314TeV
     // Higgs branching ratios from
     // https://twiki.cern.ch/twiki/bin/view/LHCPhysics/CERNYellowReportPageBR
-    if(file.Contains("ZH_HToBB_ZToLL_M-125_13TeV"))      xsec = 0.883*0.5824*0.033658;
-    if(file.Contains("ZH_HToBB_ZToNuNu_M-125_13TeV"))    xsec = 0.883*0.5824*0.2;
-    if(file.Contains("WH_HToBB_WToLNu_M-125_13TeV"))     xsec = 1.373*0.5824*(0.1071+0.1063+0.1138);
-    if(file.Contains("ZH_HToBB_ZToNuNu_M125_13TeV"))    xsec = 0.883*0.5824*0.2;
-    if(file.Contains("WH_HToBB_WToLNu_M125_13TeV"))     xsec = 1.373*0.5824*(0.1071+0.1063+0.1138);
+    if(file.Contains("ZH_HToBB_ZToLL_M-125_13TeV"))      xsec = 0.883*Htobb*0.033658;
+    if(file.Contains("ZH_HToBB_ZToNuNu_M-125_13TeV"))    xsec = 0.883*Htobb*0.2;
+    if(file.Contains("WH_HToBB_WToLNu_M-125_13TeV"))     xsec = 1.373*Htobb*(0.1071+0.1063+0.1138);
+    if(file.Contains("ZH_HToBB_ZToNuNu_M125_13TeV"))    xsec = 0.883*Htobb*0.2;
+    if(file.Contains("WH_HToBB_WToLNu_M125_13TeV"))     xsec = 1.373*Htobb*(0.1071+0.1063+0.1138);
 
     if(xsec<=0) std::cout<<"BABYMAKER: Cross section not found for "<<file<<std::endl;
 

@@ -203,7 +203,7 @@ int main(int argc, char *argv[]){
     var_val[16].push_back("*"+to_string((nent-sum_slep[idx])/nent_zlep));
   for(unsigned int idx=0;idx<sum_fs_slep.size();idx++)      
     var_val[17].push_back("*"+to_string((nent-sum_fs_slep[idx])/nent_zlep));
-  var_val[18].push_back("*"+to_string(w_lumi_corr));
+  var_val[18].push_back("*"+roundNumber(w_lumi_corr,12));
 
 
   int totentries(0);

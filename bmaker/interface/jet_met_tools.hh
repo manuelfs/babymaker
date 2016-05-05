@@ -27,7 +27,7 @@
 class jet_met_tools{
 private:
   float getMCTagEfficiency(int pdgId, float pT, float eta, bool loose);
-
+  
 public:
 
   ///////////////// JET CUTS ///////////////////////
@@ -36,11 +36,12 @@ public:
   const float JetMHTEtaCut = 5.0;
   const float JetHLTPtCut  = 40.0;
   const float JetHLTEtaCut = 3.0;
-  const float CSVLoose     = 0.605;
-  const float CSVMedium    = 0.890;
-  const float CSVTight     = 0.970;
+  // Set in constructor depending on CMSSW release used
+  float CSVLoose  = 999;
+  float CSVMedium = 999;
+  float CSVTight  = 999;
 
-  const float sizeJet      = 0.4;
+  const float sizeJet = 0.4;
 
   enum CutLevel{kLoose, kTight, kPBNR};
   enum btagVariation { kBTagCentral, kBTagUp, kBTagDown, kBTagCentralLoose, kBTagUpLoose, kBTagDownLoose};

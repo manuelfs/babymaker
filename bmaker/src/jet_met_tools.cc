@@ -819,8 +819,20 @@ jet_met_tools::jet_met_tools(TString ijecName, bool doSys, bool fastSim):
     jecUncProvider = new JetCorrectionUncertainty(basename+"_Uncertainty_AK4PFchs.txt");
   }
 
-  // only add b-tagging weights if requested
+  // set btag working points
+  TString cmssw(getenv("CMSSW_VERSION"));
+  if(cmssw.Contains("CMSSW_7_4")){
+    CSVLoose  = 0.605;
+    CSVMedium = 0.890;
+    CSVTight  = 0.970;
+  }
+  else if(cmssw.Contains("CMSSW_8_0")){
+    CSVLoose  = 0.460;
+    CSVMedium = 0.800;
+    CSVTight  = 0.935;
+  }
 
+  // only add b-tagging weights if requested
   std::string scaleFactorFile(getenv("CMSSW_BASE"));
   scaleFactorFile+="/src/babymaker/bmaker/data/CSVv2.csv";
   calib   = new BTagCalibration("csvv1", scaleFactorFile);
@@ -846,7 +858,7 @@ jet_met_tools::jet_met_tools(TString ijecName, bool doSys, bool fastSim):
     calibFS = new BTagCalibration("csvv1", scaleFactorFileFastSim);
     for(auto itype : variationTypes) {
       // BC fastsim
-      readersBC_fs.push_back(new BTagCalibrationReader(calibFS, // calibration instance 
+       readersBC_fs.push_back(new BTagCalibrationReader(calibFS, // calibration instance 
                                                        BTagEntry::OP_MEDIUM, // operating point
                                                        "fastsim", // measurement type ("comb" or "mujets")
                                                        itype)); // systematics type ("central", "up", or "down")

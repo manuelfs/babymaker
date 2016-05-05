@@ -1538,7 +1538,7 @@ void bmaker_full::writeWeights(const vCands &sig_leps, edm::Handle<GenEventInfoP
   | \__/\ (_) | | | \__ \ |_| |  | |_| | (__| || (_) | |  \__ \
   \____/\___/|_| |_|___/\__|_|   \__,_|\___|\__\___/|_|  |___/
 */
-
+//Constructor (this line searchable)
 bmaker_full::bmaker_full(const edm::ParameterSet& iConfig):
   outname(TString(iConfig.getParameter<string>("outputFile"))),
   inputfiles(iConfig.getParameter<vector<string> >("inputFiles")),
@@ -1557,6 +1557,34 @@ bmaker_full::bmaker_full(const edm::ParameterSet& iConfig):
   debug(iConfig.getParameter<bool>("debugMode"))
 {
   time(&startTime);
+
+  consumes<edm::TriggerResults>(edm::InputTag("TriggerResults","","HLT"));
+  consumes<pat::PackedTriggerPrescales>(edm::InputTag("patTrigger"));
+  consumes<reco::VertexCollection>(edm::InputTag("offlineSlimmedPrimaryVertices"));
+  consumes<std::vector< PileupSummaryInfo > >(edm::InputTag("addPileupInfo"));
+  consumes<std::vector< PileupSummaryInfo > >(edm::InputTag("slimmedAddPileupInfo"));
+  consumes<pat::PackedCandidateCollection>(edm::InputTag("packedPFCandidates"));
+  consumes<double>(edm::InputTag("fixedGridRhoFastjetCentralNeutral"));
+  consumes<pat::MuonCollection>(edm::InputTag("slimmedMuons"));
+  consumes<pat::ElectronCollection>(edm::InputTag("slimmedElectrons"));
+  consumes<double>(edm::InputTag("fixedGridRhoFastjetAll"));
+  consumes<reco::BeamSpot>(edm::InputTag("offlineBeamSpot"));
+  consumes<pat::PhotonCollection>(edm::InputTag("slimmedPhotons"));
+  consumes<vector<reco::Conversion> >(edm::InputTag("reducedEgamma","reducedConversions"));
+  consumes<pat::JetCollection>(jets_label);
+  consumes<edm::View<reco::GenJet> >(edm::InputTag("slimmedGenJets"));
+  consumes<pat::METCollection>(met_label);
+  consumes<pat::METCollection>(met_nohf_label);
+  consumes<bool>(edm::InputTag("HBHENoiseFilterResultProducer","HBHENoiseFilterResult"));
+  consumes<bool>(edm::InputTag("HBHENoiseFilterResultProducer","HBHEIsoNoiseFilterResult"));
+  consumes<edm::TriggerResults>(edm::InputTag("TriggerResults","","RECO"));
+  consumes<edm::TriggerResults>(edm::InputTag("TriggerResults","","PAT"));
+  consumes<pat::TriggerObjectStandAloneCollection>(edm::InputTag("selectedPatTrigger"));
+  consumes<reco::GenParticleCollection>(edm::InputTag("prunedGenParticles"));
+  consumes<LHEEventProduct>(edm::InputTag("externalLHEProducer"));
+  consumes<LHEEventProduct>(edm::InputTag("source"));
+  consumes<GenEventInfoProduct>(edm::InputTag("generator"));
+
 
   lepTool    = new lepton_tools();
   jetTool    = new jet_met_tools(jec_label, doSystematics, isFastSim);

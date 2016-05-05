@@ -148,6 +148,34 @@ public:
   static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 
 private:
+  // Tokens
+  edm::EDGetTokenT<edm::TriggerResults> tok_trigResults_hlt_;
+  edm::EDGetTokenT<pat::PackedTriggerPrescales> tok_patTrig_;
+  edm::EDGetTokenT<reco::VertexCollection> tok_primVertex_;
+  edm::EDGetTokenT<std::vector< PileupSummaryInfo > > tok_addPileup_;
+  edm::EDGetTokenT<std::vector< PileupSummaryInfo > > tok_slimAddPileup_;
+  edm::EDGetTokenT<pat::PackedCandidateCollection> tok_packPFCands_;
+  edm::EDGetTokenT<double> tok_rhoFastJet_centralNeutral_;
+  edm::EDGetTokenT<pat::MuonCollection> tok_muons_;
+  edm::EDGetTokenT<pat::ElectronCollection> tok_electrons_;
+  edm::EDGetTokenT<double> tok_rhoFastJet_all_;
+  edm::EDGetTokenT<reco::BeamSpot> tok_offBeamSpot_;
+  edm::EDGetTokenT<pat::PhotonCollection> tok_photons_;
+  edm::EDGetTokenT<std::vector<reco::Conversion> > tok_reducedEgamma_conver_;
+  edm::EDGetTokenT<pat::JetCollection> tok_jets_;
+  edm::EDGetTokenT<edm::View<reco::GenJet> > tok_genJets_;
+  edm::EDGetTokenT<pat::METCollection> tok_met_;
+  edm::EDGetTokenT<pat::METCollection> tok_met_noHF_;
+  edm::EDGetTokenT<bool> tok_HBHENoiseFilter_;
+  edm::EDGetTokenT<bool> tok_HBHEIsoNoiseFilter_;
+  edm::EDGetTokenT<edm::TriggerResults> tok_trigResults_reco_;
+  edm::EDGetTokenT<edm::TriggerResults> tok_trigResults_pat_;
+  edm::EDGetTokenT<pat::TriggerObjectStandAloneCollection> tok_selectedPatTrig_;
+  edm::EDGetTokenT<reco::GenParticleCollection> tok_pruneGenPart_;
+  edm::EDGetTokenT<LHEEventProduct> tok_extLHEProducer_;
+  edm::EDGetTokenT<LHEEventProduct> tok_source_;
+  edm::EDGetTokenT<GenEventInfoProduct> tok_generator_;
+
   virtual void beginJob() override;
   virtual void analyze(const edm::Event&, const edm::EventSetup&) override;
   virtual void endJob() override;

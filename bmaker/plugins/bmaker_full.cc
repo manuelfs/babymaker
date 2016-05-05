@@ -53,9 +53,9 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   if (debug) cout<<"INFO: Processing trigger info..."<<endl;
   bool triggerFired;
   edm::Handle<edm::TriggerResults> triggerBits;
-  iEvent.getByLabel(edm::InputTag("TriggerResults","","HLT"),triggerBits);  
+  iEvent.getByToken(tok_trigResults_hlt_,triggerBits);  
   edm::Handle<pat::PackedTriggerPrescales> triggerPrescales;
-  iEvent.getByLabel("patTrigger",triggerPrescales);  
+  iEvent.getByToken(tok_patTrig_,triggerPrescales);  
 
   if(triggerBits.isValid() && triggerPrescales.isValid()){
     const edm::TriggerNames &names = iEvent.triggerNames(*triggerBits);
@@ -72,11 +72,11 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   ////////////////////// Primary vertices /////////////////////
   if (debug) cout<<"INFO: Writing vertices..."<<endl;
   edm::Handle<reco::VertexCollection> vtx;
-  iEvent.getByLabel("offlineSlimmedPrimaryVertices", vtx);
+  iEvent.getByToken(tok_primVertex_, vtx);
   edm::Handle<std::vector< PileupSummaryInfo > >  pu_info;
   if(!isData) {
-    iEvent.getByLabel("addPileupInfo", pu_info);
-    if(!pu_info.isValid()) iEvent.getByLabel("slimmedAddPileupInfo", pu_info);
+    iEvent.getByToken(tok_addPileup_, pu_info);
+    if(!pu_info.isValid()) iEvent.getByToken(tok_slimAddPileup_, pu_info);
   }
   writeVertices(vtx, pu_info);
 
@@ -84,20 +84,20 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   if (debug) cout<<"INFO: Writing leptons..."<<endl;
   // pfcands, to be used in calculating isolation
   edm::Handle<pat::PackedCandidateCollection> pfcands;
-  iEvent.getByLabel("packedPFCandidates", pfcands);
+  iEvent.getByToken(tok_packPFCands_, pfcands);
 
   // Event energy density, to be used in calculating isolation and JECs
   edm::Handle<double> rhoEventCentral_h;
-  iEvent.getByLabel("fixedGridRhoFastjetCentralNeutral", rhoEventCentral_h);
+  iEvent.getByToken(tok_rhoFastJet_centralNeutral_, rhoEventCentral_h);
   double rhoEventCentral = static_cast<double>(*rhoEventCentral_h);
 
   vCands sig_leps, veto_leps, sig_mus, veto_mus, sig_els, veto_els;
   vCands all_mus, all_els;
   edm::Handle<pat::MuonCollection> allmuons;
-  iEvent.getByLabel("slimmedMuons", allmuons);
+  iEvent.getByToken(tok_muons_, allmuons);
   sig_mus = writeMuons(allmuons, pfcands, vtx, veto_mus, all_mus, rhoEventCentral);
   edm::Handle<pat::ElectronCollection> allelectrons;
-  iEvent.getByLabel("slimmedElectrons", allelectrons);
+  iEvent.getByToken(tok_electrons_, allelectrons);
   sig_els = writeElectrons(allelectrons, pfcands, vtx, veto_els, all_els, rhoEventCentral);
   
   writeDiLep(sig_mus, sig_els, veto_mus, veto_els);
@@ -114,30 +114,29 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   if (debug) cout<<"INFO: Writing photons..."<<endl;
   vCands photons;
   edm::Handle<double> rhoEvent_h;
-  iEvent.getByLabel( "fixedGridRhoFastjetAll", rhoEvent_h);
+  iEvent.getByToken(tok_rhoFastJet_all_, rhoEvent_h);
   edm::Handle<reco::BeamSpot> beamspot;
-  iEvent.getByLabel("offlineBeamSpot", beamspot);
+  iEvent.getByToken(tok_offBeamSpot_, beamspot);
   edm::Handle<pat::PhotonCollection> allphotons;
-  iEvent.getByLabel("slimmedPhotons", allphotons);
+  iEvent.getByToken(tok_photons_, allphotons);
   edm::Handle<vector<reco::Conversion> > conversions;
-  edm::InputTag converstionsTag("reducedEgamma","reducedConversions");
-  iEvent.getByLabel(converstionsTag, conversions);
+  iEvent.getByToken(tok_reducedEgamma_conver_, conversions);
   photons = writePhotons(allphotons, allelectrons, conversions, beamspot, *rhoEvent_h);
 
   //////////////////////////// MET/JETs with JECs ///////////////////////////
   if (debug) cout<<"INFO: Applying JECs..."<<endl;
   edm::Handle<pat::JetCollection> alljets;
-  iEvent.getByLabel(jets_label, alljets);
+  iEvent.getByToken(tok_jets_, alljets);
   edm::Handle<edm::View<reco::GenJet> > genjets;
-  iEvent.getByLabel("slimmedGenJets", genjets) ;
+  iEvent.getByToken(tok_genJets_, genjets) ;
   jetTool->getJetCorrections(genjets, alljets, *rhoEvent_h);
 
   /// MET
   if (debug) cout<<"INFO: Writing MET..."<<endl;
   edm::Handle<pat::METCollection> mets;
-  iEvent.getByLabel(met_label, mets);
+  iEvent.getByToken(tok_met_, mets);
   edm::Handle<pat::METCollection> mets_nohf;
-  iEvent.getByLabel(met_nohf_label, mets_nohf);
+  iEvent.getByToken(tok_met_noHF_, mets_nohf);
   writeMET(mets, mets_nohf);
 
   /// isolated tracks need to be after MET calculation and before jets cleaning
@@ -199,25 +198,25 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   // the HBHE noise filter needs to be recomputed in early 2015 data
   if (debug) cout<<"INFO: Writing filters..."<<endl;
   edm::Handle<bool> filter_hbhe;
-  if(iEvent.getByLabel("HBHENoiseFilterResultProducer","HBHENoiseFilterResult",filter_hbhe)) { 
+  if(iEvent.getByToken(tok_HBHENoiseFilter_,filter_hbhe)) { 
     if(filter_hbhe.isValid()) 
       baby.pass_hbhe() = *filter_hbhe;
     else
       baby.pass_hbhe() = true;
 
-    iEvent.getByLabel("HBHENoiseFilterResultProducer","HBHEIsoNoiseFilterResult",filter_hbhe);
+    iEvent.getByToken(tok_HBHEIsoNoiseFilter_,filter_hbhe);
     if(filter_hbhe.isValid()) 
       baby.pass_hbheiso() = *filter_hbhe;
     else
       baby.pass_hbheiso() = true;
   }
   edm::Handle<edm::TriggerResults> filterBits;
-  std::string processLabel = isData ? "RECO":"PAT"; // prompt reco runs in the "RECO" process
-  iEvent.getByLabel(edm::InputTag("TriggerResults","",processLabel),filterBits);  
+  if(isData) iEvent.getByToken(tok_trigResults_reco_,filterBits);  
+  else iEvent.getByToken(tok_trigResults_pat_,filterBits);  
   // re-recoed data will have the process label "PAT" rather than "RECO";
   // if the attempt to find data with "RECO" process fails, try "PAT"
   if(!filterBits.isValid() && isData) 
-    iEvent.getByLabel(edm::InputTag("TriggerResults", "", "PAT"),filterBits);  
+    iEvent.getByToken(tok_trigResults_pat_,filterBits);  
   if(filterBits.isValid()){
     const edm::TriggerNames &fnames = iEvent.triggerNames(*filterBits);
     //this method uses baby.pass_jets(), so call only after writeJets()!!
@@ -227,7 +226,7 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   //////////////// HLT objects //////////////////
   if (debug) cout<<"INFO: Writing HLT objects..."<<endl;
   edm::Handle<pat::TriggerObjectStandAloneCollection> triggerObjects;
-  iEvent.getByLabel("selectedPatTrigger",triggerObjects);  
+  iEvent.getByToken(tok_selectedPatTrig_,triggerObjects);  
   // Requires having called writeMuons and writeElectrons for truth-matching
   if(triggerBits.isValid() && triggerPrescales.isValid()){
     const edm::TriggerNames &names = iEvent.triggerNames(*triggerBits);
@@ -238,7 +237,7 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   if (!isData) {
     if (debug) cout<<"INFO: Writing MC particles..."<<endl;
     edm::Handle<reco::GenParticleCollection> genParticles;
-    iEvent.getByLabel("prunedGenParticles", genParticles);
+    iEvent.getByToken(tok_pruneGenPart_, genParticles);
     writeMC(genParticles, all_mus, all_els, photons);
   }
 
@@ -263,8 +262,8 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   edm::Handle<LHEEventProduct> lhe_info;
   baby.stitch() = true;
   if (!isData) {
-    iEvent.getByLabel("externalLHEProducer", lhe_info);
-    if(!lhe_info.isValid()) iEvent.getByLabel("source", lhe_info);
+    iEvent.getByToken(tok_extLHEProducer_, lhe_info);
+    if(!lhe_info.isValid()) iEvent.getByToken(tok_source_, lhe_info);
     if(lhe_info.isValid()) writeGenInfo(lhe_info);
     if((outname.Contains("TTJets") && outname.Contains("Lept") && baby.ht_isr_me()>600)
        || (outname.Contains("DYJetsToLL_M-50_TuneCUETP8M")  && baby.ht_isr_me()>100))
@@ -275,7 +274,7 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   // w_btag calculated in writeJets
   // w_toppt and sys_isr calculated in writeMC
   edm::Handle<GenEventInfoProduct> gen_event_info;
-  iEvent.getByLabel("generator", gen_event_info);
+  iEvent.getByToken(tok_generator_, gen_event_info);
   writeWeights(sig_leps, gen_event_info, lhe_info);
 
 
@@ -1554,36 +1553,37 @@ bmaker_full::bmaker_full(const edm::ParameterSet& iConfig):
   addBTagWeights(iConfig.getParameter<bool>("addBTagWeights")),
   isFastSim(iConfig.getParameter<bool>("isFastSim")),
   doSystematics(iConfig.getParameter<bool>("doSystematics")),
-  debug(iConfig.getParameter<bool>("debugMode"))
+  debug(iConfig.getParameter<bool>("debugMode")),
+
+  // Initialize tokens
+  tok_trigResults_hlt_(consumes<edm::TriggerResults>(edm::InputTag("TriggerResults","","HLT"))),
+  tok_patTrig_(consumes<pat::PackedTriggerPrescales>(edm::InputTag("patTrigger"))),
+  tok_primVertex_(consumes<reco::VertexCollection>(edm::InputTag("offlineSlimmedPrimaryVertices"))),
+  tok_addPileup_(consumes<std::vector< PileupSummaryInfo > >(edm::InputTag("addPileupInfo"))),
+  tok_slimAddPileup_(consumes<std::vector< PileupSummaryInfo > >(edm::InputTag("slimmedAddPileupInfo"))),
+  tok_packPFCands_(consumes<pat::PackedCandidateCollection>(edm::InputTag("packedPFCandidates"))),
+  tok_rhoFastJet_centralNeutral_(consumes<double>(edm::InputTag("fixedGridRhoFastjetCentralNeutral"))),
+  tok_muons_(consumes<pat::MuonCollection>(edm::InputTag("slimmedMuons"))),
+  tok_electrons_(consumes<pat::ElectronCollection>(edm::InputTag("slimmedElectrons"))),
+  tok_rhoFastJet_all_(consumes<double>(edm::InputTag("fixedGridRhoFastjetAll"))),
+  tok_offBeamSpot_(consumes<reco::BeamSpot>(edm::InputTag("offlineBeamSpot"))),
+  tok_photons_(consumes<pat::PhotonCollection>(edm::InputTag("slimmedPhotons"))),
+  tok_reducedEgamma_conver_(consumes<vector<reco::Conversion> >(edm::InputTag("reducedEgamma","reducedConversions"))),
+  tok_jets_(consumes<pat::JetCollection>(jets_label)),
+  tok_genJets_(consumes<edm::View<reco::GenJet> >(edm::InputTag("slimmedGenJets"))),
+  tok_met_(consumes<pat::METCollection>(met_label)),
+  tok_met_noHF_(consumes<pat::METCollection>(met_nohf_label)),
+  tok_HBHENoiseFilter_(consumes<bool>(edm::InputTag("HBHENoiseFilterResultProducer","HBHENoiseFilterResult"))),
+  tok_HBHEIsoNoiseFilter_(consumes<bool>(edm::InputTag("HBHENoiseFilterResultProducer","HBHEIsoNoiseFilterResult"))),
+  tok_trigResults_reco_(consumes<edm::TriggerResults>(edm::InputTag("TriggerResults","","RECO"))),
+  tok_trigResults_pat_(consumes<edm::TriggerResults>(edm::InputTag("TriggerResults","","PAT"))),
+  tok_selectedPatTrig_(consumes<pat::TriggerObjectStandAloneCollection>(edm::InputTag("selectedPatTrigger"))),
+  tok_pruneGenPart_(consumes<reco::GenParticleCollection>(edm::InputTag("prunedGenParticles"))),
+  tok_extLHEProducer_(consumes<LHEEventProduct>(edm::InputTag("externalLHEProducer"))),
+  tok_source_(consumes<LHEEventProduct>(edm::InputTag("source"))),
+  tok_generator_(consumes<GenEventInfoProduct>(edm::InputTag("generator")))
 {
   time(&startTime);
-
-  consumes<edm::TriggerResults>(edm::InputTag("TriggerResults","","HLT"));
-  consumes<pat::PackedTriggerPrescales>(edm::InputTag("patTrigger"));
-  consumes<reco::VertexCollection>(edm::InputTag("offlineSlimmedPrimaryVertices"));
-  consumes<std::vector< PileupSummaryInfo > >(edm::InputTag("addPileupInfo"));
-  consumes<std::vector< PileupSummaryInfo > >(edm::InputTag("slimmedAddPileupInfo"));
-  consumes<pat::PackedCandidateCollection>(edm::InputTag("packedPFCandidates"));
-  consumes<double>(edm::InputTag("fixedGridRhoFastjetCentralNeutral"));
-  consumes<pat::MuonCollection>(edm::InputTag("slimmedMuons"));
-  consumes<pat::ElectronCollection>(edm::InputTag("slimmedElectrons"));
-  consumes<double>(edm::InputTag("fixedGridRhoFastjetAll"));
-  consumes<reco::BeamSpot>(edm::InputTag("offlineBeamSpot"));
-  consumes<pat::PhotonCollection>(edm::InputTag("slimmedPhotons"));
-  consumes<vector<reco::Conversion> >(edm::InputTag("reducedEgamma","reducedConversions"));
-  consumes<pat::JetCollection>(jets_label);
-  consumes<edm::View<reco::GenJet> >(edm::InputTag("slimmedGenJets"));
-  consumes<pat::METCollection>(met_label);
-  consumes<pat::METCollection>(met_nohf_label);
-  consumes<bool>(edm::InputTag("HBHENoiseFilterResultProducer","HBHENoiseFilterResult"));
-  consumes<bool>(edm::InputTag("HBHENoiseFilterResultProducer","HBHEIsoNoiseFilterResult"));
-  consumes<edm::TriggerResults>(edm::InputTag("TriggerResults","","RECO"));
-  consumes<edm::TriggerResults>(edm::InputTag("TriggerResults","","PAT"));
-  consumes<pat::TriggerObjectStandAloneCollection>(edm::InputTag("selectedPatTrigger"));
-  consumes<reco::GenParticleCollection>(edm::InputTag("prunedGenParticles"));
-  consumes<LHEEventProduct>(edm::InputTag("externalLHEProducer"));
-  consumes<LHEEventProduct>(edm::InputTag("source"));
-  consumes<GenEventInfoProduct>(edm::InputTag("generator"));
 
 
   lepTool    = new lepton_tools();

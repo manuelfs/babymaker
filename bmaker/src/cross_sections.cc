@@ -143,10 +143,10 @@ namespace xsec{
     if(file.Contains("DYJetsToLL_M-50_HT-400to600"))    xsec = 5.497*1.23;
     if(file.Contains("DYJetsToLL_M-50_HT-600toInf"))    xsec = 2.21*1.23;
 
-    if(file.Contains("ZJetsToNuNu_HT-100to200_Tune4C_13TeV-madgraph-tauola"))  xsec =372.6*1.27;
-    if(file.Contains("ZJetsToNuNu_HT-200to400_Tune4C_13TeV-madgraph-tauola"))  xsec =100.8*1.27;
-    if(file.Contains("ZJetsToNuNu_HT-400to600_Tune4C_13TeV-madgraph-tauola"))  xsec =11.99*1.27;
-    if(file.Contains("ZJetsToNuNu_HT-600toInf_Tune4C_13TeV-madgraph-tauola"))  xsec =4.113*1.27;
+    if(file.Contains("ZJetsToNuNu_HT-100To200_"))  xsec = 280.35*1.27;
+    if(file.Contains("ZJetsToNuNu_HT-200To400_"))  xsec = 77.67*1.27;
+    if(file.Contains("ZJetsToNuNu_HT-400To600_"))  xsec = 10.73*1.27;
+    if(file.Contains("ZJetsToNuNu_HT-600ToInf_"))  xsec = 4.116*1.27;
 
     if(file.Contains("TTZJets_Tune4C_13TeV-madgraph-tauola"))    xsec = 0.7598;
     if(file.Contains("TTWJets_Tune4C_13TeV-madgraph-tauola"))    xsec = 0.5662;

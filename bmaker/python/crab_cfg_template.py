@@ -23,7 +23,7 @@ config.General.transferLogs = True
 
 config.section_("JobType")
 config.JobType.pluginName = 'Analysis'
-config.JobType.psetName = 'bmaker/python/bmaker_full_cfg.py'
+config.JobType.psetName = 'babymaker/bmaker/python/bmaker_full_cfg.py'
 config.JobType.disableAutomaticOutputCollection = True
 config.JobType.outputFiles = ['fullbaby_' + datasetID + '.root']
 config.JobType.pyCfgParams = ['nEventsSample=' + str(nevents), 'outputFile=fullbaby_' + datasetID + '.root']
@@ -31,10 +31,10 @@ config.JobType.pyCfgParams = ['nEventsSample=' + str(nevents), 'outputFile=fullb
 config.section_("Data")
 config.Data.inputDataset = dataset
 config.Data.inputDBS = 'global'
-if "Run2015" in taskname:
+if "Run201" in taskname:
     config.Data.splitting = 'LumiBased'
     config.Data.unitsPerJob = 100
-    config.Data.lumiMask = 'https://cms-service-dqm.web.cern.ch/cms-service-dqm/CAF/certification/Collisions15/13TeV/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON_v2.txt'
+    config.Data.lumiMask = 'https://cms-service-dqm.web.cern.ch/cms-service-dqm/CAF/certification/Collisions16/13TeV/DCSOnly/json_DCSONLY.txt'
 
 else:
     config.Data.splitting = 'FileBased'
@@ -44,9 +44,9 @@ config.Data.publication = False # used to be True for cfA production
 # config.Data.publishDBS = 'phys03'
 
 config.section_("Site")
-#config.Site.storageSite = 'T2_US_UCSD'
-config.Site.storageSite = 'T3_US_UCSB'
+config.Site.storageSite = 'T2_US_UCSD'
+#config.Site.storageSite = 'T3_US_UCSB'
 #config.Site.whitelist = ['T2_US_Caltech','T2_US_Florida', 'T2_US_MIT', 'T2_US_Nebraska', 'T2_US_Purdue', 'T2_US_UCSD', 'T2_US_Vanderbilt', 'T2_US_Wisconsin', 'T1_US_FNAL','T2_US_MIT', 'T3_US_UCSB']
-config.Site.blacklist = ['T1_RU_JINR']
+config.Site.blacklist = ['T1_RU_JINR', 'T1_FR_CCIN2P3']
 # you may want to uncomment this line and force jobs to run in the US
 # only a few datasets (mostly very new ones) will not be accessible

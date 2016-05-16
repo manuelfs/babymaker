@@ -27,7 +27,7 @@ then
     outName="outputFile="$3
 fi
 
-if [[ $inFile == *"store"* ]]
+if [[ ($inFile == *"store"*) && ($inFile != *"hadoop"*) ]]
 then
     cmsRun bmaker/python/bmaker_full_cfg.py inputFiles=$inFile nEvents=$nEvents json=$json $outName 2>&1 | tee logout.log
 else 

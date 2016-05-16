@@ -10,7 +10,7 @@ namespace xsec{
   float crossSection(const TString &file){
     float xsec(0.), Htobb(0.5824);
 
-    if(file.Contains("Run2015"))   xsec = 1.;
+    if(file.Contains("Run201"))   xsec = 1.;
 
 
     //NOTE: When you add more topologies, make sure to also add them to list of things to parse 

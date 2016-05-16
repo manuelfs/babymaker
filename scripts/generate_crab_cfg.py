@@ -49,11 +49,12 @@ def getNumberOfEvents(dataset):
       sumevents+=idata.get('result').get('value')
     return sumevents
 
+do_data2016 = True
 do_data = False
 do_ttbar = False
 do_qcd = False
 do_dy = False
-do_znunu = True
+do_znunu = False
 do_singletop = False
 do_wjets = False
 do_other = False
@@ -62,7 +63,14 @@ do_fastsim_t1tttt = False
 
 datasets = [[]]
 
-# Data
+# Data 2016
+if do_data2016:
+#  datasets.append(["/SingleElectron/Run2016B-PromptReco-v1/MINIAOD"])
+#  datasets.append(["/SingleMuon/Run2016B-PromptReco-v1/MINIAOD"])
+#  datasets.append(["/JetHT/Run2016B-PromptReco-v1/MINIAOD"])
+  datasets.append(["/MET/Run2016B-PromptReco-v2/MINIAOD"])
+
+# Data 2015
 if do_data:
   datasets.append(["/JetHT/Run2015D-PromptReco-v4/MINIAOD", "/JetHT/Run2015D-05Oct2015-v1/MINIAOD"])
   datasets.append(["/HTMHT/Run2015D-PromptReco-v4/MINIAOD", "/HTMHT/Run2015D-05Oct2015-v1/MINIAOD"])

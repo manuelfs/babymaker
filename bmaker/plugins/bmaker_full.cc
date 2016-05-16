@@ -1605,36 +1605,68 @@ bmaker_full::bmaker_full(const edm::ParameterSet& iConfig):
   }
 
   trig_name = vector<TString>();
-  if(outname.Contains("Run201")){
-    trig_name.push_back("HLT_PFHT350_PFMET100_");                               // 0 
-    trig_name.push_back("HLT_Mu15_IsoVVVL_PFHT350_PFMET50_v");                  // 1 
-    trig_name.push_back("HLT_Mu15_IsoVVVL_PFHT600_v");                          // 2
-    trig_name.push_back("HLT_Mu15_IsoVVVL_BTagCSV0p72_PFHT400_v");              // 3
-    trig_name.push_back("HLT_Mu15_IsoVVVL_PFHT350_v");                          // 4 
-    trig_name.push_back("HLT_Ele15_IsoVVVL_PFHT350_PFMET50_v");                 // 5 
-    trig_name.push_back("HLT_Ele15_IsoVVVL_PFHT600_v");                         // 6
-    trig_name.push_back("HLT_Ele15_IsoVVVL_BTagCSV0p72_PFHT400_v");             // 7
-    trig_name.push_back("HLT_Ele15_IsoVVVL_PFHT350_v");                         // 8 
-    trig_name.push_back("HLT_DoubleMu8_Mass8_PFHT300_v");                       // 9
-    trig_name.push_back("HLT_DoubleEle8_CaloIdM_TrackIdM_Mass8_PFHT300_v");     // 10
-    trig_name.push_back("HLT_PFHT475_v");                                       // 11
-    trig_name.push_back("HLT_PFHT800_v");                                       // 12
-    trig_name.push_back("HLT_PFMET120_JetIdCleaned_Mu5_v");                     // 13
-    trig_name.push_back("HLT_PFMET170_JetIdCleaned_v");                         // 14
-    trig_name.push_back("HLT_DoubleIsoMu17_eta2p1_v");                          // 15
-    trig_name.push_back("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v");               // 16
-    trig_name.push_back("HLT_IsoMu20_v");                                       // 17
-    trig_name.push_back("HLT_IsoMu18_v");                                       // 18
-    trig_name.push_back("HLT_IsoMu24_eta2p1_v");                                // 19
-    trig_name.push_back("HLT_IsoMu27_v");                                       // 20
-    trig_name.push_back("HLT_Mu50_v");                                          // 21
-    trig_name.push_back("HLT_Ele27_eta2p1_WPLoose_Gsf_v");                      // 22
-    trig_name.push_back("HLT_Ele23_WPLoose_Gsf_v");                             // 23
-    trig_name.push_back("HLT_Ele105_CaloIdVT_GsfTrkIdT_v");                     // 24
-    trig_name.push_back("HLT_DoubleEle33_CaloIdL_GsfTrkIdVL_v");                // 25
-    trig_name.push_back("HLT_DoubleEle24_22_eta2p1_WPLoose_Gsf_v");             // 26
-    trig_name.push_back("HLT_Photon90_CaloIdL_PFHT500_v");                      // 27
-    trig_name.push_back("HLT_PFMETNoMu90_JetIdCleaned_PFMHTNoMu90_IDTight_v");  // 28
+  if(outname.Contains("Run201")){ // Would like to define isData, but need iEvent?
+    if(outname.Contains("Run2016")){
+      trig_name.push_back("HLT_PFHT300_PFMET100_v");                            // 0 
+      trig_name.push_back("HLT_Mu15_IsoVVVL_PFHT350_PFMET50_v");                // 1 
+      trig_name.push_back("HLT_Mu15_IsoVVVL_PFHT600_v");                        // 2
+      trig_name.push_back("HLT_Mu15_IsoVVVL_BTagCSV_p067_PFHT400_v");           // 3
+      trig_name.push_back("HLT_Mu15_IsoVVVL_PFHT350_v");                        // 4 
+      trig_name.push_back("HLT_Ele15_IsoVVVL_PFHT350_PFMET50_v");               // 5 
+      trig_name.push_back("HLT_Ele15_IsoVVVL_PFHT600_v");                       // 6
+      trig_name.push_back("HLT_Ele15_IsoVVVL_BTagCSV_p067_PFHT400_v");          // 7
+      trig_name.push_back("HLT_Ele15_IsoVVVL_PFHT350_v");                       // 8 
+      trig_name.push_back("HLT_DoubleMu8_Mass8_PFHT300_v");                     // 9
+      trig_name.push_back("HLT_DoubleEle8_CaloIdM_TrackIdM_Mass8_PFHT300_v");   // 10
+      trig_name.push_back("HLT_PFHT475_v");                                     // 11
+      trig_name.push_back("HLT_PFHT800_v");                                     // 12
+      trig_name.push_back("HLT_PFMET100_PFMHT100_IDTight_v");                   // 13
+      trig_name.push_back("HLT_PFMET110_PFMHT110_IDTight_v");                   // 14
+      trig_name.push_back("HLT_PFMETNoMu110_PFMHTNoMu110_IDTight_v");           // 15
+      trig_name.push_back("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v");		// 16
+      trig_name.push_back("HLT_Mu45_eta2p1_v");                                 // 17
+      trig_name.push_back("HLT_IsoMu18_v");                                     // 18
+      trig_name.push_back("HLT_IsoMu24_v");					// 19
+      trig_name.push_back("HLT_IsoMu27_v");                                     // 20
+      trig_name.push_back("HLT_Mu50_v");                                        // 21
+      trig_name.push_back("HLT_Ele27_eta2p1_WPLoose_Gsf_v");                    // 22
+      trig_name.push_back("HLT_Ele25_eta2p1_WPTight_Gsf_v");                    // 23
+      trig_name.push_back("HLT_Ele105_CaloIdVT_GsfTrkIdT_v");                   // 24
+      trig_name.push_back("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v");       // 25
+      trig_name.push_back("HLT_Photon175_v");					// 26
+      trig_name.push_back("HLT_Photon90_CaloIdL_PFHT500_v");                    // 27
+      trig_name.push_back("HLT_PFMET90_PFMHT90_IDTight_v");			// 28
+    } else {
+      trig_name.push_back("HLT_PFHT350_PFMET100_");                               // 0 
+      trig_name.push_back("HLT_Mu15_IsoVVVL_PFHT350_PFMET50_v");                  // 1 
+      trig_name.push_back("HLT_Mu15_IsoVVVL_PFHT600_v");                          // 2
+      trig_name.push_back("HLT_Mu15_IsoVVVL_BTagCSV0p72_PFHT400_v");              // 3
+      trig_name.push_back("HLT_Mu15_IsoVVVL_PFHT350_v");                          // 4 
+      trig_name.push_back("HLT_Ele15_IsoVVVL_PFHT350_PFMET50_v");                 // 5 
+      trig_name.push_back("HLT_Ele15_IsoVVVL_PFHT600_v");                         // 6
+      trig_name.push_back("HLT_Ele15_IsoVVVL_BTagCSV0p72_PFHT400_v");             // 7
+      trig_name.push_back("HLT_Ele15_IsoVVVL_PFHT350_v");                         // 8 
+      trig_name.push_back("HLT_DoubleMu8_Mass8_PFHT300_v");                       // 9
+      trig_name.push_back("HLT_DoubleEle8_CaloIdM_TrackIdM_Mass8_PFHT300_v");     // 10
+      trig_name.push_back("HLT_PFHT475_v");                                       // 11
+      trig_name.push_back("HLT_PFHT800_v");                                       // 12
+      trig_name.push_back("HLT_PFMET120_JetIdCleaned_Mu5_v");                     // 13
+      trig_name.push_back("HLT_PFMET170_JetIdCleaned_v");                         // 14
+      trig_name.push_back("HLT_DoubleIsoMu17_eta2p1_v");                          // 15
+      trig_name.push_back("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v");               // 16
+      trig_name.push_back("HLT_IsoMu20_v");                                       // 17
+      trig_name.push_back("HLT_IsoMu18_v");                                       // 18
+      trig_name.push_back("HLT_IsoMu24_eta2p1_v");                                // 19
+      trig_name.push_back("HLT_IsoMu27_v");                                       // 20
+      trig_name.push_back("HLT_Mu50_v");                                          // 21
+      trig_name.push_back("HLT_Ele27_eta2p1_WPLoose_Gsf_v");                      // 22
+      trig_name.push_back("HLT_Ele23_WPLoose_Gsf_v");                             // 23
+      trig_name.push_back("HLT_Ele105_CaloIdVT_GsfTrkIdT_v");                     // 24
+      trig_name.push_back("HLT_DoubleEle33_CaloIdL_GsfTrkIdVL_v");                // 25
+      trig_name.push_back("HLT_DoubleEle24_22_eta2p1_WPLoose_Gsf_v");             // 26
+      trig_name.push_back("HLT_Photon90_CaloIdL_PFHT500_v");                      // 27
+      trig_name.push_back("HLT_PFMETNoMu90_JetIdCleaned_PFMHTNoMu90_IDTight_v");  // 28
+    }
   } else {
     trig_name.push_back("HLT_PFHT350_PFMET120_NoiseCleaned_v");                 // 0 
     trig_name.push_back("HLT_Mu15_IsoVVVL_PFHT400_PFMET70_v");                  // 1 

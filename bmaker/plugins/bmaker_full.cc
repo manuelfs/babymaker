@@ -265,9 +265,10 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
     iEvent.getByToken(tok_extLHEProducer_, lhe_info);
     if(!lhe_info.isValid()) iEvent.getByToken(tok_source_, lhe_info);
     if(lhe_info.isValid()) writeGenInfo(lhe_info);
-    if((outname.Contains("TTJets") && outname.Contains("Lept") && baby.ht_isr_me()>600)
+    if((outname.Contains("TTJets") && (outname.Contains("Lept") || outname.Contains("TTJets_Tune")) && baby.ht_isr_me()>600)
        || (outname.Contains("DYJetsToLL_M-50_TuneCUETP8M")  && baby.ht_isr_me()>100))
       baby.stitch() = false;
+    if(outname.Contains("TTJets_Tune") && baby.ntruleps()!=0) baby.stitch()=false; 
   } // if it is not data
          
   //////////////// Weights and systematics //////////////////

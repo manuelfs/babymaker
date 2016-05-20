@@ -65,9 +65,9 @@ datasets = [[]]
 
 # Data 2016
 if do_data2016:
-#  datasets.append(["/SingleElectron/Run2016B-PromptReco-v1/MINIAOD"])
-#  datasets.append(["/SingleMuon/Run2016B-PromptReco-v1/MINIAOD"])
-#  datasets.append(["/JetHT/Run2016B-PromptReco-v1/MINIAOD"])
+  datasets.append(["/SingleElectron/Run2016B-PromptReco-v2/MINIAOD"])
+  datasets.append(["/SingleMuon/Run2016B-PromptReco-v2/MINIAOD"])
+  datasets.append(["/JetHT/Run2016B-PromptReco-v2/MINIAOD"])
   datasets.append(["/MET/Run2016B-PromptReco-v2/MINIAOD"])
 
 # Data 2015
@@ -289,7 +289,7 @@ for ilist in datasets:
   for ids in ilist:
     print "ids is "+ids
     nevents += getNumberOfEvents(ids)
-    print "running nevents is "+str(nevents)
+    #print "running nevents is "+str(nevents)
 
   for ids in ilist:
     cmssw_base = os.getenv("CMSSW_BASE")

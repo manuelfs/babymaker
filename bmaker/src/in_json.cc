@@ -20,7 +20,7 @@ std::vector< std::vector<int> > MakeVRunLumi(std::string input){
   if(input == "golden"){
     fullpath += "json/golden_Cert_246908-258714_13TeV_PromptReco_Collisions15_25ns_JSON.json";
   } else if(input == "nonblind"){
-    fullpath += "json/nonblind_Cert_246908-258714_13TeV_PromptReco_Collisions15_25ns_JSON.json";
+    fullpath += "json/golden_Cert_271036-273450_13TeV_PromptReco_Collisions16_JSON_NoL1T.json";
   } else{
     fullpath = input;
   }

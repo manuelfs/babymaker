@@ -58,6 +58,7 @@ else: jets_label = "slimmedJets"
 jecLabel = 'miniAOD_Summer15_25nsV6_MC' # for 7.4.14 mc, don't apply JEC, but still give the JEC tag because of systematics
 if "Run2015D" in outName: jecLabel = 'Summer15_25nsV6_DATA' # for 7.4.12 data
 elif "RunIISpring15FSPremix" in outName: jecLabel = 'MCRUN2_74_V9'
+elif "Run2016" in outName: jecLabel = 'miniAOD_Summer15_25nsV6_DATA'
 else: jecLabel = 'Summer15_25nsV6_MC'
 
 if "FSPremix" in outName or "Fast" in outName: fastsim = True

@@ -1637,6 +1637,7 @@ bmaker_full::bmaker_full(const edm::ParameterSet& iConfig):
       trig_name.push_back("HLT_Photon175_v");					// 26
       trig_name.push_back("HLT_Photon90_CaloIdL_PFHT500_v");                    // 27
       trig_name.push_back("HLT_PFMET90_PFMHT90_IDTight_v");			// 28
+      trig_name.push_back("HLT_Ele23_WPLoose_Gsf_v");			        // 29
     } else {
       trig_name.push_back("HLT_PFHT350_PFMET100_");                               // 0 
       trig_name.push_back("HLT_Mu15_IsoVVVL_PFHT350_PFMET50_v");                  // 1 

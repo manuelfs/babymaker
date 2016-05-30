@@ -293,6 +293,7 @@ bool pass_hbheiso;
 bool pass_goodv;
 bool pass_cschalo;
 bool pass_eebadsc;
+bool pass_ecaldeadcell;
 bool pass;
 bool pass_ra2;
 bool pass_nohf;

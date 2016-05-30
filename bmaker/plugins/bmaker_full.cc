@@ -196,7 +196,8 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 
   ///////////////////// Filters ///////////////////////
   // the HBHE noise filter needs to be recomputed in early 2015 data
-  if (debug) cout<<"INFO: Writing filters..."<<endl;
+  if (debug) cout<<"INFO: Writing filters..."<<endl; 
+/* now these are taken from miniAOD 
   edm::Handle<bool> filter_hbhe;
   if(iEvent.getByToken(tok_HBHENoiseFilter_,filter_hbhe)) { 
     if(filter_hbhe.isValid()) 
@@ -210,6 +211,7 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
     else
       baby.pass_hbheiso() = true;
   }
+*/
   edm::Handle<edm::TriggerResults> filterBits;
   if(isData) iEvent.getByToken(tok_trigResults_reco_,filterBits);  
   else iEvent.getByToken(tok_trigResults_pat_,filterBits);  
@@ -1103,29 +1105,33 @@ void bmaker_full::writeFilters(const edm::TriggerNames &fnames,
                                edm::Handle<edm::TriggerResults> filterBits,
                                edm::Handle<reco::VertexCollection> vtx){
   baby.pass_goodv() = true; baby.pass_cschalo() = true; baby.pass_eebadsc() = true;
+  baby.pass_ecaldeadcell() = true; baby.pass_hbhe() = true; baby.pass_hbheiso() = true;
   for (size_t i(0); i < filterBits->size(); ++i) {
     string name = fnames.triggerName(i);
     bool pass = static_cast<bool>(filterBits->accept(i));
     if (name=="Flag_goodVertices") baby.pass_goodv() = pass;
     //else if (name=="Flag_CSCTightHaloFilter") baby.pass_cschalo() = pass; // Requires reading it from txt file
+    else if (name=="Flag_CSCTightHalo2015Filter") baby.pass_cschalo() = pass;
     else if (name=="Flag_eeBadScFilter") baby.pass_eebadsc() = pass;
-    //else if (name=="Flag_HBHENoiseFilter") baby.pass_hbhe() = pass; // Requires re-running in 2015
+    else if (name=="Flag_EcalDeadCellTriggerPrimitiveFilter") baby.pass_ecaldeadcell() = pass;
+    else if (name=="Flag_HBHENoiseFilter") baby.pass_hbhe() = pass; 
+    else if (name=="Flag_HBHENoiseIsoFilter") baby.pass_hbheiso() = pass; 
   }
 
   //baby.pass_goodv() &= eventTool->hasGoodPV(vtx); // We needed to re-run it for Run2015B
-  baby.pass_cschalo() = eventTool->passBeamHalo(baby.run(), baby.event());
+  //baby.pass_cschalo() = eventTool->passBeamHalo(baby.run(), baby.event()); // now taken from miniAOD
 
-  baby.pass() = baby.pass_goodv() && baby.pass_eebadsc() && baby.pass_cschalo() && baby.pass_hbhe() && baby.pass_hbheiso() 
+  baby.pass() = baby.pass_goodv() && baby.pass_eebadsc() && baby.pass_cschalo() && baby.pass_hbhe() && baby.pass_hbheiso() && baby.pass_ecaldeadcell() 
     && baby.pass_jets();
-  baby.pass_ra2() = baby.pass_goodv() && baby.pass_eebadsc() && baby.pass_cschalo() && baby.pass_hbhe() && baby.pass_hbheiso()  
+  baby.pass_ra2() = baby.pass_goodv() && baby.pass_eebadsc() && baby.pass_cschalo() && baby.pass_hbhe() && baby.pass_hbheiso() && baby.pass_ecaldeadcell()  
     && baby.pass_jets_ra2();
-  baby.pass_nohf() = baby.pass_goodv() && baby.pass_eebadsc() && baby.pass_cschalo() && baby.pass_hbhe() && baby.pass_hbheiso()  
+  baby.pass_nohf() = baby.pass_goodv() && baby.pass_eebadsc() && baby.pass_cschalo() && baby.pass_hbhe() && baby.pass_hbheiso() && baby.pass_ecaldeadcell() 
     && baby.pass_jets_nohf();
 
   if (doSystematics){
     for (unsigned isys(0); isys<kSysLast; isys++){
       // sys_pass_jets already stored in the value of this variable in the baby
-      baby.sys_pass()[isys] = baby.sys_pass()[isys] && baby.pass_goodv() && baby.pass_eebadsc() && baby.pass_cschalo() && baby.pass_hbhe() && baby.pass_hbheiso();
+      baby.sys_pass()[isys] = baby.sys_pass()[isys] && baby.pass_goodv() && baby.pass_eebadsc() && baby.pass_cschalo() && baby.pass_hbhe() && baby.pass_hbheiso() && baby.pass_ecaldeadcell();
     }
   }
 }

@@ -64,10 +64,10 @@ else: jecLabel = 'Summer15_25nsV6_MC'
 if "FSPremix" in outName or "Fast" in outName: fastsim = True
 else: fastsim = False
 
-if "Run2015" in outName:
+if "Run2016" in outName:
     isData = True
     # These only used for the official application of JECs
-    globalTag = "74X_dataRun2_v2"
+    globalTag = "80X_dataRun2_Prompt_v8" #"74X_dataRun2_v2"
     processRECO = "RECO"
     jecLevels = ['L1FastJet', 'L2Relative', 'L3Absolute', 'L2L3Residual']
 else:
@@ -124,11 +124,11 @@ process.GlobalTag.globaltag = globalTag
 ##___________________________HCAL_Noise_Filter________________________________||
 #if "FSPremix" in outName: fastsim = True #(moved earlier)
 #else: fastsim = False
-if not fastsim:
-    process.load('CommonTools.RecoAlgos.HBHENoiseFilterResultProducer_cfi')
-    process.HBHENoiseFilterResultProducer.minZeros = cms.int32(99999)
-    process.HBHENoiseFilterResultProducer.IgnoreTS4TS5ifJetInLowBVRegion=cms.bool(False) 
-    process.HBHENoiseFilterResultProducer.defaultDecision = cms.string("HBHENoiseFilterResultRun2Loose")
+#if not fastsim:
+#    process.load('CommonTools.RecoAlgos.HBHENoiseFilterResultProducer_cfi')
+#    process.HBHENoiseFilterResultProducer.minZeros = cms.int32(99999)
+#    process.HBHENoiseFilterResultProducer.IgnoreTS4TS5ifJetInLowBVRegion=cms.bool(False) 
+#    process.HBHENoiseFilterResultProducer.defaultDecision = cms.string("HBHENoiseFilterResultRun2Loose")
 
 if doJEC:
     ###### Setting sqlite file for the JECs that are in newer global tags 
@@ -189,12 +189,12 @@ if doJEC:
     ###### Path
     process.p = cms.Path(process.patJetCorrFactorsReapplyJEC*
                          process.patJetsReapplyJEC*
-                         process.HBHENoiseFilterResultProducer* #produces HBHE baseline bools
+                         #process.HBHENoiseFilterResultProducer* #produces HBHE baseline bools
                          process.baby_full)
 else:
     ###### Path
     if not fastsim:
-        process.p = cms.Path(process.HBHENoiseFilterResultProducer* #produces HBHE baseline bools
+        process.p = cms.Path(#process.HBHENoiseFilterResultProducer* #produces HBHE baseline bools
                              process.baby_full)
     else:
         process.p = cms.Path(process.baby_full)

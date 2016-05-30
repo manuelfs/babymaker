@@ -66,9 +66,9 @@ datasets = [[]]
 # Data 2016
 if do_data2016:
   datasets.append(["/SingleElectron/Run2016B-PromptReco-v2/MINIAOD"])
-  datasets.append(["/SingleMuon/Run2016B-PromptReco-v2/MINIAOD"])
-  datasets.append(["/JetHT/Run2016B-PromptReco-v2/MINIAOD"])
-  datasets.append(["/MET/Run2016B-PromptReco-v2/MINIAOD"])
+#  datasets.append(["/SingleMuon/Run2016B-PromptReco-v2/MINIAOD"])
+#  datasets.append(["/JetHT/Run2016B-PromptReco-v2/MINIAOD"])
+#  datasets.append(["/MET/Run2016B-PromptReco-v2/MINIAOD"])
 
 # Data 2015
 if do_data:

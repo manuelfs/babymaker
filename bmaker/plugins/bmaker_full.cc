@@ -433,12 +433,12 @@ void bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
 	  if(csv > jetTool->CSVMedium) baby.nbm()++;
 	  else jetsys_nob_p4 += jet.p4();
 	  if(csv > jetTool->CSVTight)  baby.nbt()++;
-	} else if (goodPtEtaLoose){
-	  baby.njets20()++;
-	  if(csv > jetTool->CSVLoose)  baby.nbl20()++;
-	  if(csv > jetTool->CSVMedium) baby.nbm20()++;
-	  if(csv > jetTool->CSVTight)  baby.nbt20()++;
-	}
+	} 
+	baby.njets20()++;
+	if(csv > jetTool->CSVLoose)  baby.nbl20()++;
+	if(csv > jetTool->CSVMedium) baby.nbm20()++;
+	if(csv > jetTool->CSVTight)  baby.nbt20()++;
+	
       }
     }
 
@@ -638,8 +638,8 @@ void bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
     LVector hig1 = hig_p4[hig_ind[0]][hig_ind[1]], hig2 = hig_p4[hig_ind[2]][hig_ind[3]];
     baby.hig_dm()   = fabs(hig1.mass() - hig2.mass());
     baby.hig_am()   = (hig1.mass() + hig2.mass())/2.;
-    baby.hig_drmax() = max(deltaR(jets[hi_csv[hig_ind[0]]], jets[hi_csv[hig_ind[1]]]),
-                           deltaR(jets[hi_csv[hig_ind[2]]], jets[hi_csv[hig_ind[3]]]));
+    baby.hig_drmax() = max(deltaR(jets20[hi_csv[hig_ind[0]]], jets20[hi_csv[hig_ind[1]]]),
+                           deltaR(jets20[hi_csv[hig_ind[2]]], jets20[hi_csv[hig_ind[3]]]));
 
     baby.hig1_pt()  = hig1.pt();
     baby.hig1_eta() = hig1.eta();
@@ -685,8 +685,8 @@ void bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
     hig1 = hig_p4[hig_ind[0]][hig_ind[1]]; hig2 = hig_p4[hig_ind[2]][hig_ind[3]];
     baby.hig5_dm()   = fabs(hig1.mass() - hig2.mass());
     baby.hig5_am()   = (hig1.mass() + hig2.mass())/2.;
-    baby.hig5_drmax() = max(deltaR(jets[hi_csv[hig_ind[0]]], jets[hi_csv[hig_ind[1]]]),
-                            deltaR(jets[hi_csv[hig_ind[2]]], jets[hi_csv[hig_ind[3]]]));
+    baby.hig5_drmax() = max(deltaR(jets20[hi_csv[hig_ind[0]]], jets20[hi_csv[hig_ind[1]]]),
+                            deltaR(jets20[hi_csv[hig_ind[2]]], jets20[hi_csv[hig_ind[3]]]));
 
 
   } // if njets >= 4

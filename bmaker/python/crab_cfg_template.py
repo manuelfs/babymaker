@@ -7,6 +7,7 @@ nevents = NEVENTS
 # CRAB3 task names can no longer be greater than 100 characters; need to shorten task name
 taskname = dataset[1:].replace('/','__').replace('RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2','MiniAODv2').replace('TuneCUETP8M1_13TeV-madgraphMLM-pythia8','13TeV-MG-PY8')
 taskname = taskname.replace('RunIISpring15MiniAODv2-Asympt25ns_74X_mcRun2_asymptotic_v2','MiniAODv2')
+taskname = taskname.replace('RunIISpring16MiniAODv1-PUSpring16_80X_mcRun2_asymptotic_2016','80XMiniAODv1')
 taskname = taskname.replace(':','___')
 if(len(taskname)>100): taskname = taskname[0:99]
 
@@ -44,8 +45,8 @@ config.Data.publication = False # used to be True for cfA production
 # config.Data.publishDBS = 'phys03'
 
 config.section_("Site")
-#config.Site.storageSite = 'T2_US_UCSD'
-config.Site.storageSite = 'T3_US_UCSB'
+config.Site.storageSite = 'T2_US_UCSD'
+#config.Site.storageSite = 'T3_US_UCSB'
 #config.Site.whitelist = ['T2_US_Caltech','T2_US_Florida', 'T2_US_MIT', 'T2_US_Nebraska', 'T2_US_Purdue', 'T2_US_UCSD', 'T2_US_Vanderbilt', 'T2_US_Wisconsin', 'T1_US_FNAL','T2_US_MIT', 'T3_US_UCSB']
 config.Site.blacklist = ['T1_RU_JINR', 'T1_FR_CCIN2P3']
 # you may want to uncomment this line and force jobs to run in the US

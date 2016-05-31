@@ -31,10 +31,11 @@ private:
 public:
 
   ///////////////// JET CUTS ///////////////////////
-  const float JetPtCut	   = 30.0;
+  const float JetPtCut	    = 30.0;
+  const float JetPtCutLoose = 20.0;
   const float JetEtaCut    = 2.4;
   const float JetMHTEtaCut = 5.0;
-  const float JetHLTPtCut  = 40.0;
+  const float JetHLTPtCut  = 30.0;
   const float JetHLTEtaCut = 3.0;
   // Set in constructor depending on CMSSW release used
   float CSVLoose  = 999;

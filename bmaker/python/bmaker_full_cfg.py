@@ -59,7 +59,8 @@ jecLabel = 'miniAOD_Summer15_25nsV6_MC' # for 7.4.14 mc, don't apply JEC, but st
 if "Run2015D" in outName: jecLabel = 'Summer15_25nsV6_DATA' # for 7.4.12 data
 elif "RunIISpring15FSPremix" in outName: jecLabel = 'MCRUN2_74_V9'
 elif "Run2016" in outName: jecLabel = 'miniAOD_Summer15_25nsV6_DATA'
-else: jecLabel = 'Summer15_25nsV6_MC'
+elif "RunIISpring16MiniAODv1" in outName: jecLabel = 'Spring16_25nsV1_MC'
+elif "RunIISpring16MiniAODv2" in outName: jecLabel = 'miniAOD_Spring16_25nsV1_MC'
 
 if "FSPremix" in outName or "Fast" in outName: fastsim = True
 else: fastsim = False
@@ -74,6 +75,7 @@ else:
     isData = False
     # These only used for the official application of JECs
     globalTag = "74X_mcRun2_asymptotic_v2"
+    if "RunIISpring16MiniAOD" in outName: globalTag = "80X_mcRun2_asymptotic_2016_miniAODv2"
     processRECO = "PAT"
     jecLevels = ['L1FastJet', 'L2Relative', 'L3Absolute']
 

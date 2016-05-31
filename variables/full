@@ -69,6 +69,12 @@ int njets
 int nbl
 int nbm
 int nbt
+int njets20
+int nbl20
+int nbm20
+int nbt20
+bool low_dphi20
+
 int njets_ra2
 int njets_clean
 int nbm_ra2

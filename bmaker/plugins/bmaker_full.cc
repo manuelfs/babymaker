@@ -328,9 +328,10 @@ void bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
                             vCands &sig_leps, vCands &veto_leps, vCands &photons, vCands &tks,
                             vector<LVector> &jets, vector<vector<LVector> > &sys_jets){
   vector<int> hi_csv(5,-1); // Indices of the 5 jets with highest CSV
-  vCands jets_ra2;
+  vCands jets_ra2;  vCands jets20_cands; vector<LVector> jets20;
   LVector jetsys_p4, jetsys_nob_p4;
-  baby.njets() = 0; baby.nbl() = 0; baby.nbm() = 0;  baby.nbt() = 0;  
+  baby.njets() = 0; baby.nbl() = 0; baby.nbm() = 0;  baby.nbt() = 0;
+  baby.njets20() = 0; baby.nbl20() = 0; baby.nbm20() = 0;  baby.nbt20() = 0;  
   baby.ht() = 0.; baby.ht_hlt() = 0.;
   baby.njets_ra2() = 0; baby.njets_clean() = 0; baby.nbm_ra2() = 0; baby.ht_ra2() = 0.; baby.ht_clean() = 0.; 
   baby.pass_jets() = true; baby.pass_jets_nohf() = true; baby.pass_jets_tight() = true; 
@@ -355,8 +356,9 @@ void bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
     bool isLep = jetTool->leptonInJet(jet, sig_leps);
     bool looseID = jetTool->idJet(jet, jetTool->kLoose);
     bool tightID = jetTool->idJet(jet, jetTool->kTight);
+    bool goodPtEtaLoose = jetp4.pt() > jetTool->JetPtCutLoose && fabs(jet.eta()) <= jetTool->JetEtaCut;
     bool goodPtEta = jetp4.pt() > jetTool->JetPtCut && fabs(jet.eta()) <= jetTool->JetEtaCut;
-
+    
     //   RA4 Jet Quality filters
     //--------------------------------
     if(jetp4.pt() > jetTool->JetPtCut && !isLep) {
@@ -367,7 +369,7 @@ void bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
 
     //    RA4 Jet Variables
     //----------------------------
-    if((looseID && goodPtEta) || isLep) {
+    if((looseID && goodPtEtaLoose) || isLep) {
       baby.jets_pt().push_back(jetp4.pt());
       baby.jets_eta().push_back(jet.eta());
       baby.jets_phi().push_back(jet.phi());
@@ -377,7 +379,9 @@ void bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
       else baby.jets_pt_res().push_back(-99999.);
       baby.jets_hflavor().push_back(jet.hadronFlavour());
       baby.jets_csv().push_back(csv);
-      jets.push_back(jetp4);
+      if (goodPtEta || isLep) jets.push_back(jetp4);
+      jets20_cands.push_back(dynamic_cast<const reco::Candidate *>(&jet));
+      jets20.push_back(jetp4);
       baby.jets_h1().push_back(false);
       baby.jets_h2().push_back(false);
       float dphi = reco::deltaPhi(jet.phi(), baby.met_phi());
@@ -395,7 +399,7 @@ void bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
 
 
       if(!isLep){
-        if(addBTagWeights) {
+        if(addBTagWeights && goodPtEta) {
           bool btag(csv > jetTool->CSVMedium);
           bool btagLoose(csv > jetTool->CSVLoose);
           jet_met_tools::btagVariation central(jetTool->kBTagCentral), up(jetTool->kBTagUp), down(jetTool->kBTagDown);
@@ -421,13 +425,20 @@ void bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
             baby.sys_fs_udsgtag()[1] *= jetTool->jetBTagWeight(jet, jetp4, btag, central, central, central, down);
           }
         }
-        jetsys_p4 += jet.p4();
-        baby.njets()++;
-        baby.ht() += jetp4.pt();
-        if(csv > jetTool->CSVLoose)  baby.nbl()++;
-        if(csv > jetTool->CSVMedium) baby.nbm()++;
-        else jetsys_nob_p4 += jet.p4();
-        if(csv > jetTool->CSVTight)  baby.nbt()++;
+	if (goodPtEta){
+	  jetsys_p4 += jet.p4();
+	  baby.njets()++;
+	  baby.ht() += jetp4.pt();
+	  if(csv > jetTool->CSVLoose)  baby.nbl()++;
+	  if(csv > jetTool->CSVMedium) baby.nbm()++;
+	  else jetsys_nob_p4 += jet.p4();
+	  if(csv > jetTool->CSVTight)  baby.nbt()++;
+	} else if (goodPtEtaLoose){
+	  baby.njets20()++;
+	  if(csv > jetTool->CSVLoose)  baby.nbl20()++;
+	  if(csv > jetTool->CSVMedium) baby.nbm20()++;
+	  if(csv > jetTool->CSVTight)  baby.nbt20()++;
+	}
       }
     }
 
@@ -499,6 +510,8 @@ void bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
   baby.mht_clean() = hypot(mht_clean_px, mht_clean_py);
   baby.mht_clean_phi() = atan2(mht_clean_py, mht_clean_px);
   baby.low_dphi() = jetTool->isLowDphi(jets_ra2, baby.mht_phi(), baby.dphi1(), baby.dphi2(), baby.dphi3(), baby.dphi4());
+  // saving the dphi values for 20 GeV jets instead of for RA2b
+  baby.low_dphi20() = jetTool->isLowDphi(jets20_cands, baby.met_phi(), baby.dphi1(), baby.dphi2(), baby.dphi3(), baby.dphi4());
 
   for (unsigned i(0); i<2; i++){
     baby.sys_bctag()[i] /= baby.w_btag();
@@ -594,7 +607,7 @@ void bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
     for(size_t row=0; row<hi_csv.size(); row++){
       hig_p4.push_back(vector<LVector>());
       for(size_t col=0; col<=row; col++){
-        LVector jetp4(jets[hi_csv[row]]);
+        LVector jetp4(jets20[hi_csv[row]]);
         hig_p4.back().push_back(jetp4);
         if(row!=col) hig_p4.back().back() += hig_p4[col][col];
       } // Loop over columns in hig_p4
@@ -639,15 +652,15 @@ void bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
 
     // Setting up the ABCD bin: 
     // 2 -> SIG, 1 -> SB, 0 -> in between, not used
-    if(baby.hig_dm()<20 && baby.hig_am()>100 && baby.hig_am()<140) baby.hig_bin() = 2;
-    else if(baby.hig_dm()>30 || baby.hig_am()<90 || baby.hig_am()>150) baby.hig_bin() = 1;
+    if(baby.hig_dm()<40 && baby.hig_am()>100 && baby.hig_am()<140) baby.hig_bin() = 2;
+    else if(baby.hig_dm()>40 || baby.hig_am()<100 || baby.hig_am()>140) baby.hig_bin() = 1;
     else baby.hig_bin() = 0;
     // 20 -> 2b, 30 -> 3b, 40 -> 4b
-    if(baby.nbt()>=2) {
+    if(baby.nbt20()>=2) {
       baby.hig_bin() += 20;
-      if(baby.nbm()>=3) {
+      if(baby.nbm20()>=3) {
         baby.hig_bin() += 10;
-        if(baby.nbl()>=4) baby.hig_bin() += 10;
+        if(baby.nbl20()>=4) baby.hig_bin() += 10;
       }
     }
 

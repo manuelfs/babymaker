@@ -141,7 +141,7 @@ int main(int argc, char *argv[]){
     else  xsec::stopCrossSection(ch.mgluino(), xsec, exsec);
   }
   float w_lumi = xsec*luminosity / nent_eff;
-  float w_lumi_corr = w_lumi / fabs(ch.w_lumi());
+  //float w_lumi_corr = w_lumi / fabs(ch.w_lumi());
 
   // Average w_toppt in bins of ht_isr_me found in inclusive TTJets (SingleLept and DiLept)
   double wanted_toppt(1.);
@@ -203,7 +203,7 @@ int main(int argc, char *argv[]){
     var_val[16].push_back("*"+to_string((nent-sum_slep[idx])/nent_zlep));
   for(unsigned int idx=0;idx<sum_fs_slep.size();idx++)      
     var_val[17].push_back("*"+to_string((nent-sum_fs_slep[idx])/nent_zlep));
-  var_val[18].push_back("*"+roundNumber(w_lumi_corr,12));
+  var_val[18].push_back(roundNumber(w_lumi,12));
 
 
   int totentries(0);

@@ -93,7 +93,7 @@ int change_branch_one(TString indir, TString name, TString outdir, vector<TStrin
   vector<vector<bool> * > new_var_vbool_(nvar);
   
   // Hack to protect total weight from NaN, and not include w_pu
-  float w_lumi(1.), w_lep(1.), w_fs_lep(1.), w_toppt(1.), w_btag(1.), w_corr(1.);
+  float w_lumi(1.), w_lumi_old(1.), w_lep(1.), w_fs_lep(1.), w_toppt(1.), w_btag(1.), w_corr(1.);
 
   //Branches
   int nleps_=0, mgluino_(0);
@@ -134,7 +134,7 @@ int change_branch_one(TString indir, TString name, TString outdir, vector<TStrin
   //Loop and fill events with new weights
   int nentries = oldtree->GetEntries();
   for(int i=0; i<nentries; i++){
-    //if(i==10) break;
+    //if(i==10) exit(0);
     oldtree->GetEntry(i);
 
     w_corr = 1;
@@ -162,6 +162,7 @@ int change_branch_one(TString indir, TString name, TString outdir, vector<TStrin
       }
       if(var[iset].Contains("w_toppt"))  {w_toppt  = noNaN(new_var_flt_[iset]); w_corr *= var_val[iset][0].Atof(); }
       if(var[iset].Contains("w_btag"))   {w_btag   = noNaN(new_var_flt_[iset]); w_corr *= var_val[iset][0].Atof(); }
+      if(var[iset].Contains("w_lumi"))   {w_lumi_old  = noNaN(new_var_flt_[iset]);  }
       // Hack for empty pdf branches
       if(var[iset].Contains("w_pdf")){
         if(new_var_vflt_[iset]->size()==0){
@@ -213,7 +214,7 @@ int change_branch_one(TString indir, TString name, TString outdir, vector<TStrin
       // Hack to protect total weight from NaN, and not include w_pu
       if(var[iset].Contains("w_lep"))    {w_lep    = new_var_flt_[iset]; w_corr *= var_val[iset][0].Atof(); }
       if(var[iset].Contains("w_fs_lep")) {w_fs_lep = new_var_flt_[iset]; w_corr *= var_val[iset][0].Atof(); }
-      if(var[iset].Contains("w_lumi"))   {w_lumi   = new_var_flt_[iset]; w_corr *= var_val[iset][0].Atof(); }
+      if(var[iset].Contains("w_lumi"))   {w_lumi   = new_var_flt_[iset]; w_corr *= w_lumi/w_lumi_old; }
     } // Loop over variables
     // Hack to protect total weight from NaN, and not include w_pu
     for(int iset=0; iset<nvar; iset++)

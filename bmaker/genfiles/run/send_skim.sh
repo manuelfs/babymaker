@@ -19,8 +19,15 @@ else
     cuts=$4
 fi
 
+if (( "$#" < 5 ))
+then
+    filetag=""
+else
+    filetag=$5
+fi
+
 nfiles=`ls $infolder/*root | wc -l`
 for file in `seq 1 $njobs`;
 do
-    JobSubmit.csh ./run/wrapper.sh ./run/skim_ntuples.exe $infolder $outfolder $cuts $njobs $file
+    JobSubmit.csh ./run/wrapper.sh ./run/skim_ntuples.exe $infolder $outfolder $cuts $njobs $file $filetag
 done

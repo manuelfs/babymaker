@@ -33,7 +33,7 @@ int main(int argc, char *argv[]){
   if(argc < 3) {
     cout<<endl<<"Required at least 2 arguments: "
 	<<"./plot/skim_ntuples.exe infolder outfolder [cuts=\"nleps==1&&ht>500&&met>200&&njets>=6&&nbm>=1&&mj>250\"] "
-	<<"[njobs=-1] [ijob=-1]"<<endl<<endl;;
+	<<"[njobs=-1] [ijob=-1] [filetag=]"<<endl<<endl;;
     return 1;
   }
   TString folder(argv[1]), outfolder(argv[2]), cuts="nleps==1&&ht>500&&met>200&&njets>=6&&nbm>=1&&mj>250";
@@ -43,6 +43,9 @@ int main(int argc, char *argv[]){
     njobs = atoi(argv[4]);
     ijob  = atoi(argv[5]);
   }
+  TString filetag="";
+  if(argc >= 7) filetag = argv[6];
+
   TString tag = cuts; // Using tag to avoid file names too long for TFile
   if(cuts=="standard") cuts="nleps>=1&&ht>500&&met>200";
   if(cuts=="abcd") cuts="nleps==1&&ht>500&&met>200&&njets>=6&&nbm>=1&&mj>250";
@@ -63,7 +66,7 @@ int main(int argc, char *argv[]){
      cuts = "ht>1000&&met<50&&(nvmus+nvels)==0&&njets>=10";
 	     
 
-  vector<TString> files = dirlist(folder, "*.root");
+  vector<TString> files = dirlist(folder, "*"+filetag+"*.root");
   unsigned nfiles(files.size()), ini(0), end(nfiles);
   if(njobs>0){
     if(ijob<1 || ijob>njobs){

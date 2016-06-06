@@ -48,7 +48,7 @@ int main(int argc, char *argv[]){
   }
 
   vector<TString> datasets;
-  TString buffer, basename("Run2015D");
+  TString buffer, basename("Run2016");
   ifstream indata(file_datasets);
   while(indata){
     indata >> buffer;

@@ -31,7 +31,7 @@ bool jet_met_tools::leptonInJet(const pat::Jet &jet, vCands leptons){
     if(leptons[ilep]->isMuon() && npflep==1) indpf = 0;
     if(leptons[ilep]->isElectron() && npflep==2) indpf = 1; // Electrons have a missing reference at 0
     if(indpf>=0){ // The lepton is PF -> looping over PF cands in jet
-      for (unsigned ijet(0); ijet < jet.numberOfSourceCandidatePtrs(); ijet++) 
+      for (unsigned ijet(0); ijet < jet.numberOfSourceCandidatePtrs(); ijet++)
         if(jet.sourceCandidatePtr(ijet) == leptons[ilep]->sourceCandidatePtr(indpf))
           return true;
     } else { // The lepton is not PF, matching with deltaR

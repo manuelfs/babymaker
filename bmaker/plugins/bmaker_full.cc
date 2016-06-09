@@ -1002,7 +1002,12 @@ bool bmaker_full::writeTriggers(const edm::TriggerNames &names,
       }
     }
   }
-
+  // trig_ra4 = (Lep15_HT350 ||  Lep15_HT400 || MET100 || METNoMu100)
+  vector<size_t> trig_or = {3,4,7,8,13,33};
+  baby.trig_ra4() = false;
+  for(size_t itrig=0; itrig<trig_or.size(); itrig++)
+    baby.trig_ra4() = (baby.trig_ra4() || baby.trig()[trig_or[itrig]]);
+  
   return keep;
 }
 
@@ -1531,7 +1536,7 @@ void bmaker_full::writeWeights(const vCands &sig_leps, edm::Handle<GenEventInfoP
   // w_btag calculated in writeJets
   // w_toppt and sys_isr calculated in writeMC
   baby.weight() = baby.w_lumi() * baby.w_lep() * baby.w_fs_lep() * baby.w_toppt() * baby.w_btag() 
-    * baby.eff_trig() * baby.eff_jetid();
+    * baby.eff_jetid();
   baby.weight_rpv() = baby.w_lumi() * baby.w_lep() * baby.w_fs_lep() * baby.w_toppt() * baby.w_btag()
     * baby.w_pu_rpv() * baby.eff_jetid();
 
@@ -1619,10 +1624,10 @@ bmaker_full::bmaker_full(const edm::ParameterSet& iConfig):
   baby.tree_.SetDirectory(outfile);
 
   xsec = xsec::crossSection(outname);
-  if(xsec<=0) {
-    cout<<"BABYMAKER: Cross section not found, aborting"<<endl<<endl;
-    exit(1);
-  }
+  // if(xsec<=0) {
+  //   cout<<"BABYMAKER: Cross section not found, aborting"<<endl<<endl;
+  //   exit(1);
+  // }
 
   trig_name = vector<TString>();
   if(outname.Contains("Run201")){ // Would like to define isData, but need iEvent?
@@ -1630,14 +1635,15 @@ bmaker_full::bmaker_full(const edm::ParameterSet& iConfig):
       trig_name.push_back("HLT_PFHT300_PFMET100_v");                            // 0 
       trig_name.push_back("HLT_Mu15_IsoVVVL_PFHT350_PFMET50_v");                // 1 
       trig_name.push_back("HLT_Mu15_IsoVVVL_PFHT600_v");                        // 2
-      trig_name.push_back("HLT_Mu15_IsoVVVL_BTagCSV_p067_PFHT400_v");           // 3
+      trig_name.push_back("HLT_Mu15_IsoVVVL_PFHT400_v");                        // 3
       trig_name.push_back("HLT_Mu15_IsoVVVL_PFHT350_v");                        // 4 
       trig_name.push_back("HLT_Ele15_IsoVVVL_PFHT350_PFMET50_v");               // 5 
       trig_name.push_back("HLT_Ele15_IsoVVVL_PFHT600_v");                       // 6
-      trig_name.push_back("HLT_Ele15_IsoVVVL_BTagCSV_p067_PFHT400_v");          // 7
+      trig_name.push_back("HLT_Ele15_IsoVVVL_PFHT400_v");                       // 7
       trig_name.push_back("HLT_Ele15_IsoVVVL_PFHT350_v");                       // 8 
       trig_name.push_back("HLT_DoubleMu8_Mass8_PFHT300_v");                     // 9
       trig_name.push_back("HLT_DoubleEle8_CaloIdM_TrackIdM_Mass8_PFHT300_v");   // 10
+
       trig_name.push_back("HLT_PFHT475_v");                                     // 11
       trig_name.push_back("HLT_PFHT800_v");                                     // 12
       trig_name.push_back("HLT_PFMET100_PFMHT100_IDTight_v");                   // 13
@@ -1648,6 +1654,7 @@ bmaker_full::bmaker_full(const edm::ParameterSet& iConfig):
       trig_name.push_back("HLT_IsoMu18_v");                                     // 18
       trig_name.push_back("HLT_IsoMu24_v");					// 19
       trig_name.push_back("HLT_IsoMu27_v");                                     // 20
+
       trig_name.push_back("HLT_Mu50_v");                                        // 21
       trig_name.push_back("HLT_Ele27_eta2p1_WPLoose_Gsf_v");                    // 22
       trig_name.push_back("HLT_Ele25_eta2p1_WPTight_Gsf_v");                    // 23
@@ -1658,8 +1665,14 @@ bmaker_full::bmaker_full(const edm::ParameterSet& iConfig):
       trig_name.push_back("HLT_PFMET90_PFMHT90_IDTight_v");			// 28
       trig_name.push_back("HLT_Ele23_WPLoose_Gsf_v");			        // 29
       trig_name.push_back("HLT_PFMET120_PFMHT120_IDTight_v");                   // 30
+
       trig_name.push_back("HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_v");           // 31
       trig_name.push_back("HLT_IsoMu22_v");					// 32
+      trig_name.push_back("HLT_PFMETNoMu100_PFMHTNoMu100_IDTight_v");           // 33
+      trig_name.push_back("HLT_Mu50_IsoVVVL_PFHT400_v");                        // 34
+      trig_name.push_back("HLT_Mu15_IsoVVVL_BTagCSV_p067_PFHT400_v");           // 35
+      trig_name.push_back("HLT_Ele50_IsoVVVL_PFHT400_v");                       // 36
+      trig_name.push_back("HLT_Ele15_IsoVVVL_BTagCSV_p067_PFHT400_v");          // 37
     } else {
       trig_name.push_back("HLT_PFHT350_PFMET100_");                               // 0 
       trig_name.push_back("HLT_Mu15_IsoVVVL_PFHT350_PFMET50_v");                  // 1 

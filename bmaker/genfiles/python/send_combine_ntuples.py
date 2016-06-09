@@ -10,11 +10,12 @@ import time
 import pprint
 
 # Setting folders
-infolder  = '/net/cms2/cms2r0/babymaker/babies/2016_06_05/data/unskimmed/'
-outfolder = '/net/cms2/cms2r0/babymaker/babies/2016_06_05/data/unskimmed/metlep/'
-jsonfile = '../../data/json/golden_Cert_271036-274240_13TeV_PromptReco_Collisions16_JSON.json'
 datasets = 'txt/metlep.txt'
-runs_file = 4 # Number of runs in each ntuple
+outfolder = '/net/cms2/cms2r0/babymaker/babies/2016_06_05/data/unskimmed/metlep/'
+infolder  = '/net/cms2/cms2r0/babymaker/babies/2016_06_05/data/unskimmed/'
+
+jsonfile = '../../data/json/golden_Cert_271036-274240_13TeV_PromptReco_Collisions16_JSON.json'
+runs_file = 1 # Number of runs in each ntuple
 
 
 runs = []
@@ -31,8 +32,8 @@ runs = [runs[i:i+runs_file] for i in xrange(0, len(runs), runs_file)]
 # Sending jobs for each set of runs
 os.system("JobSetup.csh")
 for run in runs:
-  cmd = "bsub ./run/combine_datasets.exe -i "+infolder+" -o "+outfolder+" -f "+datasets+" -b "+run[0]+" -e "+run[-1]
-  print cmd
+  cmd = "JobSubmit.csh ./run/wrapper.sh ./run/combine_datasets.exe -i "+infolder+" -o "+outfolder+" -f "+datasets+" -b "+run[0]+" -e "+run[-1]
+  # print cmd
   os.system(cmd)
 
 sys.exit(0)

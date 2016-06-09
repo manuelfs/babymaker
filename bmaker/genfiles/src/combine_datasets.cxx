@@ -69,7 +69,6 @@ int main(int argc, char *argv[]){
 
   vector<TString> datasets;
   TString buffer, basename("Run2016");
-  if(begrun>0) basename += run_s;
   ifstream indata(file_datasets);
   while(indata){
     indata >> buffer;
@@ -78,6 +77,7 @@ int main(int argc, char *argv[]){
       basename += ("_"+buffer);
     }
   }
+  if(begrun>0) basename += run_s;
 
   map<int, set<Long64_t> > events;
   Long64_t event;
@@ -147,21 +147,22 @@ int main(int argc, char *argv[]){
   //   cout << it->first  <<", ";
   // } // Needs c++11
 
-  TString txtname(outfolder+"/runs_"+basename+".txt");
-  ofstream txtfile(txtname);
-  int prevrun(0);
-  for(map<int, set<Long64_t> >::const_iterator it = events.begin(); it != events.end(); ++it) {
-    run = it->first;
-    if(run/1000 != prevrun){
-      prevrun = run/1000;
-      txtfile<<endl;
+  if(false){
+    TString txtname(outfolder+"/runs_"+basename+".txt");
+    ofstream txtfile(txtname);
+    int prevrun(0);
+    for(map<int, set<Long64_t> >::const_iterator it = events.begin(); it != events.end(); ++it) {
+      run = it->first;
+      if(run/1000 != prevrun){
+	prevrun = run/1000;
+	txtfile<<endl;
+      }
+      txtfile << run << "  ";
     }
-    txtfile << run << "  ";
+    txtfile<<endl;
+    txtfile.close();
+    cout<<endl<<"Written run numbers in "<<txtname<<endl;
   }
-  txtfile<<endl;
-  txtfile.close();
-  cout<<endl<<"Written run numbers in "<<txtname<<endl;
-
   cout<<endl<<endl;
 
   return 0;

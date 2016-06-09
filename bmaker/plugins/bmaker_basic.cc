@@ -1335,10 +1335,10 @@ bmaker_basic::bmaker_basic(const edm::ParameterSet& iConfig):
   baby.tree_.SetDirectory(outfile);
 
   xsec = xsec::crossSection(outname);
-  if(xsec<=0) {
-    cout<<"BABYMAKER: Cross section not found, aborting"<<endl<<endl;
-    exit(1);
-  }
+  // if(xsec<=0) {
+  //   cout<<"BABYMAKER: Cross section not found, aborting"<<endl<<endl;
+  //   exit(1);
+  // }
 
   trig_name = vector<TString>();
   if(outname.Contains("Run201")){

@@ -25,11 +25,18 @@ int main(int argc, char *argv[]){
   time(&startTime);
 
   TString file_datasets("txt/singlelep.txt"), infolder(""), outfolder("out/");
+  int begrun(-1), endrun(-1);
   int c(0);
-  while((c=getopt(argc, argv, "f:i:o:"))!=-1){
+  while((c=getopt(argc, argv, "f:i:o:b:e:"))!=-1){
     switch(c){
     case 'i':
       infolder=optarg;
+      break;
+    case 'b':
+      begrun=atoi(optarg);
+      break;
+    case 'e':
+      endrun=atoi(optarg);
       break;
     case 'o':
       outfolder=optarg;
@@ -43,12 +50,26 @@ int main(int argc, char *argv[]){
   }
   if(file_datasets=="" || infolder==""){
     cout<<endl<<"Specify input folder and datasets: "
-	<<"./run/combine_datasets.exe -i <infolder> -o <outfolder=out> -f <file_datasets=txt/singlelep.txt>"<<endl<<endl;
+	<<"./run/combine_datasets.exe -i <infolder> -o <outfolder=out> -f <file_datasets=txt/singlelep.txt> -b  <begrun=-1> -e <endrun=-1>"<<endl<<endl;
     return 1;
+  }
+
+  TString run_s="_runs"; run_s += begrun; 
+  if(endrun>begrun){
+    run_s += "-"; run_s += endrun;
+  }
+  if(begrun>0){
+    if(endrun<begrun){
+      cout<<"You set begrun to "<<begrun<<", and endrun to "<<endrun
+	  <<", but endrun has to be >= to begrun. Exiting"<<endl<<endl;
+      return 1;
+    }
+    cout<<"Combining "<<run_s<<" of ntuples in "<<infolder<<endl;
   }
 
   vector<TString> datasets;
   TString buffer, basename("Run2016");
+  if(begrun>0) basename += run_s;
   ifstream indata(file_datasets);
   while(indata){
     indata >> buffer;
@@ -79,15 +100,16 @@ int main(int argc, char *argv[]){
 
     TTree *outtree(chain.CloneTree(0));
 
-    chain.SetBranchAddress("event", &event);
-    chain.SetBranchAddress("run", &run);
+    // TBranch *b_event = chain.Branch("event", &event);
+    // TBranch *b_run = chain.Branch("run", &run);
+    TBranch *b_event(NULL), *b_run(NULL);
+    chain.SetBranchAddress("event", &event, &b_event);
+    chain.SetBranchAddress("run", &run, &b_run);
 
-    long entries(chain.GetEntries());
-    // entries = 100;
+    long entries(chain.GetEntries()), tree_entry;
 
     cout<<endl<<"Doing "<<files<<" files in "<<filename<<" with "<<entries<<" entries"<<endl;
     for(int entry(0); entry<entries; entry++){
-      chain.GetEntry(entry);
       if(entry!=0 && entry%250000==0) {
 	time(&curTime);
 	int seconds(difftime(curTime,startTime));
@@ -97,9 +119,17 @@ int main(int argc, char *argv[]){
 	    <<setw(4)<<roundNumber(entry,1,seconds*1000.)<<" kHz"<<endl;
       }
       
+      // Load "run" first, and check if it's in the range we care about
+      tree_entry = chain.LoadTree(entry);
+      b_run->GetEntry(tree_entry);
+      if(begrun>0 && (run<begrun || run>endrun)) continue;
+      b_event->GetEntry(tree_entry);
+
       if(events.find(run) == events.end()) events[run] = set<Long64_t>(); // New run
       if(events[run].find(event) == events[run].end()){ // New event
 	events[run].insert(event);
+	// You need to load all branches to copy them into outtree
+	chain.GetEntry(entry);
 	outtree->Fill();
       } 
     } // Loop over entries

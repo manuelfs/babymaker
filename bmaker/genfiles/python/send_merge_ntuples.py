@@ -9,8 +9,8 @@ import string
 import time
 
 # Setting folders
-folder    = '/net/cms27/cms27r0/babymaker/2016_04_29/mc/'
-skims = ['abcd', 'baseline', 'sys_abcd', '1lht500met200']
+folder    = '/cms2r0/babymaker/babies/2015_11_28/mc/'
+skims = ['abcdnj4']
 
 
 os.system("JobSetup.csh")
@@ -18,7 +18,7 @@ for skim in skims:
   # Checking if input folder exists and creating output folder
   infolder = folder+"/skim_"+skim+"/"
   if not os.path.exists(infolder):
-    print "Skim "+infolder+"does not exist. Skipping"
+    print "Skim "+infolder+" does not exist. Skipping"
     continue
   outfolder = folder+"/merged_"+skim+"/"
   if not os.path.exists(outfolder):
@@ -30,6 +30,7 @@ for skim in skims:
     tag = file.split("RunII")[0]
     if ("TTJets_Tune" not in tag) and ("DYJetsToLL_M-50_Tune" not in tag): tag = tag.split("Tune")[0]
     tag = tag.split("13TeV")[0]
+    tag = tag.split("PromptReco-v2")[0]+"PromptReco-v2"
     tag = tag.split("baby_")[1]
     infiles.add("_"+tag)
 
@@ -47,8 +48,6 @@ for skim in skims:
     fexe.write("./run/merge_ntuples.exe "+infolder+' '+outfolder+' '+ifile+' '+skim+'\n')
     fexe.close()
     cmd = "JobSubmit.csh ./run/wrapper.sh "+exename
-    #print cmd
-    #os.system('ls '+folder+'*'+ifile+'*')
     os.system(cmd)
 	
   print "\nSubmitted "+str(len(infiles))+" merging jobs. Output goes to "+outfolder+"\n"

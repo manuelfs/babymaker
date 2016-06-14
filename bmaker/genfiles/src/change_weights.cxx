@@ -75,16 +75,16 @@ int main(int argc, char *argv[]){
  
   int nentries = ch.GetEntries();
   //Loop over events and get sum of weights
+  time(&begtime);
   for(int ientry=0; ientry<nentries; ientry++){
     ch.GetEntry(ientry); 
 
-    //Progress meter
-    if((ientry<100&&ientry%10==0) || (ientry<1000&&ientry%100==0) || (ientry<10000&&ientry%1000==0) || (ientry%10000==0) 
-       || (ientry+1==nentries)){
-      printf("\r[Change Weights] Calculating Weights: %i / %i (%i%%)",ientry,nentries,
-	     static_cast<int>(((ientry+1.)*100./nentries)));
-      fflush(stdout);
-      if(ientry+1==nentries) printf("\n");
+    if(ientry%500000==0 || ientry==nentries-1) {
+      time(&endtime);
+      int seconds(difftime(endtime,begtime));
+      cout<<"Doing entry "<<setw(10)<<addCommas(ientry+1)<<" of "<<addCommas(nentries)
+	  <<"    Took "<<setw(6)<<seconds<<" seconds at "
+	  <<setw(4)<<roundNumber(ientry,1,seconds*1000.)<<" kHz"<<endl;
     }
     float lsign = ch.w_lumi()>0 ? 1:-1;
     nent_eff += lsign;
@@ -182,6 +182,7 @@ int main(int argc, char *argv[]){
   //   ", w_lumi_corr "<<w_lumi_corr<<endl;
   //Calculate weights
   float w_corr_l0 = (nent-sum_wlep)/nent_zlep * (nent-sum_fs_wlep)/nent_zlep;
+  if(nent_zlep==0) w_corr_l0 = 1.;
   var_val[0].push_back("*"+to_string(nent*wanted_toppt/(sum_weff_l0*w_corr_l0 + sum_weff_l1)));
   var_val[1].push_back("*"+to_string(nent/sum_btag));
   var_val[2].push_back("*"+to_string(nent/sum_pu));

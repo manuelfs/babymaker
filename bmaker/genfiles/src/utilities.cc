@@ -133,18 +133,21 @@ int change_branch_one(TString indir, TString name, TString outdir, vector<TStrin
 
   //Loop and fill events with new weights
   int nentries = oldtree->GetEntries();
+  time_t begtime, endtime;
+  time(&begtime);
   for(int i=0; i<nentries; i++){
     //if(i==10) exit(0);
     oldtree->GetEntry(i);
 
     w_corr = 1;
-
-    if((i<100&&i%10==0) || (i<1000&&i%100==0) || (i<10000&&i%1000==0) || (i%10000==0) || (i+1==nentries)){
-      printf("\r[Change Branch One] Processsing File: %i / %i (%i%%)",i,nentries,static_cast<int>(((i+1.)*100./nentries)));
-      fflush(stdout);
-      if(i+1==nentries) printf("\n");
+    if(i%500000==0 || i==nentries-1) {
+      time(&endtime);
+      int seconds(difftime(endtime,begtime));
+      cout<<"Doing entry "<<setw(10)<<addCommas(i+1)<<" of "<<addCommas(nentries)
+	  <<"    Took "<<setw(6)<<seconds<<" seconds at "
+	  <<setw(4)<<roundNumber(i,1,seconds*1000.)<<" kHz"<<endl;
     }
-   
+
     float minpdf(1e10);
     
     //Set vars
@@ -206,7 +209,12 @@ int change_branch_one(TString indir, TString name, TString outdir, vector<TStrin
             break;
           }
         } // if multiply
-        if(ivar_type[iset] == kFloat)  new_var_flt_[iset] = noNaN(new_var_flt_[iset]);
+        if(ivar_type[iset] == kFloat)  {
+	  if(isnan(new_var_flt_[iset])) {
+	    new_var_flt_[iset] = 1.;
+	    if(i==0) cout<<endl<<"==== WARNING: Branch \""<<var[iset]<<"\" is NaN ====="<<endl<<endl;
+	  } else new_var_flt_[iset] = noNaN(new_var_flt_[iset]);
+	}
         if(ivar_type[iset] == kvFloat) new_var_vflt_[iset]->at(vidx) = noNaN(new_var_vflt_[iset]->at(vidx));
       } // Loop over elements in each variable
       if(var[iset].Contains("sys_pdf")) new_var_vflt_[iset]->at(1) = minpdf*var_val[iset][1].Atof(); 
@@ -214,14 +222,21 @@ int change_branch_one(TString indir, TString name, TString outdir, vector<TStrin
       // Hack to protect total weight from NaN, and not include w_pu
       if(var[iset].Contains("w_lep"))    {w_lep    = new_var_flt_[iset]; w_corr *= var_val[iset][0].Atof(); }
       if(var[iset].Contains("w_fs_lep")) {w_fs_lep = new_var_flt_[iset]; w_corr *= var_val[iset][0].Atof(); }
-      if(var[iset].Contains("w_lumi"))   {w_lumi   = new_var_flt_[iset]; w_corr *= w_lumi/w_lumi_old; }
+      if(var[iset].Contains("w_lumi"))   {
+	w_lumi   = new_var_flt_[iset]; 
+	if(w_lumi_old<0) {
+	  w_lumi *= -1;
+	  new_var_flt_[iset] *= -1;
+	}
+	w_corr *= w_lumi/w_lumi_old; // Not currently used
+      }
     } // Loop over variables
     // Hack to protect total weight from NaN, and not include w_pu
     for(int iset=0; iset<nvar; iset++)
-      if(var[iset].Contains("weight"))
+      if(var[iset].Contains("weight")){
         new_var_flt_[iset] = w_lep * w_fs_lep * w_toppt * w_btag * w_lumi  * var_val[iset][0].Atof() 
 	  * eff_jetid; 
-
+      }
     newtree->Fill();
   }
   

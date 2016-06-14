@@ -49,8 +49,8 @@ def getNumberOfEvents(dataset):
       sumevents+=idata.get('result').get('value')
     return sumevents
 
-do_data2016 = False 
-do_80X = True 
+do_data2016 = True 
+do_80X = False 
 
 do_data = False
 do_ttbar = False

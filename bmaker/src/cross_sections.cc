@@ -134,6 +134,8 @@ namespace xsec{
     if (file.Contains("ST_t-channel_top_4f_leptonDecays_13TeV-powheg-pythia8"))     xsec = 44.07;
     if (file.Contains("ST_tW_antitop_5f_inclusiveDecays_13TeV-powheg-pythia8"))     xsec = 35.8;
     if (file.Contains("ST_tW_top_5f_inclusiveDecays_13TeV-powheg-pythia8"))     xsec = 35.8; 
+    if (file.Contains("ST_tW_antitop_5f_NoFullyHadronicDecays_13TeV-powheg"))     xsec = 35.8*0.438;
+    if (file.Contains("ST_tW_top_5f_NoFullyHadronicDecays_13TeV-powheg"))     xsec = 35.8*0.438; 
 
     if(file.Contains("DYJetsToLL_M-10to50_TuneCUETP8M1_13TeV")) xsec = 18610*1.23;
     if(file.Contains("DYJetsToLL_M-50_TuneCUETP8M1_13TeV"))     xsec = 4895*1.23;

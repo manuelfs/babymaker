@@ -8,6 +8,7 @@
 #include <iostream>
 #include <string>
 #include <stdexcept>
+#include <iomanip>   // setw
 
 #include "TCollection.h"
 #include "TFile.h"
@@ -236,6 +237,7 @@ int change_branch_one(TString indir, TString name, TString outdir, vector<TStrin
       if(var[iset].Contains("weight")){
         new_var_flt_[iset] = w_lep * w_fs_lep * w_toppt * w_btag * w_lumi  * var_val[iset][0].Atof() 
 	  * eff_jetid; 
+	//* eff_jetid * eff_trig_; 
       }
     newtree->Fill();
   }

@@ -6,9 +6,9 @@ import pprint
 import glob
 
 # Setting folders
-oldfolder    = '/net/cms27/cms27r0/babymaker/2016_04_29/mc/skim_1lht500met200/'
-newfolder    = '/net/cms2/cms2r0/babymaker/babies/2016_05_31/mc/'
-link_dest    =  '/net/cms2/cms2r0/babymaker/babies/2016_05_31/mc/skim_1lht500met200/'
+oldfolder    = '/net/cms27/cms27r0/babymaker/2016_04_29/mc/unskimmed/'
+newfolder    = '/net/cms2/cms2r0/babymaker/babies/2016_06_14/mc/unskimmed/'
+link_dest    = '/net/cms2/cms2r0/babymaker/babies/2016_06_14/mc/unskimmed/'
 
 ## Finding tags for each dataset
 oldsamples, newsamples = set(), set()

@@ -9,8 +9,8 @@ import string
 import time
 
 # Setting folders
-folder    = '/cms2r0/babymaker/babies/2015_11_28/mc/'
-skims = ['abcdnj4']
+folder    = '/net/cms2/cms2r0/babymaker/babies/2016_06_14/mc/'
+skims = ['standard', 'baseline', 'nl2nb2nj3', 'qcd', 'dy_ht300']
 
 
 os.system("JobSetup.csh")
@@ -30,7 +30,7 @@ for skim in skims:
     tag = file.split("RunII")[0]
     if ("TTJets_Tune" not in tag) and ("DYJetsToLL_M-50_Tune" not in tag): tag = tag.split("Tune")[0]
     tag = tag.split("13TeV")[0]
-    tag = tag.split("PromptReco-v2")[0]+"PromptReco-v2"
+    if("PromptReco-v2" in tag): tag = tag.split("PromptReco-v2")[0]+"PromptReco-v2"
     tag = tag.split("baby_")[1]
     infiles.add("_"+tag)
 

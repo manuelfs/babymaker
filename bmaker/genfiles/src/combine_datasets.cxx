@@ -109,6 +109,7 @@ int main(int argc, char *argv[]){
     long entries(chain.GetEntries()), tree_entry;
 
     cout<<endl<<"Doing "<<files<<" files in "<<filename<<" with "<<entries<<" entries"<<endl;
+    time(&startTime);
     for(int entry(0); entry<entries; entry++){
       if(entry!=0 && entry%250000==0) {
 	time(&curTime);
@@ -139,7 +140,6 @@ int main(int argc, char *argv[]){
     outfile.Close();
     time(&curTime);
     cout<<"Took "<<difftime(curTime,startTime) <<" seconds to write "<<outname<<endl;
-    time(&startTime);
 
   } // Loop over datasets
 

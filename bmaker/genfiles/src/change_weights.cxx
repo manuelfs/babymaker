@@ -4,6 +4,7 @@
 #include <ctime>
 #include <string>
 #include <vector>
+#include <iomanip>   // setw
 
 #include "TChain.h"
 #include "TError.h"

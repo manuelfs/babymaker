@@ -31,6 +31,7 @@ int main(int argc, char *argv[]){
   TChain chain("tree");
   int nfiles = chain.Add(ntuples);
   TString outname = outfolder+"/mergedbaby_"+ntuples_tag+"_"+out_tag+"_nfiles_"+to_string(nfiles)+".root";
+  cout<<endl<<"Merging "<<ntuples<<" with "<<chain.GetEntries()<<" entries into "<<outname<<endl;
   chain.Merge(outname);
 
   // Merging treeglobal TTrees

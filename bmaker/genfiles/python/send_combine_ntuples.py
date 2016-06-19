@@ -10,11 +10,11 @@ import time
 import pprint
 
 # Setting folders
-datasets = 'txt/metlep.txt'
-outfolder = '/net/cms2/cms2r0/babymaker/babies/2016_06_05/data/unskimmed/metlep/'
-infolder  = '/net/cms2/cms2r0/babymaker/babies/2016_06_05/data/unskimmed/'
+datasets = 'txt/hadlep.txt'
+outfolder = '/net/cms2/cms2r0/babymaker/babies/2016_06_14/data/unskimmed/hadlep/'
+infolder  = '/net/cms2/cms2r0/babymaker/babies/2016_06_14/data/unskimmed/'
+jsonfile = '../../data/json/golden_Cert_271036-274421_13TeV_PromptReco_Collisions16_JSON.txt'
 
-jsonfile = '../../data/json/golden_Cert_271036-274240_13TeV_PromptReco_Collisions16_JSON.json'
 runs_file = 1 # Number of runs in each ntuple
 
 

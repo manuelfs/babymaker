@@ -46,21 +46,26 @@ for ds in sorted(mcset):
     c = TChain("tree")
     c.Add(mcdir+"/*"+ds+"*.root")
     ntot = c.GetEntries()
+    nneg = 0
+    if "amcatnlo" in ds:
+        nneg = c.GetEntries("weight<0")
     f = TFile(glob.glob(mcdir+"/*"+ds+"*.root")[0],"READ")
     g = f.Get("treeglobal")
     xsec = -1
     for event in g:
         xsec = event.xsec
         break
-    lumi = ntot/xsec/1000.
+    lumi = ntot/xsec/1000.*math.pow(1-2*float(nneg)/ntot,2)
     print ds, ntot, xsec, lumi
     mcrows.append(' &'.join([ds.replace('_','\\_'),'{:,}'.format(ntot),'{:,.2f}'.format(lumi)])+' \\\\\n')
 
 texfile = "dataset_table.tex"
 tex = open(texfile,"w")
 tex.write(table_header(3))
+tex.write(' &'.join(['Dataset name','Events','L [fb$^{-1}$]']))
+tex.write('\\hline\n')
 for i in darows: tex.write(i)
-tex.write('\\hline\\\\\n')
+tex.write('\\hline\n')
 for i in mcrows: tex.write(i)
 tex.write(table_footer())
 tex.close()

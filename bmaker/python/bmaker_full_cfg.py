@@ -41,7 +41,7 @@ options.parseArguments()
 outName = options.outputFile
 if outName == "output.root": # output filename not set
     rootfile = basename(options.inputFiles[0])
-    outName = "fullbaby_"+rootfile
+    outName = "fullbaby_"+rootfile.replace("file:","")
 
 doSystematics = True
 cmsswRel = environ["CMSSW_BASE"]

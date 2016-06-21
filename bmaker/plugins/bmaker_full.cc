@@ -17,6 +17,7 @@
 
 // FW physics include files
 #include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
+#include "SimDataFormats/GeneratorProducts/interface/GenLumiInfoHeader.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 
 // ROOT include files
@@ -263,7 +264,10 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   if (debug) cout<<"INFO: Retrieving hard scatter info..."<<endl;
   edm::Handle<LHEEventProduct> lhe_info;
   baby.stitch() = true;
-  if (!isData) {
+  if (outname.Contains("SMS-") && outname.Contains("Spring16")) {
+    baby.mgluino() = mprod_;
+    baby.mlsp() = mlsp_;
+  } else if (!isData) {
     iEvent.getByToken(tok_extLHEProducer_, lhe_info);
     if(!lhe_info.isValid()) iEvent.getByToken(tok_source_, lhe_info);
     if(lhe_info.isValid()) writeGenInfo(lhe_info);
@@ -1606,7 +1610,8 @@ bmaker_full::bmaker_full(const edm::ParameterSet& iConfig):
   tok_pruneGenPart_(consumes<reco::GenParticleCollection>(edm::InputTag("prunedGenParticles"))),
   tok_extLHEProducer_(consumes<LHEEventProduct>(edm::InputTag("externalLHEProducer"))),
   tok_source_(consumes<LHEEventProduct>(edm::InputTag("source"))),
-  tok_generator_(consumes<GenEventInfoProduct>(edm::InputTag("generator")))
+  tok_generator_(consumes<GenEventInfoProduct>(edm::InputTag("generator"))),
+  tok_genlumiheader_(consumes<GenLumiInfoHeader,edm::InLumi>(edm::InputTag("generator")))
 {
   time(&startTime);
 
@@ -1864,12 +1869,16 @@ void bmaker_full::endJob() {
 */
 
 // ------------ method called when starting to processes a luminosity block  ------------
-/*
-  void 
-  bmaker_full::beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
-  {
+
+void bmaker_full::beginLuminosityBlock(edm::LuminosityBlock const& iLumi, edm::EventSetup const& iEvent){
+  if (outname.Contains("Spring16") && outname.Contains("SMS-")){
+    edm::Handle<GenLumiInfoHeader> gen_header;
+    iLumi.getByToken(tok_genlumiheader_, gen_header);  
+    string model = gen_header->configDescription();
+    mcTool->getMassPoints(model, mprod_, mlsp_);
   }
-*/
+}
+
 
 // ------------ method called when ending the processing of a luminosity block  ------------
 /*

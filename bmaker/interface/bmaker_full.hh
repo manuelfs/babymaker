@@ -148,6 +148,9 @@ public:
   static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 
 private:
+  int mprod_;
+  int mlsp_;
+
   // Tokens
   edm::EDGetTokenT<edm::TriggerResults> tok_trigResults_hlt_;
   edm::EDGetTokenT<pat::PackedTriggerPrescales> tok_patTrig_;
@@ -175,6 +178,7 @@ private:
   edm::EDGetTokenT<LHEEventProduct> tok_extLHEProducer_;
   edm::EDGetTokenT<LHEEventProduct> tok_source_;
   edm::EDGetTokenT<GenEventInfoProduct> tok_generator_;
+  edm::EDGetTokenT<GenLumiInfoHeader> tok_genlumiheader_;
 
   virtual void beginJob() override;
   virtual void analyze(const edm::Event&, const edm::EventSetup&) override;
@@ -183,7 +187,7 @@ private:
 
   // virtual void beginRun(edm::Run const&, edm::EventSetup const&) override;
   // virtual void endRun(edm::Run const&, edm::EventSetup const&) override;
-  //virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;
+  virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;
   //virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;
 
   // ----------member data ---------------------------

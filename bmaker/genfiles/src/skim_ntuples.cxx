@@ -48,6 +48,7 @@ int main(int argc, char *argv[]){
 
   TString tag = cuts; // Using tag to avoid file names too long for TFile
   if(cuts=="standard") cuts="nleps>=1&&ht>500&&met>200";
+  if(cuts=="met150") cuts="nleps>=1&&ht>500&&met>150&&met<=200&&njets>=5";
   if(cuts=="abcd") cuts="nleps==1&&ht>500&&met>200&&njets>=6&&nbm>=1&&mj14>250&&nveto==0";
   if(cuts=="baseline") cuts="nleps==1&&ht>500&&met>200&&njets>=6&&nbm>=1";
   if(cuts=="sys_abcd") 
@@ -57,7 +58,7 @@ int main(int argc, char *argv[]){
   if(cuts=="dy_ht300")
     cuts = "nvleps==2&&nleps>=1&&Max$(leps_pt)>30&&((elelv_m>80&&elelv_m<100)||(mumuv_m>80&&mumuv_m<100))&&ht>300";
   if(cuts=="ttisr")
-    cuts = "nvleps==2&&nleps>=1&&Max$(leps_pt)>30&&njets>=2&&nbm==2";
+    cuts = "nvleps==2&&nleps>=1&&max(Max$(mus_pt*(mus_tight&&mus_reliso<.1)),Max$(els_pt*(els_tight&&els_reliso<.1)))>30&&nbm==2";
   if(cuts=="ttdilep_ht300")
     cuts = "nels==1&&nmus==1&&Max$(leps_pt)>30&&ht>300&&met>100&&nbm>=1";
   if(cuts=="qcd")
@@ -101,11 +102,11 @@ void onefile_skim(TString infiles, TString outfolder, TString cuts, TString tag)
   outfile.Remove(0, outfile.Last('/')); outfile.ReplaceAll("*","");
   if(outfile.Contains(".root")) outfile.ReplaceAll(".root","_"+tag+".root");
   else outfile += ("_"+tag+".root");
-  outfile.ReplaceAll(">=","ge"); outfile.ReplaceAll("<=","se"); outfile.ReplaceAll("&","_");
-  outfile.ReplaceAll(">","g"); outfile.ReplaceAll("<","s"); outfile.ReplaceAll("=","");
+  outfile.ReplaceAll(">=","GE"); outfile.ReplaceAll("<=","SE"); outfile.ReplaceAll("&","_");
+  outfile.ReplaceAll(">","G"); outfile.ReplaceAll("<","S"); outfile.ReplaceAll("=","");
   outfile.ReplaceAll("(",""); outfile.ReplaceAll(")",""); outfile.ReplaceAll("+","");
   outfile.ReplaceAll("[",""); outfile.ReplaceAll("]",""); outfile.ReplaceAll("|","_");
-  outfile.ReplaceAll("$",""); outfile.ReplaceAll(",","_");
+  outfile.ReplaceAll("$",""); outfile.ReplaceAll(",","_"); outfile.ReplaceAll("!","NOT");
   outfile = outfolder+outfile;
 
   // Checking if output file exists

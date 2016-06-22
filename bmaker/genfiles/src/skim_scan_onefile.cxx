@@ -38,6 +38,10 @@ int main(int argc, char *argv[]){
   treeglobal.Add(infiles);  
   //long nentries(tree.GetEntries());
 
+  TString outfolder = outpath;
+  outfolder.Remove(outfolder.Last('/')+1, outfolder.Length());
+  if(outfolder!="") gSystem->mkdir(outfolder, kTRUE);
+
   //Project tree into mass plane to find points for skim
   TH2F * mass_plane = new TH2F("mglu_vs_mlsp","mglu_vs_mlsp",3000,-0.5,2999.5,3000,-0.5,2999.5);
   tree.Project("mglu_vs_mlsp","mgluino:mlsp","","colz");
@@ -51,6 +55,7 @@ int main(int argc, char *argv[]){
   //load all pairs as cuts into vector
   vector<TString> pair_cuts;
   vector<TString> mass_tag;
+  int Npoints=0;
   for(int iy=ini_y; iy<=last_y; iy++){
     for(int ix=ini_x; ix<=last_x; ix++){
       if(mass_plane->GetBinContent(ix,iy) > 0){
@@ -59,6 +64,7 @@ int main(int argc, char *argv[]){
         pair_cuts.push_back(Form("mgluino==%i&&mlsp==%i",mglui,mlsp));
         mass_tag.push_back(Form("mGluino-%i_mLSP-%i",mglui,mlsp));
         cout<<"Found mass point "<<mass_tag.back()<<endl;
+	Npoints++;
       }
     }
   }
@@ -69,7 +75,7 @@ int main(int argc, char *argv[]){
   //struct tm * timeinfo = localtime(&curTime);
   //strftime(time_c,100,"%Y-%m-%d %H:%M:%S",timeinfo);
   int seconds(floor(difftime(curTime,startTime)+0.5));
-  cout<<"took "<<seconds<<" seconds to fill chain, project and find mass pairs"<<endl;
+  cout<<endl<<"Took "<<seconds<<" seconds to fill chain, project and find the "<<Npoints<<" mass pairs"<<endl<<endl;
  
   // Finding outfile names
   for(unsigned int ip = 0; ip<pair_cuts.size(); ip++){

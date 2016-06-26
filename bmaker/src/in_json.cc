@@ -21,6 +21,8 @@ std::vector< std::vector<int> > MakeVRunLumi(std::string input){
     fullpath += "json/golden_Cert_246908-258714_13TeV_PromptReco_Collisions15_25ns_JSON.json";
   } else if(input == "nonblind"){
     fullpath += "json/golden_Cert_271036-274240_13TeV_PromptReco_Collisions16_JSON.json";
+  } else if(input == "json2p6"){
+    fullpath += "json/golden_Cert_271036-274443_13TeV_PromptReco_Collisions16.json";
   } else{
     fullpath = input;
   }
@@ -48,7 +50,7 @@ std::vector< std::vector<int> > MakeVRunLumi(std::string input){
     }
   }//check if the file opened.
   else{
-    std::cout<<"Invalid JSON File!\n";
+    std::cout<<"Invalid JSON File:"<<fullpath<<"!\n";
   }
   orgJSON.close();
   if(VRunLumi.size() == 0){

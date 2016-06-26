@@ -121,6 +121,24 @@ process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_condD
 process.GlobalTag.globaltag = globalTag
 
 
+
+if not fastsim:
+    process.load('Configuration.StandardSequences.Services_cff')
+
+    ##_____________Bad charged candidate filter________________||
+    process.load('RecoMET.METFilters.BadChargedCandidateFilter_cfi')
+    process.BadChargedCandidateFilter.muons = cms.InputTag("slimmedMuons")
+    process.BadChargedCandidateFilter.PFCandidates = cms.InputTag("packedPFCandidates")
+    process.BadChargedCandidateFilter.debug = cms.bool(False)
+
+    ##_____________Bad muon filter_____________________________||
+    process.load('RecoMET.METFilters.BadPFMuonFilter_cfi')
+    process.BadPFMuonFilter.muons = cms.InputTag("slimmedMuons")
+    process.BadPFMuonFilter.PFCandidates = cms.InputTag("packedPFCandidates")
+    process.BadPFMuonFilter.debug = cms.bool(False)
+
+
+
 ###### HBHE
 ## HBHE noise filter needs to be recomputed in early 2015 data
 ##___________________________HCAL_Noise_Filter________________________________||
@@ -196,7 +214,8 @@ if doJEC:
 else:
     ###### Path
     if not fastsim:
-        process.p = cms.Path(#process.HBHENoiseFilterResultProducer* #produces HBHE baseline bools
+        process.p = cms.Path(process.BadChargedCandidateFilter*
+                             process.BadPFMuonFilter*
                              process.baby_full)
     else:
         process.p = cms.Path(process.baby_full)

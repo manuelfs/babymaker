@@ -75,7 +75,8 @@ public:
                  vCands &sig_leps, vCands &veto_leps, 
                  vCands &photons, vCands &tks, 
                  std::vector<LVector> &jets, 
-                 std::vector<std::vector<LVector> > &sysjets);
+                 std::vector<std::vector<LVector> > &sysjets,
+                 std::vector<double> &jetsMuonEnergyFrac);
   void writeFatJets(std::vector<LVector> &jets);
   vCands writeMuons(edm::Handle<pat::MuonCollection> muons, 
 		    edm::Handle<pat::PackedCandidateCollection> pfcands, 
@@ -105,7 +106,10 @@ public:
 		       vCands &all_mus, vCands &all_els, vCands &photons);
   void writeFilters(const edm::TriggerNames &fnames,
                     edm::Handle<edm::TriggerResults> filterBits,
-                    edm::Handle<reco::VertexCollection> vtx);
+                    edm::Handle<reco::VertexCollection> vtx,
+                    std::vector<LVector> jets,
+                    std::vector<double> jetsMuonEnergyFrac,
+                    double met_phi);
   void writeVertices(edm::Handle<reco::VertexCollection> vtx,
 		     edm::Handle<std::vector< PileupSummaryInfo > >  pu_info);  
   void writeGenInfo(edm::Handle<LHEEventProduct> lhe_info);

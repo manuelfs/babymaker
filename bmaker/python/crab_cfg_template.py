@@ -35,7 +35,7 @@ config.Data.inputDBS = 'global'
 if "Run201" in taskname:
     config.Data.splitting = 'LumiBased'
     config.Data.unitsPerJob = 100
-    config.Data.lumiMask = '/home/users/ana/CMSSW_8_0_9/src/babymaker/data/json/golden_Cert_2p6ifb_topup_13TeV_PromptReco_Collisions16_JSON.txt'
+    config.Data.lumiMask = '/home/users/ana/CMSSW_8_0_11/src/babymaker/data/json/golden_Cert_271036-275125_13TeV_PromptReco_Collisions16.json'
                           
 
 else:

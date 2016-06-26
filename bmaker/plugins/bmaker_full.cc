@@ -19,6 +19,7 @@
 #include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
 #include "SimDataFormats/GeneratorProducts/interface/GenLumiInfoHeader.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
+#include "DataFormats/TrackReco/interface/Track.h"
 
 // ROOT include files
 #include "TFile.h"
@@ -42,13 +43,15 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   baby.run() = iEvent.id().run();
   baby.event() = iEvent.id().event();
   baby.lumiblock() = iEvent.luminosityBlock();
+  // We are applying the golden JSON with lumisToProcess in bmaker_full_cfg.py
   if(isData){
     if (debug) cout<<"INFO: Checking JSON..."<<endl;
-    // We are applying the golden JSON with lumisToProcess in bmaker_full_cfg.py
-    bool nonblind(eventTool->isInJSON("nonblind", baby.run(), baby.lumiblock()));
-    //if(!isInJSON("golden", baby.run(), baby.lumiblock()) && !nonblind) return;
-    baby.nonblind() = nonblind;
-  } else baby.nonblind() = true;
+    baby.nonblind() = eventTool->isInJSON("nonblind", baby.run(), baby.lumiblock());
+    baby.json2p6() = eventTool->isInJSON("json2p6", baby.run(), baby.lumiblock());
+  } else {
+    baby.nonblind() = true;
+    baby.json2p6() = true;
+  }
 
   ////////////////////// Trigger /////////////////////
   if (debug) cout<<"INFO: Processing trigger info..."<<endl;
@@ -155,11 +158,12 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   /// Jets
   if (debug) cout<<"INFO: Writing jets..."<<endl;
   vector<LVector> jets;
+  vector<double> jetsMuonEnergyFrac;
   vector<vector<LVector> > sys_jets;
   if (!doSystematics) {
-    writeJets(alljets, genjets, sig_leps, veto_leps, photons, tks, jets, sys_jets);
+    writeJets(alljets, genjets, sig_leps, veto_leps, photons, tks, jets, sys_jets, jetsMuonEnergyFrac);
   } else {
-    writeJets(alljets, genjets, sig_leps, veto_leps, photons, tks, jets, sys_jets);
+    writeJets(alljets, genjets, sig_leps, veto_leps, photons, tks, jets, sys_jets, jetsMuonEnergyFrac);
     for (unsigned isys(0); isys<kSysLast; isys++){
       baby.sys_mj().push_back(jetTool->getSysMJ(1.2, sys_jets[isys]));
       baby.sys_mj08().push_back(jetTool->getSysMJ(0.8, sys_jets[isys]));
@@ -223,7 +227,7 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   if(filterBits.isValid()){
     const edm::TriggerNames &fnames = iEvent.triggerNames(*filterBits);
     //this method uses baby.pass_jets(), so call only after writeJets()!!
-    writeFilters(fnames, filterBits, vtx);
+    writeFilters(fnames, filterBits, vtx, jets, jetsMuonEnergyFrac, baby.met_phi());
   }
 
   //////////////// HLT objects //////////////////
@@ -330,7 +334,9 @@ void bmaker_full::writeMET(edm::Handle<pat::METCollection> mets, edm::Handle<pat
 void bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets, 
                             edm::Handle<edm::View <reco::GenJet> > genjets,
                             vCands &sig_leps, vCands &veto_leps, vCands &photons, vCands &tks,
-                            vector<LVector> &jets, vector<vector<LVector> > &sys_jets){
+                            vector<LVector> &jets, 
+                            vector<vector<LVector> > &sys_jets,
+                            vector<double> &jetsMuonEnergyFrac){
   vector<int> hi_csv(5,-1); // Indices of the 5 jets with highest CSV
   vCands jets_ra2;  vCands jets20_cands; vector<LVector> jets20;
   LVector jetsys_p4, jetsys_nob_p4;
@@ -383,7 +389,10 @@ void bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
       else baby.jets_pt_res().push_back(-99999.);
       baby.jets_hflavor().push_back(jet.hadronFlavour());
       baby.jets_csv().push_back(csv);
-      if (goodPtEta || isLep) jets.push_back(jetp4);
+      if (goodPtEta || isLep) {
+        jets.push_back(jetp4);
+        jetsMuonEnergyFrac.push_back(jet.muonEnergyFraction());
+      }
       jets20_cands.push_back(dynamic_cast<const reco::Candidate *>(&jet));
       jets20.push_back(jetp4);
       baby.jets_h1().push_back(false);
@@ -781,6 +790,21 @@ vCands bmaker_full::writeMuons(edm::Handle<pat::MuonCollection> muons,
     baby.mus_isomu18().push_back(false);   // Filled in writeHLTObjects
     baby.mus_mu50().push_back(false);      // Filled in writeHLTObjects
     baby.mus_mu8().push_back(false);       // Filled in writeHLTObjects
+    if (lep.track().isNonnull()){
+      baby.mus_trk_quality().push_back(lep.innerTrack()->quality(reco::TrackBase::highPurity));
+      baby.mus_pterr().push_back(lep.innerTrack()->ptError());
+      baby.mus_trk_nholes_in().push_back(lep.innerTrack()->hitPattern().numberOfLostHits(reco::HitPattern::MISSING_INNER_HITS));
+      baby.mus_trk_nholes_out().push_back(lep.innerTrack()->hitPattern().numberOfLostHits(reco::HitPattern::MISSING_OUTER_HITS));
+      baby.mus_trk_algo().push_back(lep.innerTrack()->algo());
+    } else {
+      baby.mus_trk_quality().push_back(-99999);
+      baby.mus_pterr().push_back(-99999);
+      baby.mus_trk_nholes_in().push_back(-99999);
+      baby.mus_trk_nholes_out().push_back(-99999);
+      baby.mus_trk_algo().push_back(-99999);
+    }
+    baby.mus_em_e().push_back(lep.calEnergy().em);
+    baby.mus_had_e().push_back(lep.calEnergy().had);
     all_mus.push_back(dynamic_cast<const reco::Candidate *>(&lep)); // For truth-matching in writeMC
 
     if(lepTool->isVetoMuon(lep, vtx, lep_iso)) {
@@ -820,6 +844,7 @@ vCands bmaker_full::writeElectrons(edm::Handle<pat::ElectronCollection> electron
     baby.els_phi().push_back(lep.phi());
     baby.els_dz().push_back(dz);
     baby.els_d0().push_back(d0);
+    baby.els_ip3d().push_back(lep.ip3d());
     baby.els_charge().push_back(lep.charge());
     baby.els_sigid().push_back(lepTool->idElectron(lep, vtx, lepTool->kMedium));
     baby.els_ispf().push_back(lep.numberOfSourceCandidatePtrs()==2 && abs(lep.sourceCandidatePtr(1)->pdgId())==11);
@@ -833,6 +858,20 @@ vCands bmaker_full::writeElectrons(edm::Handle<pat::ElectronCollection> electron
     baby.els_ele23().push_back(false);    // Filled in writeHLTObjects
     baby.els_ele105().push_back(false);   // Filled in writeHLTObjects
     baby.els_ele8().push_back(false);     // Filled in writeHLTObjects
+    baby.els_hovere().push_back(lep.hadronicOverEm());
+    baby.els_eoverp().push_back(lep.eSuperClusterOverP());
+    baby.els_em_e().push_back(lep.ecalEnergy());
+    baby.els_deta_sctrk().push_back(lep.deltaEtaSuperClusterTrackAtVtx());
+    baby.els_dphi_sctrk().push_back(lep.deltaPhiSuperClusterTrackAtVtx());
+    if (lep.gsfTrack().isNonnull()){
+      baby.els_trk_pt().push_back(lep.gsfTrack()->pt());
+      baby.els_trk_pterr().push_back(lep.gsfTrack()->ptError());
+      baby.els_trk_nholes().push_back(lep.gsfTrack()->hitPattern().numberOfLostHits(reco::HitPattern::MISSING_INNER_HITS));
+    } else {
+      baby.els_trk_pt().push_back(-99999);
+      baby.els_trk_pterr().push_back(-99999);
+      baby.els_trk_nholes().push_back(-99999);
+    }
     all_els.push_back(dynamic_cast<const reco::Candidate *>(&lep)); // For truth-matching in writeMC
 
     if(lepTool->isVetoElectron(lep, vtx, lep_iso)){
@@ -1125,9 +1164,13 @@ void bmaker_full::writeHLTObjects(const edm::TriggerNames &names,
 // From https://twiki.cern.ch/twiki/bin/viewauth/CMS/MissingETOptionalFiltersRun2
 void bmaker_full::writeFilters(const edm::TriggerNames &fnames,
                                edm::Handle<edm::TriggerResults> filterBits,
-                               edm::Handle<reco::VertexCollection> vtx){
+                               edm::Handle<reco::VertexCollection> vtx,
+                               vector<LVector> jets,
+                               vector<double> jetsMuonEnergyFrac,
+                               double met_phi){
   baby.pass_goodv() = true; baby.pass_cschalo() = true; baby.pass_eebadsc() = true;
   baby.pass_ecaldeadcell() = true; baby.pass_hbhe() = true; baby.pass_hbheiso() = true;
+  baby.pass_ra2_badmu() = true;
   for (size_t i(0); i < filterBits->size(); ++i) {
     string name = fnames.triggerName(i);
     bool pass = static_cast<bool>(filterBits->accept(i));
@@ -1149,6 +1192,14 @@ void bmaker_full::writeFilters(const edm::TriggerNames &fnames,
     && baby.pass_jets_ra2();
   baby.pass_nohf() = baby.pass_goodv() && baby.pass_eebadsc() && baby.pass_cschalo() && baby.pass_hbhe() && baby.pass_hbheiso() && baby.pass_ecaldeadcell() 
     && baby.pass_jets_nohf();
+
+  for (size_t ijet(0); ijet < jets.size(); ijet++){
+    if (jetsMuonEnergyFrac[ijet]<=0.5) continue;
+    if ((jetsMuonEnergyFrac[ijet]*jets[ijet].pt())<=200) continue;
+    if (dPhi(jets[ijet].phi(),met_phi)>=0.4) continue;
+    baby.pass_ra2_badmu() = false;
+    break;
+  }
 
   if (doSystematics){
     for (unsigned isys(0); isys<kSysLast; isys++){

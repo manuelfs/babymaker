@@ -21,6 +21,7 @@ bool event_tools::isInJSON(string type, int run, int lumiblock){
   //if(type=="golden") return inJSON(VRunLumi2015golden, run, lumiblock);
   if(type=="golden") return true; // Applying this in bmaker_*_cfg.py
   if(type=="nonblind") return inJSON(VRunLumi2015nonblind, run, lumiblock);
+  if(type=="json2p6") return inJSON(VRunLumi2016json2p6, run, lumiblock);
 
   return true;
 }
@@ -72,7 +73,8 @@ void event_tools::fillBeamHaloMap(string eventList){
 }
 
 event_tools::event_tools(TString outname):
-  VRunLumi2015nonblind(MakeVRunLumi("nonblind")){
+  VRunLumi2015nonblind(MakeVRunLumi("nonblind")),
+  VRunLumi2016json2p6(MakeVRunLumi("json2p6")){
 
   doBeamHalo = outname.Contains("Run2015");
   if(doBeamHalo) { 

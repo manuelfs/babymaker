@@ -10,13 +10,22 @@
 # inFile=/store/mc/RunIISpring15DR74/TTJets_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v2/00000/0C22259A-F008-E511-B7A9-003048FFCB84.root
 #inFile=/store/data/Run2015D/JetHT/MINIAOD/PromptReco-v4/000/258/159/00000/50A3A073-3B6C-E511-A997-02163E0144CD.root
 # inFile=/hadoop/cms/phedex/store/mc/RunIISpring16MiniAODv1/TTJets_SingleLeptFromT_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PUSpring16_80X_mcRun2_asymptotic_2016_v3_ext1-v1/70000/8E926E3B-F304-E611-A352-001E67A3FB9B.root
-inFile=/hadoop/cms/phedex/store/mc/RunIISpring16MiniAODv2/ttZJets_13TeV_madgraphMLM/MINIAODSIM/PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/70000/FEF1A376-641C-E611-AA2A-002590E7E00A.root
+# inFile=/hadoop/cms/phedex/store/mc/RunIISpring16MiniAODv2/ttZJets_13TeV_madgraphMLM/MINIAODSIM/PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/70000/FEF1A376-641C-E611-AA2A-002590E7E00A.root
+# inFile=/nfs-7/userdata/ana/TTJets_DiLept_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv1_PUSpring16_80X_mcRun2_asymptotic_2016_v3-v1.root
+inFile=/store/data/Run2016B/SingleMuon/MINIAOD/PromptReco-v2/000/275/375/00000/FEDDBC5C-4339-E611-8740-02163E0136C4.root
+inFile=/store/data/Run2016B/SingleMuon/MINIAOD/PromptReco-v2/000/275/066/00000/6CFE9029-6E34-E611-BA01-02163E011AC1.root
+inFile=/store/data/Run2016B/SingleMuon/MINIAOD/PromptReco-v2/000/274/388/00000/A0B6C0F6-D32B-E611-8A5A-02163E014167.root
+#inFile=/nfs-7/userdata/ana/TTJets_HT-2500toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv1_PUSpring16_80X_mcRun2_asymptotic_2016_v3-v1_f2.root
 
-nEvents="2000"
-outName="fullbaby_TTJets_SingleLeptFromT_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv1.root"
-outName="fullbaby20_TTJets_SingleLeptFromT_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv1.root"
+nEvents="1000"
+# outName="fullbaby_TTJets_SingleLeptFromT_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv1.root"
+# outName="fullbaby20_TTJets_SingleLeptFromT_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv1.root"
+# outName="fullbaby_TTJets_DiLept_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv1_PUSpring16_80X_mcRun2_asymptotic_2016_v3-v1.root"
+# outName="fullbaby_TTJets_HT-2500toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv1_PUSpring16_80X_mcRun2_asymptotic_2016_v3-v1.root"
+outName="fullbaby_SingleMuon_Run2016B_PromptReco-v2_run274388.root"
 
 json=do_not_want_json # If it can't find the file, it doesn't pre-apply the JSON
+json="babymaker/data/json/golden_Cert_271036-275125_13TeV_PromptReco_Collisions16.json"
 
 if (( "$#" > 0 ))
 then

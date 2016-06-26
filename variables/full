@@ -3,6 +3,7 @@ int run
 int lumiblock
 Long64_t event
 bool nonblind
+bool json2p6
 ## stitch is used to stitch an MC sample with its corresponding HT-bin sample
 bool stitch
 
@@ -136,6 +137,13 @@ std::vector<bool> mus_mu8
 std::vector<bool> mus_inz
 std::vector<bool> mus_inzv
 std::vector<int> mus_charge
+std::vector<float> mus_pterr
+std::vector<float> mus_trk_algo
+std::vector<bool> mus_trk_quality
+std::vector<int> mus_trk_nholes_in
+std::vector<int> mus_trk_nholes_out
+std::vector<float> mus_em_e
+std::vector<float> mus_had_e
 
 int nels
 int nvels
@@ -147,6 +155,7 @@ std::vector<float> els_miniso
 std::vector<float> els_reliso
 std::vector<float> els_dz
 std::vector<float> els_d0
+std::vector<float> els_ip3d
 std::vector<bool> els_ispf
 std::vector<bool> els_sig
 std::vector<bool> els_sigid
@@ -159,6 +168,14 @@ std::vector<bool> els_ele8
 std::vector<bool> els_inz
 std::vector<bool> els_inzv
 std::vector<int> els_charge
+std::vector<float> els_trk_pt
+std::vector<float> els_trk_pterr
+std::vector<int> els_trk_nholes
+std::vector<float> els_hovere
+std::vector<float> els_eoverp
+std::vector<float> els_em_e
+std::vector<float> els_deta_sctrk
+std::vector<float> els_dphi_sctrk
 
 ##################   Di-Leptons   ################
 float elmu_m
@@ -304,6 +321,7 @@ bool pass_ecaldeadcell;
 bool pass;
 bool pass_ra2;
 bool pass_nohf;
+bool pass_ra2_badmu;
 
 ################  Fat Jets   ##################
 int nfjets

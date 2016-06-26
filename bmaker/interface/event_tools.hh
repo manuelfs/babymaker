@@ -25,6 +25,7 @@ public:
   void fillBeamHaloMap(std::string eventList);
 
   const std::vector<std::vector<int> > VRunLumi2015nonblind;
+  const std::vector<std::vector<int> > VRunLumi2016json2p6;
 
   std::map<int, std::set<int> > badBeamHaloEvents;
   bool doBeamHalo;

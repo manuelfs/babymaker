@@ -138,7 +138,7 @@ std::vector<bool> mus_inz
 std::vector<bool> mus_inzv
 std::vector<int> mus_charge
 std::vector<float> mus_pterr
-std::vector<float> mus_trk_algo
+std::vector<int> mus_trk_algo
 std::vector<bool> mus_trk_quality
 std::vector<int> mus_trk_nholes_in
 std::vector<int> mus_trk_nholes_out

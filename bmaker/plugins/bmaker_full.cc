@@ -17,7 +17,9 @@
 
 // FW physics include files
 #include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
-#include "SimDataFormats/GeneratorProducts/interface/GenLumiInfoHeader.h"
+#ifdef POST_7_4
+  #include "SimDataFormats/GeneratorProducts/interface/GenLumiInfoHeader.h"
+#endif
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "DataFormats/TrackReco/interface/Track.h"
 
@@ -1661,8 +1663,11 @@ bmaker_full::bmaker_full(const edm::ParameterSet& iConfig):
   tok_pruneGenPart_(consumes<reco::GenParticleCollection>(edm::InputTag("prunedGenParticles"))),
   tok_extLHEProducer_(consumes<LHEEventProduct>(edm::InputTag("externalLHEProducer"))),
   tok_source_(consumes<LHEEventProduct>(edm::InputTag("source"))),
-  tok_generator_(consumes<GenEventInfoProduct>(edm::InputTag("generator"))),
-  tok_genlumiheader_(consumes<GenLumiInfoHeader,edm::InLumi>(edm::InputTag("generator")))
+  tok_generator_(consumes<GenEventInfoProduct>(edm::InputTag("generator")))
+  #ifdef POST_7_4
+  ,
+    tok_genlumiheader_(consumes<GenLumiInfoHeader,edm::InLumi>(edm::InputTag("generator")))
+  #endif
 {
   time(&startTime);
 
@@ -1922,12 +1927,14 @@ void bmaker_full::endJob() {
 // ------------ method called when starting to processes a luminosity block  ------------
 
 void bmaker_full::beginLuminosityBlock(edm::LuminosityBlock const& iLumi, edm::EventSetup const& iEvent){
+#ifdef POST_7_4
   if (outname.Contains("Spring16") && outname.Contains("SMS-")){
     edm::Handle<GenLumiInfoHeader> gen_header;
     iLumi.getByToken(tok_genlumiheader_, gen_header);  
     string model = gen_header->configDescription();
     mcTool->getMassPoints(model, mprod_, mlsp_);
   }
+#endif
 }
 
 

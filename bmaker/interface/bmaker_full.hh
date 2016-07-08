@@ -182,7 +182,9 @@ private:
   edm::EDGetTokenT<LHEEventProduct> tok_extLHEProducer_;
   edm::EDGetTokenT<LHEEventProduct> tok_source_;
   edm::EDGetTokenT<GenEventInfoProduct> tok_generator_;
-  edm::EDGetTokenT<GenLumiInfoHeader> tok_genlumiheader_;
+  #ifdef POST_7_4
+    edm::EDGetTokenT<GenLumiInfoHeader> tok_genlumiheader_;
+  #endif
 
   virtual void beginJob() override;
   virtual void analyze(const edm::Event&, const edm::EventSetup&) override;

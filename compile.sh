@@ -3,11 +3,18 @@
 ## Writing a tag because different code is need in 7.4.12 and before
 if [ ! -e bmaker/interface/release.hh ]
 then
-    if [[ $CMSSW_BASE == *"CMSSW_7_4_6"* ]]
+    if [[ $CMSSW_BASE == *"CMSSW_7_4"* ]]
     then
-	printf "#define PRE_7_4_12\n\n" > bmaker/interface/release.hh
+	printf "#define PRE_8_0\n\n" > bmaker/interface/release.hh
+
+	if [[ $CMSSW_BASE == *"CMSSW_7_4_6"* ]]
+	then
+	    printf "#define PRE_7_4_12\n\n" > bmaker/interface/release.hh
+	else
+	    printf "#define POST_7_4_12\n\n" > bmaker/interface/release.hh
+	fi
     else
-	printf "#define POST_7_4_12\n\n" > bmaker/interface/release.hh
+	printf "#define POST_7_4\n\n" > bmaker/interface/release.hh
     fi
 fi
 

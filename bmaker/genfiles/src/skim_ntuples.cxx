@@ -65,6 +65,8 @@ int main(int argc, char *argv[]){
     cuts = "ht>1000&&met<50&&(nvmus+nvels)==0";
   if(cuts=="qcd_njet10")
      cuts = "ht>1000&&met<50&&(nvmus+nvels)==0&&njets>=10";
+  if(cuts=="mm_std") cuts="Sum$(mm_nleps>=1&&mm_ht>500.&&mm_met>200.)>0";	     
+  if(cuts=="mm_std_nj5mj250") cuts="Sum$(mm_nleps>=1&&mm_ht>500&&mm_met>200&&mm_njets>=5&&mm_mj14_lep>250)>0||Sum$(mm_nleps>=1&&mm_ht>500&&mm_met>200&&mm_njets>=5&&mm_mj14_nolep>250)>0";	     
 	     
 
   vector<TString> files = dirlist(folder, "*"+filetag+"*.root");

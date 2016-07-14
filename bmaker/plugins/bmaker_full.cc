@@ -270,7 +270,7 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   if (debug) cout<<"INFO: Retrieving hard scatter info..."<<endl;
   edm::Handle<LHEEventProduct> lhe_info;
   baby.stitch() = true;
-  if (outname.Contains("SMS-") && outname.Contains("Spring16")) {
+  if (outname.Contains("SMS-") && outname.Contains("PUSpring16Fast")) {
     baby.mgluino() = mprod_;
     baby.mlsp() = mlsp_;
   } else if (!isData) {
@@ -1928,7 +1928,7 @@ void bmaker_full::endJob() {
 
 void bmaker_full::beginLuminosityBlock(edm::LuminosityBlock const& iLumi, edm::EventSetup const& iEvent){
 #ifdef POST_7_4
-  if (outname.Contains("Spring16") && outname.Contains("SMS-")){
+  if (outname.Contains("PUSpring16Fast") && outname.Contains("SMS-")){
     edm::Handle<GenLumiInfoHeader> gen_header;
     iLumi.getByToken(tok_genlumiheader_, gen_header);  
     string model = gen_header->configDescription();

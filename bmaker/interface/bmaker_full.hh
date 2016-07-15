@@ -70,7 +70,7 @@ public:
 
   // Functions that do the branch writing
   void writeMET(edm::Handle<pat::METCollection> mets, edm::Handle<pat::METCollection> mets_nohf);
-  void writeJets(edm::Handle<pat::JetCollection> alljets, 
+  std::vector<reco::Candidate::LorentzVector> writeJets(edm::Handle<pat::JetCollection> alljets, 
                  edm::Handle<edm::View <reco::GenJet> > genjets, 
                  vCands &sig_leps, vCands &veto_leps, 
                  vCands &photons, vCands &tks, 
@@ -113,6 +113,8 @@ public:
   void writeVertices(edm::Handle<reco::VertexCollection> vtx,
 		     edm::Handle<std::vector< PileupSummaryInfo > >  pu_info);  
   void writeGenInfo(edm::Handle<LHEEventProduct> lhe_info);
+  void nisrMatch(edm::Handle<reco::GenParticleCollection> genParticles, 
+                 std::vector<reco::Candidate::LorentzVector> &jets);
   void writeMC(edm::Handle<reco::GenParticleCollection> genParticles, vCands &all_mus, vCands &all_els, vCands &photons);
 
   void reportTime(const edm::Event& iEvent);

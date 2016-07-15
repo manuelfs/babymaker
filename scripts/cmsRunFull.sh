@@ -17,14 +17,17 @@
 # inFile=/store/data/Run2016B/SingleMuon/MINIAOD/PromptReco-v2/000/274/388/00000/A0B6C0F6-D32B-E611-8A5A-02163E014167.root
 #inFile=/nfs-7/userdata/ana/TTJets_HT-2500toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv1_PUSpring16_80X_mcRun2_asymptotic_2016_v3-v1_f2.root
 inFile=/hadoop/cms/phedex/store/mc/RunIISpring16MiniAODv2/SMS-T1qqqq_mGluino-1000_mLSP-800_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v2/80000/BAE83A6A-0B38-E611-BF40-0025905B85DA.root
-
-nEvents="1000"
+inFile=/nfs-7/userdata/ana/SMS-T1qqqq_mGluino-1400_mLSP-100_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv2_PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v2.root
+# inFile=/nfs-7/userdata/ana/TTJets_DiLept_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv1_PUSpring16_80X_mcRun2_asymptotic_2016_v3-v1.root
+nEvents="10000"
 # outName="fullbaby_TTJets_SingleLeptFromT_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv1.root"
 # outName="fullbaby20_TTJets_SingleLeptFromT_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv1.root"
 # outName="fullbaby_TTJets_DiLept_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv1_PUSpring16_80X_mcRun2_asymptotic_2016_v3-v1.root"
 # outName="fullbaby_TTJets_HT-2500toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv1_PUSpring16_80X_mcRun2_asymptotic_2016_v3-v1.root"
 # outName="fullbaby_SingleMuon_Run2016B_PromptReco-v2_run274388.root"
 outName="fullbaby_SMS-T1qqqq_mGluino-1000_mLSP-800_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv2_PUSpring16.root"
+outName="fullbaby_SMS-T1qqqq_mGluino-1400_mLSP-100_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv2_PUSpring16.root"
+# outName="fullbaby_TTJets_DiLept_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv1_PUSpring16_80X_mcRun2_asymptotic_2016_v3-v1.root"
 
 json=do_not_want_json # If it can't find the file, it doesn't pre-apply the JSON
 json="babymaker/data/json/golden_Cert_271036-275125_13TeV_PromptReco_Collisions16.json"

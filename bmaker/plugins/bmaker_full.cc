@@ -159,13 +159,13 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 
   /// Jets
   if (debug) cout<<"INFO: Writing jets..."<<endl;
-  vector<LVector> jets;
+  vector<LVector> jets, clean_jets;
   vector<double> jetsMuonEnergyFrac;
   vector<vector<LVector> > sys_jets;
   if (!doSystematics) {
-    writeJets(alljets, genjets, sig_leps, veto_leps, photons, tks, jets, sys_jets, jetsMuonEnergyFrac);
+    clean_jets = writeJets(alljets, genjets, sig_leps, veto_leps, photons, tks, jets, sys_jets, jetsMuonEnergyFrac);
   } else {
-    writeJets(alljets, genjets, sig_leps, veto_leps, photons, tks, jets, sys_jets, jetsMuonEnergyFrac);
+    clean_jets = writeJets(alljets, genjets, sig_leps, veto_leps, photons, tks, jets, sys_jets, jetsMuonEnergyFrac);
     for (unsigned isys(0); isys<kSysLast; isys++){
       baby.sys_mj().push_back(jetTool->getSysMJ(1.2, sys_jets[isys]));
       baby.sys_mj08().push_back(jetTool->getSysMJ(0.8, sys_jets[isys]));
@@ -248,6 +248,7 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
     edm::Handle<reco::GenParticleCollection> genParticles;
     iEvent.getByToken(tok_pruneGenPart_, genParticles);
     writeMC(genParticles, all_mus, all_els, photons);
+    nisrMatch(genParticles, clean_jets);
   }
 
   ////////////////// resolution-corrected MET /////////////////////////
@@ -289,7 +290,6 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   edm::Handle<GenEventInfoProduct> gen_event_info;
   iEvent.getByToken(tok_generator_, gen_event_info);
   writeWeights(sig_leps, gen_event_info, lhe_info);
-
 
   ////////////////// Filling the tree //////////////////
   baby.Fill();
@@ -333,13 +333,14 @@ void bmaker_full::writeMET(edm::Handle<pat::METCollection> mets, edm::Handle<pat
 }
 
 // Requires having called jetTool->getJetCorrections(alljets, rhoEvent_) beforehand
-void bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets, 
+vector<LVector> bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets, 
                             edm::Handle<edm::View <reco::GenJet> > genjets,
                             vCands &sig_leps, vCands &veto_leps, vCands &photons, vCands &tks,
                             vector<LVector> &jets, 
                             vector<vector<LVector> > &sys_jets,
                             vector<double> &jetsMuonEnergyFrac){
   vector<int> hi_csv(5,-1); // Indices of the 5 jets with highest CSV
+  vector<LVector> clean_jets;
   vCands jets_ra2;  vCands jets20_cands; vector<LVector> jets20;
   LVector jetsys_p4, jetsys_nob_p4;
   baby.njets() = 0; baby.nbl() = 0; baby.nbm() = 0;  baby.nbt() = 0;
@@ -391,6 +392,7 @@ void bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
       else baby.jets_pt_res().push_back(-99999.);
       baby.jets_hflavor().push_back(jet.hadronFlavour());
       baby.jets_csv().push_back(csv);
+      if (goodPtEta && !isLep) clean_jets.push_back(jetp4);
       if (goodPtEta || isLep) {
         jets.push_back(jetp4);
         jetsMuonEnergyFrac.push_back(jet.muonEnergyFraction());
@@ -705,7 +707,7 @@ void bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
 
 
   } // if njets >= 4
-
+  return clean_jets;
 } // writeJets
 
 void bmaker_full::writeFatJets(vector<LVector> &jets){
@@ -1262,6 +1264,87 @@ void bmaker_full::writeGenInfo(edm::Handle<LHEEventProduct> lhe_info){
     mcTool->getMassPoints(model_params,baby.mgluino(),baby.mlsp());
   }
 } // writeGenInfo
+
+void bmaker_full::nisrMatch(edm::Handle<reco::GenParticleCollection> genParticles, 
+                            vector<reco::Candidate::LorentzVector> &clean_jets){
+  bool verbose = false;
+  int nisr(0);
+  for (size_t ijet(0); ijet<clean_jets.size(); ijet++){
+
+    bool matched=false;
+    for (size_t imc(0); imc < genParticles->size(); imc++) {
+      if (matched) break;
+      const reco::GenParticle &mc = (*genParticles)[imc];
+      if (mc.status()!=23 || abs(mc.pdgId())>5) continue;
+      int momid = abs(mc.mother()->pdgId());
+      if(!(momid==6 || momid==23 || momid==24 || momid==25 || momid>1e6)) continue; 
+      //check against daughter in case of hard initial splitting
+      for (size_t idau(0); idau < mc.numberOfDaughters(); idau++) {
+        float dR = deltaR(clean_jets[ijet], mc.daughter(idau)->p4());
+        if(dR<0.3){
+          if (verbose) cout<<"Jet: ("<<clean_jets[ijet].pt()<<", "<<clean_jets[ijet].eta()<<", "<<clean_jets[ijet].phi()
+            <<"), MC: ("<<mc.daughter(idau)->pt()<<", "<<mc.daughter(idau)->eta()<<", "<<mc.daughter(idau)->phi()<<"), ID "<<mc.daughter(idau)->pdgId()<<". dR "<<dR <<endl;
+            matched = true;
+            break;
+        }
+      }
+    } // Loop over MC particles
+    if(!matched) {
+      nisr++;
+    }
+  } // Loop over jets
+
+  // int nisr=0;
+  // set<int> unmatched;
+  // for (size_t ijet(0); ijet<baby.jets_pt().size(); ijet++){
+  //   bool goodjet = baby.jets_pt()[ijet] > jetTool->JetPtCut && fabs(baby.jets_eta()[ijet]) <= jetTool->JetEtaCut && !baby.jets_islep()[ijet];
+  //   if(!goodjet) continue;
+  //   bool matched=false;
+  //   for (size_t imc(0); imc<baby.mc_pt().size(); imc++){
+  //     if(baby.mc_status()[imc]!=23 || abs(baby.mc_id()[imc])>5) continue;
+  //     // In our ntuples where all taus come from W
+  //     if(!(abs(baby.mc_mom()[imc])==6 || abs(baby.mc_mom()[imc])==23 || 
+  //         abs(baby.mc_mom()[imc])==24 || abs(baby.mc_mom()[imc])==15 || abs(baby.mc_mom()[imc])>1e6)) continue; 
+  //     float dR = deltaR(baby.jets_eta()[ijet], baby.jets_phi()[ijet], baby.mc_eta()[imc], baby.mc_phi()[imc]);
+  //     if(dR<0.4){
+  //       if (verbose) cout<<"Jet: ("<<baby.jets_pt()[ijet]<<", "
+  //         <<baby.jets_eta()[ijet]<<", "<<baby.jets_phi()[ijet]
+  //         <<"), MC: ("<<baby.mc_pt()[imc]<<", "<<baby.mc_eta()[imc]<<", "
+  //         <<baby.mc_phi()[imc]<<"), ID "<<baby.mc_id()[imc]<<". dR "<<dR <<endl;
+  //         matched = true;
+  //         break;
+  //     }
+  //   } // Loop over MC particles
+  //   if(!matched) {
+  //     nisr++;
+  //     unmatched.insert(ijet);
+  //   }
+  // } // Loop over jets
+  // if (verbose && nisr>0){
+  //   for (size_t ijet(0); ijet<baby.jets_pt().size(); ijet++){
+  //     if (unmatched.find(ijet)==unmatched.end()) continue;
+  //     cout<<"Jet: ("<<baby.jets_pt()[ijet]<<", "<<baby.jets_eta()[ijet]
+  //                      <<", "<<baby.jets_phi()[ijet]<<" not matched"<<endl;
+  //     for (size_t imc(0); imc < genParticles->size(); imc++) {
+  //       const reco::GenParticle &mc = (*genParticles)[imc];
+  //       float dR = deltaR(baby.jets_eta()[ijet], baby.jets_phi()[ijet], mc.eta(), mc.phi());
+  //       if (dR<0.6){
+  //         cout<<"MC particle with dR = "<<dR<<endl;
+  //         mcTool->printParticle(mc);
+  //       }
+  //     }
+  //   }
+    // for (size_t imc(0); imc<baby.mc_pt().size(); imc++){
+    //   if(baby.mc_status()[imc]!=23 || abs(baby.mc_id()[imc])>5) continue;
+    //   if(!(abs(baby.mc_mom()[imc])==6 || abs(baby.mc_mom()[imc])==23 || 
+    //       abs(baby.mc_mom()[imc])==24 || abs(baby.mc_mom()[imc])==15 || abs(baby.mc_mom()[imc])>1e6)) continue; 
+    //   cout<<" MC: ("<<baby.mc_pt()[imc]<<", "<<baby.mc_eta()[imc]<<", "
+    //       <<baby.mc_phi()[imc]<<"), ID "<<baby.mc_id()[imc]<<endl;
+    // }
+  //   cout<<" ======== New event: njets "<<baby.njets()<<", nisr "<<nisr<<endl<<endl;
+  // }
+  baby.nisr() = nisr;
+}
 
 void bmaker_full::writeMC(edm::Handle<reco::GenParticleCollection> genParticles, 
                           vCands &all_mus, vCands &all_els, vCands &photons){

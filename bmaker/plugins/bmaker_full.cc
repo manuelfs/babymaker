@@ -279,7 +279,8 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
     if(!lhe_info.isValid()) iEvent.getByToken(tok_source_, lhe_info);
     if(lhe_info.isValid()) writeGenInfo(lhe_info);
     if((outname.Contains("TTJets") && (outname.Contains("Lept") || outname.Contains("TTJets_Tune")) && baby.ht_isr_me()>600)
-       || (outname.Contains("DYJetsToLL_M-50_TuneCUETP8M")  && baby.ht_isr_me()>100))
+       || (outname.Contains("DYJetsToLL_M-50_TuneCUETP8M")  && baby.ht_isr_me()>100)
+       || (outname.Contains("WJetsToLNu_TuneCUETP8M1")  && baby.ht_isr_me()>100))
       baby.stitch() = false;
     if(outname.Contains("TTJets_Tune") && baby.ntruleps()!=0) baby.stitch()=false; 
   } // if it is not data

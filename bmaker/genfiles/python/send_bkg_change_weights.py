@@ -2,33 +2,15 @@
 
 ###### Script to send jobs renormalizing all samples in infolder
 import os, sys, subprocess
-import pprint
-import glob
-import json
 import string
-import time
+from utilities import *
 
 infolder  = '/mnt/hadoop/local/babymaker/babies/2016_05_31/to_normalize/'
 outfolder = '/net/cms2/cms2r0/babymaker/babies/2016_05_31/mc/' 
 
 
 ## Finding tags for each dataset
-infiles = set()
-for file in glob.glob(infolder+'/*.root'):
-  tag = file.split("RunII")[0]
-  if ("TTJets_Tune" not in tag) and ("DYJetsToLL_M-50_Tune" not in tag): tag = tag.split("Tune")[0]
-  tag = tag.split("13TeV")[0]
-  tag = tag.split("pythia")[0]
-  tag = tag.split("baby_")[1]
-  tag = tag.split("__")[0]
-  if tag[0] != '_': tag = "_"+tag
-  if tag[-1] != '_': tag = tag+"_"
-  infiles.add(tag)
-sortedfiles = list()
-for file in infiles:
-    sortedfiles.append(file)
-sortedfiles = sorted(sortedfiles)
-
+sortedfiles = findBaseSampleNames(infolder)
 
 # Setting folders
 runfolder = outfolder+"run/" 

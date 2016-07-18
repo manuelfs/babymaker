@@ -59,6 +59,10 @@ int main(int argc, char *argv[]){
     cuts = "nvleps==2&&nleps>=1&&Max$(leps_pt)>30&&((elelv_m>80&&elelv_m<100)||(mumuv_m>80&&mumuv_m<100))&&ht>300";
   if(cuts=="ttisr")
     cuts = "nvleps==2&&nleps>=1&&max(Max$(mus_pt*(mus_tight&&mus_reliso<.1)),Max$(els_pt*(els_tight&&els_reliso<.1)))>30&&nbm==2";
+  if(cuts=="wisr")
+    cuts = "met>100&&max(Max$(mus_pt*(mus_tight&&mus_reliso<.1)),Max$(els_pt*(els_tight&&els_reliso<.1)))>30&&nbl==0";
+  if(cuts=="wisrht200")
+    cuts = "ht>200&&met>100&&max(Max$(mus_pt*(mus_tight&&mus_reliso<.1)),Max$(els_pt*(els_tight&&els_reliso<.1)))>30&&nbl==0";
   if(cuts=="ttdilep_ht300")
     cuts = "nels==1&&nmus==1&&Max$(leps_pt)>30&&ht>300&&met>100&&nbm>=1";
   if(cuts=="qcd")

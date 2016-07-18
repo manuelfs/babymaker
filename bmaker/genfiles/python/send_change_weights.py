@@ -10,7 +10,7 @@ import time
 
 # Setting folders
 infolder  = "/net/cms2/cms2r0/babymaker/babies/2016_02_09/to_normalize/T6ttWW/"
-outfolder = "renorm_T6ttWW/" 
+outfolder = "/net/cms2/cms2r0/babymaker/babies/2016_02_09/mc/T6ttWW/" 
 runfolder = outfolder+"run/" 
 if not os.path.exists(runfolder):
   os.system("mkdir -p "+runfolder)
@@ -35,7 +35,7 @@ for file in inputfiles:
   fexe.write("./run/change_weights.exe "+infolder+' "*'+file+'*" '+outfolder+'\n')
   if ifile % files_job == 0 or ifile == len(inputfiles): 
     fexe.close()
-    cmd = "JobSubmit.csh ./run/wrapper.sh ./"+exename
+    cmd = "JobSubmit.csh ./run/wrapper.sh "+exename
     #print cmd
     os.system(cmd)
     #sys.exit(0)

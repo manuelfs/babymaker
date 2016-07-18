@@ -8,7 +8,7 @@ using namespace std;
 namespace xsec{
 
   float crossSection(const TString &file){
-    float xsec(0.), Htobb(0.5824);
+    float xsec(1.), Htobb(0.5824);
 
     if(file.Contains("Run201"))   xsec = 1.;
 
@@ -76,7 +76,7 @@ namespace xsec{
     // k-factors are ratio of https://twiki.cern.ch/twiki/bin/viewauth/CMS/StandardModelCrossSectionsat13TeV
     // NLO/NNLO cross-sections to that of an inclusive sample in mcm at lower order (LO/NLO)
 
-    if(file.Contains("WJetsToLNu") && file.Contains("amcatnloFXFX")) xsec=61526.7; //NNLO from Lesya's summary table 
+    if(file.Contains("WJetsToLNu_TuneCUET")) xsec=61526.7; //NNLO from Lesya's summary table 
 
     //cross-section per slice changed due to change in genHT definition
     if(file.Contains("WJetsToLNu_HT-100To200"))  xsec = 1347.*1.21; //updated based on MCM

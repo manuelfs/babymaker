@@ -3,12 +3,12 @@
 ###### Script that compares the yields in old and new ntuples
 from ROOT import TChain, TH1D
 import os, sys, subprocess
-import pprint
 import glob
 import json
 import string
 import time
 import math
+from utilities import *
 
 class bcolors:
     HEADER = '\033[95m'
@@ -34,21 +34,7 @@ oldfolder    = '/net/cms2/cms2r0/babymaker/babies/2015_11_28/mc/skim_1lht500met2
 newfolder    = '/net/cms27/cms27r0/babymaker/2016_04_29/mc/merged_1lht500met200'
 
 ## Finding tags for each dataset
-infiles = set()
-for file in glob.glob(newfolder+'/*.root'):
-  tag = file.split("RunII")[0]
-  if ("TTJets_Tune" not in tag) and ("DYJetsToLL_M-50_Tune" not in tag): tag = tag.split("Tune")[0]
-  tag = tag.split("13TeV")[0]
-  tag = tag.split("pythia")[0]
-  tag = tag.split("baby_")[1]
-  tag = tag.split("__")[0]
-  if tag[0] != '_': tag = "_"+tag
-  if tag[-1] != '_': tag = tag+"_"
-  infiles.add(tag)
-sortedfiles = list()
-for file in infiles:
-    sortedfiles.append(file)
-sortedfiles = sorted(sortedfiles)
+sortedfiles = findBaseSampleNames(newfolder)
 
 print '\nOLD FOLDER: '+oldfolder
 print 'NEW FOLDER: '+newfolder

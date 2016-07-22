@@ -1,0 +1,34 @@
+// Brief descriptions of the various baby productions
+
+2016_06_26 (AN): 
+-- 4 ifb of data
+-- Added bool for only 2.6 ifb (json2p6), RA2/b muon filter, and lepton quality variables
+
+2016_06_21: 
+-- 2.6 ifb of data
+-- 80X T1tttt signal scan
+
+2016_06_14 (Operation Chincilla, FULL STATUS REPORT, AN)
+-- (Almost) all MC in 80X
+-- 2.1 ifb of data
+-- To use only 815 ipb, require nonblind=true
+-- Used for RA4 Full Status Report 
+
+2016_05_20:
+-- 218 ipb of data
+
+2016_04_29: (Operation Marmot, INTERMEDIATE STATUS REPORT)
+-- Added track veto, mj radii, rpv, mt2/angular, and higgsino variables
+-- Used for RA4 Intermediate Status Report 
+
+2016_02_09: (PAPER)
+-- T5tttt and T2tt signal scans for 2015 RA4 paper
+
+2016_02_04: (PAPER)
+-- Data that was used for the 2015 RA4 paper
+
+2016_01_11: (PAPER)
+-- T1tttt signal scan used for 2015 RA4 paper
+
+2015_11_28: (PAPER) 
+-- MC (bkg only) that was used for the 2015 RA4 paper

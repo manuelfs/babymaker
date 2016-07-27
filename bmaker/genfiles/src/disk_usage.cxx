@@ -96,11 +96,13 @@ int main(int argc, char *argv[]){
     }
   } // Loop over branches
 
+  double nentries = chain.GetEntries();
   int wbytes=16, wother=11;
   TString sep = "      ";
   sort(vars.begin(), vars.end(), varCompare);
   sort(allvars.begin(), allvars.end(), varCompare);
-  cout << "Finding sizes of branches in "<<endl<<filename << endl;
+  cout << "Tree has "<<addCommas(nentries)<<" entries ("<<roundNumber(zip_sum,2,nentries*1024)<<" kB/event):"
+       <<endl<<filename << endl;
   cout <<endl<< setw(max_length) << "Branch name" << ' '
        << setw(wbytes) << "Bytes" << ' '
        << setw(wother) << "Frac. [%]" << ' '

@@ -89,9 +89,11 @@ bool low_dphi
 float jetsys_pt
 float jetsys_eta
 float jetsys_phi
+float jetsys_m
 float jetsys_nob_pt
 float jetsys_nob_eta
 float jetsys_nob_phi
+float jetsys_nob_m
 
 std::vector<float> jets_pt
 std::vector<float> jets_eta

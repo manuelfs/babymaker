@@ -1,8 +1,8 @@
 // Brief descriptions of the various baby productions
 
-2016_07_26 (ISR study): 
+2016_07_18 (ISR study): 
 -- TTJets (only 1l and 2l extensions), plus T1tttt, T1qqqq, T2tt benchmark points
--- Added branch "nisr" with the number of ISR jets to ISR reweighting
+-- Added branch "nisr" with the number of ISR jets to apply the ISR reweighting
 
 2016_06_26 (AN): 
 -- 4 ifb of data

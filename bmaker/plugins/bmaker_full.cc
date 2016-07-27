@@ -545,9 +545,11 @@ vector<LVector> bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
   baby.jetsys_pt()  = jetsys_p4.pt();
   baby.jetsys_eta() = jetsys_p4.eta();
   baby.jetsys_phi() = jetsys_p4.phi();
+  baby.jetsys_m()   = jetsys_p4.mass();
   baby.jetsys_nob_pt()  = jetsys_nob_p4.pt();
   baby.jetsys_nob_eta() = jetsys_nob_p4.eta();
   baby.jetsys_nob_phi() = jetsys_nob_p4.phi();
+  baby.jetsys_nob_m()   = jetsys_nob_p4.mass();
 
   // write deltaR between csvm jets
   jetTool->getDeltaRbb(baby.dr_bb(), jets, baby.jets_csv(), baby.jets_islep());

@@ -3,6 +3,7 @@
 #include <iomanip>
 #include <string>
 #include <set>
+#include <algorithm>    // std::sort
 
 #include "TChain.h"
 #include "TBranch.h"
@@ -70,6 +71,7 @@ int main(int argc, char *argv[]){
 
   long zip_sum(0), tot_sum(0);
   Ssiz_t max_length(0);
+  double nentries = chain.GetEntries();
     
   vector<Variable> vars, allvars;
   set<Variable>::iterator it;
@@ -96,19 +98,19 @@ int main(int argc, char *argv[]){
     }
   } // Loop over branches
 
-  double nentries = chain.GetEntries();
-  int wbytes=16, wother=11;
+  int wbytes=10, wother=11;
   TString sep = "      ";
   sort(vars.begin(), vars.end(), varCompare);
   sort(allvars.begin(), allvars.end(), varCompare);
-  cout << "Tree has "<<addCommas(nentries)<<" entries ("<<roundNumber(zip_sum,2,nentries*1024)<<" kB/event):"
-       <<endl<<filename << endl;
+  cout <<endl<<filename<<endl
+       << endl << "Tree \""<< nametree <<"\" occupies "<< zip_sum <<" bytes and has "<<addCommas(nentries)<<" entries ("
+       <<roundNumber(zip_sum,2,nentries*1024)<<" kB/event):"  << endl;
   cout <<endl<< setw(max_length) << "Branch name" << ' '
-       << setw(wbytes) << "Bytes" << ' '
+       << setw(wbytes) << "Byte/ev" << ' '
        << setw(wother) << "Frac. [%]" << ' '
        << setw(wother) << "Cumulative"  << sep
        << setw(max_length) << "Branch group name" << ' '
-       << setw(wbytes) << "Bytes" << ' '
+       << setw(wbytes) << "Byte/ev" << ' '
        << setw(wother) << "Frac. [%]" << ' '
        << setw(wother) << "Cumulative" << endl;
   for(int ind=0; ind<(max_length+wbytes+2*wother+3); ind++) cout << "=";
@@ -116,11 +118,11 @@ int main(int argc, char *argv[]){
   for(int ind=0; ind<(max_length+wbytes+2*wother+3); ind++) cout << "=";
   cout << endl 
        << setw(max_length) << "Total" << ' '
-       << setw(wbytes) << zip_sum << ' '
+       << setw(wbytes) << roundNumber(zip_sum,1,nentries) << ' '
        << setw(wother) << "100.00" << ' '
        << setw(wother) << "-" << sep
        << setw(max_length) << "Total" << ' '
-       << setw(wbytes) << zip_sum << ' '
+       << setw(wbytes) << roundNumber(zip_sum,1,nentries) << ' '
        << setw(wother) << "100.00" << ' '
        << setw(wother) << "-" << endl;
   long running_total(0), tot2=0;
@@ -129,7 +131,7 @@ int main(int argc, char *argv[]){
     double this_frac = (100.0*allvars[ivar].zip_size)/zip_sum;
     double tot_frac = (100.0*running_total)/zip_sum;
     cout << setw(max_length) << allvars[ivar].name << " "
-	 << setw(wbytes) << allvars[ivar].zip_size << " "
+	 << setw(wbytes) << roundNumber(allvars[ivar].zip_size,2,nentries) << " "
 	 << setw(wother) << roundNumber(this_frac,2) << " "
 	 << setw(wother) << roundNumber(tot_frac,2) << sep;
     if(ivar<vars.size()){
@@ -137,7 +139,7 @@ int main(int argc, char *argv[]){
       this_frac = (100.0*vars[ivar].zip_size)/zip_sum;
       tot_frac = (100.0*tot2)/zip_sum;
       cout << setw(max_length) << vars[ivar].name << " "
-	   << setw(wbytes) << vars[ivar].zip_size << " "
+	   << setw(wbytes) << roundNumber(vars[ivar].zip_size,2,nentries) << " "
 	   << setw(wother) << roundNumber(this_frac,2) << " "
 	   << setw(wother) << roundNumber(tot_frac,2);
 

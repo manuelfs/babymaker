@@ -33,7 +33,7 @@ int main(int argc, char *argv[]){
   if(argc < 3) {
     cout<<endl<<"Required at least 2 arguments: "
 	<<"./plot/skim_ntuples.exe infolder outfolder [cuts=\"nleps==1&&ht>500&&met>200&&njets>=6&&nbm>=1&&mj14>250&&nveto==0\"] "
-	<<"[njobs=-1] [ijob=-1] [filetag=]"<<endl<<endl;;
+	<<"[njobs=0] [ijob=0] [filetag=\"\"]"<<endl<<endl;;
     return 1;
   }
   TString folder(argv[1]), outfolder(argv[2]), cuts="nleps==1&&ht>500&&met>200&&njets>=6&&nbm>=1&&mj14>250&&nveto==0";
@@ -70,7 +70,15 @@ int main(int argc, char *argv[]){
   if(cuts=="qcd_njet10")
      cuts = "ht>1000&&met<50&&(nvmus+nvels)==0&&njets>=10";
   if(cuts=="mm_std") cuts="Sum$(mm_nleps>=1&&mm_ht>500.&&mm_met>200.)>0";	     
-  if(cuts=="mm_std_nj5mj250") cuts="Sum$(mm_nleps>=1&&mm_ht>500&&mm_met>200&&mm_njets>=5&&mm_mj14_lep>250)>0||Sum$(mm_nleps>=1&&mm_ht>500&&mm_met>200&&mm_njets>=5&&mm_mj14_nolep>250)>0";	     
+  if(cuts=="mm_std_nj5mj250") cuts="Sum$(mm_nleps>=1&&mm_ht>500&&mm_met>200&&mm_njets>=5&&mm_mj14_lep>250)>0||Sum$(mm_nleps>=1&&mm_ht>500&&mm_met>200&&mm_njets>=5&&mm_mj14_nolep>250)>0";
+
+  //// RA2/b skims
+  TString pass="globalTightHalo2016Filter==1&&HBHENoiseFilter==1&&HBHEIsoNoiseFilter==1&&eeBadScFilter==1";
+  pass += "&&EcalDeadCellTriggerPrimitiveFilter==1&&BadChargedCandidateFilter&&BadPFMuonFilter&&NVtx>0&&JetID";
+  if(cuts=="ra2_qcd") cuts = pass+"&&(@Electrons.size()+@Muons.size())==0&&NJets>=3";	     
+  if(cuts=="ra2_ht300") cuts = pass+"&&HT>300";	     
+  if(cuts=="ra2_eht300") cuts = pass+"&&Max$(Electrons.Pt()*(abs(Electrons.Eta())<2))>35&&HT>300";	     
+  if(cuts=="ra2_zmht200") cuts = pass+"&&@ZCandidates.size()>=1&&MHT>200";	     
 	     
 
   vector<TString> files = dirlist(folder, "*"+filetag+"*.root");
@@ -92,12 +100,14 @@ int main(int argc, char *argv[]){
   }
   cout<<"Doing files "<<ini+1<<" to "<<end<<" out of "<<nfiles<<endl;
   for(unsigned file(ini); file < end; file++){
+    cout<<file+1<<"/"<<nfiles<<": ";
     onefile_skim(folder+"/"+files[file], outfolder, cuts, tag);
   }
 
   time_t curTime;
   time(&curTime);
-  cout<<endl<<"Took "<< difftime(curTime,startTime)<<" seconds to skim "<< end-ini<<" files."<<endl<<endl;
+  int seconds = difftime(curTime,startTime);
+  cout<<endl<<"Took "<< seconds << " seconds ("<<hoursMinSec(seconds)<<") to skim "<< end-ini<<" files."<<endl<<endl;
 }
 
 void onefile_skim(TString infiles, TString outfolder, TString cuts, TString tag){
@@ -113,6 +123,7 @@ void onefile_skim(TString infiles, TString outfolder, TString cuts, TString tag)
   outfile.ReplaceAll("(",""); outfile.ReplaceAll(")",""); outfile.ReplaceAll("+","");
   outfile.ReplaceAll("[",""); outfile.ReplaceAll("]",""); outfile.ReplaceAll("|","_");
   outfile.ReplaceAll("$",""); outfile.ReplaceAll(",","_"); outfile.ReplaceAll("!","NOT");
+  outfile.ReplaceAll(" ",""); outfile.ReplaceAll("@",""); 
   outfile = outfolder+outfile;
 
   // Checking if output file exists
@@ -136,12 +147,22 @@ void onefile_skim(TString infiles, TString outfolder, TString cuts, TString tag)
   //cout<<"Skimming the "<<nfiles<<" files in "<<infiles<<endl;
   long nentries(tree.GetEntries());
   TTree *ctree = tree.CopyTree(cuts);
-  TTree *ctreeglobal = treeglobal.CopyTree("1");
+  long centries=ctree->GetEntries();
   if(ctree) ctree->Write();
-  else cout<<"Could not find tree in "<<infiles<<endl;
-  if(ctreeglobal)   ctreeglobal->Write();
-  else cout<<"Could not find treeglobal in "<<infiles<<endl;
+  else {
+    cout<<"Could not find tree in "<<infiles<<endl;
+    return;
+  }
+
+  //// treeglobal
+  TFile infile(infiles);
+  if(infile.Get("treeglobal") != 0){
+    out_rootfile.cd();
+    TTree *ctreeglobal = treeglobal.CopyTree("1");
+    if(ctreeglobal)   ctreeglobal->Write();
+    //else cout<<"Could not find treeglobal in "<<infiles<<endl;
+  }
   out_rootfile.Close();
-  cout<<"Written "<<outfile<<" from "<<nfiles<<" files and "<<nentries<<" entries."<<endl;
+  cout<<"Written "<<centries<<" entries to "<<outfile<<" from "<<nfiles<<" files and "<<nentries<<" entries."<<endl;
 }
 

@@ -3,7 +3,7 @@
 if (( "$#" < 3 ))
 then
     echo
-    echo "Format is: ./run/send_skim.sh <infolder> <outfolder> <njobs> <cuts\"nleps==1&&ht>500&&met>200&&njets>=6&&nbm>=1&&mj>250\">"
+    echo "Format is: ./run/send_skim.sh <infolder> <outfolder> <njobs> <cuts> <filetag>"
     echo 
     exit 0
 fi

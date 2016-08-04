@@ -8,6 +8,7 @@
 <use name="PhysicsTools/PatAlgos"/>
 <use name="CondFormats/JetMETObjects"/>
 <use name="CondFormats/BTauObjects"/>
+<use name="CondTools/BTau"/>
 <use name="CommonTools/Utils"/>
 <use name="RecoEgamma/EgammaTools"/>
 <use name="fastjet"/>

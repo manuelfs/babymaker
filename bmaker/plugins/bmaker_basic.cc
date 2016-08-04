@@ -406,27 +406,30 @@ void bmaker_basic::writeJets(edm::Handle<pat::JetCollection> alljets,
         if(addBTagWeights) {
           bool btag(csv > jetTool->CSVMedium);
           bool btagLoose(csv > jetTool->CSVLoose);
-          jet_met_tools::btagVariation central(jetTool->kBTagCentral), up(jetTool->kBTagUp), down(jetTool->kBTagDown);
-          jet_met_tools::btagVariation centralLoose(jetTool->kBTagCentralLoose), upLoose(jetTool->kBTagUpLoose), downLoose(jetTool->kBTagDownLoose);
           //central weight for fastsim taken into account together with the fullsim inside jetTool->jetBTagWeight()
-          baby.w_btag()         *= jetTool->jetBTagWeight(jet, jetp4, btag, central, central);
+          baby.w_btag() *= jetTool->jetBTagWeight(jet, jetp4, btag, BTagEntry::OP_MEDIUM,
+						  "central", "central");
           // now, vary only the full sim scale factor, regardless of whether we run on Fast or Full sim
           // this is necessary since uncertainties for FastSim and FullSim are uncorrelated 
-          baby.sys_bctag()[0]   *= jetTool->jetBTagWeight(jet, jetp4, btag, up,      central);
-          baby.sys_bctag()[1]   *= jetTool->jetBTagWeight(jet, jetp4, btag, down,    central);
-          baby.sys_udsgtag()[0] *= jetTool->jetBTagWeight(jet, jetp4, btag, central, up);
-          baby.sys_udsgtag()[1] *= jetTool->jetBTagWeight(jet, jetp4, btag, central, down);
-          baby.w_btag_loose()         *= jetTool->jetBTagWeight(jet, jetp4, btagLoose, centralLoose, centralLoose);
-          baby.sys_bctag_loose()[0]   *= jetTool->jetBTagWeight(jet, jetp4, btagLoose, upLoose,      centralLoose);
-          baby.sys_bctag_loose()[1]   *= jetTool->jetBTagWeight(jet, jetp4, btagLoose, downLoose,    centralLoose);
-          baby.sys_udsgtag_loose()[0] *= jetTool->jetBTagWeight(jet, jetp4, btagLoose, centralLoose, upLoose);
-          baby.sys_udsgtag_loose()[1] *= jetTool->jetBTagWeight(jet, jetp4, btagLoose, centralLoose, downLoose);
+          baby.sys_bctag()[0]   *= jetTool->jetBTagWeight(jet, jetp4, btag, BTagEntry::OP_MEDIUM, "up",      "central");
+          baby.sys_bctag()[1]   *= jetTool->jetBTagWeight(jet, jetp4, btag, BTagEntry::OP_MEDIUM, "down",    "central");
+          baby.sys_udsgtag()[0] *= jetTool->jetBTagWeight(jet, jetp4, btag, BTagEntry::OP_MEDIUM, "central", "up");
+          baby.sys_udsgtag()[1] *= jetTool->jetBTagWeight(jet, jetp4, btag, BTagEntry::OP_MEDIUM, "central", "down");
+          baby.w_btag_loose()         *= jetTool->jetBTagWeight(jet, jetp4, btagLoose, BTagEntry::OP_LOOSE, "central", "central");
+          baby.sys_bctag_loose()[0]   *= jetTool->jetBTagWeight(jet, jetp4, btagLoose, BTagEntry::OP_LOOSE, "up",      "central");
+          baby.sys_bctag_loose()[1]   *= jetTool->jetBTagWeight(jet, jetp4, btagLoose, BTagEntry::OP_LOOSE, "down",    "central");
+          baby.sys_udsgtag_loose()[0] *= jetTool->jetBTagWeight(jet, jetp4, btagLoose, BTagEntry::OP_LOOSE, "central", "up");
+          baby.sys_udsgtag_loose()[1] *= jetTool->jetBTagWeight(jet, jetp4, btagLoose, BTagEntry::OP_LOOSE, "central", "down");
           if (isFastSim) { 
             // now we vary only the FastSim SF
-            baby.sys_fs_bctag()[0]   *= jetTool->jetBTagWeight(jet, jetp4, btag, central, central, up,      central);
-            baby.sys_fs_bctag()[1]   *= jetTool->jetBTagWeight(jet, jetp4, btag, central, central, down,    central);
-            baby.sys_fs_udsgtag()[0] *= jetTool->jetBTagWeight(jet, jetp4, btag, central, central, central, up);
-            baby.sys_fs_udsgtag()[1] *= jetTool->jetBTagWeight(jet, jetp4, btag, central, central, central, down);
+            baby.sys_fs_bctag()[0]   *= jetTool->jetBTagWeight(jet, jetp4, btag, BTagEntry::OP_MEDIUM,
+							       "central", "central", "up",      "central");
+            baby.sys_fs_bctag()[1]   *= jetTool->jetBTagWeight(jet, jetp4, btag, BTagEntry::OP_MEDIUM,
+							       "central", "central", "down",    "central");
+            baby.sys_fs_udsgtag()[0] *= jetTool->jetBTagWeight(jet, jetp4, btag, BTagEntry::OP_MEDIUM,
+							       "central", "central", "central", "up");
+            baby.sys_fs_udsgtag()[1] *= jetTool->jetBTagWeight(jet, jetp4, btag, BTagEntry::OP_MEDIUM,
+							       "central", "central", "central", "down");
           }
         }
         jetsys_p4 += jet.p4();

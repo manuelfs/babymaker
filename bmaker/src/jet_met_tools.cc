@@ -24,6 +24,8 @@
 using namespace std;
 using namespace utilities;
 
+const vector<BTagEntry::OperatingPoint> jet_met_tools::op_pts_{BTagEntry::OP_MEDIUM, BTagEntry::OP_LOOSE};
+
 bool jet_met_tools::leptonInJet(const pat::Jet &jet, vCands leptons){
   for(unsigned ilep(0); ilep < leptons.size(); ilep++){
     int indpf(-1);
@@ -282,79 +284,67 @@ void jet_met_tools::getMETWithJEC(edm::Handle<pat::METCollection> mets, float &m
 }
 
 // the jetp4 and isBTaggged are technically redundant but avoid recalculating information
-float jet_met_tools::jetBTagWeight(const pat::Jet &jet, const LVector &jetp4, bool isBTagged, 
-                                   btagVariation readerTypeBC, btagVariation readerTypeUDSG,
-                                   btagVariation readerTypeBC_fs, btagVariation readerTypeUDSG_fs) {
+float jet_met_tools::jetBTagWeight(const pat::Jet &jet, const LVector &jetp4, bool isBTagged,
+				   BTagEntry::OperatingPoint op,
+				   const string &bc_full_syst, const string &udsg_full_syst) const{
+  return jetBTagWeight(jet, jetp4, isBTagged, op, bc_full_syst, udsg_full_syst, "central", "central");				     
+}
+
+// the jetp4 and isBTaggged are technically redundant but avoid recalculating information
+float jet_met_tools::jetBTagWeight(const pat::Jet &jet, const LVector &jetp4, bool isBTagged,
+				   BTagEntry::OperatingPoint op,
+				   const string &bc_full_syst, const string &udsg_full_syst,
+				   const string &bc_fast_syst, const string &udsg_fast_syst) const{
   double jet_scalefactor = 1.0;
   int hadronFlavour = abs(jet.hadronFlavour());
-  // only apply weights if readers are initialized
-  if(readersBC.size()>0 && readersUDSG.size()>0) {
-    double jetpttemp = jetp4.pt();
-    // maximum pt in the parameterizations is 670 GeV
-    if(jetpttemp>670) jetpttemp=669.99;
-    try {
-      double eff = 1.0;
-      // loose b-tags have a different tagging efficiecy
-      if(readerTypeBC==kBTagUpLoose
-         || readerTypeBC==kBTagCentralLoose
-         || readerTypeBC==kBTagDownLoose) eff = getMCTagEfficiency(abs(hadronFlavour), jetpttemp, fabs(jetp4.eta()), true);
-      else eff = getMCTagEfficiency(abs(hadronFlavour), jetpttemp, fabs(jetp4.eta()), false);
-      double sf(1.), sf_fs(1.); 
-      // procedure from https://twiki.cern.ch/twiki/bin/view/CMS/BTagSFMethods#1a_Event_reweighting_using_scale
-      switch ( abs(hadronFlavour) ) {
-      case 5:
-        sf = readersBC.at(readerTypeBC)->eval(BTagEntry::FLAV_B, jetp4.eta(), jetpttemp);
-        if (isFastSim) sf_fs = readersBC_fs.at(readerTypeBC_fs)->eval(BTagEntry::FLAV_B, jetp4.eta(), jetpttemp);
-        break;
-      case 4:
-        sf = readersBC.at(readerTypeBC)->eval(BTagEntry::FLAV_C, jetp4.eta(), jetpttemp);
-        if (isFastSim) sf_fs = readersBC_fs.at(readerTypeBC_fs)->eval(BTagEntry::FLAV_C, jetp4.eta(), jetpttemp);
-        break;
-      default:
-        sf = readersUDSG.at(readerTypeUDSG)->eval(BTagEntry::FLAV_UDSG, jetp4.eta(), jetpttemp);
-        if (isFastSim) sf_fs = readersUDSG_fs.at(readerTypeUDSG_fs)->eval(BTagEntry::FLAV_UDSG, jetp4.eta(), jetpttemp);
-        break;
+  try{
+    // loose b-tags have a different tagging efficiecy
+    double eff = getMCTagEfficiency(hadronFlavour, jetp4.pt(), fabs(jetp4.eta()), op);
+    double sf(1.), sf_fs(1.);
+    size_t rdr_idx = distance(op_pts_.cbegin(), find(op_pts_.cbegin(), op_pts_.cend(), op));
+    // procedure from https://twiki.cern.ch/twiki/bin/view/CMS/BTagSFMethods#1a_Event_reweighting_using_scale
+    switch(hadronFlavour){
+    case 5:
+      sf = readers_full_.at(rdr_idx)->eval_auto_bounds(bc_full_syst, BTagEntry::FLAV_B, jetp4.eta(), jetp4.pt());
+      if(isFastSim){
+	sf_fs = readers_fast_.at(rdr_idx)->eval_auto_bounds(bc_fast_syst, BTagEntry::FLAV_B, jetp4.eta(), jetp4.pt());
       }
-      if (isFastSim) {
-        double eff_fs = eff/sf_fs;
-        jet_scalefactor = isBTagged ? sf*sf_fs : (1-sf*sf_fs*eff_fs)/(1-eff_fs);
-      } else {
-        jet_scalefactor = isBTagged ? sf : (1-sf*eff)/(1-eff);
+      break;
+    case 4:
+      sf = readers_full_.at(rdr_idx)->eval_auto_bounds(bc_full_syst, BTagEntry::FLAV_C, jetp4.eta(), jetp4.pt());
+      if(isFastSim){
+	sf_fs = readers_fast_.at(rdr_idx)->eval_auto_bounds(bc_fast_syst, BTagEntry::FLAV_C, jetp4.eta(), jetp4.pt());
       }
+      break;
+    default:
+      sf = readers_full_.at(rdr_idx)->eval_auto_bounds(udsg_full_syst, BTagEntry::FLAV_UDSG, jetp4.eta(), jetp4.pt());
+      if(isFastSim){
+	sf_fs = readers_fast_.at(rdr_idx)->eval_auto_bounds(udsg_fast_syst, BTagEntry::FLAV_UDSG, jetp4.eta(), jetp4.pt());
+      }
+      break;
     }
-    catch (std::exception &e) {
-      std::cout << "Caught exception: " << e.what() << " for a jet with (pt,eta,hadron flavor)=(" 
-                << jetp4.pt() << "," << jetp4.eta() << "," << hadronFlavour << ")" << std::endl;
+    if(isFastSim){
+      double eff_fs = eff/sf_fs;
+      jet_scalefactor = isBTagged ? sf*sf_fs : (1-sf*sf_fs*eff_fs)/(1-eff_fs);
+    }else{
+      jet_scalefactor = isBTagged ? sf : (1-sf*eff)/(1-eff);
     }
+  }catch (exception &e){
+    cerr << "Caught exception: " << e.what() << " for a jet with (pt,eta,hadron flavor)=(" 
+	      << jetp4.pt() << "," << jetp4.eta() << "," << hadronFlavour << ")" << endl;
   }
   return jet_scalefactor;
 }
 
-float jet_met_tools::getMCTagEfficiency(int pdgId, float pT, float eta, bool loose=false)
-{
-  if(loose) {
-    if(abs(pdgId)==4 || abs(pdgId)==5) {
-      int bin = btagEfficiencyParameterizationLoose->FindBin(eta, pT, pdgId);
-      return btagEfficiencyParameterizationLoose->GetBinContent(bin);
-    }
-    else {
-      // in the ghost clustering scheme to determine flavor, there are only b, c and other (id=0) flavors
-      int bin = btagEfficiencyParameterizationLoose->FindBin(eta, pT, 0);
-      return btagEfficiencyParameterizationLoose->GetBinContent(bin);
-    }
+float jet_met_tools::getMCTagEfficiency(int pdgId, float pT, float eta, BTagEntry::OperatingPoint op) const{
+  size_t rdr_idx = distance(op_pts_.cbegin(), find(op_pts_.cbegin(), op_pts_.cend(), op));
+  pdgId = abs(pdgId);
+  if(pdgId != 4 && pdgId != 5){
+    // in the ghost clustering scheme to determine flavor, there are only b, c and other (id=0) flavors
+    pdgId = 0;
   }
-  else {
-    if(abs(pdgId)==4 || abs(pdgId)==5) {
-      int bin = btagEfficiencyParameterization->FindBin(eta, pT, pdgId);
-      return btagEfficiencyParameterization->GetBinContent(bin);
-    }
-    else {
-      // in the ghost clustering scheme to determine flavor, there are only b, c and other (id=0) flavors
-      int bin = btagEfficiencyParameterization->FindBin(eta, pT, 0);
-      return btagEfficiencyParameterization->GetBinContent(bin);
-    }
-
-  }
+  int bin = btag_efficiencies_.at(rdr_idx)->FindBin(eta, pT, pdgId);
+  return btag_efficiencies_.at(rdr_idx)->GetBinContent(bin);
 }
 
 // get deltaR between two b-tagged CSVM jets
@@ -790,9 +780,11 @@ jet_met_tools::jet_met_tools(TString ijecName, bool doSys, bool fastSim):
   jecName(ijecName),
   doSystematics(doSys),
   isFastSim(fastSim),
-  calib(0),
-  calibFS(0){
-
+  calib_full_(),
+  calib_fast_(),
+  readers_full_(op_pts_.size()),
+  readers_fast_(op_pts_.size()),
+  btag_efficiencies_(op_pts_.size()){
   if (jecName.Contains("DATA")) isData = true;
   else if (jecName.Contains("MC")) isData = false;
   else cout<<endl<<"BABYMAKER: jet_met_tools: The jecLabel string must contain either 'DATA' or 'MC'. Currently running with "<<jecName<<endl<<endl;
@@ -812,11 +804,11 @@ jet_met_tools::jet_met_tools(TString ijecName, bool doSys, bool fastSim):
     jecFiles.push_back(JetCorrectorParameters(basename+"_L2Relative_AK4PFchs.txt"));
     jecFiles.push_back(JetCorrectorParameters(basename+"_L3Absolute_AK4PFchs.txt"));
     if(jecName.Contains("DATA")) jecFiles.push_back(JetCorrectorParameters(basename+"_L2L3Residual_AK4PFchs.txt"));
-    jetCorrector = new FactorizedJetCorrectorCalculator(jecFiles);
+    jetCorrector.reset(new FactorizedJetCorrectorCalculator(jecFiles));
   }
   if (doSystematics){
     cout<<endl<<"BABYMAKER: jet_met_tools: Using JEC uncertainties from file "<<basename.c_str()<<"_Uncertainty_AK4PFchs.txt"<<endl<<endl;
-    jecUncProvider = new JetCorrectionUncertainty(basename+"_Uncertainty_AK4PFchs.txt");
+    jecUncProvider.reset(new JetCorrectionUncertainty(basename+"_Uncertainty_AK4PFchs.txt"));
   }
 
   // set btag working points
@@ -833,55 +825,51 @@ jet_met_tools::jet_met_tools(TString ijecName, bool doSys, bool fastSim):
   }
 
   // only add b-tagging weights if requested
-  std::string scaleFactorFile(getenv("CMSSW_BASE"));
+  string scaleFactorFile(getenv("CMSSW_BASE"));
   scaleFactorFile+="/src/babymaker/bmaker/data/CSVv2.csv";
-  calib   = new BTagCalibration("csvv1", scaleFactorFile);
-  std::vector<std::string> variationTypes = {"central", "up", "down"};
-  std::vector<BTagEntry::OperatingPoint> operatingPoints = {BTagEntry::OP_MEDIUM, BTagEntry::OP_LOOSE};
-  for(BTagEntry::OperatingPoint op : operatingPoints) {
-    for(auto itype : variationTypes) {
-      // BC full sim
-      readersBC.push_back(new BTagCalibrationReader(calib, // calibration instance
-                                                    op, // operating point
-                                                    "mujets", // measurement type ("comb" or "mujets")
-                                                    itype)); // systematics type ("central", "up", or "down")
-      // UDSG full sim
-      readersUDSG.push_back(new BTagCalibrationReader(calib, // calibration instance
-                                                      op, // operating point
-                                                      "comb", // measurement type ("comb" or "mujets")
-                                                      itype)); // systematics type ("central", "up", or "down")
-    }
+  calib_full_.reset(new BTagCalibration("csvv2", scaleFactorFile));
+  for(size_t i=0; i < op_pts_.size(); ++i){
+    readers_full_.at(i).reset(new BTagCalibrationReader(op_pts_.at(i), "central", {"up", "down"}));
+    readers_full_.at(i)->load(*calib_full_, BTagEntry::FLAV_UDSG, "comb");
+    readers_full_.at(i)->load(*calib_full_, BTagEntry::FLAV_C, "comb");
+    readers_full_.at(i)->load(*calib_full_, BTagEntry::FLAV_B, "comb");
   }
+
   if (isFastSim){
-    std::string scaleFactorFileFastSim(getenv("CMSSW_BASE"));
-    scaleFactorFileFastSim+="/src/babymaker/bmaker/data/CSV_13TEV_Combined_20_11_2015.csv";
-    calibFS = new BTagCalibration("csvv1", scaleFactorFileFastSim);
-    for(auto itype : variationTypes) {
-      // BC fastsim
-       readersBC_fs.push_back(new BTagCalibrationReader(calibFS, // calibration instance 
-                                                       BTagEntry::OP_MEDIUM, // operating point
-                                                       "fastsim", // measurement type ("comb" or "mujets")
-                                                       itype)); // systematics type ("central", "up", or "down")
-      // UDSG fastsim
-      readersUDSG_fs.push_back(new BTagCalibrationReader(calibFS, // calibration instance 
-                                                         BTagEntry::OP_MEDIUM, // operating point
-                                                         "fastsim", // measurement type ("comb" or "mujets")
-                                                         itype)); // systematics type ("central", "up", or "down")
+    string scaleFactorFileFastSim(getenv("CMSSW_BASE"));
+    scaleFactorFileFastSim+="/src/babymaker/bmaker/data/CSV_13TEV_Combined_14_7_2016.csv";
+    calib_fast_.reset(new BTagCalibration("csvv2", scaleFactorFileFastSim));
+    for(size_t i = 0; i < op_pts_.size(); ++i){
+      readers_fast_.at(i).reset(new BTagCalibrationReader(op_pts_.at(i), "central", {"up", "down"}));
+      readers_fast_.at(i)->load(*calib_fast_, BTagEntry::FLAV_UDSG, "fastsim");
+      readers_fast_.at(i)->load(*calib_fast_, BTagEntry::FLAV_C, "fastsim");
+      readers_fast_.at(i)->load(*calib_fast_, BTagEntry::FLAV_B, "fastsim");
     }
   }
 
-  std::string filename(getenv("CMSSW_BASE"));
+  string filename(getenv("CMSSW_BASE"));
   filename+="/src/babymaker/bmaker/data/btagEfficiency.root";
   TFile *efficiencyFile = TFile::Open(filename.c_str());
   if(efficiencyFile->IsOpen()) {
-    btagEfficiencyParameterization = static_cast<TH3F*>(efficiencyFile->Get("btagEfficiency"));
-    btagEfficiencyParameterizationLoose = static_cast<TH3F*>(efficiencyFile->Get("btagEfficiency_loose"));
+    for(size_t i = 0; i < op_pts_.size(); ++i){
+      string hist_name;
+      switch(op_pts_.at(i)){
+      case BTagEntry::OP_LOOSE: hist_name = "btagEfficiency_loose"; break;
+      case BTagEntry::OP_MEDIUM: hist_name = "btagEfficiency_medium"; break;
+      case BTagEntry::OP_TIGHT: hist_name = "btagEfficiency_tight"; break;
+      case BTagEntry::OP_RESHAPING: hist_name = "btagEfficiency_reshaping"; break;
+      default: hist_name = "btagEfficiency"; break;
+      }
+      btag_efficiencies_.at(i) = static_cast<TH3F*>(efficiencyFile->Get(hist_name.c_str()));
+      if(!btag_efficiencies_.at(i)){
+	throw cms::Exception("NoEfficiencyMap")
+	  << "Could not find efficiency parametrization " << hist_name << "." << endl;
+      }
+    }
+  }else{
+    throw cms::Exception("FileNotFound")
+      << "Could not find efficiency file " << filename << "." << endl;
   }
-  else {
-    throw cms::Exception("FileNotFound") 
-      << "Could not find efficiency file " << filename << "." << std::endl;
-  }
-  
 }
 
 // from 8TeV dijet measurement with an extra 50% 
@@ -896,12 +884,4 @@ float jet_met_tools::getJetResolutionSF(float jet_eta){
   else if (abseta < 3.2) return (1. + 1.5*0.395);
   else if (abseta < 5.0) return (1. + 1.5*0.056);
   else return 1.;
-}
-
-jet_met_tools::~jet_met_tools(){
-  if(doJEC) delete jetCorrector;
-  if(calib !=0 ) delete calib;
-  if(calibFS !=0 ) delete calibFS;
-  for(auto ireader : readersBC) delete ireader;
-  for(auto ireader : readersUDSG) delete ireader;
 }

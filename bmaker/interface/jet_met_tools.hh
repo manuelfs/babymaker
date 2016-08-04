@@ -5,6 +5,7 @@
 
 // System include files
 #include <vector>
+#include <memory>
 
 // FW physics include files
 #include "DataFormats/PatCandidates/interface/Jet.h"
@@ -15,7 +16,7 @@
 #include "CondFormats/JetMETObjects/interface/JetCorrectionUncertainty.h"
 // B-tag scale factors                                                                                                                                                                 
 #include "CondFormats/BTauObjects/interface/BTagCalibration.h"
-#include "CondFormats/BTauObjects/interface/BTagCalibrationReader.h"
+#include "CondTools/BTau/interface/BTagCalibrationReader.h"
 
 // ROOT include files
 #include "TString.h"
@@ -26,7 +27,7 @@
 
 class jet_met_tools{
 private:
-  float getMCTagEfficiency(int pdgId, float pT, float eta, bool loose);
+  float getMCTagEfficiency(int pdgId, float pT, float eta, BTagEntry::OperatingPoint op) const;
   
 public:
 
@@ -54,22 +55,20 @@ public:
   bool isData;
   double rhoEvent_;
   edm::Handle<pat::JetCollection> alljets_;
-  FactorizedJetCorrectorCalculator *jetCorrector;
+  std::unique_ptr<FactorizedJetCorrectorCalculator> jetCorrector;
   FactorizedJetCorrectorCalculator::VariableValues jetValues;
-  JetCorrectionUncertainty *jecUncProvider;
+  std::unique_ptr<JetCorrectionUncertainty> jecUncProvider;
   std::vector<float> jetTotCorrections, jetL1Corrections;
   std::vector<LVector> corrJet;
   std::vector<float> jerUnc, jecUnc;
   std::vector<float> genJetPt;
 
-  BTagCalibration *calib;
-  BTagCalibration *calibFS;
-  std::vector<BTagCalibrationReader*> readersBC;
-  std::vector<BTagCalibrationReader*> readersUDSG;
-  std::vector<BTagCalibrationReader*> readersBC_fs;
-  std::vector<BTagCalibrationReader*> readersUDSG_fs;
-  TH3F *btagEfficiencyParameterization;
-  TH3F *btagEfficiencyParameterizationLoose;
+  static const std::vector<BTagEntry::OperatingPoint> op_pts_;
+  std::unique_ptr<BTagCalibration> calib_full_;
+  std::unique_ptr<BTagCalibration> calib_fast_;
+  std::vector<std::unique_ptr<BTagCalibrationReader> > readers_full_;
+  std::vector<std::unique_ptr<BTagCalibrationReader> > readers_fast_;
+  std::vector<TH3F*> btag_efficiencies_;
 
   bool leptonInJet(const pat::Jet &jet, vCands leptons);
   bool jetMatched(const pat::Jet &jet, vCands objects);
@@ -86,9 +85,13 @@ public:
   void setJetUncertainties(edm::Handle<edm::View <reco::GenJet> > genjets);
 
   float getJetResolutionSF(float jet_eta);
-  float jetBTagWeight(const pat::Jet &jet, const LVector &jetp4, bool isBTagged, 
-                      btagVariation readerTypeBC, btagVariation readerTypeUDSG,
-                      btagVariation readerTypeBC_fs = kBTagCentral, btagVariation readerTypeUDSG_fs = kBTagCentral);
+  float jetBTagWeight(const pat::Jet &jet, const LVector &jetp4, bool isBTagged,
+		      BTagEntry::OperatingPoint op,
+		      const std::string &bc_full_syst, const std::string &udsg_full_syst) const;
+  float jetBTagWeight(const pat::Jet &jet, const LVector &jetp4, bool isBTagged,
+		      BTagEntry::OperatingPoint op,
+		      const std::string &bc_full_syst, const std::string &udsg_full_syst,
+		      const std::string &bc_fast_syst, const std::string &udsg_fast_syst) const;
   void getDeltaRbb(std::vector<float> & deltaRbb, const std::vector<LVector> &jets, const std::vector<float> &jets_csv, const std::vector<bool> &jets_islep);
   static std::vector<size_t> getBRanking(const std::vector<LVector> &momentum, const std::vector<float> &csv,
 					 const std::vector<bool> &is_lep);
@@ -163,7 +166,7 @@ public:
           std::vector<float> &jets_csv);
   double getSysMJ(double radius, std::vector<LVector> &jets);  
   jet_met_tools(TString ijecName, bool doSys, bool isFastSim);
-  ~jet_met_tools();
+  ~jet_met_tools() = default;
 };
 
 

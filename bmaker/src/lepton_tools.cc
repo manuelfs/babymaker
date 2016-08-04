@@ -36,7 +36,7 @@ bool lepton_tools::isSignalMuon(const pat::Muon &lep, edm::Handle<reco::VertexCo
   if(lep.pt() <= SignalLeptonPtCut) return false;
   if(fabs(lep.eta()) > MuonEtaCut) return false;
   // ID cuts (includes dz/dz0 cuts)
-  if(!idMuon(lep, vtx, kMedium)) return false;
+  if(!idMuon(lep, vtx, kMediumICHEP)) return false;
   // Isolation cuts
   if(lepIso >= 0 && lepIso > MuonMiniIsoCut) return false;
 
@@ -48,8 +48,7 @@ bool lepton_tools::isVetoMuon(const pat::Muon &lep, edm::Handle<reco::VertexColl
   if(lep.pt() <= VetoLeptonPtCut) return false;
   if(fabs(lep.eta()) > MuonEtaCut) return false;
   // ID cuts (includes dz/dz0 cuts)
-  //if(!idMuon(lep, vtx, kLoose)) return false;
-  if(!idMuon(lep, vtx, kMedium)) return false; // Using RA2/b muons
+  if(!idMuon(lep, vtx, kMediumICHEP)) return false; // Using RA2/b muons
   // Isolation cuts
   if(lepIso >= 0 && lepIso > MuonMiniIsoCut) return false;
 
@@ -60,6 +59,7 @@ bool lepton_tools::idMuon(const pat::Muon &lep, edm::Handle<reco::VertexCollecti
   double dz(0.), d0(0.);
   if(!vertexMuon(lep, vtx, dz, d0)) return false;
 
+  bool good_global;
   switch(threshold){
   default:
   case kVeto:
@@ -67,6 +67,15 @@ bool lepton_tools::idMuon(const pat::Muon &lep, edm::Handle<reco::VertexCollecti
     return lep.isLooseMuon();
   case kMedium:
     return lep.isMediumMuon();
+  case kMediumICHEP:
+    //From https://twiki.cern.ch/twiki/bin/viewauth/CMS/SWGuideMuonIdRun2#Short_Term_Medium_Muon_Definitio
+    good_global = lep.isGlobalMuon()
+      && lep.globalTrack()->normalizedChi2() < 3.
+      && lep.combinedQuality().chi2LocalPosition < 12.
+      && lep.combinedQuality().trkKink < 20.;
+    return  muon::isLooseMuon(lep)
+      && lep.innerTrack()->validFraction() > 0.49
+      && muon::segmentCompatibility(lep) > (good_global ? 0.303 : 0.451);
   case kTight:
     return lep.isTightMuon(vtx->at(0));
   }

@@ -29,11 +29,14 @@ public:
   const float MuonMiniIsoCut     = 0.2;
   const float ElectronMiniIsoCut = 0.1;
 
-  enum CutLevel{kVeto, kLoose, kMedium, kTight};
+  enum CutLevel{kVeto, kLoose, kMedium, kMediumICHEP, kTight};
   template<class T>
   T chooseVal(CutLevel threshold, T valVeto, T valLoose, T valMedium, T valTight){
     switch(threshold){
     default:
+    case kMediumICHEP:
+      cms::Exception("BadElectronID")
+	<< "CutLevel " << static_cast<int>(threshold) << " is not accepted for electrons." << std::endl;
     case kVeto:
       return valVeto;
     case kLoose:

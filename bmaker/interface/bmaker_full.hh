@@ -107,9 +107,7 @@ public:
   void writeFilters(const edm::TriggerNames &fnames,
                     edm::Handle<edm::TriggerResults> filterBits,
                     edm::Handle<reco::VertexCollection> vtx,
-                    std::vector<LVector> jets,
-                    std::vector<double> jetsMuonEnergyFrac,
-                    double met_phi);
+                    std::vector<double> jetsMuonEnergyFrac);
   void writeVertices(edm::Handle<reco::VertexCollection> vtx,
 		     edm::Handle<std::vector< PileupSummaryInfo > >  pu_info);  
   void writeGenInfo(edm::Handle<LHEEventProduct> lhe_info);

@@ -23,7 +23,7 @@ else: json = "/net/cms2/cms2r0/babymaker/misc/pu/2015/Cert_246908-258750_13TeV_P
 # Minbias cross-section, (corrected) announcement for ICHEP16:
 # https://hypernews.cern.ch/HyperNews/CMS/get/luminosity/613/2/1/1/1.html
 if do80X: mbxsec, mbxsec_relunc = 69200, 0.046
-else: mbxsec, mbxsec_relunc = 65550, 0.05 # mbxsec from a comment in babymaker, unc. just a place holder
+else: mbxsec, mbxsec_relunc = 69000, 0.05 
 
 # get hist of the MC PU profile
 mcpu_vals = []
@@ -43,8 +43,8 @@ calc_mode = "true"
 
 mbxsec_dict = {
      "nom": mbxsec,
-      "up": mbxsec*(1+mbxsec_relunc/100.),
-    "down": mbxsec*(1-mbxsec_relunc/100.)
+      "up": mbxsec*(1+mbxsec_relunc),
+    "down": mbxsec*(1-mbxsec_relunc)
 }
 
 hmc = TH1D("hmc","hmc",len(mcpu_vals),0,len(mcpu_vals))
@@ -80,9 +80,7 @@ for imb in mbxsec_dict:
             print " Weight: "+'{:>10.3e}'.format(iwgt)
 
     print "------> Vector for weight_tools:"
-    if imb=="nom": print "pileupWeightsCentral",
-    elif imb=="up": print "pileupWeightsPlus1Sigma",
-    elif imb=="down": print "pileupWeightsMinus1Sigma",
+    print "w_pu_"+imb,
     print " = vector<double>({"+', '.join('{:.3e}'.format(x) for x in wgt)+"});"
     
 

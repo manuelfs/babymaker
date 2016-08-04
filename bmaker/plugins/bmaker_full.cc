@@ -1637,7 +1637,7 @@ void bmaker_full::writeWeights(const vCands &sig_leps, edm::Handle<GenEventInfoP
 
   // Initializing weights
   if(isData) {
-    baby.eff_trig() = baby.w_btag() = baby.w_btag_loose() = baby.w_pu() = baby.w_pu_rpv() = baby.w_lep() = baby.w_fs_lep() = baby.w_toppt() = 1.;
+    baby.eff_trig() = baby.w_btag() = baby.w_btag_loose() = baby.w_pu() = baby.w_pu() = baby.w_lep() = baby.w_fs_lep() = baby.w_toppt() = 1.;
     baby.eff_jetid() = baby.w_lumi() = baby.weight() = baby.weight_rpv() = 1.;
     return;
   }
@@ -1648,11 +1648,10 @@ void bmaker_full::writeWeights(const vCands &sig_leps, edm::Handle<GenEventInfoP
   if (gen_event_info->weight() < 0) baby.w_lumi() *= -1.;
   
   // Pile-up weight
-  baby.w_pu() = weightTool->pileupWeight(baby.ntrupv_mean());
-  baby.w_pu_rpv() = weightTool->pileupWeightRPV(baby.ntrupv_mean(), 0);
-  baby.sys_pu_rpv().resize(2, 1.);
-  baby.sys_pu_rpv()[0] = weightTool->pileupWeightRPV(baby.ntrupv_mean(), 1)/baby.w_pu_rpv();
-  baby.sys_pu_rpv()[1] = weightTool->pileupWeightRPV(baby.ntrupv_mean(), -1)/baby.w_pu_rpv();
+  baby.w_pu() = weightTool->pileupWeight(baby.ntrupv_mean(),0);
+  baby.sys_pu().resize(2, 1.);
+  baby.sys_pu()[0] = weightTool->pileupWeight(baby.ntrupv_mean(), 1)/baby.w_pu();
+  baby.sys_pu()[1] = weightTool->pileupWeight(baby.ntrupv_mean(), -1)/baby.w_pu();
 
   // Lepton SFs
   double sf  = lepTool->getScaleFactor(sig_leps);
@@ -1684,7 +1683,7 @@ void bmaker_full::writeWeights(const vCands &sig_leps, edm::Handle<GenEventInfoP
   baby.weight() = baby.w_lumi() * baby.w_lep() * baby.w_fs_lep() * baby.w_toppt() * baby.w_btag() 
     * baby.eff_jetid();
   baby.weight_rpv() = baby.w_lumi() * baby.w_lep() * baby.w_fs_lep() * baby.w_toppt() * baby.w_btag()
-    * baby.w_pu_rpv() * baby.eff_jetid();
+    * baby.w_pu() * baby.eff_jetid();
 
   /////// Systematics that do not change central value /////////
   if(lhe_info.isValid()) weightTool->getTheoryWeights(lhe_info);

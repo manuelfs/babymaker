@@ -64,10 +64,11 @@ public:
   std::vector<float> genJetPt;
 
   static const std::vector<BTagEntry::OperatingPoint> op_pts_;
+  static const std::vector<BTagEntry::JetFlavor> flavors_;
   std::unique_ptr<BTagCalibration> calib_full_;
   std::unique_ptr<BTagCalibration> calib_fast_;
-  std::vector<std::unique_ptr<BTagCalibrationReader> > readers_full_;
-  std::vector<std::unique_ptr<BTagCalibrationReader> > readers_fast_;
+  std::map<BTagEntry::OperatingPoint, std::map<BTagEntry::JetFlavor, std::unique_ptr<BTagCalibrationReader> > > readers_full_;
+  std::map<BTagEntry::OperatingPoint, std::map<BTagEntry::JetFlavor, std::unique_ptr<BTagCalibrationReader> > > readers_fast_;
   std::vector<TH3F*> btag_efficiencies_;
 
   bool leptonInJet(const pat::Jet &jet, vCands leptons);

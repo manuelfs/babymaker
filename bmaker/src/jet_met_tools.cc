@@ -25,6 +25,14 @@ using namespace std;
 using namespace utilities;
 
 const vector<BTagEntry::OperatingPoint> jet_met_tools::op_pts_{BTagEntry::OP_MEDIUM, BTagEntry::OP_LOOSE};
+const vector<BTagEntry::JetFlavor> jet_met_tools::flavors_{BTagEntry::FLAV_B, BTagEntry::FLAV_C, BTagEntry::FLAV_UDSG};
+
+namespace{
+  template<typename T, typename... Args>
+    std::unique_ptr<T> MakeUnique(Args&&... args){
+    return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
+  }
+}
 
 bool jet_met_tools::leptonInJet(const pat::Jet &jet, vCands leptons){
   for(unsigned ilep(0); ilep < leptons.size(); ilep++){
@@ -295,43 +303,42 @@ float jet_met_tools::jetBTagWeight(const pat::Jet &jet, const LVector &jetp4, bo
 				   BTagEntry::OperatingPoint op,
 				   const string &bc_full_syst, const string &udsg_full_syst,
 				   const string &bc_fast_syst, const string &udsg_fast_syst) const{
-  double jet_scalefactor = 1.0;
   int hadronFlavour = abs(jet.hadronFlavour());
-  try{
-    // loose b-tags have a different tagging efficiecy
-    double eff = getMCTagEfficiency(hadronFlavour, jetp4.pt(), fabs(jetp4.eta()), op);
-    double sf(1.), sf_fs(1.);
-    size_t rdr_idx = distance(op_pts_.cbegin(), find(op_pts_.cbegin(), op_pts_.cend(), op));
-    // procedure from https://twiki.cern.ch/twiki/bin/view/CMS/BTagSFMethods#1a_Event_reweighting_using_scale
-    switch(hadronFlavour){
-    case 5:
-      sf = readers_full_.at(rdr_idx)->eval_auto_bounds(bc_full_syst, BTagEntry::FLAV_B, jetp4.eta(), jetp4.pt());
-      if(isFastSim){
-	sf_fs = readers_fast_.at(rdr_idx)->eval_auto_bounds(bc_fast_syst, BTagEntry::FLAV_B, jetp4.eta(), jetp4.pt());
-      }
-      break;
-    case 4:
-      sf = readers_full_.at(rdr_idx)->eval_auto_bounds(bc_full_syst, BTagEntry::FLAV_C, jetp4.eta(), jetp4.pt());
-      if(isFastSim){
-	sf_fs = readers_fast_.at(rdr_idx)->eval_auto_bounds(bc_fast_syst, BTagEntry::FLAV_C, jetp4.eta(), jetp4.pt());
-      }
-      break;
-    default:
-      sf = readers_full_.at(rdr_idx)->eval_auto_bounds(udsg_full_syst, BTagEntry::FLAV_UDSG, jetp4.eta(), jetp4.pt());
-      if(isFastSim){
-	sf_fs = readers_fast_.at(rdr_idx)->eval_auto_bounds(udsg_fast_syst, BTagEntry::FLAV_UDSG, jetp4.eta(), jetp4.pt());
-      }
-      break;
-    }
-    if(isFastSim){
-      double eff_fs = eff/sf_fs;
-      jet_scalefactor = isBTagged ? sf*sf_fs : (1-sf*sf_fs*eff_fs)/(1-eff_fs);
-    }else{
-      jet_scalefactor = isBTagged ? sf : (1-sf*eff)/(1-eff);
-    }
-  }catch (exception &e){
-    cerr << "Caught exception: " << e.what() << " for a jet with (pt,eta,hadron flavor)=(" 
-	      << jetp4.pt() << "," << jetp4.eta() << "," << hadronFlavour << ")" << endl;
+  BTagEntry::JetFlavor flav;
+  string full_syst, fast_syst;
+  switch(hadronFlavour){
+  case 5: flav = BTagEntry::FLAV_B; break;
+  case 4: flav = BTagEntry::FLAV_C; break;
+  default: flav = BTagEntry::FLAV_UDSG; break;
+  }
+
+  double eff = getMCTagEfficiency(hadronFlavour, jetp4.pt(), fabs(jetp4.eta()), op);
+
+  switch(flav){
+  case BTagEntry::FLAV_B:
+  case BTagEntry::FLAV_C:
+    full_syst = bc_full_syst;
+    fast_syst = bc_fast_syst;
+    break;
+  case BTagEntry::FLAV_UDSG:
+    full_syst = udsg_full_syst;
+    fast_syst = udsg_fast_syst;
+    break;
+  default:
+    throw cms::Exception("BadJetFlavour")
+      << "Did not recognize BTagEntry::JetFlavor " << static_cast<int>(flav) << "." << endl;
+  }
+
+  double sf = readers_full_.at(op).at(flav)->eval_auto_bounds(full_syst, flav, jetp4.eta(), jetp4.pt());
+  double sf_fs = isFastSim ? readers_fast_.at(op).at(flav)->eval_auto_bounds(fast_syst, flav, jetp4.eta(), jetp4.pt()) : 1.;
+
+  // procedure from https://twiki.cern.ch/twiki/bin/view/CMS/BTagSFMethods#1a_Event_reweighting_using_scale
+  double jet_scalefactor;
+  if(isFastSim){
+    double eff_fs = eff/sf_fs;
+    jet_scalefactor = isBTagged ? sf*sf_fs : (1-sf*sf_fs*eff_fs)/(1-eff_fs);
+  }else{
+    jet_scalefactor = isBTagged ? sf : (1-sf*eff)/(1-eff);
   }
   return jet_scalefactor;
 }
@@ -344,7 +351,8 @@ float jet_met_tools::getMCTagEfficiency(int pdgId, float pT, float eta, BTagEntr
     pdgId = 0;
   }
   int bin = btag_efficiencies_.at(rdr_idx)->FindBin(eta, pT, pdgId);
-  return btag_efficiencies_.at(rdr_idx)->GetBinContent(bin);
+  float eff = btag_efficiencies_.at(rdr_idx)->GetBinContent(bin);
+  return eff;
 }
 
 // get deltaR between two b-tagged CSVM jets
@@ -782,8 +790,8 @@ jet_met_tools::jet_met_tools(TString ijecName, bool doSys, bool fastSim):
   isFastSim(fastSim),
   calib_full_(),
   calib_fast_(),
-  readers_full_(op_pts_.size()),
-  readers_fast_(op_pts_.size()),
+  readers_full_(),
+  readers_fast_(),
   btag_efficiencies_(op_pts_.size()){
   if (jecName.Contains("DATA")) isData = true;
   else if (jecName.Contains("MC")) isData = false;
@@ -828,22 +836,26 @@ jet_met_tools::jet_met_tools(TString ijecName, bool doSys, bool fastSim):
   string scaleFactorFile(getenv("CMSSW_BASE"));
   scaleFactorFile+="/src/babymaker/bmaker/data/CSVv2.csv";
   calib_full_.reset(new BTagCalibration("csvv2", scaleFactorFile));
-  for(size_t i=0; i < op_pts_.size(); ++i){
-    readers_full_.at(i).reset(new BTagCalibrationReader(op_pts_.at(i), "central", {"up", "down"}));
-    readers_full_.at(i)->load(*calib_full_, BTagEntry::FLAV_UDSG, "comb");
-    readers_full_.at(i)->load(*calib_full_, BTagEntry::FLAV_C, "comb");
-    readers_full_.at(i)->load(*calib_full_, BTagEntry::FLAV_B, "comb");
+  for(const auto &op: op_pts_){
+    readers_full_[op] = map<BTagEntry::JetFlavor, unique_ptr<BTagCalibrationReader> >{};
+    for(const auto &flav: flavors_){
+      readers_full_.at(op)[flav] = MakeUnique<BTagCalibrationReader>(op, "central",
+								     vector<string>{"up", "down"});
+      readers_full_.at(op).at(flav)->load(*calib_full_, flav, "comb");
+    }
   }
 
   if (isFastSim){
     string scaleFactorFileFastSim(getenv("CMSSW_BASE"));
     scaleFactorFileFastSim+="/src/babymaker/bmaker/data/CSV_13TEV_Combined_14_7_2016.csv";
     calib_fast_.reset(new BTagCalibration("csvv2", scaleFactorFileFastSim));
-    for(size_t i = 0; i < op_pts_.size(); ++i){
-      readers_fast_.at(i).reset(new BTagCalibrationReader(op_pts_.at(i), "central", {"up", "down"}));
-      readers_fast_.at(i)->load(*calib_fast_, BTagEntry::FLAV_UDSG, "fastsim");
-      readers_fast_.at(i)->load(*calib_fast_, BTagEntry::FLAV_C, "fastsim");
-      readers_fast_.at(i)->load(*calib_fast_, BTagEntry::FLAV_B, "fastsim");
+    for(const auto &op: op_pts_){
+      readers_fast_[op] = map<BTagEntry::JetFlavor, unique_ptr<BTagCalibrationReader> >{};
+      for(const auto &flav: flavors_){
+	readers_fast_.at(op)[flav] = MakeUnique<BTagCalibrationReader>(op, "central",
+								       vector<string>{"up", "down"});
+	readers_fast_.at(op).at(flav)->load(*calib_fast_, flav, "fastsim");
+      }
     }
   }
 

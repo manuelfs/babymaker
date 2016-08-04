@@ -20,7 +20,7 @@
 
 // ROOT include files
 #include "TString.h"
-#include "TH3.h"
+#include "TH3D.h"
 
 // User include files
 #include "babymaker/bmaker/interface/utilities.hh"
@@ -67,9 +67,9 @@ public:
   static const std::vector<BTagEntry::JetFlavor> flavors_;
   std::unique_ptr<BTagCalibration> calib_full_;
   std::unique_ptr<BTagCalibration> calib_fast_;
-  std::map<BTagEntry::OperatingPoint, std::map<BTagEntry::JetFlavor, std::unique_ptr<BTagCalibrationReader> > > readers_full_;
-  std::map<BTagEntry::OperatingPoint, std::map<BTagEntry::JetFlavor, std::unique_ptr<BTagCalibrationReader> > > readers_fast_;
-  std::vector<TH3F*> btag_efficiencies_;
+  std::map<BTagEntry::OperatingPoint, std::unique_ptr<BTagCalibrationReader> > readers_full_;
+  std::map<BTagEntry::OperatingPoint, std::unique_ptr<BTagCalibrationReader> > readers_fast_;
+  std::vector<const TH3D*> btag_efficiencies_;
 
   bool leptonInJet(const pat::Jet &jet, vCands leptons);
   bool jetMatched(const pat::Jet &jet, vCands objects);

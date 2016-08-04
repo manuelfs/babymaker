@@ -329,8 +329,8 @@ float jet_met_tools::jetBTagWeight(const pat::Jet &jet, const LVector &jetp4, bo
       << "Did not recognize BTagEntry::JetFlavor " << static_cast<int>(flav) << "." << endl;
   }
 
-  double sf = readers_full_.at(op).at(flav)->eval_auto_bounds(full_syst, flav, jetp4.eta(), jetp4.pt());
-  double sf_fs = isFastSim ? readers_fast_.at(op).at(flav)->eval_auto_bounds(fast_syst, flav, jetp4.eta(), jetp4.pt()) : 1.;
+  double sf = readers_full_.at(op)->eval_auto_bounds(full_syst, flav, jetp4.eta(), jetp4.pt());
+  double sf_fs = isFastSim ? readers_fast_.at(op)->eval_auto_bounds(fast_syst, flav, jetp4.eta(), jetp4.pt()) : 1.;
 
   // procedure from https://twiki.cern.ch/twiki/bin/view/CMS/BTagSFMethods#1a_Event_reweighting_using_scale
   double jet_scalefactor;
@@ -350,7 +350,7 @@ float jet_met_tools::getMCTagEfficiency(int pdgId, float pT, float eta, BTagEntr
     // in the ghost clustering scheme to determine flavor, there are only b, c and other (id=0) flavors
     pdgId = 0;
   }
-  int bin = btag_efficiencies_.at(rdr_idx)->FindBin(eta, pT, pdgId);
+  int bin = btag_efficiencies_.at(rdr_idx)->FindFixBin(eta, pT, pdgId);
   float eff = btag_efficiencies_.at(rdr_idx)->GetBinContent(bin);
   return eff;
 }
@@ -837,12 +837,10 @@ jet_met_tools::jet_met_tools(TString ijecName, bool doSys, bool fastSim):
   scaleFactorFile+="/src/babymaker/bmaker/data/CSVv2.csv";
   calib_full_.reset(new BTagCalibration("csvv2", scaleFactorFile));
   for(const auto &op: op_pts_){
-    readers_full_[op] = map<BTagEntry::JetFlavor, unique_ptr<BTagCalibrationReader> >{};
-    for(const auto &flav: flavors_){
-      readers_full_.at(op)[flav] = MakeUnique<BTagCalibrationReader>(op, "central",
-								     vector<string>{"up", "down"});
-      readers_full_.at(op).at(flav)->load(*calib_full_, flav, "comb");
-    }
+    readers_full_[op] = MakeUnique<BTagCalibrationReader>(op, "central", vector<string>{"up", "down"});
+    readers_full_.at(op)->load(*calib_full_, BTagEntry::FLAV_UDSG, "incl");
+    readers_full_.at(op)->load(*calib_full_, BTagEntry::FLAV_C, "comb");
+    readers_full_.at(op)->load(*calib_full_, BTagEntry::FLAV_B, "comb");
   }
 
   if (isFastSim){
@@ -850,12 +848,10 @@ jet_met_tools::jet_met_tools(TString ijecName, bool doSys, bool fastSim):
     scaleFactorFileFastSim+="/src/babymaker/bmaker/data/CSV_13TEV_Combined_14_7_2016.csv";
     calib_fast_.reset(new BTagCalibration("csvv2", scaleFactorFileFastSim));
     for(const auto &op: op_pts_){
-      readers_fast_[op] = map<BTagEntry::JetFlavor, unique_ptr<BTagCalibrationReader> >{};
-      for(const auto &flav: flavors_){
-	readers_fast_.at(op)[flav] = MakeUnique<BTagCalibrationReader>(op, "central",
-								       vector<string>{"up", "down"});
-	readers_fast_.at(op).at(flav)->load(*calib_fast_, flav, "fastsim");
-      }
+      readers_fast_[op] = MakeUnique<BTagCalibrationReader>(op, "central", vector<string>{"up", "down"});
+      readers_fast_.at(op)->load(*calib_fast_, BTagEntry::FLAV_UDSG, "incl");
+      readers_fast_.at(op)->load(*calib_fast_, BTagEntry::FLAV_C, "comb");
+      readers_fast_.at(op)->load(*calib_fast_, BTagEntry::FLAV_B, "comb");
     }
   }
 
@@ -872,7 +868,7 @@ jet_met_tools::jet_met_tools(TString ijecName, bool doSys, bool fastSim):
       case BTagEntry::OP_RESHAPING: hist_name = "btagEfficiency_reshaping"; break;
       default: hist_name = "btagEfficiency"; break;
       }
-      btag_efficiencies_.at(i) = static_cast<TH3F*>(efficiencyFile->Get(hist_name.c_str()));
+      btag_efficiencies_.at(i) = static_cast<const TH3D*>(efficiencyFile->Get(hist_name.c_str()));
       if(!btag_efficiencies_.at(i)){
 	throw cms::Exception("NoEfficiencyMap")
 	  << "Could not find efficiency parametrization " << hist_name << "." << endl;

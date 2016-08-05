@@ -8,9 +8,11 @@
 #include <algorithm>
 #include <stdexcept>
 #include <string>
+#include <numeric>
 
 //ROOT include files
 #include "TFile.h"
+#include "TGraphAsymmErrors.h"
 
 // FW include files
 #include "FWCore/Framework/interface/ESHandle.h"
@@ -22,13 +24,153 @@
 using namespace std;
 using namespace utilities;
 
+namespace{
+  template<typename T>
+    T GetSF(const string &file_name, const string &item_name){
+    string path = string(getenv("CMSSW_BASE"))+"/src/babymaker/bmaker/data/lepton_sf/"+file_name;
+    TFile f(path.c_str(), "read");
+    if(!f.IsOpen()) ERROR("Could not open " << file_name);
+    T* item = static_cast<T*>(f.Get(item_name.c_str()));
+    if(!item) ERROR("Could not find " << item_name << " in " << file_name);
+    return *item;
+  }
+
+  template<typename T>
+    pair<double, double> GetSF(const T &h, double x, double y, bool ignore_error = false){
+    pair<double, double> sf;
+    auto bin = h.FindFixBin(x, y);
+    if((h.IsBinOverflow(bin) || h.IsBinUnderflow(bin))
+       && h.GetBinContent(bin) == 0. && h.GetBinError(bin) == 0.){
+      auto bin_x = h.GetXaxis()->FindFixBin(x);
+      auto bin_y = h.GetYaxis()->FindFixBin(y);
+      if(bin_x <= 0) bin_x = 1;
+      if(bin_x > h.GetNbinsX()) bin_x = h.GetNbinsX();
+      if(bin_y <= 0) bin_y = 1;
+      if(bin_y > h.GetNbinsY()) bin_y = h.GetNbinsY();
+      sf = {h.GetBinContent(bin_x, bin_y), h.GetBinError(bin_x, bin_y)};
+    }else{
+      sf = {h.GetBinContent(bin), h.GetBinError(bin)};
+    }
+    if(ignore_error) sf.second = 0.;
+    return sf;
+  }
+
+  pair<double, double> MergeSF(pair<double, double> a,
+			       pair<double, double> b){
+    double sf = a.first * b.first;
+    double err = hypot(a.first*b.second, b.first*a.second);
+    return {sf, err};
+  }
+
+  TH2D GraphToHist(const TGraphAsymmErrors &g){
+    struct Point{
+      double xl, xh, y, e;
+      Point(double xl_in, double xh_in, double y_in, double e_in):
+	xl(xl_in),
+	xh(xh_in),
+	y(y_in),
+	e(e_in){
+      }
+      bool operator<(const Point &p) const{
+	return make_tuple(xl, xh, fabs(log(fabs(y))), fabs(e))
+	  <make_tuple(p.xl, p.xh, fabs(log(fabs(p.y))), fabs(p.e));
+      }
+    };
+    vector<Point> bins;
+    Double_t *x = g.GetX();
+    Double_t *xl = g.GetEXlow();
+    Double_t *xh = g.GetEXhigh();
+    Double_t *y = g.GetY();
+    Double_t *yl = g.GetEYlow();
+    Double_t *yh = g.GetEYhigh();
+    for(int i = 0; i < g.GetN(); ++i){
+      bins.emplace_back(x[i]-fabs(xl[i]), x[i]+fabs(xh[i]),
+			y[i], max(fabs(yl[i]), fabs(yh[i])));
+    }
+    bool problems = true;
+    while(problems){
+      stable_sort(bins.begin(), bins.end());
+      problems = false;
+      for(auto low = bins.begin(); !problems && low != bins.end(); ++low){
+	auto high = low;
+	++high;
+	if(high == bins.end()) break;
+	double new_y = sqrt(low->y * high->y);
+	double top = max(low->y+low->e, high->y+high->e);
+	double bot = min(low->y-low->e, high->y-high->e);
+	double new_e = max(top-new_y, new_y-bot);
+	if(low->xh < high->xl){
+	  //Gap
+	  bins.insert(high, Point(low->xh, high->xl, new_y, new_e));
+	}else if(low->xh > high->xl){
+	  //Overlap
+	  problems = true;
+	  if(low->xh < high->xh){
+	    //Plain overlap
+	    Point new_low(low->xl, high->xl, low->y, low->e);
+	    Point new_mid(high->xl, low->xh, new_y, new_e);
+	    Point new_high(low->xh, high->xh, high->y, high->e);
+	    *low = new_low;
+	    *high = new_high;
+	    bins.insert(high, new_mid);
+	  }else if(low->xh == high->xh){
+	    //Subset -> 2 bins
+	    Point new_low(low->xl, high->xl, low->y, low->e);
+	    Point new_high(high->xl, high->xh, new_y, new_e);
+	    *low = new_low;
+	    *high = new_high;
+	  }else{
+	    //Subset -> 3 bins
+	    Point new_low(low->xl, high->xl, low->y, low->e);
+	    Point new_mid(high->xl, high->xh, new_y, new_e);
+	    Point new_high(high->xh, low->xh, low->y, low->e);
+	    *low = new_low;
+	    *high = new_high;
+	    bins.insert(high, new_mid);
+	  }
+	}
+      }
+    }
+    vector<double> bin_edges(bins.size()+1);
+    for(size_t i = 0; i < bins.size(); ++i){
+      bin_edges.at(i) = bins.at(i).xl;
+    }
+    bin_edges.back() = bins.back().xh;
+    TH2D h(g.GetName(), (string(g.GetTitle())+";"+g.GetXaxis()->GetTitle()+";"+g.GetYaxis()->GetTitle()).c_str(),
+	   1, 0., 1.e4, bin_edges.size()-1, &bin_edges.at(0));
+    for(int ix = 0; ix <= 2; ++ix){
+      h.SetBinContent(ix, 0, 1.);
+      h.SetBinError(ix, 0, 1.);
+      h.SetBinContent(ix, h.GetNbinsY()+1, 1.);
+      h.SetBinError(ix, h.GetNbinsY()+1, 1.);
+      for(int iy = 1; iy <= h.GetNbinsY(); ++iy){
+	h.SetBinContent(ix, iy, bins.at(iy-1).y);
+	h.SetBinError(ix ,iy, bins.at(iy-1).e);
+      }
+    }
+    return h;
+  }
+}
+
 //////////////////// Scale Factor loading
-const TH2D lepton_tools::muon_id_sf = *static_cast<TH2D*>(TFile((string(getenv("CMSSW_BASE"))+"/src/babymaker/bmaker/data/lepton_sf/muon_medium_id.root").c_str(),"read").Get("pt_abseta_PLOT_pair_probeMultiplicity_bin0_&_tag_combRelIsoPF04dBeta_bin0_&_tag_pt_bin0_&_tag_IsoMu20_pass"));
-const TH2D lepton_tools::muon_iso_sf = *static_cast<TH2D*>(TFile((string(getenv("CMSSW_BASE"))+"/src/babymaker/bmaker/data/lepton_sf/muon_mini_iso_0p2.root").c_str(),"read").Get("pt_abseta_PLOT_pair_probeMultiplicity_bin0_&_tag_combRelIsoPF04dBeta_bin0_&_tag_pt_bin0_&_PF_pass_&_tag_IsoMu20_pass"));
-const TH2D lepton_tools::electron_id_sf = *static_cast<TH2D*>(TFile((string(getenv("CMSSW_BASE"))+"/src/babymaker/bmaker/data/lepton_sf/electron.root").c_str(),"read").Get("CutBasedMedium"));
-const TH2D lepton_tools::electron_iso_sf = *static_cast<TH2D*>(TFile((string(getenv("CMSSW_BASE"))+"/src/babymaker/bmaker/data/lepton_sf/electron.root").c_str(),"read").Get("MiniIso0p1_vs_AbsEta"));
-const TH3D lepton_tools::muon_idiso_fs_sf = *static_cast<TH3D*>(TFile((string(getenv("CMSSW_BASE"))+"/src/babymaker/bmaker/data/lepton_sf/sf_mu_mediumID_mini02.root").c_str(),"read").Get("histo3D"));
-const TH3D lepton_tools::electron_idiso_fs_sf = *static_cast<TH3D*>(TFile((string(getenv("CMSSW_BASE"))+"/src/babymaker/bmaker/data/lepton_sf/sf_el_mediumCB_mini01.root").c_str(),"read").Get("histo3D"));
+const TH2F lepton_tools::sf_full_muon_medium = GetSF<TH2F>("sf_full_muon_medium.root",
+							   "pt_abseta_PLOT_pair_probeMultiplicity_bin0");
+const TH2F lepton_tools::sf_full_muon_iso = GetSF<TH2F>("sf_full_muon_iso.root",
+							"pt_abseta_PLOT_pair_probeMultiplicity_bin0_&_Medium2016_pass");
+const TH2D lepton_tools::sf_full_muon_tracking = GraphToHist(GetSF<TGraphAsymmErrors>("sf_full_muon_tracking.root",
+										      "ratio_eta"));
+const TH2F lepton_tools::sf_full_electron_medium = GetSF<TH2F>("sf_full_electron_idiso.root",
+							       "GsfElectronToMedium");
+const TH2F lepton_tools::sf_full_electron_iso = GetSF<TH2F>("sf_full_electron_idiso.root",
+							    "MVAVLooseElectronToMini");
+const TH2F lepton_tools::sf_full_electron_tracking = GetSF<TH2F>("sf_full_electron_tracking.root",
+								 "EGamma_SF2D");
+const TH2D lepton_tools::sf_fast_muon_medium = GetSF<TH2D>("sf_fast_muon_medium.root",
+							   "histo2D");
+const TH2D lepton_tools::sf_fast_muon_iso = GetSF<TH2D>("sf_fast_muon_iso.root",
+							"histo2D");
+const TH2D lepton_tools::sf_fast_electron_mediumiso = GetSF<TH2D>("sf_fast_electron_mediumiso.root",
+								  "histo2D");
 
 //////////////////// Muons
 bool lepton_tools::isSignalMuon(const pat::Muon &lep, edm::Handle<reco::VertexCollection> vtx, double lepIso){
@@ -220,177 +362,104 @@ double lepton_tools::getRelIsolation(const pat::Electron &lep, double rho){
   return (ch_iso + neu_iso) / lep.pt();
 }
 
-double lepton_tools::getScaleFactor(const reco::Candidate &cand){
+pair<double, double> lepton_tools::getScaleFactor(const reco::Candidate &cand){
   if(const pat::Electron * ele_ptr = dynamic_cast<const pat::Electron*>(&cand)){
     return getScaleFactor(*ele_ptr);
   }else if(const reco::Muon * mu_ptr = dynamic_cast<const reco::Muon*>(&cand)){
     return getScaleFactor(*mu_ptr);
   }else{
-    throw runtime_error(string("Cannot get scale factor for type ")+typeid(cand).name());
+    ERROR("Cannot get scale factor for type " << typeid(cand).name());
   }
-  return 1.;
+  return {1., 0.};
 }
 
-double lepton_tools::getScaleFactorUncertainty(const reco::Candidate &cand){
+pair<double, double> lepton_tools::getScaleFactor(const vCands &sig_leps){
+  return accumulate(sig_leps.cbegin(), sig_leps.cend(), make_pair(1., 0.),
+		    [](pair<double, double> sf, const reco::Candidate* cand){
+		      if(cand == nullptr) ERROR("Dereferencing nullptr");
+		      return MergeSF(sf, getScaleFactor(*cand));
+		    });
+}
+
+pair<double, double> lepton_tools::getScaleFactorFs(const reco::Candidate &cand){
   if(const pat::Electron * ele_ptr = dynamic_cast<const pat::Electron*>(&cand)){
-    return getScaleFactorUncertainty(*ele_ptr);
+    return getScaleFactorFs(*ele_ptr);
   }else if(const reco::Muon * mu_ptr = dynamic_cast<const reco::Muon*>(&cand)){
-    return getScaleFactorUncertainty(*mu_ptr);
+    return getScaleFactorFs(*mu_ptr);
   }else{
-    throw runtime_error(string("Cannot get scale factor uncertainty for type ")+typeid(cand).name());
+    ERROR("Cannot get scale factor for type " << typeid(cand).name());
   }
-  return 0.;
+  return {1., 0.};
 }
 
-double lepton_tools::getScaleFactor(const vCands &sig_leps){
-  double scale_factor = 1.;
-  for(const auto &lep: sig_leps){
-    if(lep == nullptr) throw runtime_error("sig_leps contains a nullptr in lepton_tools::getScaleFactor");
-    scale_factor *= getScaleFactor(*lep);
-  }
-  return scale_factor;
+pair<double, double> lepton_tools::getScaleFactorFs(const vCands &sig_leps){
+  return accumulate(sig_leps.cbegin(), sig_leps.cend(), make_pair(1., 0.),
+		    [](pair<double, double> sf, const reco::Candidate* cand){
+		      if(cand == nullptr) ERROR("Dereferencing nullptr");
+		      return MergeSF(sf, getScaleFactorFs(*cand));
+		    });
 }
 
-double lepton_tools::getScaleFactorUncertainty(const vCands &sig_leps){
-  //Crashes if scale factor == 0...
-  double uncertainty = 0., totsf(1.);
-  for(const auto &lep: sig_leps){
-    if(lep == nullptr) throw runtime_error("sig_leps contains a nullptr in lepton_tools::getScaleFactorUncertainty");
-    double scale_factor = getScaleFactor(*lep);
-    if(scale_factor <= 0) throw runtime_error("One lepton FSSF is 0 in lepton_tools::getScaleFactorUncertainty");
-    uncertainty = hypot(uncertainty, getScaleFactorUncertainty(*lep)/scale_factor);
-    totsf *= scale_factor;
-  }
-  return uncertainty*totsf;
+pair<double, double> lepton_tools::getScaleFactor(const reco::Muon &lep){
+  //https://twiki.cern.ch/twiki/bin/view/CMS/SUSLeptonSF#Data_leading_order_FullSim_MC_co
+  //ID, iso, tracking SFs applied
+  //No stat error, 3% systematic from ID, iso
+  double pt = lep.pt();
+  double eta = lep.eta();
+  double abseta = fabs(eta);
+  vector<pair<double, double> > sfs{
+    GetSF(sf_full_muon_medium, pt, abseta, false),
+      make_pair(1., 0.03),//Systematic uncertainty
+      GetSF(sf_full_muon_iso, pt, abseta, false),
+      make_pair(1., 0.03),//Systematic uncertainty
+      GetSF(sf_full_muon_tracking, pt, eta)//Asymmetric in eta
+      };
+  return accumulate(sfs.cbegin(), sfs.cend(), make_pair(1., 0.), MergeSF);
 }
 
-double lepton_tools::getScaleFactorFs(const reco::Candidate &cand, int npv){
-  if(const pat::Electron * ele_ptr = dynamic_cast<const pat::Electron*>(&cand)){
-    return getScaleFactorFs(*ele_ptr,npv);
-  }else if(const reco::Muon * mu_ptr = dynamic_cast<const reco::Muon*>(&cand)){
-    return getScaleFactorFs(*mu_ptr,npv);
-  }else{
-    throw runtime_error(string("Cannot get scale factor for type ")+typeid(cand).name());
-  }
-  return 1.;
+pair<double, double> lepton_tools::getScaleFactor(const pat::Electron &lep){
+  //https://twiki.cern.ch/twiki/bin/view/CMS/SUSLeptonSF#Data_leading_order_FullSim_M_AN1
+  //ID, iso, tracking SFs applied
+  //ID iso systematics built-in
+  //Tracking SFs from https://twiki.cern.ch/twiki/bin/view/CMS/EgammaIDRecipesRun2#Electron_efficiencies_and_scale
+  //3% tracking systematic below 20 GeV
+  double pt = lep.superCluster()->energy()*sin(lep.superClusterPosition().theta());
+  double eta = lep.superCluster()->eta();
+  double abseta = fabs(eta);
+  vector<pair<double, double> > sfs{
+    GetSF(sf_full_electron_medium, pt, abseta),
+      GetSF(sf_full_electron_iso, pt, abseta),
+      GetSF(sf_full_electron_tracking, eta, pt),//Axes swapped, asymmetric in eta
+      make_pair(1., pt<20. ? 0.03 : 0.)//Systematic uncertainty
+      };
+  return accumulate(sfs.cbegin(), sfs.cend(), make_pair(1., 0.), MergeSF);
 }
 
-double lepton_tools::getScaleFactorUncertaintyFs(const reco::Candidate &cand, int npv){
-  if(const pat::Electron * ele_ptr = dynamic_cast<const pat::Electron*>(&cand)){
-    return getScaleFactorUncertaintyFs(*ele_ptr,npv);
-  }else if(const reco::Muon * mu_ptr = dynamic_cast<const reco::Muon*>(&cand)){
-    return getScaleFactorUncertaintyFs(*mu_ptr,npv);
-  }else{
-    throw runtime_error(string("Cannot get scale factor uncertainty for type ")+typeid(cand).name());
-  }
-  return 0.;
+pair<double, double> lepton_tools::getScaleFactorFs(const reco::Muon &lep){
+  //https://twiki.cern.ch/twiki/bin/view/CMS/SUSLeptonSF#FullSim_FastSim_TTBar_MC_compari
+  //ID, iso SFs applied
+  //No stat error, 2% systematic from ID, iso
+  double pt = lep.pt();
+  double abseta = fabs(lep.eta());
+  vector<pair<double, double> > sfs{
+    GetSF(sf_fast_muon_medium, pt, abseta),
+      make_pair(1., 0.02),
+      GetSF(sf_fast_muon_iso, pt, abseta),
+      make_pair(1., 0.02),
+      };
+  return accumulate(sfs.cbegin(), sfs.cend(), make_pair(1., 0.), MergeSF);
 }
 
-double lepton_tools::getScaleFactorFs(const vCands &sig_leps, int npv){
-  double scale_factor = 1.;
-  for(const auto &lep: sig_leps){
-    if(lep == nullptr) throw runtime_error("sig_leps contains a nullptr in lepton_tools::getScaleFactor");
-    scale_factor *= getScaleFactorFs(*lep,npv);
-  }
-  return scale_factor;
-}
-
-double lepton_tools::getScaleFactorUncertaintyFs(const vCands &sig_leps, int npv){
-  //Crashes if scale factor == 0...
-  double uncertainty = 0., totsf(1.);
-  for(const auto &lep: sig_leps){
-    if(lep == nullptr) throw runtime_error("sig_leps contains a nullptr in lepton_tools::getScaleFactorUncertainty");
-    double scale_factor = getScaleFactorFs(*lep, npv);
-    if(scale_factor <= 0) throw runtime_error("One lepton FSSF is 0 in lepton_tools::getScaleFactorUncertainty");
-    uncertainty = hypot(uncertainty, getScaleFactorUncertaintyFs(*lep,npv)/scale_factor);
-    totsf *= scale_factor;
-  }
-  return uncertainty*totsf;
-}
-
-
-double lepton_tools::getScaleFactor(const reco::Muon &lep){
-  auto id_bin = muon_id_sf.FindFixBin(lep.pt(), fabs(lep.eta()));
-  auto iso_bin = muon_iso_sf.FindFixBin(lep.pt(), fabs(lep.eta()));
-  auto id_overflow = muon_id_sf.IsBinOverflow(id_bin);
-  auto iso_overflow = muon_iso_sf.IsBinOverflow(id_bin);
-  auto id_val = id_overflow ? 1. : muon_id_sf.GetBinContent(id_bin);
-  auto iso_val = iso_overflow ? 1. : muon_iso_sf.GetBinContent(iso_bin);
-  return id_val * iso_val;
-}
-
-double lepton_tools::getScaleFactorUncertainty(const reco::Muon &lep){
-  auto id_bin = muon_id_sf.FindFixBin(lep.pt(), fabs(lep.eta()));
-  auto iso_bin = muon_iso_sf.FindFixBin(lep.pt(), fabs(lep.eta()));
-  auto id_overflow = muon_id_sf.IsBinOverflow(id_bin);
-  auto iso_overflow = muon_iso_sf.IsBinOverflow(id_bin);
-  auto id_val = id_overflow ? 1. : muon_id_sf.GetBinContent(id_bin);
-  auto iso_val = iso_overflow ? 1. : muon_iso_sf.GetBinContent(iso_bin);
-  auto id_err = id_overflow ? 0. : muon_id_sf.GetBinError(id_bin);
-  auto iso_err = iso_overflow ? 0. : muon_iso_sf.GetBinError(iso_bin);
-  auto full_val = id_val*iso_val;
-  // Adding relative uncertainty of ISO, ID, and two 1% systematics
-  return full_val * hypot(hypot(hypot(iso_err/iso_val, id_err/id_val),0.01/full_val),0.01/full_val);
-}
-
-double lepton_tools::getScaleFactor(const pat::Electron &lep){
-  auto id_bin = electron_id_sf.FindFixBin(lep.superCluster()->energy()*sin(lep.superClusterPosition().theta()), fabs(lep.superCluster()->eta()));
-  auto iso_bin = electron_iso_sf.FindFixBin(lep.superCluster()->energy()*sin(lep.superClusterPosition().theta()), fabs(lep.superCluster()->eta()));
-  auto id_val = electron_id_sf.GetBinContent(id_bin);
-  auto iso_val = electron_iso_sf.GetBinContent(iso_bin);
-  return id_val * iso_val;
-}
-
-double lepton_tools::getScaleFactorUncertainty(const pat::Electron &lep){
-  auto id_bin = electron_id_sf.FindFixBin(lep.pt(), fabs(lep.superCluster()->eta()));
-  auto iso_bin = electron_iso_sf.FindFixBin(lep.pt(), fabs(lep.superCluster()->eta()));
-  auto id_val = electron_id_sf.GetBinContent(id_bin);
-  auto iso_val = electron_iso_sf.GetBinContent(iso_bin);
-  auto id_err = electron_id_sf.GetBinError(id_bin);
-  auto iso_err = electron_iso_sf.GetBinError(iso_bin);
-  // Adding relative uncertainty of ISO, ID
-  auto full_val = id_val*iso_val;
-  return full_val * hypot(iso_err/iso_val, id_err/id_val);
-}
-
-double lepton_tools::getScaleFactorFs(const reco::Muon &lep, int npv){
-  auto bin = muon_idiso_fs_sf.FindFixBin(lep.pt(), fabs(lep.eta()), npv);
-  auto overflow = muon_idiso_fs_sf.IsBinOverflow(bin);
-  auto val = overflow ? 1. : muon_idiso_fs_sf.GetBinContent(bin); 
-  return val;
-}
-
-double lepton_tools::getScaleFactorUncertaintyFs(const reco::Muon &lep, int npv){
-  auto bin = muon_idiso_fs_sf.FindFixBin(lep.pt(), fabs(lep.eta()), npv);
-  auto overflow = muon_idiso_fs_sf.IsBinOverflow(bin);
-  auto val = overflow ? 1. : muon_idiso_fs_sf.GetBinContent(bin); 
-
-  // Systematics : https://twiki.cern.ch/twiki/bin/view/CMS/SUSLeptonSFMC#Recommendations
-  float syst=0;
-  if(lep.pt()>10 && lep.pt()<=20)	syst = val*0.03;
-  else if(lep.pt()>20 && lep.pt()<=30)	syst = val*0.01;
-  else if(lep.pt()>30)			syst = val*0.01; 
-  return syst;
-}
-
-double lepton_tools::getScaleFactorFs(const pat::Electron &lep, int npv){
-  auto bin = electron_idiso_fs_sf.FindFixBin(lep.pt(), fabs(lep.eta()), npv);
-  auto overflow = electron_idiso_fs_sf.IsBinOverflow(bin);
-  auto val = overflow ? 1. : electron_idiso_fs_sf.GetBinContent(bin);
-  return val;
-}
-
-double lepton_tools::getScaleFactorUncertaintyFs(const pat::Electron &lep, int npv){
-  auto bin = electron_idiso_fs_sf.FindFixBin(lep.pt(), fabs(lep.eta()), npv);
-  auto overflow = electron_idiso_fs_sf.IsBinOverflow(bin);
-  auto val = overflow ? 1. : electron_idiso_fs_sf.GetBinContent(bin);
-
-  // Systematics : https://twiki.cern.ch/twiki/bin/view/CMS/SUSLeptonSFMC#Recommendations
-  float syst=0;
-  if(lep.pt()>10 && lep.pt()<=20)	syst=val*0.10;
-  else if(lep.pt()>20 && lep.pt()<=30)	syst=val*0.08;
-  else if(lep.pt()>30)			syst=val*0.05; 
-  return syst;
+pair<double, double> lepton_tools::getScaleFactorFs(const pat::Electron &lep){
+  //https://twiki.cern.ch/twiki/bin/view/CMS/SUSLeptonSF#FullSim_FastSim_TTBar_MC_com_AN1
+  //ID, iso SFs applied
+  //No stat error, 2% systematic from ID, iso
+  double pt = lep.superCluster()->energy()*sin(lep.superClusterPosition().theta());
+  double abseta = fabs(lep.superCluster()->eta());
+  vector<pair<double, double> > sfs{
+    GetSF(sf_fast_electron_mediumiso, pt, abseta)
+      };
+  return accumulate(sfs.cbegin(), sfs.cend(), make_pair(1., 0.), MergeSF);
 }
 
 double lepton_tools::getPFIsolation(edm::Handle<pat::PackedCandidateCollection> pfcands,

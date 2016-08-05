@@ -3,8 +3,10 @@
 #ifndef H_LEPTON_TOOLS
 #define H_LEPTON_TOOLS
 
+#include <utility>
+
 #include "TH2D.h"
-#include "TH3D.h"
+#include "TH2F.h"
 
 #include "FWCore/Framework/interface/ESHandle.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
@@ -63,17 +65,11 @@ public:
   double getEffAreaElectron(double eta);
   double getRelIsolation(const pat::Electron &lep, double rho);
 
-  static double getScaleFactor(const reco::Candidate &cand);
-  static double getScaleFactorUncertainty(const reco::Candidate &cand);
+  static std::pair<double, double> getScaleFactor(const reco::Candidate &cand);
+  static std::pair<double, double> getScaleFactor(const vCands &sig_leps);
 
-  static double getScaleFactor(const vCands &sig_leps);
-  static double getScaleFactorUncertainty(const vCands &sig_leps);
-
-  static double getScaleFactorFs(const reco::Candidate &cand, int npv);
-  static double getScaleFactorUncertaintyFs(const reco::Candidate &cand, int npv);
-
-  static double getScaleFactorFs(const vCands &sig_leps, int npv);
-  static double getScaleFactorUncertaintyFs(const vCands &sig_leps, int npv);
+  static std::pair<double, double> getScaleFactorFs(const reco::Candidate &cand);
+  static std::pair<double, double> getScaleFactorFs(const vCands &sig_leps);
 
   double getPFIsolation(edm::Handle<pat::PackedCandidateCollection> pfcands,
                         const reco::Candidate* ptcl,
@@ -84,17 +80,14 @@ public:
   vCands getRA4IsoTracks(edm::Handle<pat::PackedCandidateCollection> pfcands, double met, double met_phi,double rhoEventCentral,std::vector<float> &isos,  std::vector<float> &relisos, int primary_pdg);
 
 private:
-  static const TH2D muon_id_sf, muon_iso_sf, electron_id_sf, electron_iso_sf;
-  static const TH3D muon_idiso_fs_sf,electron_idiso_fs_sf;
-  static double getScaleFactor(const reco::Muon &lep);
-  static double getScaleFactorUncertainty(const reco::Muon &lep);
-  static double getScaleFactor(const pat::Electron &lep);
-  static double getScaleFactorUncertainty(const pat::Electron &lep);
+  static const TH2F sf_full_muon_medium, sf_full_muon_iso, sf_full_electron_medium, sf_full_electron_iso, sf_full_electron_tracking;
+  static const TH2D sf_full_muon_tracking, sf_fast_muon_medium, sf_fast_muon_iso, sf_fast_electron_mediumiso;
+
+  static std::pair<double, double> getScaleFactor(const reco::Muon &lep);
+  static std::pair<double, double> getScaleFactor(const pat::Electron &lep);
   
-  static double getScaleFactorFs(const reco::Muon &lep,  int npv);
-  static double getScaleFactorUncertaintyFs(const reco::Muon &lep, int npv);
-  static double getScaleFactorFs(const pat::Electron &lep,  int npv);
-  static double getScaleFactorUncertaintyFs(const pat::Electron &lep, int npv);
+  static std::pair<double, double> getScaleFactorFs(const reco::Muon &lep);
+  static std::pair<double, double> getScaleFactorFs(const pat::Electron &lep);
 };
 
 #endif

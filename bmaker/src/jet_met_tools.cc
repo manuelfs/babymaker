@@ -312,7 +312,7 @@ float jet_met_tools::jetBTagWeight(const pat::Jet &jet, const LVector &jetp4, bo
   default: flav = BTagEntry::FLAV_UDSG; break;
   }
 
-  double eff = getMCTagEfficiency(hadronFlavour, jetp4.pt(), fabs(jetp4.eta()), op);
+  double eff = getMCTagEfficiency(hadronFlavour, jetp4.pt(), jetp4.eta(), op);
 
   switch(flav){
   case BTagEntry::FLAV_B:
@@ -325,8 +325,7 @@ float jet_met_tools::jetBTagWeight(const pat::Jet &jet, const LVector &jetp4, bo
     fast_syst = udsg_fast_syst;
     break;
   default:
-    throw cms::Exception("BadJetFlavour")
-      << "Did not recognize BTagEntry::JetFlavor " << static_cast<int>(flav) << "." << endl;
+    ERROR("Did not recognize BTagEntry::JetFlavor " << static_cast<int>(flav));
   }
 
   double sf = readers_full_.at(op)->eval_auto_bounds(full_syst, flav, jetp4.eta(), jetp4.pt());
@@ -350,7 +349,7 @@ float jet_met_tools::getMCTagEfficiency(int pdgId, float pT, float eta, BTagEntr
     // in the ghost clustering scheme to determine flavor, there are only b, c and other (id=0) flavors
     pdgId = 0;
   }
-  int bin = btag_efficiencies_.at(rdr_idx)->FindFixBin(eta, pT, pdgId);
+  int bin = btag_efficiencies_.at(rdr_idx)->FindFixBin(fabs(eta), pT, pdgId);
   float eff = btag_efficiencies_.at(rdr_idx)->GetBinContent(bin);
   return eff;
 }
@@ -870,13 +869,11 @@ jet_met_tools::jet_met_tools(TString ijecName, bool doSys, bool fastSim):
       }
       btag_efficiencies_.at(i) = static_cast<const TH3D*>(efficiencyFile->Get(hist_name.c_str()));
       if(!btag_efficiencies_.at(i)){
-	throw cms::Exception("NoEfficiencyMap")
-	  << "Could not find efficiency parametrization " << hist_name << "." << endl;
+	ERROR("Could not find efficiency parametrization " << hist_name);
       }
     }
   }else{
-    throw cms::Exception("FileNotFound")
-      << "Could not find efficiency file " << filename << "." << endl;
+    ERROR("Could not find efficiency file " << filename);
   }
 }
 

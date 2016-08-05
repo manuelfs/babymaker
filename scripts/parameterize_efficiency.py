@@ -5,6 +5,7 @@ import ROOT
 import array
 
 def ParameterizeEfficiency(out_file_path, ttbar_only, no_cuts):
+    ROOT.TH1.SetDefaultSumw2()
     c = ROOT.TChain("tree", "tree")
     subdir = ("unskimmed" if no_cuts else "merged_stdnj5")
     if ttbar_only:

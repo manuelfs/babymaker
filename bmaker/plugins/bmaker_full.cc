@@ -982,7 +982,7 @@ void bmaker_full::setDiLepMass(vCands leptons, baby_float ll_m, baby_float ll_pt
           if(fabs(pt1 - (baby.*l_pt)()[ilep]) < 1e-7) (baby.*l_inz)()[ilep] = true;
           if(fabs(pt2 - (baby.*l_pt)()[ilep]) < 1e-7) (baby.*l_inz)()[ilep] = true;
         }
-        (baby.*ll_w)() = lepton_tools::getScaleFactor({leptons[lep1], leptons[lep2]});
+        (baby.*ll_w)() = lepton_tools::getScaleFactor({leptons[lep1], leptons[lep2]}).first;
         return; // We only set it with the first good ll combination
       }
     } // Loop over lep2
@@ -1004,7 +1004,7 @@ void bmaker_full::setElMuMass(vCands leptons1, vCands leptons2, baby_float ll_m,
         float pt1(leptons1[lep1]->pt()), pt2(leptons2[lep2]->pt());
         (baby.*ll_pt1)() = pt1; 
         (baby.*ll_pt2)() = pt2;
-        (baby.*ll_w)() = lepton_tools::getScaleFactor({leptons1[lep1], leptons2[lep2]});
+        (baby.*ll_w)() = lepton_tools::getScaleFactor({leptons1[lep1], leptons2[lep2]}).first;
         return; // We only set it with the first good ll combination
       }
     } // Loop over lep2
@@ -1651,8 +1651,9 @@ void bmaker_full::writeWeights(const vCands &sig_leps, edm::Handle<GenEventInfoP
   baby.sys_pu()[1] = weightTool->pileupWeight(baby.ntrupv_mean(), -1)/baby.w_pu();
 
   // Lepton SFs
-  double sf  = lepTool->getScaleFactor(sig_leps);
-  double unc = lepTool->getScaleFactorUncertainty(sig_leps)/sf;
+  pair<double, double> sf_err = lepTool->getScaleFactor(sig_leps);
+  double sf  = sf_err.first;
+  double unc = sf_err.second/sf_err.first;
   baby.w_lep() = sf;
   baby.sys_lep().resize(2, 1.);
   baby.sys_lep().at(0) = 1.+unc;
@@ -1661,8 +1662,9 @@ void bmaker_full::writeWeights(const vCands &sig_leps, edm::Handle<GenEventInfoP
   // Lepton SFs in FastSim
   baby.sys_fs_lep().resize(2, 1.);
   if(isFastSim){ 
-    double sf_fs  = lepTool->getScaleFactorFs(sig_leps, baby.npv());
-    double unc_fs = lepTool->getScaleFactorUncertaintyFs(sig_leps, baby.npv())/sf_fs; 
+    pair<double, double> sf_err_fs = lepTool->getScaleFactorFs(sig_leps);
+    double sf_fs  = sf_err_fs.first;
+    double unc_fs = sf_err_fs.second/sf_err_fs.first;
     baby.w_fs_lep() = sf_fs;
     baby.sys_fs_lep()[0] = 1.+unc_fs;
     baby.sys_fs_lep()[1] = 1.-unc_fs; 

@@ -82,7 +82,7 @@ namespace utilities{
 
   string execute(const string &cmd){
     FILE *pipe = popen(cmd.c_str(), "r");
-    if(!pipe) throw runtime_error("Could not open pipe.");
+    if(!pipe) ERROR("Could not open pipe.");
     const size_t buffer_size = 128;
     char buffer[buffer_size];
     string result = "";

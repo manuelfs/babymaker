@@ -442,9 +442,9 @@ pair<double, double> lepton_tools::getScaleFactorFs(const reco::Muon &lep){
   double pt = lep.pt();
   double abseta = fabs(lep.eta());
   vector<pair<double, double> > sfs{
-    GetSF(sf_fast_muon_medium, pt, abseta),
+    GetSF(sf_fast_muon_medium, pt, abseta, false),
       make_pair(1., 0.02),
-      GetSF(sf_fast_muon_iso, pt, abseta),
+      GetSF(sf_fast_muon_iso, pt, abseta, false),
       make_pair(1., 0.02),
       };
   return accumulate(sfs.cbegin(), sfs.cend(), make_pair(1., 0.), MergeSF);
@@ -457,7 +457,9 @@ pair<double, double> lepton_tools::getScaleFactorFs(const pat::Electron &lep){
   double pt = lep.superCluster()->energy()*sin(lep.superClusterPosition().theta());
   double abseta = fabs(lep.superCluster()->eta());
   vector<pair<double, double> > sfs{
-    GetSF(sf_fast_electron_mediumiso, pt, abseta)
+    GetSF(sf_fast_electron_mediumiso, pt, abseta, false),
+      make_pair(1., 0.02),//Systematic uncertainty
+      make_pair(1., 0.02)//Systematic uncertainty
       };
   return accumulate(sfs.cbegin(), sfs.cend(), make_pair(1., 0.), MergeSF);
 }

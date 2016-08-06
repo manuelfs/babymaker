@@ -30,6 +30,8 @@ public:
   std::map<int, std::set<int> > badBeamHaloEvents;
   bool doBeamHalo;
 
+  static int type(const std::string &name);
+
   event_tools(TString outname);
   ~event_tools();
 };

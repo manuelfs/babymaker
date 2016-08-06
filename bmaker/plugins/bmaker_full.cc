@@ -54,6 +54,7 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
     baby.nonblind() = true;
     baby.json2p6() = true;
   }
+  baby.type() = event_tools::type(outname.Data());
 
   ////////////////////// Trigger /////////////////////
   if (debug) cout<<"INFO: Processing trigger info..."<<endl;

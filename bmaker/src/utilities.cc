@@ -9,6 +9,9 @@
 using namespace std;
 
 namespace utilities{
+  bool contains(const string &s, const string &pat){
+    return s.find(pat) != string::npos;
+  }
 
   float sumMass(const LVector &a, const LVector &b){
     return sqrt(a.mass2()+b.mass2()+2.*(a.E()*b.E()-a.Px()*b.Px()-a.Py()*b.Py()-a.Pz()*b.Pz()));

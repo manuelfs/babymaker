@@ -8,6 +8,7 @@
 #include <iostream>
 #include <stdexcept>
 #include "DataFormats/PatCandidates/interface/Electron.h"
+#include "FWCore/MessageLogger/interface/MessageLogger.h"
 #include <fastjet/PseudoJet.hh>
 #include "TString.h"
 
@@ -15,12 +16,12 @@ typedef std::vector<const reco::Candidate*> vCands;
 typedef reco::Candidate::LorentzVector LVector;
 
 #define ERROR(x) do{throw cms::Exception("babymaker") << "In " << __FILE__ << " at line " << __LINE__ << " (in function " << __func__ << "): " << x << std::endl;}while(false)
-#define DBG(x) do{std::cerr << "In " << __FILE__ << " at line " << __LINE__ << " (in function " << __func__ << "): " << x << std::endl;}while(false)
+#define DBG(x) do{edm::LogError("babymaker") << "In " << __FILE__ << " at line " << __LINE__ << " (in function " << __func__ << "): " << x << std::endl;}while(false)
 
 namespace utilities{
 
   enum SysEnum{kSysJER, kSysJECUp, kSysJECDn, kSysLast};
-
+  bool contains(const std::string &s, const std::string &pat);
   float sumMass(const LVector &a, const LVector &b);
   float dPhi(float phi1, float phi2);
   float dR(float phi1, float phi2, float eta1, float eta2);

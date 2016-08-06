@@ -2,6 +2,7 @@
 int run
 int lumiblock
 Long64_t event
+int type
 bool nonblind
 bool json2p6
 ## stitch is used to stitch an MC sample with its corresponding HT-bin sample

@@ -698,25 +698,28 @@ float jet_met_tools::getDeltaPhibmetMin(const vector<LVector> &jets, const vecto
 }
 
 void jet_met_tools::clusterFatJets(int &nfjets, float &mj,
-                                   vector<float> &fjets_pt, 
-                                   vector<float> &fjets_eta,
-                                   vector<float> &fjets_phi, 
-                                   vector<float> &fjets_m,
-                                   vector<int> &fjets_nconst,
-                                   vector<float> &fjets_sumcsv,
-                                   vector<float> &fjets_poscsv,
-                                   vector<int> &fjets_btags,
-                                   vector<int> &jets_fjet_index,
+                                   std::vector<float> &fjets_pt, 
+                                   std::vector<float> &fjets_eta,
+                                   std::vector<float> &fjets_phi, 
+                                   std::vector<float> &fjets_m,
+                                   std::vector<int> &fjets_nconst,
+                                   std::vector<float> &fjets_sumcsv,
+                                   std::vector<float> &fjets_poscsv,
+                                   std::vector<int> &fjets_btags,
+                                   std::vector<int> &jets_fjet_index,
+                                   baby_full &baby,
                                    double radius,
-                                   vector<LVector> &jets,
-                                   vector<float> &jets_csv){
+                                   double min_jets_pt,
+                                   bool cluster_leps){
 
   vector<fastjet::PseudoJet> sjets(0);
-  vector<float> csvs(0);
-  for(size_t ijet(0); ijet < jets.size(); ijet++){
-    const fastjet::PseudoJet this_pj(jets[ijet].px(), jets[ijet].py(), jets[ijet].pz(), jets[ijet].energy());
-    sjets.push_back(this_pj);
-    csvs.push_back(jets_csv[ijet]); // This require to have the same jets in baby and jets
+  for(size_t ijet(0); ijet < baby.jets_pt().size(); ijet++){
+    if (!cluster_leps && baby.jets_islep()[ijet]) continue;
+    if (baby.jets_pt()[ijet]>min_jets_pt || (cluster_leps && baby.jets_islep()[ijet])) {
+      TLorentzVector vjet; vjet.SetPtEtaPhiM(baby.jets_pt()[ijet], baby.jets_eta()[ijet], baby.jets_phi()[ijet], baby.jets_m()[ijet]);
+      const fastjet::PseudoJet this_pj(vjet.Px(), vjet.Py(), vjet.Pz(), vjet.E());
+      sjets.push_back(this_pj);
+    }
   } // Loop over skinny jets
   fastjet::JetDefinition jet_def(fastjet::antikt_algorithm, radius);
   fastjet::ClusterSequence cs(sjets, jet_def);
@@ -732,7 +735,7 @@ void jet_met_tools::clusterFatJets(int &nfjets, float &mj,
   fjets_sumcsv.resize(fjets.size());
   fjets_poscsv.resize(fjets.size());
   fjets_btags.resize(fjets.size());
-  jets_fjet_index.resize(jets.size());
+  jets_fjet_index.resize(baby.jets_csv().size(), -1);
 
   for(size_t ipj = 0; ipj < fjets.size(); ++ipj){
     const fastjet::PseudoJet &pj = fjets.at(ipj);
@@ -747,15 +750,15 @@ void jet_met_tools::clusterFatJets(int &nfjets, float &mj,
     fjets_btags.at(ipj) = 0;
     fjets_sumcsv.at(ipj) = 0.;
     fjets_poscsv.at(ipj) = 0.;
-    for(size_t ijet = 0; ijet < jets.size(); ++ijet){
+    for(size_t ijet = 0; ijet < baby.jets_pt().size(); ++ijet){
       for(size_t cjet = 0; cjet < cjets.size(); ++ cjet){
-        if((cjets.at(cjet) - sjets.at(ijet)).pt() < 0.0001){
+        if(cjets.at(cjet).pt() - baby.jets_pt()[ijet] < 0.0001){
           jets_fjet_index.at(ijet) = ipj;
-          fjets_sumcsv.at(ipj) += csvs.at(ijet);
-          if(csvs.at(ijet) > 0.){
-            fjets_poscsv.at(ipj) += csvs.at(ijet);
+          fjets_sumcsv.at(ipj) += baby.jets_csv()[ijet];
+          if(baby.jets_csv()[ijet] > 0.){
+            fjets_poscsv.at(ipj) += baby.jets_csv()[ijet];
           }
-          if(csvs.at(ijet) > CSVMedium){
+          if(baby.jets_csv()[ijet] > CSVMedium){
             ++(fjets_btags.at(ipj));
           }
         }
@@ -765,13 +768,16 @@ void jet_met_tools::clusterFatJets(int &nfjets, float &mj,
 
 }
 
-double jet_met_tools::getSysMJ(double radius, vector<LVector> &jets){
+double jet_met_tools::getSysMJ(double radius, vector<LVector> &jets, vector<bool> &jets_islep, double min_jets_pt, bool cluster_leps){
 
   double mj(0.);
   vector<fastjet::PseudoJet> sjets(0);
   for(size_t ijet(0); ijet < jets.size(); ijet++){
-    const fastjet::PseudoJet this_pj(jets[ijet].px(), jets[ijet].py(), jets[ijet].pz(), jets[ijet].energy());
-    sjets.push_back(this_pj);
+    if (!cluster_leps && jets_islep[ijet]) continue;
+    if (jets[ijet].pt()>min_jets_pt || (cluster_leps && jets_islep[ijet])) {
+      const fastjet::PseudoJet this_pj(jets[ijet].px(), jets[ijet].py(), jets[ijet].pz(), jets[ijet].energy());
+      sjets.push_back(this_pj);
+    }
   } // Loop over skinny jets
   fastjet::JetDefinition jet_def(fastjet::antikt_algorithm, radius);
   fastjet::ClusterSequence cs(sjets, jet_def);
@@ -781,8 +787,6 @@ double jet_met_tools::getSysMJ(double radius, vector<LVector> &jets){
 
   return mj;
 }
-
-
 jet_met_tools::jet_met_tools(TString ijecName, bool doSys, bool fastSim):
   jecName(ijecName),
   doSystematics(doSys),

@@ -159,23 +159,22 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 
   /// Jets
   if (debug) cout<<"INFO: Writing jets..."<<endl;
-  vector<LVector> jets, clean_jets;
+  vector<LVector> clean_jets;
   vector<double> jetsMuonEnergyFrac;
   vector<vector<LVector> > sys_jets;
   if (!doSystematics) {
-    clean_jets = writeJets(alljets, genjets, sig_leps, veto_leps, photons, tks, jets, sys_jets, jetsMuonEnergyFrac);
+    clean_jets = writeJets(alljets, genjets, sig_leps, veto_leps, photons, tks, sys_jets, jetsMuonEnergyFrac);
   } else {
-    clean_jets = writeJets(alljets, genjets, sig_leps, veto_leps, photons, tks, jets, sys_jets, jetsMuonEnergyFrac);
+    clean_jets = writeJets(alljets, genjets, sig_leps, veto_leps, photons, tks, sys_jets, jetsMuonEnergyFrac);
     for (unsigned isys(0); isys<kSysLast; isys++){
-      baby.sys_mj().push_back(jetTool->getSysMJ(1.2, sys_jets[isys]));
-      baby.sys_mj08().push_back(jetTool->getSysMJ(0.8, sys_jets[isys]));
-      baby.sys_mj13().push_back(jetTool->getSysMJ(1.3, sys_jets[isys]));
-      baby.sys_mj14().push_back(jetTool->getSysMJ(1.4, sys_jets[isys]));
-      baby.sys_mj15().push_back(jetTool->getSysMJ(1.5, sys_jets[isys]));
-      baby.sys_mj16().push_back(jetTool->getSysMJ(1.6, sys_jets[isys]));
+      bool cluster_leps = false;
+      baby.sys_mj14_nolep().push_back(jetTool->getSysMJ(1.4, sys_jets[isys], baby.jets_islep(), jetTool->JetPtCut, cluster_leps));
+      cluster_leps = true;
+      baby.sys_mj14().push_back(jetTool->getSysMJ(1.4, sys_jets[isys], baby.jets_islep(), jetTool->JetPtCut, cluster_leps));
+      baby.sys_mj40().push_back(jetTool->getSysMJ(1.4, sys_jets[isys], baby.jets_islep(), 40., cluster_leps));
     }
   }
-  writeFatJets(jets);
+  writeFatJets();
 
   ////////////////////// mT, dphi /////////////////////
   // It requires previous storing of MET
@@ -337,27 +336,39 @@ void bmaker_full::writeMET(edm::Handle<pat::METCollection> mets, edm::Handle<pat
 vector<LVector> bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets, 
                             edm::Handle<edm::View <reco::GenJet> > genjets,
                             vCands &sig_leps, vCands &veto_leps, vCands &photons, vCands &tks,
-                            vector<LVector> &jets, 
                             vector<vector<LVector> > &sys_jets,
                             vector<double> &jetsMuonEnergyFrac){
   vector<int> hi_csv(5,-1); // Indices of the 5 jets with highest CSV
   vector<LVector> clean_jets;
-  vCands jets_ra2;  vCands jets20_cands; vector<LVector> jets20;
+  vCands jets_ra2;
+  vector<LVector> jets;
   LVector jetsys_p4, jetsys_nob_p4;
   baby.njets() = 0; baby.nbl() = 0; baby.nbm() = 0;  baby.nbt() = 0;
   baby.njets20() = 0; baby.nbl20() = 0; baby.nbm20() = 0;  baby.nbt20() = 0;  
-  baby.ht() = 0.; baby.ht_hlt() = 0.;
+  baby.ht() = 0.; baby.htx() = 0.; baby.st() = 0.; baby.ht_hlt() = 0.;
+  baby.ht40() = 0.; baby.htx40() = 0.; baby.st40() = 0.; baby.njets40() = 0; baby.nbm40() = 0;
+  baby.ht50() = 0.; baby.htx50() = 0.; baby.st50() = 0.; baby.njets50() = 0; baby.nbm50() = 0;
   baby.njets_ra2() = 0; baby.njets_clean() = 0; baby.nbm_ra2() = 0; baby.ht_ra2() = 0.; baby.ht_clean() = 0.; 
   baby.pass_jets() = true; baby.pass_jets_nohf() = true; baby.pass_jets_tight() = true; 
+  baby.pass_jets20() = true; baby.pass_jets40() = true; baby.pass_jets50() = true; 
   baby.pass_jets_ra2() = true; baby.pass_jets_tight_ra2() = true; 
   baby.sys_bctag().resize(2, 1.); baby.sys_udsgtag().resize(2, 1.);
   baby.sys_bctag_loose().resize(2, 1.); baby.sys_udsgtag_loose().resize(2, 1.);
+  baby.sys_bctag40().resize(2, 1.); baby.sys_udsgtag40().resize(2, 1.);
   baby.w_btag() = baby.w_btag_loose() = 1.;
+  baby.w_btag40() = 1.;
   baby.hig_dphi() = 9999.;
-  if (isFastSim){ baby.sys_fs_bctag().resize(2, 1.); baby.sys_fs_udsgtag().resize(2, 1.);}
+  if (isFastSim){ 
+    baby.sys_fs_bctag().resize(2, 1.); baby.sys_fs_udsgtag().resize(2, 1.);
+    baby.sys_fs_bctag40().resize(2, 1.); baby.sys_fs_udsgtag40().resize(2, 1.);
+  }
   if (doSystematics) {
     baby.sys_njets().resize(kSysLast, 0); baby.sys_nbm().resize(kSysLast, 0); 
     baby.sys_pass().resize(kSysLast, true); baby.sys_ht().resize(kSysLast, 0.); 
+    baby.sys_st().resize(kSysLast, 0); 
+    baby.sys_njets40().resize(kSysLast, 0); baby.sys_nbm40().resize(kSysLast, 0); 
+    baby.sys_pass40().resize(kSysLast, true); baby.sys_ht40().resize(kSysLast, 0.); 
+    baby.sys_st40().resize(kSysLast, 0); 
     sys_jets.resize(kSysLast, vector<LVector>());
   }
   float mht_px(0.), mht_py(0.), mht_clean_px(0.), mht_clean_py(0.);
@@ -375,9 +386,12 @@ vector<LVector> bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
     
     //   RA4 Jet Quality filters
     //--------------------------------
+    if(!looseID && jetp4.pt()>20. && !isLep) baby.pass_jets20() = false;
     if(jetp4.pt() > jetTool->JetPtCut && !isLep) {
       if(goodPtEta && !looseID) baby.pass_jets_nohf() = false;
       if(!looseID) baby.pass_jets() = false;
+      if(!looseID && jetp4.pt()>40.) baby.pass_jets40() = false;
+      if(!looseID && jetp4.pt()>50.) baby.pass_jets50() = false;
       if(!tightID) baby.pass_jets_tight() = false;
     }
 
@@ -396,8 +410,6 @@ vector<LVector> bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
       baby.jets_csv().push_back(csv);
       if (goodPtEta && !isLep) clean_jets.push_back(jetp4);
       if (goodPtEta || isLep) jets.push_back(jetp4);
-      jets20_cands.push_back(dynamic_cast<const reco::Candidate *>(&jet));
-      jets20.push_back(jetp4);
       baby.jets_h1().push_back(false);
       baby.jets_h2().push_back(false);
       float dphi = reco::deltaPhi(jet.phi(), baby.met_phi());
@@ -442,23 +454,60 @@ vector<LVector> bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
 							       "central", "central", "central", "up");
             baby.sys_fs_udsgtag()[1] *= jetTool->jetBTagWeight(jet, jetp4, btag, BTagEntry::OP_MEDIUM,
 							       "central", "central", "central", "down");
-	  }
-	}
-	if (goodPtEta){
-	  jetsys_p4 += jet.p4();
-	  baby.njets()++;
-	  baby.ht() += jetp4.pt();
-	  if(csv > jetTool->CSVLoose)  baby.nbl()++;
-	  if(csv > jetTool->CSVMedium) baby.nbm()++;
-	  else jetsys_nob_p4 += jet.p4();
-	  if(csv > jetTool->CSVTight)  baby.nbt()++;
-	} 
-	baby.njets20()++;
-	if(csv > jetTool->CSVLoose)  baby.nbl20()++;
-	if(csv > jetTool->CSVMedium) baby.nbm20()++;
-	if(csv > jetTool->CSVTight)  baby.nbt20()++;
-	
-      }
+      	  }
+          if (jetp4.pt()>40.){
+            //central weight for fastsim taken into account together with the fullsim inside jetTool->jetBTagWeight()
+            baby.w_btag40() *= jetTool->jetBTagWeight(jet, jetp4, btag, BTagEntry::OP_MEDIUM,
+                "central", "central");
+            // now, vary only the full sim scale factor, regardless of whether we run on Fast or Full sim
+            // this is necessary since uncertainties for FastSim and FullSim are uncorrelated 
+            baby.sys_bctag40()[0]   *= jetTool->jetBTagWeight(jet, jetp4, btag, BTagEntry::OP_MEDIUM, "up",      "central");
+            baby.sys_bctag40()[1]   *= jetTool->jetBTagWeight(jet, jetp4, btag, BTagEntry::OP_MEDIUM, "down",    "central");
+            baby.sys_udsgtag40()[0] *= jetTool->jetBTagWeight(jet, jetp4, btag, BTagEntry::OP_MEDIUM, "central", "up");
+            baby.sys_udsgtag40()[1] *= jetTool->jetBTagWeight(jet, jetp4, btag, BTagEntry::OP_MEDIUM, "central", "down");
+            if (isFastSim) { 
+              // now we vary only the FastSim SF
+              baby.sys_fs_bctag40()[0]   *= jetTool->jetBTagWeight(jet, jetp4, btag, BTagEntry::OP_MEDIUM,
+                       "central", "central", "up",      "central");
+              baby.sys_fs_bctag40()[1]   *= jetTool->jetBTagWeight(jet, jetp4, btag, BTagEntry::OP_MEDIUM,
+                       "central", "central", "down",    "central");
+              baby.sys_fs_udsgtag40()[0] *= jetTool->jetBTagWeight(jet, jetp4, btag, BTagEntry::OP_MEDIUM,
+                       "central", "central", "central", "up");
+              baby.sys_fs_udsgtag40()[1] *= jetTool->jetBTagWeight(jet, jetp4, btag, BTagEntry::OP_MEDIUM,
+                       "central", "central", "central", "down");
+            }
+          }
+      	}
+      	if (goodPtEta){
+      	  jetsys_p4 += jet.p4();
+      	  baby.njets()++;
+          baby.ht() += jetp4.pt();
+          baby.htx() += jetp4.pt();
+      	  baby.st() += jetp4.pt();
+      	  if(csv > jetTool->CSVLoose)  baby.nbl()++;
+      	  if(csv > jetTool->CSVMedium) baby.nbm()++;
+      	  else jetsys_nob_p4 += jet.p4();
+      	  if(csv > jetTool->CSVTight)  baby.nbt()++;
+          if (jetp4.pt()>40.) {
+            baby.njets40()++;
+            baby.ht40() += jetp4.pt();
+            baby.htx40() += jetp4.pt();
+            baby.st40() += jetp4.pt();
+            if(csv > jetTool->CSVMedium) baby.nbm40()++;
+          } 
+          if (jetp4.pt()>50.) {
+            baby.njets50()++;
+            baby.ht50() += jetp4.pt();
+            baby.htx50() += jetp4.pt();
+            baby.st50() += jetp4.pt();
+            if(csv > jetTool->CSVMedium) baby.nbm50()++;
+          } 
+      	}
+      	baby.njets20()++;
+      	if(csv > jetTool->CSVLoose)  baby.nbl20()++;
+      	if(csv > jetTool->CSVMedium) baby.nbm20()++;
+      	if(csv > jetTool->CSVTight)  baby.nbt20()++;
+      } 
     }
 
     //    HLT HT definition
@@ -509,19 +558,45 @@ vector<LVector> bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
         //for now store pass_jets in the baby.sys_pass
         //variable will be updated with rest of filters in writeFilters()
         if(jetp4.pt() > jetTool->JetPtCut && !isLep && !looseID) baby.sys_pass()[isys] = false;
+        if(jetp4.pt() > 40. && !isLep && !looseID) baby.sys_pass40()[isys] = false;
 
+        //cutting on unaltered goodPtEtaLoose since indices must match baby.jets_islep()
+        if((looseID && goodPtEtaLoose) || isLep) sys_jets[isys].push_back(jetp4); 
+        //now cutting on altered variable for calculation of njets, ht, st
         if(looseID && jetp4.pt() > jetTool->JetPtCut && fabs(jet.eta()) <= jetTool->JetEtaCut) {
-          sys_jets[isys].push_back(jetp4);
           if(!isLep){
             baby.sys_njets()[isys]++;
             baby.sys_ht()[isys] += jetp4.pt();
+            baby.sys_st()[isys] += jetp4.pt();
             if(csv > jetTool->CSVMedium) baby.sys_nbm()[isys]++;
+            if (jetp4.pt()>40.) {
+              baby.sys_njets40()[isys]++;
+              baby.sys_ht40()[isys] += jetp4.pt();
+              baby.sys_st40()[isys] += jetp4.pt();
+              if(csv > jetTool->CSVMedium) baby.sys_nbm40()[isys]++;
+            }
           }
         }
       } // loop over systematics
     } // do systematics
   } // Loop over jets  
 
+  for (size_t ilep(0); ilep<sig_leps.size(); ilep++){
+    baby.st() += sig_leps[ilep]->pt();
+    baby.st40() += sig_leps[ilep]->pt();
+    baby.st50() += sig_leps[ilep]->pt();
+    if (doSystematics){
+      for (unsigned isys(0); isys<kSysLast; isys++){
+        baby.sys_st()[isys] += sig_leps[ilep]->pt();
+        baby.sys_st40()[isys] += sig_leps[ilep]->pt();
+      }
+    }
+  }
+  if (sig_leps.size()==2){
+    baby.htx() += sig_leps[0]->pt();
+    baby.htx40() += sig_leps[0]->pt();
+    baby.htx50() += sig_leps[0]->pt();
+  }
   if(!isData) baby.ht_tru() = jetTool->trueHT(genjets);
 
   baby.mht() = hypot(mht_px, mht_py);
@@ -529,17 +604,19 @@ vector<LVector> bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
   baby.mht_clean() = hypot(mht_clean_px, mht_clean_py);
   baby.mht_clean_phi() = atan2(mht_clean_py, mht_clean_px);
   baby.low_dphi() = jetTool->isLowDphi(jets_ra2, baby.mht_phi(), baby.dphi1(), baby.dphi2(), baby.dphi3(), baby.dphi4());
-  // saving the dphi values for 20 GeV jets instead of for RA2b
-  baby.low_dphi20() = jetTool->isLowDphi(jets20_cands, baby.met_phi(), baby.dphi1(), baby.dphi2(), baby.dphi3(), baby.dphi4());
 
   for (unsigned i(0); i<2; i++){
     baby.sys_bctag()[i] /= baby.w_btag();
     baby.sys_udsgtag()[i] /= baby.w_btag();
+    baby.sys_bctag40()[i] /= baby.w_btag40();
+    baby.sys_udsgtag40()[i] /= baby.w_btag40();
     baby.sys_bctag_loose()[i] /= baby.w_btag_loose();
     baby.sys_udsgtag_loose()[i] /= baby.w_btag_loose();
     if (isFastSim) { 
       baby.sys_fs_bctag()[i] /= baby.w_btag();
       baby.sys_fs_udsgtag()[i] /= baby.w_btag();
+      baby.sys_fs_bctag40()[i] /= baby.w_btag40();
+      baby.sys_fs_udsgtag40()[i] /= baby.w_btag40();
     }
   }
   // ISR system for Z->ll and tt->llbb configurations
@@ -628,7 +705,7 @@ vector<LVector> bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
     for(size_t row=0; row<hi_csv.size(); row++){
       hig_p4.push_back(vector<LVector>());
       for(size_t col=0; col<=row; col++){
-        LVector jetp4(jets20[hi_csv[row]]);
+        LVector jetp4(jets[hi_csv[row]]);
         hig_p4.back().push_back(jetp4);
         if(row!=col) hig_p4.back().back() += hig_p4[col][col];
       } // Loop over columns in hig_p4
@@ -659,8 +736,8 @@ vector<LVector> bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
     LVector hig1 = hig_p4[hig_ind[0]][hig_ind[1]], hig2 = hig_p4[hig_ind[2]][hig_ind[3]];
     baby.hig_dm()   = fabs(hig1.mass() - hig2.mass());
     baby.hig_am()   = (hig1.mass() + hig2.mass())/2.;
-    baby.hig_drmax() = max(deltaR(jets20[hi_csv[hig_ind[0]]], jets20[hi_csv[hig_ind[1]]]),
-                           deltaR(jets20[hi_csv[hig_ind[2]]], jets20[hi_csv[hig_ind[3]]]));
+    baby.hig_drmax() = max(deltaR(jets[hi_csv[hig_ind[0]]], jets[hi_csv[hig_ind[1]]]),
+                           deltaR(jets[hi_csv[hig_ind[2]]], jets[hi_csv[hig_ind[3]]]));
 
     baby.hig1_pt()  = hig1.pt();
     baby.hig1_eta() = hig1.eta();
@@ -706,38 +783,41 @@ vector<LVector> bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
     hig1 = hig_p4[hig_ind[0]][hig_ind[1]]; hig2 = hig_p4[hig_ind[2]][hig_ind[3]];
     baby.hig5_dm()   = fabs(hig1.mass() - hig2.mass());
     baby.hig5_am()   = (hig1.mass() + hig2.mass())/2.;
-    baby.hig5_drmax() = max(deltaR(jets20[hi_csv[hig_ind[0]]], jets20[hi_csv[hig_ind[1]]]),
-                            deltaR(jets20[hi_csv[hig_ind[2]]], jets20[hi_csv[hig_ind[3]]]));
+    baby.hig5_drmax() = max(deltaR(jets[hi_csv[hig_ind[0]]], jets[hi_csv[hig_ind[1]]]),
+                            deltaR(jets[hi_csv[hig_ind[2]]], jets[hi_csv[hig_ind[3]]]));
 
 
   } // if njets >= 4
   return clean_jets;
 } // writeJets
 
-void bmaker_full::writeFatJets(vector<LVector> &jets){
-  jetTool->clusterFatJets(baby.nfjets(), baby.mj(),
-                          baby.fjets_pt(), baby.fjets_eta(),
-                          baby.fjets_phi(), baby.fjets_m(),
-                          baby.fjets_nconst(),
-                          baby.fjets_sumcsv(), baby.fjets_poscsv(),
-                          baby.fjets_btags(), baby.jets_fjet_index(),
-                          1.2, jets, baby.jets_csv());
+void bmaker_full::writeFatJets(){
+  //pass instead of baby.jets_is_lep() if leptons should be clustered in MJ
+  bool cluster_leps = false;
+  jetTool->clusterFatJets(baby.nfjets_nolep(), baby.mj14_nolep(),
+                          baby.fjets_nolep_pt(), baby.fjets_nolep_eta(),
+                          baby.fjets_nolep_phi(), baby.fjets_nolep_m(),
+                          baby.fjets_nolep_nconst(),
+                          baby.fjets_nolep_sumcsv(), baby.fjets_nolep_poscsv(),
+                          baby.fjets_nolep_btags(), baby.jets_fjet_nolep_index(),
+                          baby, 1.4, jetTool->JetPtCut, cluster_leps);
 
+  cluster_leps = true;
   jetTool->clusterFatJets(baby.nfjets08(), baby.mj08(),
                           baby.fjets08_pt(), baby.fjets08_eta(),
                           baby.fjets08_phi(), baby.fjets08_m(),
                           baby.fjets08_nconst(),
                           baby.fjets08_sumcsv(), baby.fjets08_poscsv(),
                           baby.fjets08_btags(), baby.jets_fjet08_index(),
-                          0.8, jets, baby.jets_csv());
+                          baby, 0.8, jetTool->JetPtCut, cluster_leps);
 
-  jetTool->clusterFatJets(baby.nfjets13(), baby.mj13(),
-                          baby.fjets13_pt(), baby.fjets13_eta(),
-                          baby.fjets13_phi(), baby.fjets13_m(),
-                          baby.fjets13_nconst(),
-                          baby.fjets13_sumcsv(), baby.fjets13_poscsv(),
-                          baby.fjets13_btags(), baby.jets_fjet13_index(),
-                          1.3, jets, baby.jets_csv());
+  jetTool->clusterFatJets(baby.nfjets12(), baby.mj12(),
+                          baby.fjets12_pt(), baby.fjets12_eta(),
+                          baby.fjets12_phi(), baby.fjets12_m(),
+                          baby.fjets12_nconst(),
+                          baby.fjets12_sumcsv(), baby.fjets12_poscsv(),
+                          baby.fjets12_btags(), baby.jets_fjet12_index(),
+                          baby, 1.2, jetTool->JetPtCut, cluster_leps);
 
   jetTool->clusterFatJets(baby.nfjets14(), baby.mj14(),
                           baby.fjets14_pt(), baby.fjets14_eta(),
@@ -745,24 +825,23 @@ void bmaker_full::writeFatJets(vector<LVector> &jets){
                           baby.fjets14_nconst(),
                           baby.fjets14_sumcsv(), baby.fjets14_poscsv(),
                           baby.fjets14_btags(), baby.jets_fjet14_index(),
-                          1.4, jets, baby.jets_csv());
+                          baby, 1.4, jetTool->JetPtCut, cluster_leps);
 
-  jetTool->clusterFatJets(baby.nfjets15(), baby.mj15(),
-                          baby.fjets15_pt(), baby.fjets15_eta(),
-                          baby.fjets15_phi(), baby.fjets15_m(),
-                          baby.fjets15_nconst(),
-                          baby.fjets15_sumcsv(), baby.fjets15_poscsv(),
-                          baby.fjets15_btags(), baby.jets_fjet15_index(),
-                          1.5, jets, baby.jets_csv());
+  jetTool->clusterFatJets(baby.nfjets40(), baby.mj40(),
+                          baby.fjets40_pt(), baby.fjets40_eta(),
+                          baby.fjets40_phi(), baby.fjets40_m(),
+                          baby.fjets40_nconst(),
+                          baby.fjets40_sumcsv(), baby.fjets40_poscsv(),
+                          baby.fjets40_btags(), baby.jets_fjet40_index(),
+                          baby, 1.4, 40., cluster_leps);
 
-  jetTool->clusterFatJets(baby.nfjets16(), baby.mj16(),
-                          baby.fjets16_pt(), baby.fjets16_eta(),
-                          baby.fjets16_phi(), baby.fjets16_m(),
-                          baby.fjets16_nconst(),
-                          baby.fjets16_sumcsv(), baby.fjets16_poscsv(),
-                          baby.fjets16_btags(), baby.jets_fjet16_index(),
-                          1.6, jets, baby.jets_csv());
-
+  jetTool->clusterFatJets(baby.nfjets50(), baby.mj50(),
+                          baby.fjets50_pt(), baby.fjets50_eta(),
+                          baby.fjets50_phi(), baby.fjets50_m(),
+                          baby.fjets50_nconst(),
+                          baby.fjets50_sumcsv(), baby.fjets50_poscsv(),
+                          baby.fjets50_btags(), baby.jets_fjet50_index(),
+                          baby, 1.4, 50., cluster_leps);
 }
 
 vCands bmaker_full::writeMuons(edm::Handle<pat::MuonCollection> muons, 
@@ -1053,22 +1132,21 @@ bool bmaker_full::writeTriggers(const edm::TriggerNames &names,
       }
     }
   }
-
   // OR-ing triggers used in RA4
   vector<TString> trigs_ra4({"HLT_PFMET100_PFMHT100_IDTight_v", "HLT_PFMETNoMu100_PFMHTNoMu100_IDTight_v",
-	"HLT_PFMET110_PFMHT110_IDTight_v", "HLT_PFMETNoMu110_PFMHTNoMu110_IDTight_v",
-	"HLT_Mu15_IsoVVVL_PFHT350_v", "HLT_Mu15_IsoVVVL_PFHT400_v", "HLT_Mu50_IsoVVVL_PFHT400_v", 
-	"HLT_Ele15_IsoVVVL_PFHT350_v", "HLT_Ele15_IsoVVVL_PFHT400_v", "HLT_Ele50_IsoVVVL_PFHT400_v", 
-	"HLT_IsoMu22_eta2p1_v", "HLT_IsoMu24_v", "HLT_Mu50_v",
-	"HLT_Ele25_eta2p1_WPTight_Gsf_v", "HLT_Ele27_eta2p1_WPLoose_Gsf_v", "HLT_Ele105_CaloIdVT_GsfTrkIdT_v",
-	"HLT_Ele115_CaloIdVT_GsfTrkIdT_v"});
+  "HLT_PFMET110_PFMHT110_IDTight_v", "HLT_PFMETNoMu110_PFMHTNoMu110_IDTight_v",
+  "HLT_Mu15_IsoVVVL_PFHT350_v", "HLT_Mu15_IsoVVVL_PFHT400_v", "HLT_Mu50_IsoVVVL_PFHT400_v", 
+  "HLT_Ele15_IsoVVVL_PFHT350_v", "HLT_Ele15_IsoVVVL_PFHT400_v", "HLT_Ele50_IsoVVVL_PFHT400_v", 
+  "HLT_IsoMu22_eta2p1_v", "HLT_IsoMu24_v", "HLT_Mu50_v",
+  "HLT_Ele25_eta2p1_WPTight_Gsf_v", "HLT_Ele27_eta2p1_WPLoose_Gsf_v", "HLT_Ele105_CaloIdVT_GsfTrkIdT_v",
+  "HLT_Ele115_CaloIdVT_GsfTrkIdT_v"});
   vector<TString> trigs_met({"HLT_PFMET100_PFMHT100_IDTight_v", "HLT_PFMETNoMu100_PFMHTNoMu100_IDTight_v",
-	"HLT_PFMET110_PFMHT110_IDTight_v", "HLT_PFMETNoMu110_PFMHTNoMu110_IDTight_v"});
+  "HLT_PFMET110_PFMHT110_IDTight_v", "HLT_PFMETNoMu110_PFMHTNoMu110_IDTight_v"});
   vector<TString> trigs_vvvl({"HLT_Mu15_IsoVVVL_PFHT350_v", "HLT_Mu15_IsoVVVL_PFHT400_v", "HLT_Mu50_IsoVVVL_PFHT400_v", 
-	"HLT_Ele15_IsoVVVL_PFHT350_v", "HLT_Ele15_IsoVVVL_PFHT400_v", "HLT_Ele50_IsoVVVL_PFHT400_v"});
+  "HLT_Ele15_IsoVVVL_PFHT350_v", "HLT_Ele15_IsoVVVL_PFHT400_v", "HLT_Ele50_IsoVVVL_PFHT400_v"});
   vector<TString> trigs_lep({"HLT_IsoMu22_eta2p1_v", "HLT_IsoMu24_v", "HLT_Mu50_v",
-	"HLT_Ele25_eta2p1_WPTight_Gsf_v", "HLT_Ele27_eta2p1_WPLoose_Gsf_v", "HLT_Ele105_CaloIdVT_GsfTrkIdT_v",
-	"HLT_Ele115_CaloIdVT_GsfTrkIdT_v"});
+  "HLT_Ele25_eta2p1_WPTight_Gsf_v", "HLT_Ele27_eta2p1_WPLoose_Gsf_v", "HLT_Ele105_CaloIdVT_GsfTrkIdT_v",
+  "HLT_Ele115_CaloIdVT_GsfTrkIdT_v"});
   baby.trig_ra4() = false;
   baby.trig_met() = false;
   baby.trig_vvvl() = false;
@@ -1218,6 +1296,10 @@ void bmaker_full::writeFilters(const edm::TriggerNames &fnames,
 
   baby.pass() = baby.pass_goodv() && baby.pass_eebadsc() && baby.pass_cschalo() && baby.pass_hbhe() && baby.pass_hbheiso() && baby.pass_ecaldeadcell() 
     && baby.pass_jets();
+  baby.pass40() = baby.pass_goodv() && baby.pass_eebadsc() && baby.pass_cschalo() && baby.pass_hbhe() && baby.pass_hbheiso() && baby.pass_ecaldeadcell() 
+    && baby.pass_jets40();
+  baby.pass50() = baby.pass_goodv() && baby.pass_eebadsc() && baby.pass_cschalo() && baby.pass_hbhe() && baby.pass_hbheiso() && baby.pass_ecaldeadcell() 
+    && baby.pass_jets50();
   baby.pass_ra2() = baby.pass_goodv() && baby.pass_eebadsc() && baby.pass_cschalo() && baby.pass_hbhe() && baby.pass_hbheiso() && baby.pass_ecaldeadcell()  
     && baby.pass_jets_ra2();
   baby.pass_nohf() = baby.pass_goodv() && baby.pass_eebadsc() && baby.pass_cschalo() && baby.pass_hbhe() && baby.pass_hbheiso() && baby.pass_ecaldeadcell() 
@@ -1236,6 +1318,7 @@ void bmaker_full::writeFilters(const edm::TriggerNames &fnames,
     for (unsigned isys(0); isys<kSysLast; isys++){
       // sys_pass_jets already stored in the value of this variable in the baby
       baby.sys_pass()[isys] = baby.sys_pass()[isys] && baby.pass_goodv() && baby.pass_eebadsc() && baby.pass_cschalo() && baby.pass_hbhe() && baby.pass_hbheiso() && baby.pass_ecaldeadcell();
+      baby.sys_pass40()[isys] = baby.sys_pass40()[isys] && baby.pass_goodv() && baby.pass_eebadsc() && baby.pass_cschalo() && baby.pass_hbhe() && baby.pass_hbheiso() && baby.pass_ecaldeadcell();
     }
   }
 }
@@ -1850,22 +1933,20 @@ bmaker_full::bmaker_full(const edm::ParameterSet& iConfig):
       trig_name.push_back("HLT_Ele27_WPTight_Gsf_v");                           // 40
 
       trig_name.push_back("HLT_Ele115_CaloIdVT_GsfTrkIdT_v");                   // 41
-      trig_name.push_back("HLT_IsoMu22_eta2p1_v");			        // 42
+      trig_name.push_back("HLT_IsoMu22_eta2p1_v");              // 42
       trig_name.push_back("HLT_PFHT300_PFMET110_v");                            // 43 
       trig_name.push_back("HLT_PFHT200_DiPFJetAve90_PFAlphaT0p63_v");           // 44
       trig_name.push_back("HLT_PFHT250_DiPFJetAve90_PFAlphaT0p58_v");           // 45
       trig_name.push_back("HLT_PFHT300_DiPFJetAve90_PFAlphaT0p54_v");           // 46
-      trig_name.push_back("HLT_PFHT200_v");			                // 47
-      trig_name.push_back("HLT_PFHT250_v");			                // 48
-      trig_name.push_back("HLT_PFHT300_v");			                // 49
-      trig_name.push_back("HLT_PFHT350_v");			                // 50
+      trig_name.push_back("HLT_PFHT200_v");                     // 47
+      trig_name.push_back("HLT_PFHT250_v");                     // 48
+      trig_name.push_back("HLT_PFHT300_v");                     // 49
+      trig_name.push_back("HLT_PFHT350_v");                     // 50
 
-      trig_name.push_back("HLT_PFHT400_v");			                // 51
-      trig_name.push_back("HLT_PFHT600_v");			                // 52
-      trig_name.push_back("HLT_PFHT650_v");			                // 53
-      trig_name.push_back("HLT_PFHT900_v");			                // 54
-
-
+      trig_name.push_back("HLT_PFHT400_v");                     // 51
+      trig_name.push_back("HLT_PFHT600_v");                     // 52
+      trig_name.push_back("HLT_PFHT650_v");                     // 53
+      trig_name.push_back("HLT_PFHT900_v"); // 54
     } else {
       trig_name.push_back("HLT_PFHT350_PFMET100_");                               // 0 
       trig_name.push_back("HLT_Mu15_IsoVVVL_PFHT350_PFMET50_v");                  // 1 

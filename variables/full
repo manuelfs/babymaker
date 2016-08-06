@@ -14,6 +14,14 @@ int npv
 int ntrupv
 float ntrupv_mean
 float ht
+float ht40
+float ht50
+float htx
+float htx40
+float htx50
+float st
+float st40
+float st50
 float ht_ra2
 float ht_clean
 float ht_hlt
@@ -69,12 +77,16 @@ float hig2_m
 
 ###################   Jets   ##################
 int njets
-int nbl
-int nbm
-int nbt
 int njets20
+int njets40
+int njets50
+int nbl
 int nbl20
+int nbm
 int nbm20
+int nbm40
+int nbm50
+int nbt
 int nbt20
 bool low_dphi20
 
@@ -102,12 +114,12 @@ std::vector<float> jets_m
 std::vector<float> jets_csv
 std::vector<float> jets_pt_res
 std::vector<bool>  jets_islep
-std::vector<int>   jets_fjet_index
+std::vector<int>   jets_fjet_nolep_index
 std::vector<int>   jets_fjet08_index
-std::vector<int>   jets_fjet13_index
+std::vector<int>   jets_fjet12_index
 std::vector<int>   jets_fjet14_index
-std::vector<int>   jets_fjet15_index
-std::vector<int>   jets_fjet16_index
+std::vector<int>   jets_fjet40_index
+std::vector<int>   jets_fjet50_index
 std::vector<int>   jets_hflavor
 std::vector<bool>  jets_h1
 std::vector<bool>  jets_h2
@@ -291,7 +303,6 @@ bool trig_ra4
 bool trig_met
 bool trig_vvvl
 bool trig_lep
-
 float onht
 float onmet
 float onmu_vvvl
@@ -316,6 +327,9 @@ std::vector<float> els_vvvl_phi
 
 ###################   Quality   ##################
 bool pass_jets;
+bool pass_jets20;
+bool pass_jets40;
+bool pass_jets50;
 bool pass_jets_tight;
 bool pass_jets_nohf;
 bool pass_jets_ra2;
@@ -327,21 +341,25 @@ bool pass_cschalo;
 bool pass_eebadsc;
 bool pass_ecaldeadcell;
 bool pass;
+bool pass20;
+bool pass40;
+bool pass50;
 bool pass_ra2;
 bool pass_nohf;
 bool pass_ra2_badmu;
 
 ################  Fat Jets   ##################
-int nfjets
-float mj
-std::vector<float> fjets_pt
-std::vector<float> fjets_eta
-std::vector<float> fjets_phi
-std::vector<float> fjets_m
-std::vector<float> fjets_sumcsv
-std::vector<float> fjets_poscsv
-std::vector<int> fjets_btags
-std::vector<int> fjets_nconst
+
+int nfjets_nolep
+float mj14_nolep
+std::vector<float> fjets_nolep_pt
+std::vector<float> fjets_nolep_eta
+std::vector<float> fjets_nolep_phi
+std::vector<float> fjets_nolep_m
+std::vector<float> fjets_nolep_sumcsv
+std::vector<float> fjets_nolep_poscsv
+std::vector<int> fjets_nolep_btags
+std::vector<int> fjets_nolep_nconst
 
 int nfjets08
 float mj08
@@ -354,16 +372,16 @@ std::vector<float> fjets08_poscsv
 std::vector<int> fjets08_btags
 std::vector<int> fjets08_nconst
 
-int nfjets13
-float mj13
-std::vector<float> fjets13_pt
-std::vector<float> fjets13_eta
-std::vector<float> fjets13_phi
-std::vector<float> fjets13_m
-std::vector<float> fjets13_sumcsv
-std::vector<float> fjets13_poscsv
-std::vector<int> fjets13_btags
-std::vector<int> fjets13_nconst
+int nfjets12
+float mj12
+std::vector<float> fjets12_pt
+std::vector<float> fjets12_eta
+std::vector<float> fjets12_phi
+std::vector<float> fjets12_m
+std::vector<float> fjets12_sumcsv
+std::vector<float> fjets12_poscsv
+std::vector<int> fjets12_btags
+std::vector<int> fjets12_nconst
 
 int nfjets14
 float mj14
@@ -376,27 +394,27 @@ std::vector<float> fjets14_poscsv
 std::vector<int> fjets14_btags
 std::vector<int> fjets14_nconst
 
-int nfjets15
-float mj15
-std::vector<float> fjets15_pt
-std::vector<float> fjets15_eta
-std::vector<float> fjets15_phi
-std::vector<float> fjets15_m
-std::vector<float> fjets15_sumcsv
-std::vector<float> fjets15_poscsv
-std::vector<int> fjets15_btags
-std::vector<int> fjets15_nconst
+int nfjets40
+float mj40
+std::vector<float> fjets40_pt
+std::vector<float> fjets40_eta
+std::vector<float> fjets40_phi
+std::vector<float> fjets40_m
+std::vector<float> fjets40_sumcsv
+std::vector<float> fjets40_poscsv
+std::vector<int> fjets40_btags
+std::vector<int> fjets40_nconst
 
-int nfjets16
-float mj16
-std::vector<float> fjets16_pt
-std::vector<float> fjets16_eta
-std::vector<float> fjets16_phi
-std::vector<float> fjets16_m
-std::vector<float> fjets16_sumcsv
-std::vector<float> fjets16_poscsv
-std::vector<int> fjets16_btags
-std::vector<int> fjets16_nconst
+int nfjets50
+float mj50
+std::vector<float> fjets50_pt
+std::vector<float> fjets50_eta
+std::vector<float> fjets50_phi
+std::vector<float> fjets50_m
+std::vector<float> fjets50_sumcsv
+std::vector<float> fjets50_poscsv
+std::vector<int> fjets50_btags
+std::vector<int> fjets50_nconst
 
 ################  Truth   ##################
 int nisr_me
@@ -427,6 +445,7 @@ float weight_rpv
 float w_lumi
 float w_pu
 float w_btag
+float w_btag40
 float w_btag_loose
 float w_toppt
 float w_lep
@@ -438,15 +457,18 @@ std::vector<float> w_pdf
 ################  Systematic variations   ##################
 # variations have index 0 (JER smearing), 1 (JEC up) and 2 (JEC down)
 std::vector<float> sys_ht
+std::vector<float> sys_ht40
+std::vector<float> sys_st
+std::vector<float> sys_st40
 std::vector<int>   sys_njets
+std::vector<int>   sys_njets40
 std::vector<int>   sys_nbm
+std::vector<int>   sys_nbm40
 std::vector<bool>  sys_pass
-std::vector<float> sys_mj
-std::vector<float> sys_mj08
-std::vector<float> sys_mj13
+std::vector<bool>  sys_pass40
+std::vector<float> sys_mj14_nolep
 std::vector<float> sys_mj14
-std::vector<float> sys_mj15
-std::vector<float> sys_mj16
+std::vector<float> sys_mj40
 std::vector<float> sys_met
 std::vector<float> sys_mt
 
@@ -457,6 +479,8 @@ std::vector<float> sys_murf
 std::vector<float> sys_pdf
 std::vector<float> sys_bctag
 std::vector<float> sys_udsgtag
+std::vector<float> sys_bctag40
+std::vector<float> sys_udsgtag40
 std::vector<float> sys_bctag_loose
 std::vector<float> sys_udsgtag_loose
 std::vector<float> sys_isr
@@ -464,5 +488,7 @@ std::vector<float> sys_lep
 std::vector<float> sys_fs_lep
 std::vector<float> sys_fs_bctag
 std::vector<float> sys_fs_udsgtag
+std::vector<float> sys_fs_bctag40
+std::vector<float> sys_fs_udsgtag40
 std::vector<float> sys_trig
 std::vector<float> sys_pu

@@ -74,10 +74,9 @@ public:
                  edm::Handle<edm::View <reco::GenJet> > genjets, 
                  vCands &sig_leps, vCands &veto_leps, 
                  vCands &photons, vCands &tks, 
-                 std::vector<LVector> &jets, 
                  std::vector<std::vector<LVector> > &sysjets,
                  std::vector<double> &jetsMuonEnergyFrac);
-  void writeFatJets(std::vector<LVector> &jets);
+  void writeFatJets();
   vCands writeMuons(edm::Handle<pat::MuonCollection> muons, 
 		    edm::Handle<pat::PackedCandidateCollection> pfcands, 
 		    edm::Handle<reco::VertexCollection> vtx,

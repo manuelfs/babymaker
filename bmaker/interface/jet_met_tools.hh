@@ -24,6 +24,7 @@
 
 // User include files
 #include "babymaker/bmaker/interface/utilities.hh"
+#include "babymaker/bmaker/interface/baby_full.hh"
 
 class jet_met_tools{
 private:
@@ -153,19 +154,23 @@ public:
 				  size_t nb, float met_phi);
 
   void clusterFatJets(int &nfjets, float &mj,
-          std::vector<float> &fjets_pt, 
-          std::vector<float> &fjets_eta,
-          std::vector<float> &fjets_phi, 
-          std::vector<float> &fjets_m,
-          std::vector<int> &fjets_nconst,
-          std::vector<float> &fjets_sumcsv,
-          std::vector<float> &fjets_poscsv,
-          std::vector<int> &fjets_btags,
-          std::vector<int> &jets_fjet_index,
-          double radius,
-          std::vector<LVector> &jets,
-          std::vector<float> &jets_csv);
-  double getSysMJ(double radius, std::vector<LVector> &jets);  
+                       std::vector<float> &fjets_pt, 
+                       std::vector<float> &fjets_eta,
+                       std::vector<float> &fjets_phi, 
+                       std::vector<float> &fjets_m,
+                       std::vector<int> &fjets_nconst,
+                       std::vector<float> &fjets_sumcsv,
+                       std::vector<float> &fjets_poscsv,
+                       std::vector<int> &fjets_btags,
+                       std::vector<int> &jets_fjet_index,
+                       baby_full &baby,
+                       double radius,
+                       double min_jets_pt,
+                       bool cluster_leps);
+  double getSysMJ(double radius, std::vector<LVector> &jets, 
+                  std::vector<bool> &jets_islep, double min_jets_pt,
+                  bool cluster_leps);  
+
   jet_met_tools(TString ijecName, bool doSys, bool isFastSim);
   ~jet_met_tools() = default;
 };

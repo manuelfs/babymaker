@@ -14,8 +14,8 @@ CMSSW code to generate babies (small flat ntuples) from MINIAOD
 To set up the code and generate a file named `baby.root`, issue the following commands 
 on lxplus:
 
-    cmsrel CMSSW_8_0_12
-    cd CMSSW_8_0_12/src
+    cmsrel CMSSW_8_0_16
+    cd CMSSW_8_0_16/src
     cmsenv
     git cms-init
     git cms-merge-topic -u cms-met:CMSSW_8_0_X-METFilterUpdate	
@@ -32,20 +32,20 @@ in the `babymaker` folder.
 #### Adding new branches
 
 To add new branches to the tree, you first create the new branch in
-`babymaker/variables/basic` where the type and name are specified.
+`babymaker/variables/full` where the type and name are specified.
 The code in `babymaker/bmaker/genfiles/src/generate_baby.cxx` automatically generates
 the files 
 
     babymaker/bmaker/interface/baby_base.hh
-    babymaker/bmaker/interface/baby_basic.hh
+    babymaker/bmaker/interface/baby_full.hh
     babymaker/bmaker/src/baby_base.cc
-    babymaker/bmaker/src/baby_basic.cc
+    babymaker/bmaker/src/baby_full.cc
 
-which have the c++ code that defines the class `baby_basic` with the tree, all the branches,
-automatic vector clearing in the `baby_basic::Fill` method, and other useful functions.
+which have the c++ code that defines the class `baby_full` with the tree, all the branches,
+automatic vector clearing in the `baby_full::Fill` method, and other useful functions.
 
-The branches are filled in the `bmaker_basic::analyze` method in 
-`babymaker/bmaker/plugins/bmaker_basic.cc`. Functions that define physics quantities,
+The branches are filled in the `bmaker_full::analyze` method in 
+`babymaker/bmaker/plugins/bmaker_full.cc`. Functions that define physics quantities,
 like isolation or electron ID, are defined in `babymaker/bmaker/src/*_tools.cc`.
 
 
@@ -85,9 +85,9 @@ of `babymaker`:
  * **Branch names** use **all lower case letters**. If words must be separated, use an underscore, e.g. `met_phi`
  * **File names** use **all lower case letters**. If words must be separated, use an underscore, e.g. `lepton_tools.cc`
  * **Function names** follow the standard **CMSSW convention**, that is, first word all lower case, and first letter 
- of subsequent words in upper case. e.g. `bmaker_basic::writeFatJets`
- * **Product names** (e.g. `"slimmedElectrons"`) are **only defined in `bmaker_basic::analize` or in 
- `babymaker/bmaker/python/bmaker_basic_cfg.py`**. 
+ of subsequent words in upper case. e.g. `bmaker_full::writeFatJets`
+ * **Product names** (e.g. `"slimmedElectrons"`) are **only defined in `bmaker_full::analize` or in 
+ `babymaker/bmaker/python/bmaker_full_cfg.py`**. 
  * As much as possible, **physics definitions go in the corresponding `src/*_tools.cc` file**, e.g. lepton ID goes in
- `src/lepton_tools.cc`. They should not be part of `plugins/bmaker_basic.cc` so that when/if we move to having various 
+ `src/lepton_tools.cc`. They should not be part of `plugins/bmaker_full.cc` so that when/if we move to having various 
  baby definitions in parallel, for which the code is setup, all babies would use common definitions.

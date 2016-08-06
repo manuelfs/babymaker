@@ -57,7 +57,7 @@ float weight_tools::pileupWeight(unsigned int ntrupv_mean, int type)
 }
 
 
-float weight_tools::triggerEfficiency(int &nmus, int &nels, vector<float> &sys_trig){
+float weight_tools::triggerEfficiency(int &nmus, int &nels, float &met, vector<float> &sys_trig){
   sys_trig.resize(2,1.);
   int nleps(nmus+nels);
 
@@ -66,37 +66,39 @@ float weight_tools::triggerEfficiency(int &nmus, int &nels, vector<float> &sys_t
   float eff_trig(1.);
   if(nleps == 1){
     if(nels==1){
-      // eff = 0.941 +0.6-0.7 +-1.0 = 0.941 +0.012 - 0.012
-      eff_trig = 0.941;
-      sys_trig[0] = (eff_trig+0.012)/eff_trig;
-      sys_trig[1] = (eff_trig-0.012)/eff_trig;
+      if(met>  0&&met<= 50) eff_trig = 0.897;
+      if(met> 50&&met<=100) eff_trig = 0.923;
+      if(met>100&&met<=150) eff_trig = 0.958;
+      if(met>150&&met<=200) eff_trig = 0.988;
+      // 1% systematic for met < 200
+      sys_trig[0] = (eff_trig+0.01)/eff_trig;
+      sys_trig[1] = min(1., eff_trig-0.01)/eff_trig;
+      if(met>200) {
+	eff_trig = 0.998;
+	sys_trig[0] = (eff_trig+0.005)/eff_trig;
+	sys_trig[1] = min(1., eff_trig+0.005)/eff_trig;
+      }
     }
     if(nmus==1){
-      // eff = 0.951 +0.5-0.5 +-1.0 = 0.951 +0.011 - 0.011
-      eff_trig = 0.951;
-      sys_trig[0] = (eff_trig+0.011)/eff_trig;
-      sys_trig[1] = (eff_trig-0.011)/eff_trig;
-    } 
+      if(met>  0&&met<= 50) eff_trig = 0.938;
+      if(met> 50&&met<=100) eff_trig = 0.943;
+      if(met>100&&met<=150) eff_trig = 0.965;
+      if(met>150&&met<=200) eff_trig = 0.994;
+      // 1% systematic for met < 200
+      sys_trig[0] = (eff_trig+0.01)/eff_trig;
+      sys_trig[1] = min(1., eff_trig-0.01)/eff_trig;
+      if(met>200){
+	eff_trig = 0.997;
+	sys_trig[0] = (eff_trig+0.005)/eff_trig;
+	sys_trig[1] = min(1., eff_trig+0.005)/eff_trig;
+      }
+    }
   } // nleps == 1
+
   if(nleps == 2){
-    if(nels==2){
-      // eff = 0.983 +0.5-0.7 +-0.5 = 0.983 +0.007 - 0.009
-      eff_trig = 0.983;
-      sys_trig[0] = (eff_trig+0.007)/eff_trig;
-      sys_trig[1] = (eff_trig-0.009)/eff_trig;
-    }
-    if(nmus==2){
-      // eff = 0.991 +0.3-0.5 +-0.5 = 0.991 +0.006 - 0.007
-      eff_trig = 0.991;
-      sys_trig[0] = (eff_trig+0.006)/eff_trig;
-      sys_trig[1] = (eff_trig-0.007)/eff_trig;
-    }
-    if(nels==1&&nmus==1){
-      // eff = 0.989 +0.5-0.9 +-0.5 = 0.989 +0.007 - 0.010
-      eff_trig = 0.989;
-      sys_trig[0] = (eff_trig+0.007)/eff_trig;
-      sys_trig[1] = (eff_trig-0.010)/eff_trig;
-    }
+    eff_trig = 1.;
+    sys_trig[0] = 0.995;
+    sys_trig[1] = 1.;
   } // nleps == 2
   return eff_trig;
 }

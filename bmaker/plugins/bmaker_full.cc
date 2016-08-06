@@ -278,7 +278,7 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
     iEvent.getByToken(tok_extLHEProducer_, lhe_info);
     if(!lhe_info.isValid()) iEvent.getByToken(tok_source_, lhe_info);
     if(lhe_info.isValid()) writeGenInfo(lhe_info);
-    if((outname.Contains("TTJets") && (outname.Contains("Lept") || outname.Contains("TTJets_Tune")) && baby.ht_isr_me()>600)
+    if((outname.Contains("TTJets") && (outname.Contains("Lept")) && baby.ht_isr_me()>600)
        || (outname.Contains("DYJetsToLL_M-50_TuneCUETP8M")  && baby.ht_isr_me()>100)
        || (outname.Contains("WJetsToLNu_TuneCUETP8M1")  && baby.ht_isr_me()>100))
       baby.stitch() = false;
@@ -1053,12 +1053,36 @@ bool bmaker_full::writeTriggers(const edm::TriggerNames &names,
       }
     }
   }
-  // trig_ra4 = (Lep15_HT350 ||  Lep15_HT400 || MET100 || METNoMu100)
-  vector<size_t> trig_or = {3,4,7,8,13,33};
+
+  // OR-ing triggers used in RA4
+  vector<TString> trigs_ra4({"HLT_PFMET100_PFMHT100_IDTight_v", "HLT_PFMETNoMu100_PFMHTNoMu100_IDTight_v",
+	"HLT_PFMET110_PFMHT110_IDTight_v", "HLT_PFMETNoMu110_PFMHTNoMu110_IDTight_v",
+	"HLT_Mu15_IsoVVVL_PFHT350_v", "HLT_Mu15_IsoVVVL_PFHT400_v", "HLT_Mu50_IsoVVVL_PFHT400_v", 
+	"HLT_Ele15_IsoVVVL_PFHT350_v", "HLT_Ele15_IsoVVVL_PFHT400_v", "HLT_Ele50_IsoVVVL_PFHT400_v", 
+	"HLT_IsoMu22_eta2p1_v", "HLT_IsoMu24_v", "HLT_Mu50_v",
+	"HLT_Ele25_eta2p1_WPTight_Gsf_v", "HLT_Ele27_eta2p1_WPLoose_Gsf_v", "HLT_Ele105_CaloIdVT_GsfTrkIdT_v",
+	"HLT_Ele115_CaloIdVT_GsfTrkIdT_v"});
+  vector<TString> trigs_met({"HLT_PFMET100_PFMHT100_IDTight_v", "HLT_PFMETNoMu100_PFMHTNoMu100_IDTight_v",
+	"HLT_PFMET110_PFMHT110_IDTight_v", "HLT_PFMETNoMu110_PFMHTNoMu110_IDTight_v"});
+  vector<TString> trigs_vvvl({"HLT_Mu15_IsoVVVL_PFHT350_v", "HLT_Mu15_IsoVVVL_PFHT400_v", "HLT_Mu50_IsoVVVL_PFHT400_v", 
+	"HLT_Ele15_IsoVVVL_PFHT350_v", "HLT_Ele15_IsoVVVL_PFHT400_v", "HLT_Ele50_IsoVVVL_PFHT400_v"});
+  vector<TString> trigs_lep({"HLT_IsoMu22_eta2p1_v", "HLT_IsoMu24_v", "HLT_Mu50_v",
+	"HLT_Ele25_eta2p1_WPTight_Gsf_v", "HLT_Ele27_eta2p1_WPLoose_Gsf_v", "HLT_Ele105_CaloIdVT_GsfTrkIdT_v",
+	"HLT_Ele115_CaloIdVT_GsfTrkIdT_v"});
   baby.trig_ra4() = false;
-  for(size_t itrig=0; itrig<trig_or.size(); itrig++)
-    baby.trig_ra4() = (baby.trig_ra4() || baby.trig()[trig_or[itrig]]);
-  
+  baby.trig_met() = false;
+  baby.trig_vvvl() = false;
+  baby.trig_lep() = false;
+  for(size_t itn(0); itn < trig_name.size(); itn++){
+    for(size_t ira4(0); ira4 < trigs_ra4.size(); ira4++)
+      if(trig_name[itn].Contains(trigs_ra4[ira4])) baby.trig_ra4() = (baby.trig_ra4() || baby.trig()[itn]);
+    for(size_t imet(0); imet < trigs_met.size(); imet++)
+      if(trig_name[itn].Contains(trigs_met[imet])) baby.trig_met() = (baby.trig_met() || baby.trig()[itn]);
+    for(size_t ivvvl(0); ivvvl < trigs_vvvl.size(); ivvvl++)
+      if(trig_name[itn].Contains(trigs_vvvl[ivvvl])) baby.trig_vvvl() = (baby.trig_vvvl() || baby.trig()[itn]);
+    for(size_t ilep(0); ilep < trigs_lep.size(); ilep++)
+      if(trig_name[itn].Contains(trigs_lep[ilep])) baby.trig_lep() = (baby.trig_lep() || baby.trig()[itn]);
+  } // Loop over trigger names
   return keep;
 }
 
@@ -1671,7 +1695,7 @@ void bmaker_full::writeWeights(const vCands &sig_leps, edm::Handle<GenEventInfoP
   } else baby.w_fs_lep() = 1.;
 
   // VVVL trigger efficiency
-  baby.eff_trig() = weightTool->triggerEfficiency(baby.nmus(), baby.nels(), baby.sys_trig());
+  baby.eff_trig() = weightTool->triggerEfficiency(baby.nmus(), baby.nels(), baby.met(), baby.sys_trig());
   
   // In FastSim the JetID is broken, so we just apply 0.99 +- 0.01
   if(isFastSim) baby.eff_jetid() = 0.99;
@@ -1821,6 +1845,27 @@ bmaker_full::bmaker_full(const edm::ParameterSet& iConfig):
       trig_name.push_back("HLT_Mu15_IsoVVVL_BTagCSV_p067_PFHT400_v");           // 35
       trig_name.push_back("HLT_Ele50_IsoVVVL_PFHT400_v");                       // 36
       trig_name.push_back("HLT_Ele15_IsoVVVL_BTagCSV_p067_PFHT400_v");          // 37
+      trig_name.push_back("HLT_Mu15_IsoVVVL_PFHT400_PFMET50_v");                // 38 
+      trig_name.push_back("HLT_Ele15_IsoVVVL_PFHT400_PFMET50_v");               // 39
+      trig_name.push_back("HLT_Ele27_WPTight_Gsf_v");                           // 40
+
+      trig_name.push_back("HLT_Ele115_CaloIdVT_GsfTrkIdT_v");                   // 41
+      trig_name.push_back("HLT_IsoMu22_eta2p1_v");			        // 42
+      trig_name.push_back("HLT_PFHT300_PFMET110_v");                            // 43 
+      trig_name.push_back("HLT_PFHT200_DiPFJetAve90_PFAlphaT0p63_v");           // 44
+      trig_name.push_back("HLT_PFHT250_DiPFJetAve90_PFAlphaT0p58_v");           // 45
+      trig_name.push_back("HLT_PFHT300_DiPFJetAve90_PFAlphaT0p54_v");           // 46
+      trig_name.push_back("HLT_PFHT200_v");			                // 47
+      trig_name.push_back("HLT_PFHT250_v");			                // 48
+      trig_name.push_back("HLT_PFHT300_v");			                // 49
+      trig_name.push_back("HLT_PFHT350_v");			                // 50
+
+      trig_name.push_back("HLT_PFHT400_v");			                // 51
+      trig_name.push_back("HLT_PFHT600_v");			                // 52
+      trig_name.push_back("HLT_PFHT650_v");			                // 53
+      trig_name.push_back("HLT_PFHT900_v");			                // 54
+
+
     } else {
       trig_name.push_back("HLT_PFHT350_PFMET100_");                               // 0 
       trig_name.push_back("HLT_Mu15_IsoVVVL_PFHT350_PFMET50_v");                  // 1 

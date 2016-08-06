@@ -288,6 +288,10 @@ std::vector<bool> tks_tm
 std::vector<bool> trig;
 std::vector<float> trig_prescale;
 bool trig_ra4
+bool trig_met
+bool trig_vvvl
+bool trig_lep
+
 float onht
 float onmet
 float onmu_vvvl

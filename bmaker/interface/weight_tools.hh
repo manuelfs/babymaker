@@ -30,7 +30,7 @@ public:
   float theoryWeight(variationType variation);
   void getTheoryWeights(edm::Handle<LHEEventProduct> lhe_info);
   float pileupWeight(unsigned int ntrupv_mean, int type);
-  float triggerEfficiency(int &nmus, int &nels, std::vector<float> &sys_trig);
+  float triggerEfficiency(int &nmus, int &nels, float &met, std::vector<float> &sys_trig);
   float topPtWeight(float top_pt1,float top_pt2);
   float isrWeight(float isrpt);
   void getPDFWeights(std::vector<float> &sys_pdf, std::vector<float> &w_pdf);

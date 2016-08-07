@@ -110,7 +110,7 @@ public:
   void writeVertices(edm::Handle<reco::VertexCollection> vtx,
 		     edm::Handle<std::vector< PileupSummaryInfo > >  pu_info);  
   void writeGenInfo(edm::Handle<LHEEventProduct> lhe_info);
-  void nisrMatch(edm::Handle<reco::GenParticleCollection> genParticles, 
+  void writeIFSR(edm::Handle<reco::GenParticleCollection> genParticles, 
                  std::vector<reco::Candidate::LorentzVector> &jets);
   void writeMC(edm::Handle<reco::GenParticleCollection> genParticles, vCands &all_mus, vCands &all_els, vCands &photons);
 

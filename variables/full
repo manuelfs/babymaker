@@ -82,13 +82,11 @@ int njets20
 int njets40
 int njets50
 int nbl
-int nbl20
 int nbm
 int nbm20
 int nbm40
 int nbm50
 int nbt
-int nbt20
 bool low_dphi20
 
 int njets_ra2
@@ -449,11 +447,11 @@ float w_btag
 float w_btag40
 float w_btag_loose
 float w_toppt
+float w_isr
 float w_lep
 float w_fs_lep
 float eff_trig
 float eff_jetid
-std::vector<float> w_pdf
 
 ################  Systematic variations   ##################
 # variations have index 0 (JER smearing), 1 (JEC up) and 2 (JEC down)
@@ -477,7 +475,6 @@ std::vector<float> sys_mt
 std::vector<float> sys_mur
 std::vector<float> sys_muf
 std::vector<float> sys_murf
-std::vector<float> sys_pdf
 std::vector<float> sys_bctag
 std::vector<float> sys_udsgtag
 std::vector<float> sys_bctag40

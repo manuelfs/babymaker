@@ -852,9 +852,9 @@ jet_met_tools::jet_met_tools(TString ijecName, bool doSys, bool fastSim):
     calib_fast_.reset(new BTagCalibration("csvv2", scaleFactorFileFastSim));
     for(const auto &op: op_pts_){
       readers_fast_[op] = MakeUnique<BTagCalibrationReader>(op, "central", vector<string>{"up", "down"});
-      readers_fast_.at(op)->load(*calib_fast_, BTagEntry::FLAV_UDSG, "incl");
-      readers_fast_.at(op)->load(*calib_fast_, BTagEntry::FLAV_C, "comb");
-      readers_fast_.at(op)->load(*calib_fast_, BTagEntry::FLAV_B, "comb");
+      readers_fast_.at(op)->load(*calib_fast_, BTagEntry::FLAV_UDSG, "fastsim");
+      readers_fast_.at(op)->load(*calib_fast_, BTagEntry::FLAV_C, "fastsim");
+      readers_fast_.at(op)->load(*calib_fast_, BTagEntry::FLAV_B, "fastsim");
     }
   }
 

@@ -6,7 +6,8 @@
 #include <memory>
 #include <iostream>
 #include <stdlib.h>
-#include <iomanip>  // put_time
+#include <iomanip>    // put_time
+#include <utility>    // std::pair
 
 // FW include files
 #include "FWCore/Framework/interface/Frameworkfwd.h"
@@ -792,13 +793,20 @@ vector<LVector> bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
 
 
   } // if njets >= 4
-  else if (hi_csv[1]>=0){
-    LVector hig = all_baby_jets[hi_csv[0]] + all_baby_jets[hi_csv[1]];
+  else if (hi_csv[1]>=0){ // Checking that at least 2 jets exist (important for WH analysis)
+    LVector pb1 = all_baby_jets[hi_csv[0]], pb2 = all_baby_jets[hi_csv[1]];
+    LVector hig = pb1+pb2;
     baby.hig1_pt()  = hig.pt();
     baby.hig1_eta() = hig.eta();
     baby.hig1_phi() = hig.phi();
     baby.hig1_m()   = hig.mass();
   }
+
+  if (hi_csv[1]>=0){
+    LVector pb1 = all_baby_jets[hi_csv[0]], pb2 = all_baby_jets[hi_csv[1]];
+    baby.mct() = sqrt(2*pb1.pt()*pb2.pt() * (1+cos(deltaPhi(pb1.phi(), pb2.phi()))) );
+  }
+
   return clean_jets;
 } // writeJets
 
@@ -1430,6 +1438,11 @@ void bmaker_full::writeMC(edm::Handle<reco::GenParticleCollection> genParticles,
   int topIndex=-1;
   int antitopIndex=-1;
   const size_t bsmid(1000000);
+
+  //// Indices and pointers to the particles we decide to save
+  vector<pair<int, const reco::GenParticle *> > indices;
+  int Nsaved=0;
+
   for (size_t imc(0); imc < genParticles->size(); imc++) {
     const reco::GenParticle &mc = (*genParticles)[imc];
     size_t id = abs(mc.pdgId());
@@ -1461,7 +1474,7 @@ void bmaker_full::writeMC(edm::Handle<reco::GenParticleCollection> genParticles,
     bool muFromTopZtau(id==13 && (momid==24 || momid==23 || fromTau ));
     bool fromHiggs(momid==25);
     bool fromTop(momid==6);
-    bool mg_me = mc.status()==22 || mc.status()==23;
+    bool mg_me = mc.status()==23;
 
     //////// Saving interesting true particles
     if((isLast && (isTop || isNewPhysics || isZ || isH))
@@ -1475,6 +1488,10 @@ void bmaker_full::writeMC(edm::Handle<reco::GenParticleCollection> genParticles,
       baby.mc_phi().push_back(mc.phi());
       baby.mc_mass().push_back(mc.mass());
       baby.mc_mom().push_back(mcTool->mom(mc,mom));
+      // Saving mother index
+      baby.mc_momidx().push_back(mcTool->getMomIndex(mc,indices));
+      indices.push_back(pair<int, const reco::GenParticle *>(Nsaved, &mc));
+      Nsaved++;
     }
 
     if(isLast){
@@ -1993,7 +2010,7 @@ bmaker_full::~bmaker_full(){
   string commit_s = execute("git rev-parse HEAD");
   while(!commit_s.empty() && commit_s.at(commit_s.length()-1) == '\n') commit_s.erase(commit_s.length()-1);
   TString commit = commit_s;
-  TString type = baby.Type();
+  TString type = baby.BabyType();
   TString root_version = gROOT->GetVersion();
   TString root_tutorial_dir = gROOT->GetTutorialsDir();
   TString user(getenv("ORIGIN_USER"));

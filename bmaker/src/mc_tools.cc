@@ -56,6 +56,15 @@ int mc_tools::mom(const reco::GenParticle &mc, const reco::GenParticle *&mcMom){
   } else return 0;
 }
 
+// Returns the index of the mother in the "indices" list
+int mc_tools::getMomIndex(const reco::GenParticle &mc, vector<pair<int, const reco::GenParticle *> > indices){
+  const reco::GenParticle * mcMom = static_cast<const reco::GenParticle *>(mc.mother());
+  if(mcMom){
+    for(size_t ind=0; ind<indices.size(); ind++)
+      if(indices[ind].second == mcMom) return static_cast<int>(ind);
+    return getMomIndex(*mcMom, indices);
+  } else return -1;
+}
 
 // Checks if "mc" eventually decays to "id" (after it stops decays to itself)
 bool mc_tools::decaysTo(const reco::GenParticle &mc, size_t id, const reco::GenParticle *&mcDau){

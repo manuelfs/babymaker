@@ -3,6 +3,9 @@
 #ifndef H_MC_TOOLS
 #define H_MC_TOOLS
 
+#include <utility>
+#include <vector>
+
 #include "FWCore/Framework/interface/ESHandle.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 
@@ -20,6 +23,7 @@ public:
   bool fromWOrWTau(const reco::GenParticle &mc);
   bool fromTau(const reco::GenParticle &mc);
   int mom(const reco::GenParticle &mc, const reco::GenParticle *&mcMom);
+  int getMomIndex(const reco::GenParticle &mc, std::vector<std::pair<int, const reco::GenParticle *> > indices);
   bool isFromGSP(const reco::Candidate *c);
   bool isHardProcess(const int status);
   void getMassPoints(TString mpoints, int &mgluino, int &mlsp);

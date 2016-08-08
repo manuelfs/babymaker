@@ -38,6 +38,7 @@ float mt_tru_nuw
 float mt_rebal
 float mt2
 float mt2_0mass
+float mct
 float dphi_wlep
 bool jetmismeas
 
@@ -424,6 +425,7 @@ std::vector<float> mc_phi
 std::vector<float> mc_mass
 std::vector<int>   mc_id
 std::vector<int>   mc_mom
+std::vector<int>   mc_momidx
 std::vector<int>   mc_status
 float m_tt
 bool fromGS

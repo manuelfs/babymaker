@@ -201,7 +201,7 @@ void WriteBaseHeader(const set<Variable> &all_vars,
   file << "  virtual void Fill();\n";
   file << "  void Write();\n\n";
 
-  file << "  virtual std::string Type() const;\n\n";
+  file << "  virtual std::string BabyType() const;\n\n";
 
   file << "  static const double bad_val_;\n\n";
 
@@ -415,7 +415,7 @@ void WriteBaseSource(const set<Variable> &all_vars,
   file << "  }\n";
   file << "}\n\n";
 
-  file << "string baby_base::Type() const{\n";
+  file << "string baby_base::BabyType() const{\n";
   file << "  return \"\";\n";
   file << "}\n\n";
 
@@ -538,7 +538,7 @@ void WriteSepHeader(const pair<string, set<Variable> > &sep_vars){
 
   file << "  virtual void Fill();\n\n";
 
-  file << "  virtual std::string Type() const;\n\n";
+  file << "  virtual std::string BabyType() const;\n\n";
 
   file << "  virtual ~baby_" << name << "();\n\n";
 
@@ -690,7 +690,7 @@ void WriteSepSource(const pair<string, set<Variable> > &sep_vars){
   }
   file << "}\n\n";
 
-  file << "string baby_" << name << "::Type() const{\n";
+  file << "string baby_" << name << "::BabyType() const{\n";
   file << "  return \"" << name << "\";\n";
   file << "}\n\n";
 

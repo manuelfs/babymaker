@@ -5,6 +5,8 @@ from __future__ import print_function
 import sys
 import argparse
 import fnmatch
+import os
+
 import ROOT
 
 def ePrint(*args, **kwargs):
@@ -22,10 +24,14 @@ def passRules(branch, rules):
     matched_rules =  [ rule for rule in rules if fnmatch.fnmatch(branch, rule[1]) ]
     return len(matched_rules)==0 or matched_rules[-1][0] == "keep"
 
-def slimNtuple(slim_file_name, output_file_name, input_file_names, test_mode):
+def slimNtuple(slim_file_name, output_file_name, input_file_names, keep_existing, test_mode):
     print("     INPUT FILES:",input_file_names)
     print("     OUTPUT FILE:",output_file_name)
     print("      RULES FILE:",slim_file_name)
+
+    if keep_existing and os.path.exists(output_file_name):
+        print("Keeping pre-existing "+output_file_name)
+        return
 
     in_tree = ROOT.TChain("tree", "tree")
     in_treeglobal = ROOT.TChain("treeglobal", "treeglobal")
@@ -58,6 +64,8 @@ if __name__ == "__main__":
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument("-t", "--test", action="store_true",
                         help="Run in test mode, quickly diplaying the list of kept and dropped branchs without actually copying the trees.")
+    parser.add_argument("-k","--keep_existing", action="store_true",
+                        help="Do not overwrite output file if it already exists.")
     parser.add_argument("slim_file",
                         help="File containing rules for pruning branches (one rule per line). Rules are are the form \"keep XXX\" or \"drop YYY\". Unix shell-style wildcards (e.g., '*') allow pattern matching. Branches are kept by default if no matching rule is found for the branch. If multiple rules match, the last takes precedence.")
     parser.add_argument("output_file",
@@ -66,4 +74,4 @@ if __name__ == "__main__":
                         help="Files containing ntuples to be slimmed and merged.")
     args = parser.parse_args()
 
-    slimNtuple(args.slim_file, args.output_file, args.input_files, args.test)
+    slimNtuple(args.slim_file, args.output_file, args.input_files, args.keep_existing, args.test)

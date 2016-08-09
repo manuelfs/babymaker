@@ -703,9 +703,6 @@ void jet_met_tools::clusterFatJets(int &nfjets, float &mj,
                                    std::vector<float> &fjets_phi, 
                                    std::vector<float> &fjets_m,
                                    std::vector<int> &fjets_nconst,
-                                   std::vector<float> &fjets_sumcsv,
-                                   std::vector<float> &fjets_poscsv,
-                                   std::vector<int> &fjets_btags,
                                    std::vector<int> &jets_fjet_index,
                                    baby_full &baby,
                                    double radius,
@@ -732,9 +729,6 @@ void jet_met_tools::clusterFatJets(int &nfjets, float &mj,
   fjets_phi.resize(fjets.size());
   fjets_m.resize(fjets.size());
   fjets_nconst.resize(fjets.size());
-  fjets_sumcsv.resize(fjets.size());
-  fjets_poscsv.resize(fjets.size());
-  fjets_btags.resize(fjets.size());
   jets_fjet_index.resize(baby.jets_csv().size(), -1);
 
   for(size_t ipj = 0; ipj < fjets.size(); ++ipj){
@@ -747,20 +741,10 @@ void jet_met_tools::clusterFatJets(int &nfjets, float &mj,
     fjets_nconst.at(ipj) = cjets.size();
     mj += pj.m();
     ++nfjets;
-    fjets_btags.at(ipj) = 0;
-    fjets_sumcsv.at(ipj) = 0.;
-    fjets_poscsv.at(ipj) = 0.;
     for(size_t ijet = 0; ijet < baby.jets_pt().size(); ++ijet){
       for(size_t cjet = 0; cjet < cjets.size(); ++ cjet){
         if(cjets.at(cjet).pt() - baby.jets_pt()[ijet] < 0.0001){
           jets_fjet_index.at(ijet) = ipj;
-          fjets_sumcsv.at(ipj) += baby.jets_csv()[ijet];
-          if(baby.jets_csv()[ijet] > 0.){
-            fjets_poscsv.at(ipj) += baby.jets_csv()[ijet];
-          }
-          if(baby.jets_csv()[ijet] > CSVMedium){
-            ++(fjets_btags.at(ipj));
-          }
         }
       } // Loop over fat jet constituents
     } // Loop over skinny jets

@@ -161,13 +161,13 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 
   /// Jets
   if (debug) cout<<"INFO: Writing jets..."<<endl;
-  vector<LVector> clean_jets;
+  vector<LVector> all_baby_jets;
   vector<double> jetsMuonEnergyFrac;
   vector<vector<LVector> > sys_jets;
   if (!doSystematics) {
-    clean_jets = writeJets(alljets, genjets, sig_leps, veto_leps, photons, tks, sys_jets, jetsMuonEnergyFrac);
+    all_baby_jets = writeJets(alljets, genjets, sig_leps, veto_leps, photons, tks, sys_jets, jetsMuonEnergyFrac);
   } else {
-    clean_jets = writeJets(alljets, genjets, sig_leps, veto_leps, photons, tks, sys_jets, jetsMuonEnergyFrac);
+    all_baby_jets = writeJets(alljets, genjets, sig_leps, veto_leps, photons, tks, sys_jets, jetsMuonEnergyFrac);
     for (unsigned isys(0); isys<kSysLast; isys++){
       bool cluster_leps = false;
       baby.sys_mj14_nolep().push_back(jetTool->getSysMJ(1.4, sys_jets[isys], baby.jets_islep(), jetTool->JetPtCut, cluster_leps));
@@ -249,7 +249,7 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
     edm::Handle<reco::GenParticleCollection> genParticles;
     iEvent.getByToken(tok_pruneGenPart_, genParticles);
     writeMC(genParticles, all_mus, all_els, photons);
-    writeIFSR(genParticles, clean_jets);
+    writeIFSR(genParticles, all_baby_jets);
   }
 
   ////////////////// resolution-corrected MET /////////////////////////
@@ -288,7 +288,7 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
          
   //////////////// Weights and systematics //////////////////
   // w_btag calculated in writeJets
-  // w_toppt and sys_isr calculated in writeMC
+  // w_toppt calculated in writeMC
   edm::Handle<GenEventInfoProduct> gen_event_info;
   iEvent.getByToken(tok_generator_, gen_event_info);
   //assuming baby.nisr() is filled
@@ -342,7 +342,7 @@ vector<LVector> bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
                             vector<vector<LVector> > &sys_jets,
                             vector<double> &jetsMuonEnergyFrac){
   vector<int> hi_csv(5,-1); // Indices of the 5 jets with highest CSV
-  vector<LVector> clean_jets; vector<LVector> all_baby_jets;
+  vector<LVector> all_baby_jets;
   vCands jets_ra2;
   vector<LVector> jets;
   LVector jetsys_p4, jetsys_nob_p4;
@@ -412,7 +412,6 @@ vector<LVector> bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
       else baby.jets_pt_res().push_back(-99999.);
       baby.jets_hflavor().push_back(jet.hadronFlavour());
       baby.jets_csv().push_back(csv);
-      if (goodPtEta && !isLep) clean_jets.push_back(jetp4);
       if (goodPtEta || isLep) jets.push_back(jetp4);
       baby.jets_h1().push_back(false);
       baby.jets_h2().push_back(false);
@@ -609,20 +608,6 @@ vector<LVector> bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
   baby.mht_clean_phi() = atan2(mht_clean_py, mht_clean_px);
   baby.low_dphi() = jetTool->isLowDphi(jets_ra2, baby.mht_phi(), baby.dphi1(), baby.dphi2(), baby.dphi3(), baby.dphi4());
 
-  for (unsigned i(0); i<2; i++){
-    baby.sys_bctag()[i] /= baby.w_btag();
-    baby.sys_udsgtag()[i] /= baby.w_btag();
-    baby.sys_bctag40()[i] /= baby.w_btag40();
-    baby.sys_udsgtag40()[i] /= baby.w_btag40();
-    baby.sys_bctag_loose()[i] /= baby.w_btag_loose();
-    baby.sys_udsgtag_loose()[i] /= baby.w_btag_loose();
-    if (isFastSim) { 
-      baby.sys_fs_bctag()[i] /= baby.w_btag();
-      baby.sys_fs_udsgtag()[i] /= baby.w_btag();
-      baby.sys_fs_bctag40()[i] /= baby.w_btag40();
-      baby.sys_fs_udsgtag40()[i] /= baby.w_btag40();
-    }
-  }
   // ISR system for Z->ll and tt->llbb configurations
   baby.jetsys_pt()  = jetsys_p4.pt();
   baby.jetsys_eta() = jetsys_p4.eta();
@@ -633,60 +618,7 @@ vector<LVector> bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
   baby.jetsys_nob_phi() = jetsys_nob_p4.phi();
   baby.jetsys_nob_m()   = jetsys_nob_p4.mass();
 
-  // write deltaR between csvm jets
-  jetTool->getDeltaRbb(baby.dr_bb(), jets, baby.jets_csv(), baby.jets_islep());
-
   vector<size_t> branks = jet_met_tools::getBRanking(jets, baby.jets_csv(), baby.jets_islep());
-  baby.dr_bb_2() = jet_met_tools::getDeltaRbb(jets, branks, baby.nbm());
-  baby.dr_bb_max() = jet_met_tools::getDeltaRbbMax(jets, branks, baby.nbm());
-  baby.dr_bb_min() = jet_met_tools::getDeltaRbbMin(jets, branks, baby.nbm());
-  baby.dphi_bb_2() = jet_met_tools::getDeltaPhibb(jets, branks, baby.nbm());
-  baby.dphi_bb_max() = jet_met_tools::getDeltaPhibbMax(jets, branks, baby.nbm());
-  baby.dphi_bb_min() = jet_met_tools::getDeltaPhibbMin(jets, branks, baby.nbm());
-  baby.m_bb_2() = jet_met_tools::getMbb(jets, branks, baby.nbm());
-  baby.m_bb_max() = jet_met_tools::getMbbMax(jets, branks, baby.nbm());
-  baby.m_bb_min() = jet_met_tools::getMbbMin(jets, branks, baby.nbm());
-
-  if(sig_leps.size() > 0){
-    baby.dr_bl_min() = jet_met_tools::getDeltaRblepMin(jets, branks, baby.nbm(), sig_leps.at(0)->p4());
-    baby.dr_bl_max() = jet_met_tools::getDeltaRblepMax(jets, branks, baby.nbm(), sig_leps.at(0)->p4());
-    baby.dr_bl_min2() = jet_met_tools::getDeltaRblepMin2(jets, branks, baby.nbm(), sig_leps.at(0)->p4());
-    baby.dr_bl_max2() = jet_met_tools::getDeltaRblepMax2(jets, branks, baby.nbm(), sig_leps.at(0)->p4());
-    baby.dphi_bl_min() = jet_met_tools::getDeltaPhiblepMin(jets, branks, baby.nbm(), sig_leps.at(0)->p4());
-    baby.dphi_bl_max() = jet_met_tools::getDeltaPhiblepMax(jets, branks, baby.nbm(), sig_leps.at(0)->p4());
-    baby.dphi_bl_min2() = jet_met_tools::getDeltaPhiblepMin2(jets, branks, baby.nbm(), sig_leps.at(0)->p4());
-    baby.dphi_bl_max2() = jet_met_tools::getDeltaPhiblepMax2(jets, branks, baby.nbm(), sig_leps.at(0)->p4());
-    baby.m_bl_min() = jet_met_tools::getMblepMin(jets, branks, baby.nbm(), sig_leps.at(0)->p4());
-    baby.m_bl_max() = jet_met_tools::getMblepMax(jets, branks, baby.nbm(), sig_leps.at(0)->p4());
-    baby.m_bl_min2() = jet_met_tools::getMblepMin2(jets, branks, baby.nbm(), sig_leps.at(0)->p4());
-    baby.m_bl_max2() = jet_met_tools::getMblepMax2(jets, branks, baby.nbm(), sig_leps.at(0)->p4());
-    baby.dphi_lmet() = fabs(reco::deltaPhi(sig_leps.at(0)->phi(), baby.met_phi()));
-  }else{
-    baby.dr_bl_min() = -1.;
-    baby.dr_bl_max() = -1.;
-    baby.dr_bl_min2() = -1.;
-    baby.dr_bl_max2() = -1.;
-    baby.dphi_bl_min() = -1.;
-    baby.dphi_bl_max() = -1.;
-    baby.dphi_bl_min2() = -1.;
-    baby.dphi_bl_max2() = -1.;
-    baby.m_bl_min() = -1.;
-    baby.m_bl_max() = -1.;
-    baby.m_bl_min2() = -1.;
-    baby.m_bl_max2() = -1.;
-    baby.dphi_lmet() = -1.;
-  }
-
-  baby.dphi_bmet_min() = jet_met_tools::getDeltaPhibmetMin(jets, branks, baby.nbm(), baby.met_phi());
-  baby.dphi_bmet_max() = jet_met_tools::getDeltaPhibmetMax(jets, branks, baby.nbm(), baby.met_phi());
-  baby.dphi_bmet_min2() = jet_met_tools::getDeltaPhibmetMin2(jets, branks, baby.nbm(), baby.met_phi());
-  baby.dphi_bmet_max2() = jet_met_tools::getDeltaPhibmetMax2(jets, branks, baby.nbm(), baby.met_phi());
-  baby.mt_bmet_min() = jet_met_tools::getMTbmetMin(jets, branks, baby.nbm(), baby.met(), baby.met_phi());
-  baby.mt_bmet_max() = jet_met_tools::getMTbmetMax(jets, branks, baby.nbm(), baby.met(), baby.met_phi());
-  baby.mt_bmet_min2() = jet_met_tools::getMTbmetMin2(jets, branks, baby.nbm(), baby.met(), baby.met_phi());
-  baby.mt_bmet_max2() = jet_met_tools::getMTbmetMax2(jets, branks, baby.nbm(), baby.met(), baby.met_phi());
-
-
   if(baby.nbm() >= 2 && sig_leps.size()>0){
     const auto &jet1 = jets.at(branks.at(0));
     const auto &jet2 = jets.at(branks.at(1));
@@ -766,32 +698,6 @@ vector<LVector> bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
         if(baby.nbl()>=4) baby.hig_bin() += 10;
       }
     }
-
-    if(hi_csv[4]>=0) nCSVs = 5; // If there are 5 jets, find all combinations of those 5
-    minDm = 9999.;
-    for(size_t ind0=0; ind0<nCSVs; ind0++){
-      for(size_t ind1=0; ind1<ind0; ind1++){
-        for(size_t ind2=ind0+1; ind2<nCSVs; ind2++){
-          if(ind2==ind1) continue;
-          for(size_t ind3=0; ind3<ind2; ind3++){
-            if(ind3==ind0 || ind3==ind1) continue;
-            float thisDm = fabs(hig_p4[ind0][ind1].mass() - hig_p4[ind2][ind3].mass());
-            //cout<<ind0<<"-"<<ind1<<", "<<ind2<<"-"<<ind3<<", thisDM "<<thisDm<<", minDm "<<minDm<<endl;
-            if(thisDm < minDm) {
-              hig_ind[0] = ind0; hig_ind[1] = ind1; hig_ind[2] = ind2; hig_ind[3] = ind3;
-              minDm = thisDm;
-            }
-          } // ind3
-        } // ind2
-      } // ind1
-    } // ind0
-    hig1 = hig_p4[hig_ind[0]][hig_ind[1]]; hig2 = hig_p4[hig_ind[2]][hig_ind[3]];
-    baby.hig5_dm()   = fabs(hig1.mass() - hig2.mass());
-    baby.hig5_am()   = (hig1.mass() + hig2.mass())/2.;
-    baby.hig5_drmax() = max(deltaR(all_baby_jets[hi_csv[hig_ind[0]]], all_baby_jets[hi_csv[hig_ind[1]]]),
-                            deltaR(all_baby_jets[hi_csv[hig_ind[2]]], all_baby_jets[hi_csv[hig_ind[3]]]));
-
-
   } // if njets >= 4
   else if (hi_csv[1]>=0){ // Checking that at least 2 jets exist (important for WH analysis)
     LVector pb1 = all_baby_jets[hi_csv[0]], pb2 = all_baby_jets[hi_csv[1]];
@@ -807,59 +713,46 @@ vector<LVector> bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
     baby.mct() = sqrt(2*pb1.pt()*pb2.pt() * (1+cos(deltaPhi(pb1.phi(), pb2.phi()))) );
   }
 
-  return clean_jets;
+  return all_baby_jets;
 } // writeJets
 
 void bmaker_full::writeFatJets(){
-  //pass instead of baby.jets_is_lep() if leptons should be clustered in MJ
+  vector<float> fdummy;
+  vector<int> idummy;
+  int intdummy;
   bool cluster_leps = false;
-  jetTool->clusterFatJets(baby.nfjets_nolep(), baby.mj14_nolep(),
-                          baby.fjets_nolep_pt(), baby.fjets_nolep_eta(),
-                          baby.fjets_nolep_phi(), baby.fjets_nolep_m(),
-                          baby.fjets_nolep_nconst(),
-                          baby.fjets_nolep_sumcsv(), baby.fjets_nolep_poscsv(),
-                          baby.fjets_nolep_btags(), baby.jets_fjet_nolep_index(),
+  jetTool->clusterFatJets(intdummy, baby.mj14_nolep(), fdummy, fdummy, fdummy, 
+                          fdummy, idummy, baby.jets_fjet14_nolep_index(),
                           baby, 1.4, jetTool->JetPtCut, cluster_leps);
 
   cluster_leps = true;
-  jetTool->clusterFatJets(baby.nfjets08(), baby.mj08(),
-                          baby.fjets08_pt(), baby.fjets08_eta(),
-                          baby.fjets08_phi(), baby.fjets08_m(),
-                          baby.fjets08_nconst(),
-                          baby.fjets08_sumcsv(), baby.fjets08_poscsv(),
-                          baby.fjets08_btags(), baby.jets_fjet08_index(),
+  fdummy.clear(); idummy.clear();
+  jetTool->clusterFatJets(intdummy, baby.mj08(), fdummy, fdummy, fdummy, 
+                          fdummy, idummy, baby.jets_fjet08_index(),
                           baby, 0.8, jetTool->JetPtCut, cluster_leps);
 
-  jetTool->clusterFatJets(baby.nfjets12(), baby.mj12(),
-                          baby.fjets12_pt(), baby.fjets12_eta(),
-                          baby.fjets12_phi(), baby.fjets12_m(),
-                          baby.fjets12_nconst(),
-                          baby.fjets12_sumcsv(), baby.fjets12_poscsv(),
-                          baby.fjets12_btags(), baby.jets_fjet12_index(),
+  fdummy.clear(); idummy.clear();
+  jetTool->clusterFatJets(intdummy, baby.mj12(), fdummy, fdummy, fdummy, 
+                          fdummy, idummy, baby.jets_fjet12_index(),
                           baby, 1.2, jetTool->JetPtCut, cluster_leps);
 
+  fdummy.clear(); idummy.clear();
   jetTool->clusterFatJets(baby.nfjets14(), baby.mj14(),
                           baby.fjets14_pt(), baby.fjets14_eta(),
                           baby.fjets14_phi(), baby.fjets14_m(),
-                          baby.fjets14_nconst(),
-                          baby.fjets14_sumcsv(), baby.fjets14_poscsv(),
-                          baby.fjets14_btags(), baby.jets_fjet14_index(),
+                          baby.fjets14_nconst(), baby.jets_fjet14_index(),
                           baby, 1.4, jetTool->JetPtCut, cluster_leps);
 
+  fdummy.clear(); idummy.clear();
   jetTool->clusterFatJets(baby.nfjets40(), baby.mj40(),
                           baby.fjets40_pt(), baby.fjets40_eta(),
                           baby.fjets40_phi(), baby.fjets40_m(),
-                          baby.fjets40_nconst(),
-                          baby.fjets40_sumcsv(), baby.fjets40_poscsv(),
-                          baby.fjets40_btags(), baby.jets_fjet40_index(),
+                          baby.fjets40_nconst(), baby.jets_fjet40_index(),
                           baby, 1.4, 40., cluster_leps);
 
-  jetTool->clusterFatJets(baby.nfjets50(), baby.mj50(),
-                          baby.fjets50_pt(), baby.fjets50_eta(),
-                          baby.fjets50_phi(), baby.fjets50_m(),
-                          baby.fjets50_nconst(),
-                          baby.fjets50_sumcsv(), baby.fjets50_poscsv(),
-                          baby.fjets50_btags(), baby.jets_fjet50_index(),
+  fdummy.clear(); idummy.clear();
+  jetTool->clusterFatJets(intdummy, baby.mj50(), fdummy, fdummy, fdummy, 
+                          fdummy, idummy, baby.jets_fjet50_index(),
                           baby, 1.4, 50., cluster_leps);
 }
 
@@ -1395,10 +1288,12 @@ void bmaker_full::writeGenInfo(edm::Handle<LHEEventProduct> lhe_info){
 } // writeGenInfo
 
 void bmaker_full::writeIFSR(edm::Handle<reco::GenParticleCollection> genParticles, 
-                            vector<reco::Candidate::LorentzVector> &clean_jets){
+                            vector<reco::Candidate::LorentzVector> &all_baby_jets){
   bool verbose = false;
+  baby.jets_isisr().resize(all_baby_jets.size(), false);
   int nisr(0);
-  for (size_t ijet(0); ijet<clean_jets.size(); ijet++){
+  for (size_t ijet(0); ijet<all_baby_jets.size(); ijet++){
+    if (baby.jets_islep()[ijet] || all_baby_jets[ijet].pt()<=jetTool->JetPtCut) continue;
 
     bool matched=false;
     for (size_t imc(0); imc < genParticles->size(); imc++) {
@@ -1409,9 +1304,9 @@ void bmaker_full::writeIFSR(edm::Handle<reco::GenParticleCollection> genParticle
       if(!(momid==6 || momid==23 || momid==24 || momid==25 || momid>1e6)) continue; 
       //check against daughter in case of hard initial splitting
       for (size_t idau(0); idau < mc.numberOfDaughters(); idau++) {
-        float dR = deltaR(clean_jets[ijet], mc.daughter(idau)->p4());
+        float dR = deltaR(all_baby_jets[ijet], mc.daughter(idau)->p4());
         if(dR<0.3){
-          if (verbose) cout<<"Jet: ("<<clean_jets[ijet].pt()<<", "<<clean_jets[ijet].eta()<<", "<<clean_jets[ijet].phi()
+          if (verbose) cout<<"Jet: ("<<all_baby_jets[ijet].pt()<<", "<<all_baby_jets[ijet].eta()<<", "<<all_baby_jets[ijet].phi()
             <<"), MC: ("<<mc.daughter(idau)->pt()<<", "<<mc.daughter(idau)->eta()<<", "<<mc.daughter(idau)->phi()<<"), ID "<<mc.daughter(idau)->pdgId()<<". dR "<<dR <<endl;
             matched = true;
             break;
@@ -1420,6 +1315,7 @@ void bmaker_full::writeIFSR(edm::Handle<reco::GenParticleCollection> genParticle
     } // Loop over MC particles
     if(!matched) {
       nisr++;
+      baby.jets_isisr()[ijet] = true;
     }
   } // Loop over jets
   baby.nisr() = nisr;
@@ -1642,14 +1538,6 @@ void bmaker_full::writeMC(edm::Handle<reco::GenParticleCollection> genParticles,
   baby.isr_tru_eta() = isr_p4.eta();
   baby.isr_tru_phi() = isr_p4.phi();
 
-  vector<float> isr_sys;
-  if(outname.Contains("SMS") || outname.Contains("RPV")){
-    isr_sys.push_back(1. + weightTool->isrWeight(baby.isr_tru_pt()));
-    isr_sys.push_back(1. - weightTool->isrWeight(baby.isr_tru_pt()));
-  }
-  else{ isr_sys.push_back(1.); isr_sys.push_back(1.);}
-  baby.sys_isr()=isr_sys;
-
   if((outname.Contains("TTJets") || outname.Contains("TT_")) && top_pt.size() == 2) baby.w_toppt() = weightTool->topPtWeight(top_pt.at(0),top_pt.at(1));
   else baby.w_toppt() = 1.;
 
@@ -1732,27 +1620,27 @@ void bmaker_full::writeWeights(const vCands &sig_leps, edm::Handle<GenEventInfoP
   // Pile-up weight
   baby.w_pu() = weightTool->pileupWeight(baby.ntrupv_mean(),0);
   baby.sys_pu().resize(2, 1.);
-  baby.sys_pu()[0] = weightTool->pileupWeight(baby.ntrupv_mean(), 1)/baby.w_pu();
-  baby.sys_pu()[1] = weightTool->pileupWeight(baby.ntrupv_mean(), -1)/baby.w_pu();
+  baby.sys_pu()[0] = weightTool->pileupWeight(baby.ntrupv_mean(), 1);
+  baby.sys_pu()[1] = weightTool->pileupWeight(baby.ntrupv_mean(), -1);
 
   // Lepton SFs
   pair<double, double> sf_err = lepTool->getScaleFactor(sig_leps);
   double sf  = sf_err.first;
-  double unc = sf_err.second/sf_err.first;
+  double unc = sf_err.second;
   baby.w_lep() = sf;
   baby.sys_lep().resize(2, 1.);
-  baby.sys_lep().at(0) = 1.+unc;
-  baby.sys_lep().at(1) = 1.-unc; 
+  baby.sys_lep().at(0) = sf+unc;
+  baby.sys_lep().at(1) = sf-unc; 
 
   // Lepton SFs in FastSim
   baby.sys_fs_lep().resize(2, 1.);
   if(isFastSim){ 
     pair<double, double> sf_err_fs = lepTool->getScaleFactorFs(sig_leps);
     double sf_fs  = sf_err_fs.first;
-    double unc_fs = sf_err_fs.second/sf_err_fs.first;
+    double unc_fs = sf_err_fs.second;
     baby.w_fs_lep() = sf_fs;
-    baby.sys_fs_lep()[0] = 1.+unc_fs;
-    baby.sys_fs_lep()[1] = 1.-unc_fs; 
+    baby.sys_fs_lep()[0] = sf_fs+unc_fs;
+    baby.sys_fs_lep()[1] = sf_fs-unc_fs; 
   } else baby.w_fs_lep() = 1.;
 
   // VVVL trigger efficiency
@@ -1764,9 +1652,9 @@ void bmaker_full::writeWeights(const vCands &sig_leps, edm::Handle<GenEventInfoP
   ////////////  Total weight  ////////////
   // w_btag calculated in writeJets
   // w_toppt and sys_isr calculated in writeMC
-  baby.weight() = baby.w_lumi() * baby.w_lep() * baby.w_fs_lep() * baby.w_toppt() * baby.w_btag() 
+  baby.weight() = baby.w_lumi() * baby.w_lep() * baby.w_fs_lep() * baby.w_btag() 
     * baby.eff_jetid();
-  baby.weight_rpv() = baby.w_lumi() * baby.w_lep() * baby.w_fs_lep() * baby.w_toppt() * baby.w_btag()
+  baby.weight_rpv() = baby.w_lumi() * baby.w_lep() * baby.w_fs_lep() * baby.w_btag()
     * baby.w_pu() * baby.eff_jetid();
 
   /////// Systematics that do not change central value /////////
@@ -1781,16 +1669,20 @@ void bmaker_full::writeWeights(const vCands &sig_leps, edm::Handle<GenEventInfoP
 
   baby.w_isr() = 1.; baby.sys_isr().resize(2,1.);
   if (baby.type()/1000==1){
-    if      (baby.nisr()==0) baby.w_isr() = 1.099; 
-    else if (baby.nisr()==1) baby.w_isr() = 0.969; 
-    else if (baby.nisr()==2) baby.w_isr() = 0.870; 
-    else if (baby.nisr()==3) baby.w_isr() = 0.772; 
-    else if (baby.nisr()==4) baby.w_isr() = 0.712; 
-    else if (baby.nisr()==5) baby.w_isr() = 0.661; 
-    else if (baby.nisr()>=6) baby.w_isr() = 0.566; 
-    //assign relative unc of 50% 
-    baby.sys_isr()[0] = 1.5; 
-    baby.sys_isr()[1] = 0.5; 
+    const float isr_norm_tt = 1.117;
+    float isr_wgt = -999.;
+    if (baby.nisr()==0)      isr_wgt = 1.; 
+    else if (baby.nisr()==1) isr_wgt = 0.882; 
+    else if (baby.nisr()==2) isr_wgt = 0.792; 
+    else if (baby.nisr()==3) isr_wgt = 0.702; 
+    else if (baby.nisr()==4) isr_wgt = 0.648; 
+    else if (baby.nisr()==5) isr_wgt = 0.601; 
+    else if (baby.nisr()>=6) isr_wgt = 0.515; 
+    baby.w_isr() = isr_wgt*isr_norm_tt;
+    //assign relative unc = 50% of the deviation from flat
+    float absolute_unc = (1-isr_wgt)/2.;
+    baby.sys_isr()[0] = isr_norm_tt*(isr_wgt+absolute_unc); 
+    baby.sys_isr()[1] = isr_norm_tt*(isr_wgt-absolute_unc); 
   }
 }
 

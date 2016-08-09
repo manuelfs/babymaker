@@ -1,3 +1,4 @@
+
 ##################   Provenance   #############
 int run
 int lumiblock
@@ -64,9 +65,6 @@ int   hig_bin
 float hig_dm
 float hig_am
 float hig_drmax
-float hig5_dm
-float hig5_am
-float hig5_drmax
 float hig_dphi
 float hig1_pt
 float hig1_eta
@@ -88,7 +86,6 @@ int nbm20
 int nbm40
 int nbm50
 int nbt
-bool low_dphi20
 
 int njets_ra2
 int njets_clean
@@ -114,7 +111,8 @@ std::vector<float> jets_m
 std::vector<float> jets_csv
 std::vector<float> jets_pt_res
 std::vector<bool>  jets_islep
-std::vector<int>   jets_fjet_nolep_index
+std::vector<bool>  jets_isisr
+std::vector<int>   jets_fjet14_nolep_index
 std::vector<int>   jets_fjet08_index
 std::vector<int>   jets_fjet12_index
 std::vector<int>   jets_fjet14_index
@@ -232,46 +230,6 @@ float mumuv_eta
 float mumuv_phi
 float mumuv_w
 
-##################   Di-jets   ###################
-
-std::vector<float> dr_bb
-
-##################   Di-objects   ################
-
-float dr_bb_2
-float dr_bb_max
-float dr_bb_min
-float dphi_bb_2
-float dphi_bb_max
-float dphi_bb_min
-float m_bb_2
-float m_bb_max
-float m_bb_min
-
-float dr_bl_min
-float dr_bl_max
-float dr_bl_min2
-float dr_bl_max2
-float dphi_bl_min
-float dphi_bl_max
-float dphi_bl_min2
-float dphi_bl_max2
-float m_bl_min
-float m_bl_max
-float m_bl_min2
-float m_bl_max2
-
-float dphi_bmet_min
-float dphi_bmet_max
-float dphi_bmet_min2
-float dphi_bmet_max2
-float mt_bmet_min
-float mt_bmet_max
-float mt_bmet_min2
-float mt_bmet_max2
-
-float dphi_lmet
-
 ##################   Photons   ###################
 int nph
 std::vector<float> ph_pt
@@ -350,38 +308,9 @@ bool pass_ra2_badmu;
 
 ################  Fat Jets   ##################
 
-int nfjets_nolep
 float mj14_nolep
-std::vector<float> fjets_nolep_pt
-std::vector<float> fjets_nolep_eta
-std::vector<float> fjets_nolep_phi
-std::vector<float> fjets_nolep_m
-std::vector<float> fjets_nolep_sumcsv
-std::vector<float> fjets_nolep_poscsv
-std::vector<int> fjets_nolep_btags
-std::vector<int> fjets_nolep_nconst
-
-int nfjets08
 float mj08
-std::vector<float> fjets08_pt
-std::vector<float> fjets08_eta
-std::vector<float> fjets08_phi
-std::vector<float> fjets08_m
-std::vector<float> fjets08_sumcsv
-std::vector<float> fjets08_poscsv
-std::vector<int> fjets08_btags
-std::vector<int> fjets08_nconst
-
-int nfjets12
 float mj12
-std::vector<float> fjets12_pt
-std::vector<float> fjets12_eta
-std::vector<float> fjets12_phi
-std::vector<float> fjets12_m
-std::vector<float> fjets12_sumcsv
-std::vector<float> fjets12_poscsv
-std::vector<int> fjets12_btags
-std::vector<int> fjets12_nconst
 
 int nfjets14
 float mj14
@@ -389,9 +318,6 @@ std::vector<float> fjets14_pt
 std::vector<float> fjets14_eta
 std::vector<float> fjets14_phi
 std::vector<float> fjets14_m
-std::vector<float> fjets14_sumcsv
-std::vector<float> fjets14_poscsv
-std::vector<int> fjets14_btags
 std::vector<int> fjets14_nconst
 
 int nfjets40
@@ -400,21 +326,9 @@ std::vector<float> fjets40_pt
 std::vector<float> fjets40_eta
 std::vector<float> fjets40_phi
 std::vector<float> fjets40_m
-std::vector<float> fjets40_sumcsv
-std::vector<float> fjets40_poscsv
-std::vector<int> fjets40_btags
 std::vector<int> fjets40_nconst
 
-int nfjets50
 float mj50
-std::vector<float> fjets50_pt
-std::vector<float> fjets50_eta
-std::vector<float> fjets50_phi
-std::vector<float> fjets50_m
-std::vector<float> fjets50_sumcsv
-std::vector<float> fjets50_poscsv
-std::vector<int> fjets50_btags
-std::vector<int> fjets50_nconst
 
 ################  Truth   ##################
 int nisr_me

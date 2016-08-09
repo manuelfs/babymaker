@@ -2,6 +2,7 @@
 
 import glob
 import string
+import os
 
 ## Finding basename for each dataset
 def findBaseSampleNames(folder):
@@ -23,3 +24,13 @@ def findBaseSampleNames(folder):
     sortedfiles = sorted(sortedfiles)
 
     return sortedfiles
+
+def fullPath(path):
+    return os.path.realpath(os.path.abspath(os.path.expanduser(path)))
+
+def ensureDir(path):
+    try:
+        os.makedirs(path)
+    except OSError:
+        if not os.path.isdir(path):
+            raise

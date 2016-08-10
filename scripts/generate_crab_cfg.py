@@ -207,7 +207,8 @@ for ilist in datasets:
   print "new list"
   for ids in ilist:
     print "ids is "+ids
-    nevents += getNumberOfEvents(ids)
+    #nevents += getNumberOfEvents(ids) # Not working currently
+    nevents += 1000000 ## Only needed to get w_lumi right on the first go, will fix at renormalization
     #print "running nevents is "+str(nevents)
 
   for ids in ilist:

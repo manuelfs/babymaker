@@ -104,6 +104,24 @@ namespace xsec{
     if(file.Contains("QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8")) xsec = 121.5;
     if(file.Contains("QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8"))  xsec = 25.42;
 
+    if(file.Contains("QCD_bEnriched_HT100to200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8")) xsec = 1321000;
+    if(file.Contains("QCD_bEnriched_HT200to300_TuneCUETP8M1_13TeV-madgraphMLM-pythia8"))   xsec = 87950;
+    if(file.Contains("QCD_bEnriched_HT300to500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8"))   xsec = 17570;
+    if(file.Contains("QCD_bEnriched_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8"))   xsec = 1512;
+    if(file.Contains("QCD_bEnriched_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8"))  xsec = 320;
+    if(file.Contains("QCD_bEnriched_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8")) xsec = 50.26;
+    if(file.Contains("QCD_bEnriched_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8")) xsec = 4.41;
+    if(file.Contains("QCD_bEnriched_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8"))  xsec = 0.78;
+
+    if(file.Contains("QCD_HT100to200_BGenFilter_TuneCUETP8M1_13TeV-madgraphMLM-pythia8")) xsec = 1899000;
+    if(file.Contains("QCD_HT200to300_BGenFilter_TuneCUETP8M1_13TeV-madgraphMLM-pythia8"))   xsec = 156500;
+    if(file.Contains("QCD_HT300to500_BGenFilter_TuneCUETP8M1_13TeV-madgraphMLM-pythia8"))   xsec = 38970;
+    if(file.Contains("QCD_HT500to700_BGenFilter_TuneCUETP8M1_13TeV-madgraphMLM-pythia8"))   xsec = 4150;
+    if(file.Contains("QCD_HT700to1000_BGenFilter_TuneCUETP8M1_13TeV-madgraphMLM-pythia8"))  xsec = 1000;
+    if(file.Contains("QCD_HT1000to1500_BGenFilter_TuneCUETP8M1_13TeV-madgraphMLM-pythia8")) xsec = 184.4;
+    if(file.Contains("QCD_HT1500to2000_BGenFilter_TuneCUETP8M1_13TeV-madgraphMLM-pythia8")) xsec = 21.31;
+    if(file.Contains("QCD_HT2000toInf_BGenFilter_TuneCUETP8M1_13TeV-madgraphMLM-pythia8"))  xsec = 4.16;
+
     if(file.Contains("QCD_Pt-1800_")) xsec = 0.1091;
 
     // only thing that changed for Spring 15 is "QCD_Pt-" --> "QCD_Pt_"
@@ -143,12 +161,20 @@ namespace xsec{
     if(file.Contains("DYJetsToLL_M-50_HT-100to200"))    xsec = 139.4*1.23;
     if(file.Contains("DYJetsToLL_M-50_HT-200to400"))    xsec = 42.75*1.23;
     if(file.Contains("DYJetsToLL_M-50_HT-400to600"))    xsec = 5.497*1.23;
+    if(file.Contains("DYJetsToLL_M-50_HT-600to800"))    xsec = 1.363*1.23;
+    if(file.Contains("DYJetsToLL_M-50_HT-800to1200"))    xsec = 0.6759*1.23;
+    if(file.Contains("DYJetsToLL_M-50_HT-1200to2500"))    xsec = 0.116*1.23;
+    if(file.Contains("DYJetsToLL_M-50_HT-2500toInf"))    xsec = 0.002592*1.23;
     if(file.Contains("DYJetsToLL_M-50_HT-600toInf"))    xsec = 2.21*1.23;
 
     if(file.Contains("ZJetsToNuNu_HT-100To200_"))  xsec = 280.35*1.27;
     if(file.Contains("ZJetsToNuNu_HT-200To400_"))  xsec = 77.67*1.27;
     if(file.Contains("ZJetsToNuNu_HT-400To600_"))  xsec = 10.73*1.27;
-    if(file.Contains("ZJetsToNuNu_HT-600ToInf_"))  xsec = 4.116*1.27;
+    if(file.Contains("ZJetsToNuNu_HT-600To800_"))  xsec = 2.536*1.27;
+    if(file.Contains("ZJetsToNuNu_HT-800To1200_"))  xsec = 1.161*1.27;
+    if(file.Contains("ZJetsToNuNu_HT-1200To2500_"))  xsec = 0.2824*1.27;
+    if(file.Contains("ZJetsToNuNu_HT-2500ToInf_"))  xsec = 0.006459*1.27;
+    if(file.Contains("ZJetsToNuNu_HT-600ToInf_"))  xsec = 3.986*1.27;
 
     if(file.Contains("TTZJets_Tune4C_13TeV-madgraph-tauola"))    xsec = 0.7598;
     if(file.Contains("TTWJets_Tune4C_13TeV-madgraph-tauola"))    xsec = 0.5662;

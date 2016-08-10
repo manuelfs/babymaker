@@ -49,11 +49,13 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   // We are applying the golden JSON with lumisToProcess in bmaker_full_cfg.py
   if(isData){
     if (debug) cout<<"INFO: Checking JSON..."<<endl;
-    baby.nonblind() = eventTool->isInJSON("nonblind", baby.run(), baby.lumiblock());
-    baby.json2p6() = eventTool->isInJSON("json2p6", baby.run(), baby.lumiblock());
+    baby.nonblind() = baby.run() <= 274240;
+    baby.json2p6()  = baby.run() <= 274443;
+    baby.json4p0()  = baby.run() <= 275125;
+    baby.json7p65()  = baby.run() <= 276097;
+    baby.json12p9() = baby.run() <= 276811;
   } else {
-    baby.nonblind() = true;
-    baby.json2p6() = true;
+    baby.nonblind() = baby.json2p6() = baby.json4p0() = baby.json7p65() = baby.json12p9() = true;
   }
   baby.type() = event_tools::type(outname.Data());
 

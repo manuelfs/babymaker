@@ -1,6 +1,7 @@
 drop *
 keep ht
 keep st
+keep htx
 keep met
 keep nleps
 keep nveto

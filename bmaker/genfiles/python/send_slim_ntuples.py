@@ -12,7 +12,7 @@ def sendSlimJob(skim, slim, overwrite):
     mc_dir = os.path.dirname(skim)
     skim_name = os.path.basename(skim)
     slim_name = os.path.splitext(os.path.basename(slim))[0]
-    out_dir = os.path.join(mc_dir, "slim_"+slim_name+"_"+skim_name)
+    out_dir = os.path.join(mc_dir, "slim_"+slim_name+"_"+skim_name).replace("_skim_","")
     run_dir = os.path.join(out_dir, "run")
     python_dir = utilities.fullPath(os.path.dirname(__file__))
 
@@ -22,17 +22,20 @@ def sendSlimJob(skim, slim, overwrite):
     total_jobs = 0
     for tag in tags:
         in_files = os.path.join(skim,"*"+tag+"*.root")
-        out_file = os.path.join(out_dir,"slim_"+tag+"_nfiles_"+str(len(glob.glob(in_files)))+".root")
+        out_file = os.path.join(out_dir,"slimbaby_"+tag+"_nfiles_"+str(len(glob.glob(in_files)))+".root")
         if os.path.exists(out_file) and not overwrite:
             print("Keeping pre-existing "+out_file)
             continue
         f_name = os.path.join(run_dir,"slim_"+tag+".py")
         with open(f_name,"w") as f:
             f.write("#! /usr/bin/env python\n")
-            f.write("import sys\n")
-            f.write("sys.path.append(\""+python_dir+"\")\n")
-            f.write("import slim_ntuple\n")
-            f.write("slim_ntuple.slimNtuple(\""+slim+"\",\""+out_file+"\",[\""+in_files+"\"],"+str(not overwrite)+",False)\n")
+            if os.path.exists(out_file) and not overwrite:
+                f.write("print \"Keeping pre-existing "+out_file+"\"\n")
+            else:
+                f.write("import sys\n")
+                f.write("sys.path.append(\""+python_dir+"\")\n")
+                f.write("import slim_ntuple\n")
+                f.write("slim_ntuple.slimNtuple(\""+slim+"\",\""+out_file+"\",[\""+in_files+"\"],"+str(not overwrite)+",False)\n")
             os.fchmod(f.fileno(), 0755)
         subprocess.call(["JobSubmit.csh","run/wrapper.sh",f_name])
         total_jobs += 1

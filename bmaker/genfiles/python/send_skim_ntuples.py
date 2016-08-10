@@ -55,10 +55,13 @@ def sendSkimJob(in_files, out_files, cut, overwrite, exe_name):
 
         f.write("scratch = utilities.fullPath(os.path.join(\"/scratch\",getpass.getuser()))\n")
         for in_file, out_file in itertools.izip(in_files, out_files):
-            f.write("with tempfile.NamedTemporaryFile(dir=scratch,prefix=\"tmp_babymaker_skim_\",suffix=\".root\") as f:\n")
-            f.write("    print \"Copying "+in_file+" to \"+str(f.name)\n")
-            f.write("    shutil.copyfile(\""+in_file+"\",f.name)\n")
-            f.write("    skim_ntuple.skimFiles([f.name],\""+out_file+"\",\""+cut+"\","+str(not overwrite)+")\n\n")
+            if os.path.exists(out_file) and not overwrite:
+                f.write("print \"Keeping pre-existing "+out_file+"\"\n")
+            else:
+                f.write("with tempfile.NamedTemporaryFile(dir=scratch,prefix=\"tmp_babymaker_skim_\",suffix=\".root\") as f:\n")
+                f.write("    print \"Copying "+in_file+" to \"+str(f.name)\n")
+                f.write("    shutil.copyfile(\""+in_file+"\",f.name)\n")
+                f.write("    skim_ntuple.skimFiles([f.name],\""+out_file+"\",\""+cut+"\","+str(not overwrite)+")\n\n")
         os.fchmod(f.fileno(), 0755)
     subprocess.call(["JobSubmit.csh","run/wrapper.sh",run_file])
 

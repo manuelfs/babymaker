@@ -198,7 +198,7 @@ int event_tools::type(const string &name){
   }else if(contains(name, "TTTT")){ sample = 11;
     if(contains(name, "TTTT_Tune")){ category = 0; bin = 0;
     }
-  }else if(contains(name, "WH_") && !contains(name, "SMS")){ sample = 12;
+  }else if(contains(name, "WH_")){ sample = 12;
     if(contains(name, "WH_HToBB_WToLNu")){ category = 0; bin = 0;
     }
   }else if(contains(name, "ZH_")){ sample = 13;
@@ -224,7 +224,6 @@ int event_tools::type(const string &name){
   }else if(contains(name, "T1qqqq")){ sample = 104; category = 0; bin = 0;
   }else if(contains(name, "RPV")){ sample = 105; category = 0; bin = 0;
   }else if(contains(name, "TChiHH")){ sample = 106; category = 0; bin = 0;
-  }else if(contains(name, "TChiWH")){ sample = 107; category = 0; bin = 0;
   }
 
   if(sample < 0 || category < 0 || bin < 0
@@ -235,16 +234,14 @@ int event_tools::type(const string &name){
     return code;
   }else{
     int code = 1000*sample+100*category+bin;
-    if(code < 0 || code > 107000){
+    if(code < 0 || code > 106000){
       DBG("Type code out of range for " << name << ": sample=" << sample << ", category=" << category << ", bin=" << bin);
     }
     return code;
   }
 }
 
-event_tools::event_tools(TString outname):
-  VRunLumi2015nonblind(MakeVRunLumi("nonblind")),
-  VRunLumi2016json2p6(MakeVRunLumi("json2p6")){
+event_tools::event_tools(TString outname){
 
   doBeamHalo = outname.Contains("Run2015");
   if(doBeamHalo) { 

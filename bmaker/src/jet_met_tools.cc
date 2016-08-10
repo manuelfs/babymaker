@@ -743,7 +743,7 @@ void jet_met_tools::clusterFatJets(int &nfjets, float &mj,
     ++nfjets;
     for(size_t ijet = 0; ijet < baby.jets_pt().size(); ++ijet){
       for(size_t cjet = 0; cjet < cjets.size(); ++ cjet){
-        if(cjets.at(cjet).pt() - baby.jets_pt()[ijet] < 0.0001){
+        if(fabs(cjets.at(cjet).pt() - baby.jets_pt()[ijet]) < 0.0001){
           jets_fjet_index.at(ijet) = ipj;
         }
       } // Loop over fat jet constituents

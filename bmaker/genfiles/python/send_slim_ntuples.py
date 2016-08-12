@@ -7,12 +7,13 @@ import glob
 import os
 import subprocess 
 import utilities
+import shutil
 
 def sendSlimJob(skim, slim, overwrite):
     mc_dir = os.path.dirname(skim)
     skim_name = os.path.basename(skim)
     slim_name = os.path.splitext(os.path.basename(slim))[0]
-    out_dir = os.path.join(mc_dir, "slim_"+slim_name+"_"+skim_name).replace("_skim_","")
+    out_dir = os.path.join(mc_dir, "slim_"+slim_name+"_"+skim_name).replace("_skim_","_")
     run_dir = os.path.join(out_dir, "run")
     python_dir = utilities.fullPath(os.path.dirname(__file__))
 
@@ -26,18 +27,8 @@ def sendSlimJob(skim, slim, overwrite):
         if os.path.exists(out_file) and not overwrite:
             print("Keeping pre-existing "+out_file)
             continue
-        f_name = os.path.join(run_dir,"slim_"+tag+".py")
-        with open(f_name,"w") as f:
-            f.write("#! /usr/bin/env python\n")
-            if os.path.exists(out_file) and not overwrite:
-                f.write("print \"Keeping pre-existing "+out_file+"\"\n")
-            else:
-                f.write("import sys\n")
-                f.write("sys.path.append(\""+python_dir+"\")\n")
-                f.write("import slim_ntuple\n")
-                f.write("slim_ntuple.slimNtuple(\""+slim+"\",\""+out_file+"\",[\""+in_files+"\"],"+str(not overwrite)+",False)\n")
-            os.fchmod(f.fileno(), 0755)
-        subprocess.call(["JobSubmit.csh","run/wrapper.sh",f_name])
+        subprocess.call(['JobSubmit.csh','python/cache.py','-c',out_file,
+                         '-e','python/slim_ntuple.py',' --keep_existing','txt/slim_rules/minimal.txt',out_file,in_files])
         total_jobs += 1
 
     return total_jobs

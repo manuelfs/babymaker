@@ -9,15 +9,12 @@ import os
 
 import ROOT
 
-def ePrint(*args, **kwargs):
-    print(*args, file=sys.stderr, **kwargs)
-
 def getRules(slim_file_name):
     rules = [ line.rstrip('\n').split() for line in open(slim_file_name) ]
     good_rules = [ rule for rule in rules if len(rule)==2 and (rule[0]=="keep" or rule[0]=="drop") ]
     bad_rules = [ rule for rule in rules if rule not in good_rules ]
     for rule in bad_rules:
-        ePrint("Invalid rule:",rule)
+        utilities.ePrint("Invalid rule:",rule,"\n")
     return good_rules
 
 def passRules(branch, rules):
@@ -25,12 +22,12 @@ def passRules(branch, rules):
     return len(matched_rules)==0 or matched_rules[-1][0] == "keep"
 
 def slimNtuple(slim_file_name, output_file_name, input_file_names, keep_existing, test_mode):
-    print("     INPUT FILES:",input_file_names)
-    print("     OUTPUT FILE:",output_file_name)
-    print("      RULES FILE:",slim_file_name)
+    print("     INPUT FILES:",input_file_names,"\n")
+    print("     OUTPUT FILE:",output_file_name,"\n")
+    print("      RULES FILE:",slim_file_name,"\n")
 
     if keep_existing and os.path.exists(output_file_name):
-        print("Keeping pre-existing "+output_file_name)
+        print("Keeping pre-existing "+output_file_name+"\n")
         return
 
     in_tree = ROOT.TChain("tree", "tree")
@@ -46,8 +43,8 @@ def slimNtuple(slim_file_name, output_file_name, input_file_names, keep_existing
     dropped_branches = [ branch for branch in branch_names if branch not in kept_branches ]
     dropped_branches.sort()
 
-    print("DROPPED BRANCHES:",dropped_branches)
-    print("   KEPT BRANCHES:",kept_branches)
+    print("DROPPED BRANCHES:",dropped_branches,"\n")
+    print("   KEPT BRANCHES:",kept_branches,"\n")
     if test_mode: return
 
     for branch in branch_names:

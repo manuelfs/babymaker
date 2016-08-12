@@ -28,7 +28,6 @@ The `compile.sh` script first compiles the `babymaker/bmaker/genfiles` folder, w
 automatically generates the tree structure (see below), and then issues `scram b`
 in the `babymaker` folder. 
 
-
 #### Adding new branches
 
 To add new branches to the tree, you first create the new branch in
@@ -76,6 +75,10 @@ Then, add the datasets you want to run over in the wishlist of `scripts/sub_cond
 `babymaker` folder with
 
     ./scripts/sub_cond.py
+
+#### Post-processing of produced babies
+
+See [bmaker/genfiles/README.md](bmaker/genfiles/README.md) for detailed instructions.
 
 #### Conventions in babymaker
 

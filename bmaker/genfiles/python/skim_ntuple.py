@@ -60,12 +60,12 @@ def skimFiles(in_files, out_file, cut, keep_existing):
 
     cut = expandCut(cut)
 
-    print("INPUT FILES:",in_files)
-    print("OUTPUT FILE:",out_file)
-    print("        CUT:",cut)
+    print("INPUT FILES:",in_files,"\n")
+    print("OUTPUT FILE:",out_file,"\n")
+    print("        CUT:",cut,"\n")
 
     if keep_existing and os.path.exists(out_file):
-        print("Keeping pre-existing "+out_file)
+        print("Keeping pre-existing "+out_file+"\n")
         return
 
     in_treeglobal = ROOT.TChain("treeglobal", "treeglobal")

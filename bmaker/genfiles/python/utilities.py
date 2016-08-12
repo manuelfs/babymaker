@@ -1,8 +1,11 @@
 #!/usr/bin/env python
 
+from __future__ import print_function
+
 import glob
 import string
 import os
+import sys
 
 ## Finding basename for each dataset
 def findBaseSampleNames(folder):
@@ -34,3 +37,6 @@ def ensureDir(path):
     except OSError:
         if not os.path.isdir(path):
             raise
+
+def ePrint(*args, **kwargs):
+    print(*args, file=sys.stderr, **kwargs)

@@ -1,5 +1,11 @@
 // Brief descriptions of the various baby productions
 
+2016_08_10: (Operation Capybara)
+-- 17.1 ifb of Data, all 80X MC, plus T1ttt and TChiWH
+-- Updated with ICHEP recommendations for btag/lepton SFs, PU, ISR, new triggers, JECs
+-- Slimmed babies by 25% not saving fjets for unimportant MJs and w_pdf
+-- Added mj14_nolep and 40/50 GeV variable for PU robustness
+
 2016_07_18 (ISR study): 
 -- TTJets (only 1l and 2l extensions), plus T1tttt, T1qqqq, T2tt benchmark points
 -- Added branch "nisr" with the number of ISR jets to apply the ISR reweighting
@@ -12,7 +18,7 @@
 -- 2.6 ifb of data
 -- 80X T1tttt signal scan
 
-2016_06_14 (Operation Chincilla, FULL STATUS REPORT, AN)
+2016_06_14 (Operation Chinchilla, FULL STATUS REPORT, AN)
 -- (Almost) all MC in 80X
 -- 2.1 ifb of data
 -- To use only 815 ipb, require nonblind=true

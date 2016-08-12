@@ -33,11 +33,19 @@ oldfolder    = '/net/cms27/cms27r0/babymaker/2016_04_29/mc/merged_met100nb2nj4nl
 oldfolder    = '/net/cms2/cms2r0/babymaker/babies/2015_11_28/mc/skim_1lht500met200'
 newfolder    = '/net/cms27/cms27r0/babymaker/2016_04_29/mc/merged_1lht500met200'
 
+oldfolder    = '/net/cms2/cms2r0/babymaker/babies/2016_04_29/mc/unskimmed/'
+newfolder    = '/net/cms2/cms2r0/babymaker/babies/2016_08_10/mc/unskimmed/manuelf/'
+
+oweight = "weight/w_toppt/eff_trig"
+nweight = "weight/w_isr/w_pu"
+
 ## Finding tags for each dataset
 sortedfiles = findBaseSampleNames(newfolder)
 
 print '\nOLD FOLDER: '+oldfolder
 print 'NEW FOLDER: '+newfolder
+print 'OLD WEIGHT "'+oweight+'"  - NEW WEIGHT "'+nweight
+
 print '\n{:>40}'.format(' Ntuple name          ')+'{:>16}'.format('Difference')+'{:>17}'.format('Old yield'),
 print '{:>17}'.format('New yield')+'{:>17}'.format('Old entries')+'{:>17}'.format('New entries')
 print '=' * 128
@@ -60,9 +68,9 @@ for ifile in sortedfiles:
     not_in_new.append(ifile)
     continue;
 
-  no = ochain.Draw("1>>histo","weight","goff")
+  no = ochain.Draw("1>>histo",oweight,"goff")
   oldtot = histo.Integral()
-  nn = nchain.Draw("1>>histo","weight","goff")
+  nn = nchain.Draw("1>>histo",nweight,"goff")
   newtot = histo.Integral()
     
   if oldtot != 0 : diff = (newtot-oldtot)*100/oldtot

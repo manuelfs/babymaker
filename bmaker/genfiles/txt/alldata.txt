@@ -1,7 +1,5 @@
 HTMHT		
 MET		
 JetHT
-DoubleEG	
-DoubleMuon	
 SingleElectron	
 SingleMuon	

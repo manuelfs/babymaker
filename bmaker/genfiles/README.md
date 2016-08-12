@@ -15,30 +15,30 @@ directory:
 Note that running scram and compiling in the root `babymaker`
 directory are unnecessary.
 
-## Post-processing
+## Post-processing of ntuple production
 
 Post-processing relies on the UCSB tier 3, so all ntuples must first
-be copies to one of the `/net/cmsX/cmsXr0` directories. All commands
+be copied to a folder like `/net/cmsX/cmsXr0/babymaker/babies/YYYY_MM_DD/mc/to_renormalize/`. All commands
 are issued from the `genfiles` directory for both MC and data.
 
 ### Data
 
-1. Combine datasets using `run/combine_datasets.exe.` If, for example,
-one wanted to merge all the datasets, one would issue the command
+1. Combine datasets removing duplicates using 
 
-    run/combine_datasets.exe -i /net/cmsX/cmsXr0/babymaker/babies/YYYY_MM_DD/data/unskimmed -o /net/cmsX/cmsXr0/babymaker/babies/YYYY_MM_DD/data/alldata -f txt/alldata.txt
+        python/send_combine_ntuples.py
 
-Note that one will have to repeat all the later steps for each combined dataset.
+    where you'll need to set the proper `infolder`, `outfolder`, `datasets`, and `jsonfile`. This script sends
+    combination jobs for groups of `run_files` runs.
 
 2. Skim the combined dataset. Each skim requires one execution of
 `python/send_skim_ntuples.py.` Suppose, for example, that one want to
 produce the standard and baseline skims for the "alldata" combined
 dataset produced in the last step; then one would issue the commands
 
-    python/send_skim_ntuples.py /net/cmsX/cmsXr0/babymaker/babies/YYYY_MM_DD/data/alldata 50 standard
-    python/send_skim_ntuples.py /net/cmsX/cmsXr0/babymaker/babies/YYYY_MM_DD/data/alldata 50 baseline
+        python/send_skim_ntuples.py /net/cmsX/cmsXr0/babymaker/babies/YYYY_MM_DD/data/alldata 50 standard
+        python/send_skim_ntuples.py /net/cmsX/cmsXr0/babymaker/babies/YYYY_MM_DD/data/alldata 50 baseline
 
-This will produce the subdirectories `skim_standard` and `skim_baseline` inside of `alldata.`
+    This will produce the subdirectories `skim_standard` and `skim_baseline` inside of `alldata.`
 
 3. Slim and merge the skimmed ntuples. Multiple skims can be slimmed
 with multiple slimming rules using `python/send_slim_ntuples.py.` The
@@ -46,9 +46,9 @@ script takes the outer product of the requested slims and skims, so if
 one wanted the minimal and base_data slims for both the standard and
 baseline skims produced in the last step, one would issue the command
 
-    python/send_slim_ntuples.py --input_dir /net/cmsX/cmsXr0/babymaker/babies/YYYY_MM_DD/data/alldata --skims standard baseline --slims minimal base_data
+        python/send_slim_ntuples.py --input_dir /net/cmsX/cmsXr0/babymaker/babies/YYYY_MM_DD/data/alldata --skims standard baseline --slims minimal base_data
 
-This will produce subdirectories `slim_minimal_standard,`
+    This will produce subdirectories `slim_minimal_standard,`
 `slim_minimal_baseline,` `slim_base_data_standard,` and
 `slim_base_data_baseline` inside `alldata.`
 
@@ -58,20 +58,30 @@ same after skimming and that the number of events stays the same after
 slimming and merging. The number of files can be checked with the
 command
 
-    python/count_root_files.py -f /net/cmsX/cmsXr0/babymaker/babies/YYYY_MM_DD/data
+        python/count_root_files.py -f /net/cmsX/cmsXr0/babymaker/babies/YYYY_MM_DD/data
 
 ### MC
 
-1. Renormalize the weights. Not sure if one wants
-`python/send_bkg_change_weights.py` or
-`python/send_change_weights.py.`
+1. Renormalize the weights so that the cross section is kept constant. For background and signal MC
+respectively, you'll need to set up the correct `infolder` and `outfolder` in
+
+        python/send_bkg_change_weights.py
+        python/send_sig_change_weights.py
 
 2. If one is processing signal scans, separate the mass points. This
 is done with
 
-    run/send_scan_skim.sh /net/cmsX/cmsXr0/babymaker/babies/YYYY_MM_DD/mc/unskimmed /net/cmsX/cmsXr0/babymaker/babies/YYYY_MM_DD/mc/scans 50
+        run/send_scan_skim.sh /net/cmsX/cmsXr0/babymaker/babies/YYYY_MM_DD/mc/unskimmed /net/cmsX/cmsXr0/babymaker/babies/YYYY_MM_DD/mc/scans 50
 
-3. Follow steps 2 through 4 from [Data](#Data).
+3. Validate `weight` by setting the proper `infolder`, `outfolder` in 
+
+        ./python/validate_ntuples.py
+
+    and running it. This script compares the sum of weights to an older production. The variable `weight`
+    might have changed, so for instance when comparing Marmot and Capybara, the variables that would agree
+    would be `weight/w_toppt/eff_trig` and `weight/w_isr/w_pu`
+
+4. Follow steps 2 through 4 from [Data](#Data).
 
 ## Utility scripts and data caching
 

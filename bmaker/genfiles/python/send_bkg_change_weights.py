@@ -5,8 +5,8 @@ import os, sys, subprocess
 import string
 from utilities import *
 
-infolder  = '/mnt/hadoop/local/babymaker/babies/2016_05_31/to_normalize/'
-outfolder = '/net/cms2/cms2r0/babymaker/babies/2016_05_31/mc/' 
+infolder  = '/net/cms26/cms26r0/babymaker/babies/2016_08_10/to_renormalize/manuelf/'
+outfolder = '/net/cms26/cms26r0/babymaker/babies/2016_08_10/mc/unskimmed/manuelf/' 
 
 
 ## Finding tags for each dataset
@@ -31,8 +31,8 @@ for ifile in sortedfiles:
   cmd = "JobSubmit.csh ./run/wrapper.sh "+exename
   os.system(cmd)
   print execmd
-  # print '\n\n'
-  # print "./run/change_weights.exe "+infolder+' "*'+ifile+'*" '+outfolder+'\n'
+  #print '\n\n'
+  #print "./run/change_weights.exe "+infolder+' "*'+ifile+'*" '+outfolder+'\n'
   # os.system('ls '+infolder+'*'+ifile+'*')
 
 print "\nSubmitted "+str(ijob)+" jobs. Output goes to "+outfolder+"\n"

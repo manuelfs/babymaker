@@ -41,6 +41,18 @@ baby_base::baby_base():
   jetmismeas_(static_cast<bool >(bad_val_)),
   b_jetmismeas_(tree_.Branch("jetmismeas", &jetmismeas_)),
   c_jetmismeas_(false),
+  json12p9_(static_cast<bool >(bad_val_)),
+  b_json12p9_(tree_.Branch("json12p9", &json12p9_)),
+  c_json12p9_(false),
+  json2p6_(static_cast<bool >(bad_val_)),
+  b_json2p6_(tree_.Branch("json2p6", &json2p6_)),
+  c_json2p6_(false),
+  json4p0_(static_cast<bool >(bad_val_)),
+  b_json4p0_(tree_.Branch("json4p0", &json4p0_)),
+  c_json4p0_(false),
+  json7p65_(static_cast<bool >(bad_val_)),
+  b_json7p65_(tree_.Branch("json7p65", &json7p65_)),
+  c_json7p65_(false),
   low_dphi_(static_cast<bool >(bad_val_)),
   b_low_dphi_(tree_.Branch("low_dphi", &low_dphi_)),
   c_low_dphi_(false),
@@ -50,9 +62,21 @@ baby_base::baby_base():
   pass_(static_cast<bool >(bad_val_)),
   b_pass_(tree_.Branch("pass", &pass_)),
   c_pass_(false),
+  pass20_(static_cast<bool >(bad_val_)),
+  b_pass20_(tree_.Branch("pass20", &pass20_)),
+  c_pass20_(false),
+  pass40_(static_cast<bool >(bad_val_)),
+  b_pass40_(tree_.Branch("pass40", &pass40_)),
+  c_pass40_(false),
+  pass50_(static_cast<bool >(bad_val_)),
+  b_pass50_(tree_.Branch("pass50", &pass50_)),
+  c_pass50_(false),
   pass_cschalo_(static_cast<bool >(bad_val_)),
   b_pass_cschalo_(tree_.Branch("pass_cschalo", &pass_cschalo_)),
   c_pass_cschalo_(false),
+  pass_ecaldeadcell_(static_cast<bool >(bad_val_)),
+  b_pass_ecaldeadcell_(tree_.Branch("pass_ecaldeadcell", &pass_ecaldeadcell_)),
+  c_pass_ecaldeadcell_(false),
   pass_eebadsc_(static_cast<bool >(bad_val_)),
   b_pass_eebadsc_(tree_.Branch("pass_eebadsc", &pass_eebadsc_)),
   c_pass_eebadsc_(false),
@@ -68,6 +92,15 @@ baby_base::baby_base():
   pass_jets_(static_cast<bool >(bad_val_)),
   b_pass_jets_(tree_.Branch("pass_jets", &pass_jets_)),
   c_pass_jets_(false),
+  pass_jets20_(static_cast<bool >(bad_val_)),
+  b_pass_jets20_(tree_.Branch("pass_jets20", &pass_jets20_)),
+  c_pass_jets20_(false),
+  pass_jets40_(static_cast<bool >(bad_val_)),
+  b_pass_jets40_(tree_.Branch("pass_jets40", &pass_jets40_)),
+  c_pass_jets40_(false),
+  pass_jets50_(static_cast<bool >(bad_val_)),
+  b_pass_jets50_(tree_.Branch("pass_jets50", &pass_jets50_)),
+  c_pass_jets50_(false),
   pass_jets_nohf_(static_cast<bool >(bad_val_)),
   b_pass_jets_nohf_(tree_.Branch("pass_jets_nohf", &pass_jets_nohf_)),
   c_pass_jets_nohf_(false),
@@ -86,9 +119,24 @@ baby_base::baby_base():
   pass_ra2_(static_cast<bool >(bad_val_)),
   b_pass_ra2_(tree_.Branch("pass_ra2", &pass_ra2_)),
   c_pass_ra2_(false),
+  pass_ra2_badmu_(static_cast<bool >(bad_val_)),
+  b_pass_ra2_badmu_(tree_.Branch("pass_ra2_badmu", &pass_ra2_badmu_)),
+  c_pass_ra2_badmu_(false),
   stitch_(static_cast<bool >(bad_val_)),
   b_stitch_(tree_.Branch("stitch", &stitch_)),
   c_stitch_(false),
+  trig_lep_(static_cast<bool >(bad_val_)),
+  b_trig_lep_(tree_.Branch("trig_lep", &trig_lep_)),
+  c_trig_lep_(false),
+  trig_met_(static_cast<bool >(bad_val_)),
+  b_trig_met_(tree_.Branch("trig_met", &trig_met_)),
+  c_trig_met_(false),
+  trig_ra4_(static_cast<bool >(bad_val_)),
+  b_trig_ra4_(tree_.Branch("trig_ra4", &trig_ra4_)),
+  c_trig_ra4_(false),
+  trig_vvvl_(static_cast<bool >(bad_val_)),
+  b_trig_vvvl_(tree_.Branch("trig_vvvl", &trig_vvvl_)),
+  c_trig_vvvl_(false),
   dphi1_(static_cast<float >(bad_val_)),
   b_dphi1_(tree_.Branch("dphi1", &dphi1_)),
   c_dphi1_(false),
@@ -104,6 +152,9 @@ baby_base::baby_base():
   dphi_wlep_(static_cast<float >(bad_val_)),
   b_dphi_wlep_(tree_.Branch("dphi_wlep", &dphi_wlep_)),
   c_dphi_wlep_(false),
+  eff_jetid_(static_cast<float >(bad_val_)),
+  b_eff_jetid_(tree_.Branch("eff_jetid", &eff_jetid_)),
+  c_eff_jetid_(false),
   eff_trig_(static_cast<float >(bad_val_)),
   b_eff_trig_(tree_.Branch("eff_trig", &eff_trig_)),
   c_eff_trig_(false),
@@ -170,9 +221,51 @@ baby_base::baby_base():
   elmu_w_(static_cast<float >(bad_val_)),
   b_elmu_w_(tree_.Branch("elmu_w", &elmu_w_)),
   c_elmu_w_(false),
+  hig1_eta_(static_cast<float >(bad_val_)),
+  b_hig1_eta_(tree_.Branch("hig1_eta", &hig1_eta_)),
+  c_hig1_eta_(false),
+  hig1_m_(static_cast<float >(bad_val_)),
+  b_hig1_m_(tree_.Branch("hig1_m", &hig1_m_)),
+  c_hig1_m_(false),
+  hig1_phi_(static_cast<float >(bad_val_)),
+  b_hig1_phi_(tree_.Branch("hig1_phi", &hig1_phi_)),
+  c_hig1_phi_(false),
+  hig1_pt_(static_cast<float >(bad_val_)),
+  b_hig1_pt_(tree_.Branch("hig1_pt", &hig1_pt_)),
+  c_hig1_pt_(false),
+  hig2_eta_(static_cast<float >(bad_val_)),
+  b_hig2_eta_(tree_.Branch("hig2_eta", &hig2_eta_)),
+  c_hig2_eta_(false),
+  hig2_m_(static_cast<float >(bad_val_)),
+  b_hig2_m_(tree_.Branch("hig2_m", &hig2_m_)),
+  c_hig2_m_(false),
+  hig2_phi_(static_cast<float >(bad_val_)),
+  b_hig2_phi_(tree_.Branch("hig2_phi", &hig2_phi_)),
+  c_hig2_phi_(false),
+  hig2_pt_(static_cast<float >(bad_val_)),
+  b_hig2_pt_(tree_.Branch("hig2_pt", &hig2_pt_)),
+  c_hig2_pt_(false),
+  hig_am_(static_cast<float >(bad_val_)),
+  b_hig_am_(tree_.Branch("hig_am", &hig_am_)),
+  c_hig_am_(false),
+  hig_dm_(static_cast<float >(bad_val_)),
+  b_hig_dm_(tree_.Branch("hig_dm", &hig_dm_)),
+  c_hig_dm_(false),
+  hig_dphi_(static_cast<float >(bad_val_)),
+  b_hig_dphi_(tree_.Branch("hig_dphi", &hig_dphi_)),
+  c_hig_dphi_(false),
+  hig_drmax_(static_cast<float >(bad_val_)),
+  b_hig_drmax_(tree_.Branch("hig_drmax", &hig_drmax_)),
+  c_hig_drmax_(false),
   ht_(static_cast<float >(bad_val_)),
   b_ht_(tree_.Branch("ht", &ht_)),
   c_ht_(false),
+  ht40_(static_cast<float >(bad_val_)),
+  b_ht40_(tree_.Branch("ht40", &ht40_)),
+  c_ht40_(false),
+  ht50_(static_cast<float >(bad_val_)),
+  b_ht50_(tree_.Branch("ht50", &ht50_)),
+  c_ht50_(false),
   ht_clean_(static_cast<float >(bad_val_)),
   b_ht_clean_(tree_.Branch("ht_clean", &ht_clean_)),
   c_ht_clean_(false),
@@ -188,6 +281,15 @@ baby_base::baby_base():
   ht_tru_(static_cast<float >(bad_val_)),
   b_ht_tru_(tree_.Branch("ht_tru", &ht_tru_)),
   c_ht_tru_(false),
+  htx_(static_cast<float >(bad_val_)),
+  b_htx_(tree_.Branch("htx", &htx_)),
+  c_htx_(false),
+  htx40_(static_cast<float >(bad_val_)),
+  b_htx40_(tree_.Branch("htx40", &htx40_)),
+  c_htx40_(false),
+  htx50_(static_cast<float >(bad_val_)),
+  b_htx50_(tree_.Branch("htx50", &htx50_)),
+  c_htx50_(false),
   isr_tru_eta_(static_cast<float >(bad_val_)),
   b_isr_tru_eta_(tree_.Branch("isr_tru_eta", &isr_tru_eta_)),
   c_isr_tru_eta_(false),
@@ -200,9 +302,15 @@ baby_base::baby_base():
   jetsys_eta_(static_cast<float >(bad_val_)),
   b_jetsys_eta_(tree_.Branch("jetsys_eta", &jetsys_eta_)),
   c_jetsys_eta_(false),
+  jetsys_m_(static_cast<float >(bad_val_)),
+  b_jetsys_m_(tree_.Branch("jetsys_m", &jetsys_m_)),
+  c_jetsys_m_(false),
   jetsys_nob_eta_(static_cast<float >(bad_val_)),
   b_jetsys_nob_eta_(tree_.Branch("jetsys_nob_eta", &jetsys_nob_eta_)),
   c_jetsys_nob_eta_(false),
+  jetsys_nob_m_(static_cast<float >(bad_val_)),
+  b_jetsys_nob_m_(tree_.Branch("jetsys_nob_m", &jetsys_nob_m_)),
+  c_jetsys_nob_m_(false),
   jetsys_nob_phi_(static_cast<float >(bad_val_)),
   b_jetsys_nob_phi_(tree_.Branch("jetsys_nob_phi", &jetsys_nob_phi_)),
   c_jetsys_nob_phi_(false),
@@ -215,6 +323,12 @@ baby_base::baby_base():
   jetsys_pt_(static_cast<float >(bad_val_)),
   b_jetsys_pt_(tree_.Branch("jetsys_pt", &jetsys_pt_)),
   c_jetsys_pt_(false),
+  m_tt_(static_cast<float >(bad_val_)),
+  b_m_tt_(tree_.Branch("m_tt", &m_tt_)),
+  c_m_tt_(false),
+  mct_(static_cast<float >(bad_val_)),
+  b_mct_(tree_.Branch("mct", &mct_)),
+  c_mct_(false),
   met_(static_cast<float >(bad_val_)),
   b_met_(tree_.Branch("met", &met_)),
   c_met_(false),
@@ -272,15 +386,33 @@ baby_base::baby_base():
   mht_phi_(static_cast<float >(bad_val_)),
   b_mht_phi_(tree_.Branch("mht_phi", &mht_phi_)),
   c_mht_phi_(false),
-  mj_(static_cast<float >(bad_val_)),
-  b_mj_(tree_.Branch("mj", &mj_)),
-  c_mj_(false),
   mj08_(static_cast<float >(bad_val_)),
   b_mj08_(tree_.Branch("mj08", &mj08_)),
   c_mj08_(false),
+  mj12_(static_cast<float >(bad_val_)),
+  b_mj12_(tree_.Branch("mj12", &mj12_)),
+  c_mj12_(false),
+  mj14_(static_cast<float >(bad_val_)),
+  b_mj14_(tree_.Branch("mj14", &mj14_)),
+  c_mj14_(false),
+  mj14_nolep_(static_cast<float >(bad_val_)),
+  b_mj14_nolep_(tree_.Branch("mj14_nolep", &mj14_nolep_)),
+  c_mj14_nolep_(false),
+  mj40_(static_cast<float >(bad_val_)),
+  b_mj40_(tree_.Branch("mj40", &mj40_)),
+  c_mj40_(false),
+  mj50_(static_cast<float >(bad_val_)),
+  b_mj50_(tree_.Branch("mj50", &mj50_)),
+  c_mj50_(false),
   mt_(static_cast<float >(bad_val_)),
   b_mt_(tree_.Branch("mt", &mt_)),
   c_mt_(false),
+  mt2_(static_cast<float >(bad_val_)),
+  b_mt2_(tree_.Branch("mt2", &mt2_)),
+  c_mt2_(false),
+  mt2_0mass_(static_cast<float >(bad_val_)),
+  b_mt2_0mass_(tree_.Branch("mt2_0mass", &mt2_0mass_)),
+  c_mt2_0mass_(false),
   mt_nohf_(static_cast<float >(bad_val_)),
   b_mt_nohf_(tree_.Branch("mt_nohf", &mt_nohf_)),
   c_mt_nohf_(false),
@@ -335,6 +467,9 @@ baby_base::baby_base():
   mumuv_w_(static_cast<float >(bad_val_)),
   b_mumuv_w_(tree_.Branch("mumuv_w", &mumuv_w_)),
   c_mumuv_w_(false),
+  nisr_(static_cast<float >(bad_val_)),
+  b_nisr_(tree_.Branch("nisr", &nisr_)),
+  c_nisr_(false),
   ntrupv_mean_(static_cast<float >(bad_val_)),
   b_ntrupv_mean_(tree_.Branch("ntrupv_mean", &ntrupv_mean_)),
   c_ntrupv_mean_(false),
@@ -371,12 +506,30 @@ baby_base::baby_base():
   onph_ph90_(static_cast<float >(bad_val_)),
   b_onph_ph90_(tree_.Branch("onph_ph90", &onph_ph90_)),
   c_onph_ph90_(false),
+  st_(static_cast<float >(bad_val_)),
+  b_st_(tree_.Branch("st", &st_)),
+  c_st_(false),
+  st40_(static_cast<float >(bad_val_)),
+  b_st40_(tree_.Branch("st40", &st40_)),
+  c_st40_(false),
+  st50_(static_cast<float >(bad_val_)),
+  b_st50_(tree_.Branch("st50", &st50_)),
+  c_st50_(false),
   w_btag_(static_cast<float >(bad_val_)),
   b_w_btag_(tree_.Branch("w_btag", &w_btag_)),
   c_w_btag_(false),
+  w_btag40_(static_cast<float >(bad_val_)),
+  b_w_btag40_(tree_.Branch("w_btag40", &w_btag40_)),
+  c_w_btag40_(false),
+  w_btag_loose_(static_cast<float >(bad_val_)),
+  b_w_btag_loose_(tree_.Branch("w_btag_loose", &w_btag_loose_)),
+  c_w_btag_loose_(false),
   w_fs_lep_(static_cast<float >(bad_val_)),
   b_w_fs_lep_(tree_.Branch("w_fs_lep", &w_fs_lep_)),
   c_w_fs_lep_(false),
+  w_isr_(static_cast<float >(bad_val_)),
+  b_w_isr_(tree_.Branch("w_isr", &w_isr_)),
+  c_w_isr_(false),
   w_lep_(static_cast<float >(bad_val_)),
   b_w_lep_(tree_.Branch("w_lep", &w_lep_)),
   c_w_lep_(false),
@@ -392,6 +545,12 @@ baby_base::baby_base():
   weight_(static_cast<float >(bad_val_)),
   b_weight_(tree_.Branch("weight", &weight_)),
   c_weight_(false),
+  weight_rpv_(static_cast<float >(bad_val_)),
+  b_weight_rpv_(tree_.Branch("weight_rpv", &weight_rpv_)),
+  c_weight_rpv_(false),
+  hig_bin_(static_cast<int >(bad_val_)),
+  b_hig_bin_(tree_.Branch("hig_bin", &hig_bin_)),
+  c_hig_bin_(false),
   lumiblock_(static_cast<int >(bad_val_)),
   b_lumiblock_(tree_.Branch("lumiblock", &lumiblock_)),
   c_lumiblock_(false),
@@ -407,6 +566,15 @@ baby_base::baby_base():
   nbm_(static_cast<int >(bad_val_)),
   b_nbm_(tree_.Branch("nbm", &nbm_)),
   c_nbm_(false),
+  nbm20_(static_cast<int >(bad_val_)),
+  b_nbm20_(tree_.Branch("nbm20", &nbm20_)),
+  c_nbm20_(false),
+  nbm40_(static_cast<int >(bad_val_)),
+  b_nbm40_(tree_.Branch("nbm40", &nbm40_)),
+  c_nbm40_(false),
+  nbm50_(static_cast<int >(bad_val_)),
+  b_nbm50_(tree_.Branch("nbm50", &nbm50_)),
+  c_nbm50_(false),
   nbm_ra2_(static_cast<int >(bad_val_)),
   b_nbm_ra2_(tree_.Branch("nbm_ra2", &nbm_ra2_)),
   c_nbm_ra2_(false),
@@ -422,18 +590,27 @@ baby_base::baby_base():
   nels_vvvl_(static_cast<int >(bad_val_)),
   b_nels_vvvl_(tree_.Branch("nels_vvvl", &nels_vvvl_)),
   c_nels_vvvl_(false),
-  nfjets_(static_cast<int >(bad_val_)),
-  b_nfjets_(tree_.Branch("nfjets", &nfjets_)),
-  c_nfjets_(false),
-  nfjets08_(static_cast<int >(bad_val_)),
-  b_nfjets08_(tree_.Branch("nfjets08", &nfjets08_)),
-  c_nfjets08_(false),
+  nfjets14_(static_cast<int >(bad_val_)),
+  b_nfjets14_(tree_.Branch("nfjets14", &nfjets14_)),
+  c_nfjets14_(false),
+  nfjets40_(static_cast<int >(bad_val_)),
+  b_nfjets40_(tree_.Branch("nfjets40", &nfjets40_)),
+  c_nfjets40_(false),
   nisr_me_(static_cast<int >(bad_val_)),
   b_nisr_me_(tree_.Branch("nisr_me", &nisr_me_)),
   c_nisr_me_(false),
   njets_(static_cast<int >(bad_val_)),
   b_njets_(tree_.Branch("njets", &njets_)),
   c_njets_(false),
+  njets20_(static_cast<int >(bad_val_)),
+  b_njets20_(tree_.Branch("njets20", &njets20_)),
+  c_njets20_(false),
+  njets40_(static_cast<int >(bad_val_)),
+  b_njets40_(tree_.Branch("njets40", &njets40_)),
+  c_njets40_(false),
+  njets50_(static_cast<int >(bad_val_)),
+  b_njets50_(tree_.Branch("njets50", &njets50_)),
+  c_njets50_(false),
   njets_clean_(static_cast<int >(bad_val_)),
   b_njets_clean_(tree_.Branch("njets_clean", &njets_clean_)),
   c_njets_clean_(false),
@@ -497,6 +674,9 @@ baby_base::baby_base():
   run_(static_cast<int >(bad_val_)),
   b_run_(tree_.Branch("run", &run_)),
   c_run_(false),
+  type_(static_cast<int >(bad_val_)),
+  b_type_(tree_.Branch("type", &type_)),
+  c_type_(false),
   els_ele105_(0),
   p_els_ele105_(&els_ele105_),
   b_els_ele105_(tree_.Branch("els_ele105", &p_els_ele105_)),
@@ -541,6 +721,18 @@ baby_base::baby_base():
   p_els_vvvl_(&els_vvvl_),
   b_els_vvvl_(tree_.Branch("els_vvvl", &p_els_vvvl_)),
   c_els_vvvl_(false),
+  jets_h1_(0),
+  p_jets_h1_(&jets_h1_),
+  b_jets_h1_(tree_.Branch("jets_h1", &p_jets_h1_)),
+  c_jets_h1_(false),
+  jets_h2_(0),
+  p_jets_h2_(&jets_h2_),
+  b_jets_h2_(tree_.Branch("jets_h2", &p_jets_h2_)),
+  c_jets_h2_(false),
+  jets_isisr_(0),
+  p_jets_isisr_(&jets_isisr_),
+  b_jets_isisr_(tree_.Branch("jets_isisr", &p_jets_isisr_)),
+  c_jets_isisr_(false),
   jets_islep_(0),
   p_jets_islep_(&jets_islep_),
   b_jets_islep_(tree_.Branch("jets_islep", &p_jets_islep_)),
@@ -581,6 +773,10 @@ baby_base::baby_base():
   p_mus_tm_(&mus_tm_),
   b_mus_tm_(tree_.Branch("mus_tm", &p_mus_tm_)),
   c_mus_tm_(false),
+  mus_trk_quality_(0),
+  p_mus_trk_quality_(&mus_trk_quality_),
+  b_mus_trk_quality_(tree_.Branch("mus_trk_quality", &p_mus_trk_quality_)),
+  c_mus_trk_quality_(false),
   mus_vvvl_(0),
   p_mus_vvvl_(&mus_vvvl_),
   b_mus_vvvl_(tree_.Branch("mus_vvvl", &p_mus_vvvl_)),
@@ -597,6 +793,14 @@ baby_base::baby_base():
   p_sys_pass_(&sys_pass_),
   b_sys_pass_(tree_.Branch("sys_pass", &p_sys_pass_)),
   c_sys_pass_(false),
+  sys_pass40_(0),
+  p_sys_pass40_(&sys_pass40_),
+  b_sys_pass40_(tree_.Branch("sys_pass40", &p_sys_pass40_)),
+  c_sys_pass40_(false),
+  tks_tm_(0),
+  p_tks_tm_(&tks_tm_),
+  b_tks_tm_(tree_.Branch("tks_tm", &p_tks_tm_)),
+  c_tks_tm_(false),
   trig_(0),
   p_trig_(&trig_),
   b_trig_(tree_.Branch("trig", &p_trig_)),
@@ -605,14 +809,38 @@ baby_base::baby_base():
   p_els_d0_(&els_d0_),
   b_els_d0_(tree_.Branch("els_d0", &p_els_d0_)),
   c_els_d0_(false),
+  els_deta_sctrk_(0),
+  p_els_deta_sctrk_(&els_deta_sctrk_),
+  b_els_deta_sctrk_(tree_.Branch("els_deta_sctrk", &p_els_deta_sctrk_)),
+  c_els_deta_sctrk_(false),
+  els_dphi_sctrk_(0),
+  p_els_dphi_sctrk_(&els_dphi_sctrk_),
+  b_els_dphi_sctrk_(tree_.Branch("els_dphi_sctrk", &p_els_dphi_sctrk_)),
+  c_els_dphi_sctrk_(false),
   els_dz_(0),
   p_els_dz_(&els_dz_),
   b_els_dz_(tree_.Branch("els_dz", &p_els_dz_)),
   c_els_dz_(false),
+  els_em_e_(0),
+  p_els_em_e_(&els_em_e_),
+  b_els_em_e_(tree_.Branch("els_em_e", &p_els_em_e_)),
+  c_els_em_e_(false),
+  els_eoverp_(0),
+  p_els_eoverp_(&els_eoverp_),
+  b_els_eoverp_(tree_.Branch("els_eoverp", &p_els_eoverp_)),
+  c_els_eoverp_(false),
   els_eta_(0),
   p_els_eta_(&els_eta_),
   b_els_eta_(tree_.Branch("els_eta", &p_els_eta_)),
   c_els_eta_(false),
+  els_hovere_(0),
+  p_els_hovere_(&els_hovere_),
+  b_els_hovere_(tree_.Branch("els_hovere", &p_els_hovere_)),
+  c_els_hovere_(false),
+  els_ip3d_(0),
+  p_els_ip3d_(&els_ip3d_),
+  b_els_ip3d_(tree_.Branch("els_ip3d", &p_els_ip3d_)),
+  c_els_ip3d_(false),
   els_miniso_(0),
   p_els_miniso_(&els_miniso_),
   b_els_miniso_(tree_.Branch("els_miniso", &p_els_miniso_)),
@@ -633,6 +861,14 @@ baby_base::baby_base():
   p_els_sceta_(&els_sceta_),
   b_els_sceta_(tree_.Branch("els_sceta", &p_els_sceta_)),
   c_els_sceta_(false),
+  els_trk_pt_(0),
+  p_els_trk_pt_(&els_trk_pt_),
+  b_els_trk_pt_(tree_.Branch("els_trk_pt", &p_els_trk_pt_)),
+  c_els_trk_pt_(false),
+  els_trk_pterr_(0),
+  p_els_trk_pterr_(&els_trk_pterr_),
+  b_els_trk_pterr_(tree_.Branch("els_trk_pterr", &p_els_trk_pterr_)),
+  c_els_trk_pterr_(false),
   els_vvvl_eta_(0),
   p_els_vvvl_eta_(&els_vvvl_eta_),
   b_els_vvvl_eta_(tree_.Branch("els_vvvl_eta", &p_els_vvvl_eta_)),
@@ -645,54 +881,38 @@ baby_base::baby_base():
   p_els_vvvl_pt_(&els_vvvl_pt_),
   b_els_vvvl_pt_(tree_.Branch("els_vvvl_pt", &p_els_vvvl_pt_)),
   c_els_vvvl_pt_(false),
-  fjets08_eta_(0),
-  p_fjets08_eta_(&fjets08_eta_),
-  b_fjets08_eta_(tree_.Branch("fjets08_eta", &p_fjets08_eta_)),
-  c_fjets08_eta_(false),
-  fjets08_m_(0),
-  p_fjets08_m_(&fjets08_m_),
-  b_fjets08_m_(tree_.Branch("fjets08_m", &p_fjets08_m_)),
-  c_fjets08_m_(false),
-  fjets08_phi_(0),
-  p_fjets08_phi_(&fjets08_phi_),
-  b_fjets08_phi_(tree_.Branch("fjets08_phi", &p_fjets08_phi_)),
-  c_fjets08_phi_(false),
-  fjets08_poscsv_(0),
-  p_fjets08_poscsv_(&fjets08_poscsv_),
-  b_fjets08_poscsv_(tree_.Branch("fjets08_poscsv", &p_fjets08_poscsv_)),
-  c_fjets08_poscsv_(false),
-  fjets08_pt_(0),
-  p_fjets08_pt_(&fjets08_pt_),
-  b_fjets08_pt_(tree_.Branch("fjets08_pt", &p_fjets08_pt_)),
-  c_fjets08_pt_(false),
-  fjets08_sumcsv_(0),
-  p_fjets08_sumcsv_(&fjets08_sumcsv_),
-  b_fjets08_sumcsv_(tree_.Branch("fjets08_sumcsv", &p_fjets08_sumcsv_)),
-  c_fjets08_sumcsv_(false),
-  fjets_eta_(0),
-  p_fjets_eta_(&fjets_eta_),
-  b_fjets_eta_(tree_.Branch("fjets_eta", &p_fjets_eta_)),
-  c_fjets_eta_(false),
-  fjets_m_(0),
-  p_fjets_m_(&fjets_m_),
-  b_fjets_m_(tree_.Branch("fjets_m", &p_fjets_m_)),
-  c_fjets_m_(false),
-  fjets_phi_(0),
-  p_fjets_phi_(&fjets_phi_),
-  b_fjets_phi_(tree_.Branch("fjets_phi", &p_fjets_phi_)),
-  c_fjets_phi_(false),
-  fjets_poscsv_(0),
-  p_fjets_poscsv_(&fjets_poscsv_),
-  b_fjets_poscsv_(tree_.Branch("fjets_poscsv", &p_fjets_poscsv_)),
-  c_fjets_poscsv_(false),
-  fjets_pt_(0),
-  p_fjets_pt_(&fjets_pt_),
-  b_fjets_pt_(tree_.Branch("fjets_pt", &p_fjets_pt_)),
-  c_fjets_pt_(false),
-  fjets_sumcsv_(0),
-  p_fjets_sumcsv_(&fjets_sumcsv_),
-  b_fjets_sumcsv_(tree_.Branch("fjets_sumcsv", &p_fjets_sumcsv_)),
-  c_fjets_sumcsv_(false),
+  fjets14_eta_(0),
+  p_fjets14_eta_(&fjets14_eta_),
+  b_fjets14_eta_(tree_.Branch("fjets14_eta", &p_fjets14_eta_)),
+  c_fjets14_eta_(false),
+  fjets14_m_(0),
+  p_fjets14_m_(&fjets14_m_),
+  b_fjets14_m_(tree_.Branch("fjets14_m", &p_fjets14_m_)),
+  c_fjets14_m_(false),
+  fjets14_phi_(0),
+  p_fjets14_phi_(&fjets14_phi_),
+  b_fjets14_phi_(tree_.Branch("fjets14_phi", &p_fjets14_phi_)),
+  c_fjets14_phi_(false),
+  fjets14_pt_(0),
+  p_fjets14_pt_(&fjets14_pt_),
+  b_fjets14_pt_(tree_.Branch("fjets14_pt", &p_fjets14_pt_)),
+  c_fjets14_pt_(false),
+  fjets40_eta_(0),
+  p_fjets40_eta_(&fjets40_eta_),
+  b_fjets40_eta_(tree_.Branch("fjets40_eta", &p_fjets40_eta_)),
+  c_fjets40_eta_(false),
+  fjets40_m_(0),
+  p_fjets40_m_(&fjets40_m_),
+  b_fjets40_m_(tree_.Branch("fjets40_m", &p_fjets40_m_)),
+  c_fjets40_m_(false),
+  fjets40_phi_(0),
+  p_fjets40_phi_(&fjets40_phi_),
+  b_fjets40_phi_(tree_.Branch("fjets40_phi", &p_fjets40_phi_)),
+  c_fjets40_phi_(false),
+  fjets40_pt_(0),
+  p_fjets40_pt_(&fjets40_pt_),
+  b_fjets40_pt_(tree_.Branch("fjets40_pt", &p_fjets40_pt_)),
+  c_fjets40_pt_(false),
   jets_csv_(0),
   p_jets_csv_(&jets_csv_),
   b_jets_csv_(tree_.Branch("jets_csv", &p_jets_csv_)),
@@ -757,10 +977,18 @@ baby_base::baby_base():
   p_mus_dz_(&mus_dz_),
   b_mus_dz_(tree_.Branch("mus_dz", &p_mus_dz_)),
   c_mus_dz_(false),
+  mus_em_e_(0),
+  p_mus_em_e_(&mus_em_e_),
+  b_mus_em_e_(tree_.Branch("mus_em_e", &p_mus_em_e_)),
+  c_mus_em_e_(false),
   mus_eta_(0),
   p_mus_eta_(&mus_eta_),
   b_mus_eta_(tree_.Branch("mus_eta", &p_mus_eta_)),
   c_mus_eta_(false),
+  mus_had_e_(0),
+  p_mus_had_e_(&mus_had_e_),
+  b_mus_had_e_(tree_.Branch("mus_had_e", &p_mus_had_e_)),
+  c_mus_had_e_(false),
   mus_miniso_(0),
   p_mus_miniso_(&mus_miniso_),
   b_mus_miniso_(tree_.Branch("mus_miniso", &p_mus_miniso_)),
@@ -773,6 +1001,10 @@ baby_base::baby_base():
   p_mus_pt_(&mus_pt_),
   b_mus_pt_(tree_.Branch("mus_pt", &p_mus_pt_)),
   c_mus_pt_(false),
+  mus_pterr_(0),
+  p_mus_pterr_(&mus_pterr_),
+  b_mus_pterr_(tree_.Branch("mus_pterr", &p_mus_pterr_)),
+  c_mus_pterr_(false),
   mus_reliso_(0),
   p_mus_reliso_(&mus_reliso_),
   b_mus_reliso_(tree_.Branch("mus_reliso", &p_mus_reliso_)),
@@ -805,10 +1037,22 @@ baby_base::baby_base():
   p_sys_bctag_(&sys_bctag_),
   b_sys_bctag_(tree_.Branch("sys_bctag", &p_sys_bctag_)),
   c_sys_bctag_(false),
+  sys_bctag40_(0),
+  p_sys_bctag40_(&sys_bctag40_),
+  b_sys_bctag40_(tree_.Branch("sys_bctag40", &p_sys_bctag40_)),
+  c_sys_bctag40_(false),
+  sys_bctag_loose_(0),
+  p_sys_bctag_loose_(&sys_bctag_loose_),
+  b_sys_bctag_loose_(tree_.Branch("sys_bctag_loose", &p_sys_bctag_loose_)),
+  c_sys_bctag_loose_(false),
   sys_fs_bctag_(0),
   p_sys_fs_bctag_(&sys_fs_bctag_),
   b_sys_fs_bctag_(tree_.Branch("sys_fs_bctag", &p_sys_fs_bctag_)),
   c_sys_fs_bctag_(false),
+  sys_fs_bctag40_(0),
+  p_sys_fs_bctag40_(&sys_fs_bctag40_),
+  b_sys_fs_bctag40_(tree_.Branch("sys_fs_bctag40", &p_sys_fs_bctag40_)),
+  c_sys_fs_bctag40_(false),
   sys_fs_lep_(0),
   p_sys_fs_lep_(&sys_fs_lep_),
   b_sys_fs_lep_(tree_.Branch("sys_fs_lep", &p_sys_fs_lep_)),
@@ -817,10 +1061,18 @@ baby_base::baby_base():
   p_sys_fs_udsgtag_(&sys_fs_udsgtag_),
   b_sys_fs_udsgtag_(tree_.Branch("sys_fs_udsgtag", &p_sys_fs_udsgtag_)),
   c_sys_fs_udsgtag_(false),
+  sys_fs_udsgtag40_(0),
+  p_sys_fs_udsgtag40_(&sys_fs_udsgtag40_),
+  b_sys_fs_udsgtag40_(tree_.Branch("sys_fs_udsgtag40", &p_sys_fs_udsgtag40_)),
+  c_sys_fs_udsgtag40_(false),
   sys_ht_(0),
   p_sys_ht_(&sys_ht_),
   b_sys_ht_(tree_.Branch("sys_ht", &p_sys_ht_)),
   c_sys_ht_(false),
+  sys_ht40_(0),
+  p_sys_ht40_(&sys_ht40_),
+  b_sys_ht40_(tree_.Branch("sys_ht40", &p_sys_ht40_)),
+  c_sys_ht40_(false),
   sys_isr_(0),
   p_sys_isr_(&sys_isr_),
   b_sys_isr_(tree_.Branch("sys_isr", &p_sys_isr_)),
@@ -833,10 +1085,18 @@ baby_base::baby_base():
   p_sys_met_(&sys_met_),
   b_sys_met_(tree_.Branch("sys_met", &p_sys_met_)),
   c_sys_met_(false),
-  sys_mj_(0),
-  p_sys_mj_(&sys_mj_),
-  b_sys_mj_(tree_.Branch("sys_mj", &p_sys_mj_)),
-  c_sys_mj_(false),
+  sys_mj14_(0),
+  p_sys_mj14_(&sys_mj14_),
+  b_sys_mj14_(tree_.Branch("sys_mj14", &p_sys_mj14_)),
+  c_sys_mj14_(false),
+  sys_mj14_nolep_(0),
+  p_sys_mj14_nolep_(&sys_mj14_nolep_),
+  b_sys_mj14_nolep_(tree_.Branch("sys_mj14_nolep", &p_sys_mj14_nolep_)),
+  c_sys_mj14_nolep_(false),
+  sys_mj40_(0),
+  p_sys_mj40_(&sys_mj40_),
+  b_sys_mj40_(tree_.Branch("sys_mj40", &p_sys_mj40_)),
+  c_sys_mj40_(false),
   sys_mt_(0),
   p_sys_mt_(&sys_mt_),
   b_sys_mt_(tree_.Branch("sys_mt", &p_sys_mt_)),
@@ -853,10 +1113,18 @@ baby_base::baby_base():
   p_sys_murf_(&sys_murf_),
   b_sys_murf_(tree_.Branch("sys_murf", &p_sys_murf_)),
   c_sys_murf_(false),
-  sys_pdf_(0),
-  p_sys_pdf_(&sys_pdf_),
-  b_sys_pdf_(tree_.Branch("sys_pdf", &p_sys_pdf_)),
-  c_sys_pdf_(false),
+  sys_pu_(0),
+  p_sys_pu_(&sys_pu_),
+  b_sys_pu_(tree_.Branch("sys_pu", &p_sys_pu_)),
+  c_sys_pu_(false),
+  sys_st_(0),
+  p_sys_st_(&sys_st_),
+  b_sys_st_(tree_.Branch("sys_st", &p_sys_st_)),
+  c_sys_st_(false),
+  sys_st40_(0),
+  p_sys_st40_(&sys_st40_),
+  b_sys_st40_(tree_.Branch("sys_st40", &p_sys_st40_)),
+  c_sys_st40_(false),
   sys_trig_(0),
   p_sys_trig_(&sys_trig_),
   b_sys_trig_(tree_.Branch("sys_trig", &p_sys_trig_)),
@@ -865,6 +1133,22 @@ baby_base::baby_base():
   p_sys_udsgtag_(&sys_udsgtag_),
   b_sys_udsgtag_(tree_.Branch("sys_udsgtag", &p_sys_udsgtag_)),
   c_sys_udsgtag_(false),
+  sys_udsgtag40_(0),
+  p_sys_udsgtag40_(&sys_udsgtag40_),
+  b_sys_udsgtag40_(tree_.Branch("sys_udsgtag40", &p_sys_udsgtag40_)),
+  c_sys_udsgtag40_(false),
+  sys_udsgtag_loose_(0),
+  p_sys_udsgtag_loose_(&sys_udsgtag_loose_),
+  b_sys_udsgtag_loose_(tree_.Branch("sys_udsgtag_loose", &p_sys_udsgtag_loose_)),
+  c_sys_udsgtag_loose_(false),
+  tks_d0_(0),
+  p_tks_d0_(&tks_d0_),
+  b_tks_d0_(tree_.Branch("tks_d0", &p_tks_d0_)),
+  c_tks_d0_(false),
+  tks_dz_(0),
+  p_tks_dz_(&tks_dz_),
+  b_tks_dz_(tree_.Branch("tks_dz", &p_tks_dz_)),
+  c_tks_dz_(false),
   tks_eta_(0),
   p_tks_eta_(&tks_eta_),
   b_tks_eta_(tree_.Branch("tks_eta", &p_tks_eta_)),
@@ -889,42 +1173,54 @@ baby_base::baby_base():
   p_tks_pt_(&tks_pt_),
   b_tks_pt_(tree_.Branch("tks_pt", &p_tks_pt_)),
   c_tks_pt_(false),
+  tks_reliso_(0),
+  p_tks_reliso_(&tks_reliso_),
+  b_tks_reliso_(tree_.Branch("tks_reliso", &p_tks_reliso_)),
+  c_tks_reliso_(false),
   trig_prescale_(0),
   p_trig_prescale_(&trig_prescale_),
   b_trig_prescale_(tree_.Branch("trig_prescale", &p_trig_prescale_)),
   c_trig_prescale_(false),
-  w_pdf_(0),
-  p_w_pdf_(&w_pdf_),
-  b_w_pdf_(tree_.Branch("w_pdf", &p_w_pdf_)),
-  c_w_pdf_(false),
   els_charge_(0),
   p_els_charge_(&els_charge_),
   b_els_charge_(tree_.Branch("els_charge", &p_els_charge_)),
   c_els_charge_(false),
-  fjets08_btags_(0),
-  p_fjets08_btags_(&fjets08_btags_),
-  b_fjets08_btags_(tree_.Branch("fjets08_btags", &p_fjets08_btags_)),
-  c_fjets08_btags_(false),
-  fjets08_nconst_(0),
-  p_fjets08_nconst_(&fjets08_nconst_),
-  b_fjets08_nconst_(tree_.Branch("fjets08_nconst", &p_fjets08_nconst_)),
-  c_fjets08_nconst_(false),
-  fjets_btags_(0),
-  p_fjets_btags_(&fjets_btags_),
-  b_fjets_btags_(tree_.Branch("fjets_btags", &p_fjets_btags_)),
-  c_fjets_btags_(false),
-  fjets_nconst_(0),
-  p_fjets_nconst_(&fjets_nconst_),
-  b_fjets_nconst_(tree_.Branch("fjets_nconst", &p_fjets_nconst_)),
-  c_fjets_nconst_(false),
+  els_trk_nholes_(0),
+  p_els_trk_nholes_(&els_trk_nholes_),
+  b_els_trk_nholes_(tree_.Branch("els_trk_nholes", &p_els_trk_nholes_)),
+  c_els_trk_nholes_(false),
+  fjets14_nconst_(0),
+  p_fjets14_nconst_(&fjets14_nconst_),
+  b_fjets14_nconst_(tree_.Branch("fjets14_nconst", &p_fjets14_nconst_)),
+  c_fjets14_nconst_(false),
+  fjets40_nconst_(0),
+  p_fjets40_nconst_(&fjets40_nconst_),
+  b_fjets40_nconst_(tree_.Branch("fjets40_nconst", &p_fjets40_nconst_)),
+  c_fjets40_nconst_(false),
   jets_fjet08_index_(0),
   p_jets_fjet08_index_(&jets_fjet08_index_),
   b_jets_fjet08_index_(tree_.Branch("jets_fjet08_index", &p_jets_fjet08_index_)),
   c_jets_fjet08_index_(false),
-  jets_fjet_index_(0),
-  p_jets_fjet_index_(&jets_fjet_index_),
-  b_jets_fjet_index_(tree_.Branch("jets_fjet_index", &p_jets_fjet_index_)),
-  c_jets_fjet_index_(false),
+  jets_fjet12_index_(0),
+  p_jets_fjet12_index_(&jets_fjet12_index_),
+  b_jets_fjet12_index_(tree_.Branch("jets_fjet12_index", &p_jets_fjet12_index_)),
+  c_jets_fjet12_index_(false),
+  jets_fjet14_index_(0),
+  p_jets_fjet14_index_(&jets_fjet14_index_),
+  b_jets_fjet14_index_(tree_.Branch("jets_fjet14_index", &p_jets_fjet14_index_)),
+  c_jets_fjet14_index_(false),
+  jets_fjet14_nolep_index_(0),
+  p_jets_fjet14_nolep_index_(&jets_fjet14_nolep_index_),
+  b_jets_fjet14_nolep_index_(tree_.Branch("jets_fjet14_nolep_index", &p_jets_fjet14_nolep_index_)),
+  c_jets_fjet14_nolep_index_(false),
+  jets_fjet40_index_(0),
+  p_jets_fjet40_index_(&jets_fjet40_index_),
+  b_jets_fjet40_index_(tree_.Branch("jets_fjet40_index", &p_jets_fjet40_index_)),
+  c_jets_fjet40_index_(false),
+  jets_fjet50_index_(0),
+  p_jets_fjet50_index_(&jets_fjet50_index_),
+  b_jets_fjet50_index_(tree_.Branch("jets_fjet50_index", &p_jets_fjet50_index_)),
+  c_jets_fjet50_index_(false),
   jets_hflavor_(0),
   p_jets_hflavor_(&jets_hflavor_),
   b_jets_hflavor_(tree_.Branch("jets_hflavor", &p_jets_hflavor_)),
@@ -937,18 +1233,46 @@ baby_base::baby_base():
   p_mc_mom_(&mc_mom_),
   b_mc_mom_(tree_.Branch("mc_mom", &p_mc_mom_)),
   c_mc_mom_(false),
+  mc_momidx_(0),
+  p_mc_momidx_(&mc_momidx_),
+  b_mc_momidx_(tree_.Branch("mc_momidx", &p_mc_momidx_)),
+  c_mc_momidx_(false),
+  mc_status_(0),
+  p_mc_status_(&mc_status_),
+  b_mc_status_(tree_.Branch("mc_status", &p_mc_status_)),
+  c_mc_status_(false),
   mus_charge_(0),
   p_mus_charge_(&mus_charge_),
   b_mus_charge_(tree_.Branch("mus_charge", &p_mus_charge_)),
   c_mus_charge_(false),
+  mus_trk_algo_(0),
+  p_mus_trk_algo_(&mus_trk_algo_),
+  b_mus_trk_algo_(tree_.Branch("mus_trk_algo", &p_mus_trk_algo_)),
+  c_mus_trk_algo_(false),
+  mus_trk_nholes_in_(0),
+  p_mus_trk_nholes_in_(&mus_trk_nholes_in_),
+  b_mus_trk_nholes_in_(tree_.Branch("mus_trk_nholes_in", &p_mus_trk_nholes_in_)),
+  c_mus_trk_nholes_in_(false),
+  mus_trk_nholes_out_(0),
+  p_mus_trk_nholes_out_(&mus_trk_nholes_out_),
+  b_mus_trk_nholes_out_(tree_.Branch("mus_trk_nholes_out", &p_mus_trk_nholes_out_)),
+  c_mus_trk_nholes_out_(false),
   sys_nbm_(0),
   p_sys_nbm_(&sys_nbm_),
   b_sys_nbm_(tree_.Branch("sys_nbm", &p_sys_nbm_)),
   c_sys_nbm_(false),
+  sys_nbm40_(0),
+  p_sys_nbm40_(&sys_nbm40_),
+  b_sys_nbm40_(tree_.Branch("sys_nbm40", &p_sys_nbm40_)),
+  c_sys_nbm40_(false),
   sys_njets_(0),
   p_sys_njets_(&sys_njets_),
   b_sys_njets_(tree_.Branch("sys_njets", &p_sys_njets_)),
   c_sys_njets_(false),
+  sys_njets40_(0),
+  p_sys_njets40_(&sys_njets40_),
+  b_sys_njets40_(tree_.Branch("sys_njets40", &p_sys_njets40_)),
+  c_sys_njets40_(false),
   tks_pdg_(0),
   b_tks_pdg_(tree_.Branch("tks_pdg", &tks_pdg_)),
   c_tks_pdg_(false){
@@ -968,6 +1292,18 @@ baby_base::baby_base(const string &filename):
   jetmismeas_(static_cast<bool >(bad_val_)),
   b_jetmismeas_(NULL),
   c_jetmismeas_(false),
+  json12p9_(static_cast<bool >(bad_val_)),
+  b_json12p9_(NULL),
+  c_json12p9_(false),
+  json2p6_(static_cast<bool >(bad_val_)),
+  b_json2p6_(NULL),
+  c_json2p6_(false),
+  json4p0_(static_cast<bool >(bad_val_)),
+  b_json4p0_(NULL),
+  c_json4p0_(false),
+  json7p65_(static_cast<bool >(bad_val_)),
+  b_json7p65_(NULL),
+  c_json7p65_(false),
   low_dphi_(static_cast<bool >(bad_val_)),
   b_low_dphi_(NULL),
   c_low_dphi_(false),
@@ -977,9 +1313,21 @@ baby_base::baby_base(const string &filename):
   pass_(static_cast<bool >(bad_val_)),
   b_pass_(NULL),
   c_pass_(false),
+  pass20_(static_cast<bool >(bad_val_)),
+  b_pass20_(NULL),
+  c_pass20_(false),
+  pass40_(static_cast<bool >(bad_val_)),
+  b_pass40_(NULL),
+  c_pass40_(false),
+  pass50_(static_cast<bool >(bad_val_)),
+  b_pass50_(NULL),
+  c_pass50_(false),
   pass_cschalo_(static_cast<bool >(bad_val_)),
   b_pass_cschalo_(NULL),
   c_pass_cschalo_(false),
+  pass_ecaldeadcell_(static_cast<bool >(bad_val_)),
+  b_pass_ecaldeadcell_(NULL),
+  c_pass_ecaldeadcell_(false),
   pass_eebadsc_(static_cast<bool >(bad_val_)),
   b_pass_eebadsc_(NULL),
   c_pass_eebadsc_(false),
@@ -995,6 +1343,15 @@ baby_base::baby_base(const string &filename):
   pass_jets_(static_cast<bool >(bad_val_)),
   b_pass_jets_(NULL),
   c_pass_jets_(false),
+  pass_jets20_(static_cast<bool >(bad_val_)),
+  b_pass_jets20_(NULL),
+  c_pass_jets20_(false),
+  pass_jets40_(static_cast<bool >(bad_val_)),
+  b_pass_jets40_(NULL),
+  c_pass_jets40_(false),
+  pass_jets50_(static_cast<bool >(bad_val_)),
+  b_pass_jets50_(NULL),
+  c_pass_jets50_(false),
   pass_jets_nohf_(static_cast<bool >(bad_val_)),
   b_pass_jets_nohf_(NULL),
   c_pass_jets_nohf_(false),
@@ -1013,9 +1370,24 @@ baby_base::baby_base(const string &filename):
   pass_ra2_(static_cast<bool >(bad_val_)),
   b_pass_ra2_(NULL),
   c_pass_ra2_(false),
+  pass_ra2_badmu_(static_cast<bool >(bad_val_)),
+  b_pass_ra2_badmu_(NULL),
+  c_pass_ra2_badmu_(false),
   stitch_(static_cast<bool >(bad_val_)),
   b_stitch_(NULL),
   c_stitch_(false),
+  trig_lep_(static_cast<bool >(bad_val_)),
+  b_trig_lep_(NULL),
+  c_trig_lep_(false),
+  trig_met_(static_cast<bool >(bad_val_)),
+  b_trig_met_(NULL),
+  c_trig_met_(false),
+  trig_ra4_(static_cast<bool >(bad_val_)),
+  b_trig_ra4_(NULL),
+  c_trig_ra4_(false),
+  trig_vvvl_(static_cast<bool >(bad_val_)),
+  b_trig_vvvl_(NULL),
+  c_trig_vvvl_(false),
   dphi1_(static_cast<float >(bad_val_)),
   b_dphi1_(NULL),
   c_dphi1_(false),
@@ -1031,6 +1403,9 @@ baby_base::baby_base(const string &filename):
   dphi_wlep_(static_cast<float >(bad_val_)),
   b_dphi_wlep_(NULL),
   c_dphi_wlep_(false),
+  eff_jetid_(static_cast<float >(bad_val_)),
+  b_eff_jetid_(NULL),
+  c_eff_jetid_(false),
   eff_trig_(static_cast<float >(bad_val_)),
   b_eff_trig_(NULL),
   c_eff_trig_(false),
@@ -1097,9 +1472,51 @@ baby_base::baby_base(const string &filename):
   elmu_w_(static_cast<float >(bad_val_)),
   b_elmu_w_(NULL),
   c_elmu_w_(false),
+  hig1_eta_(static_cast<float >(bad_val_)),
+  b_hig1_eta_(NULL),
+  c_hig1_eta_(false),
+  hig1_m_(static_cast<float >(bad_val_)),
+  b_hig1_m_(NULL),
+  c_hig1_m_(false),
+  hig1_phi_(static_cast<float >(bad_val_)),
+  b_hig1_phi_(NULL),
+  c_hig1_phi_(false),
+  hig1_pt_(static_cast<float >(bad_val_)),
+  b_hig1_pt_(NULL),
+  c_hig1_pt_(false),
+  hig2_eta_(static_cast<float >(bad_val_)),
+  b_hig2_eta_(NULL),
+  c_hig2_eta_(false),
+  hig2_m_(static_cast<float >(bad_val_)),
+  b_hig2_m_(NULL),
+  c_hig2_m_(false),
+  hig2_phi_(static_cast<float >(bad_val_)),
+  b_hig2_phi_(NULL),
+  c_hig2_phi_(false),
+  hig2_pt_(static_cast<float >(bad_val_)),
+  b_hig2_pt_(NULL),
+  c_hig2_pt_(false),
+  hig_am_(static_cast<float >(bad_val_)),
+  b_hig_am_(NULL),
+  c_hig_am_(false),
+  hig_dm_(static_cast<float >(bad_val_)),
+  b_hig_dm_(NULL),
+  c_hig_dm_(false),
+  hig_dphi_(static_cast<float >(bad_val_)),
+  b_hig_dphi_(NULL),
+  c_hig_dphi_(false),
+  hig_drmax_(static_cast<float >(bad_val_)),
+  b_hig_drmax_(NULL),
+  c_hig_drmax_(false),
   ht_(static_cast<float >(bad_val_)),
   b_ht_(NULL),
   c_ht_(false),
+  ht40_(static_cast<float >(bad_val_)),
+  b_ht40_(NULL),
+  c_ht40_(false),
+  ht50_(static_cast<float >(bad_val_)),
+  b_ht50_(NULL),
+  c_ht50_(false),
   ht_clean_(static_cast<float >(bad_val_)),
   b_ht_clean_(NULL),
   c_ht_clean_(false),
@@ -1115,6 +1532,15 @@ baby_base::baby_base(const string &filename):
   ht_tru_(static_cast<float >(bad_val_)),
   b_ht_tru_(NULL),
   c_ht_tru_(false),
+  htx_(static_cast<float >(bad_val_)),
+  b_htx_(NULL),
+  c_htx_(false),
+  htx40_(static_cast<float >(bad_val_)),
+  b_htx40_(NULL),
+  c_htx40_(false),
+  htx50_(static_cast<float >(bad_val_)),
+  b_htx50_(NULL),
+  c_htx50_(false),
   isr_tru_eta_(static_cast<float >(bad_val_)),
   b_isr_tru_eta_(NULL),
   c_isr_tru_eta_(false),
@@ -1127,9 +1553,15 @@ baby_base::baby_base(const string &filename):
   jetsys_eta_(static_cast<float >(bad_val_)),
   b_jetsys_eta_(NULL),
   c_jetsys_eta_(false),
+  jetsys_m_(static_cast<float >(bad_val_)),
+  b_jetsys_m_(NULL),
+  c_jetsys_m_(false),
   jetsys_nob_eta_(static_cast<float >(bad_val_)),
   b_jetsys_nob_eta_(NULL),
   c_jetsys_nob_eta_(false),
+  jetsys_nob_m_(static_cast<float >(bad_val_)),
+  b_jetsys_nob_m_(NULL),
+  c_jetsys_nob_m_(false),
   jetsys_nob_phi_(static_cast<float >(bad_val_)),
   b_jetsys_nob_phi_(NULL),
   c_jetsys_nob_phi_(false),
@@ -1142,6 +1574,12 @@ baby_base::baby_base(const string &filename):
   jetsys_pt_(static_cast<float >(bad_val_)),
   b_jetsys_pt_(NULL),
   c_jetsys_pt_(false),
+  m_tt_(static_cast<float >(bad_val_)),
+  b_m_tt_(NULL),
+  c_m_tt_(false),
+  mct_(static_cast<float >(bad_val_)),
+  b_mct_(NULL),
+  c_mct_(false),
   met_(static_cast<float >(bad_val_)),
   b_met_(NULL),
   c_met_(false),
@@ -1199,15 +1637,33 @@ baby_base::baby_base(const string &filename):
   mht_phi_(static_cast<float >(bad_val_)),
   b_mht_phi_(NULL),
   c_mht_phi_(false),
-  mj_(static_cast<float >(bad_val_)),
-  b_mj_(NULL),
-  c_mj_(false),
   mj08_(static_cast<float >(bad_val_)),
   b_mj08_(NULL),
   c_mj08_(false),
+  mj12_(static_cast<float >(bad_val_)),
+  b_mj12_(NULL),
+  c_mj12_(false),
+  mj14_(static_cast<float >(bad_val_)),
+  b_mj14_(NULL),
+  c_mj14_(false),
+  mj14_nolep_(static_cast<float >(bad_val_)),
+  b_mj14_nolep_(NULL),
+  c_mj14_nolep_(false),
+  mj40_(static_cast<float >(bad_val_)),
+  b_mj40_(NULL),
+  c_mj40_(false),
+  mj50_(static_cast<float >(bad_val_)),
+  b_mj50_(NULL),
+  c_mj50_(false),
   mt_(static_cast<float >(bad_val_)),
   b_mt_(NULL),
   c_mt_(false),
+  mt2_(static_cast<float >(bad_val_)),
+  b_mt2_(NULL),
+  c_mt2_(false),
+  mt2_0mass_(static_cast<float >(bad_val_)),
+  b_mt2_0mass_(NULL),
+  c_mt2_0mass_(false),
   mt_nohf_(static_cast<float >(bad_val_)),
   b_mt_nohf_(NULL),
   c_mt_nohf_(false),
@@ -1262,6 +1718,9 @@ baby_base::baby_base(const string &filename):
   mumuv_w_(static_cast<float >(bad_val_)),
   b_mumuv_w_(NULL),
   c_mumuv_w_(false),
+  nisr_(static_cast<float >(bad_val_)),
+  b_nisr_(NULL),
+  c_nisr_(false),
   ntrupv_mean_(static_cast<float >(bad_val_)),
   b_ntrupv_mean_(NULL),
   c_ntrupv_mean_(false),
@@ -1298,12 +1757,30 @@ baby_base::baby_base(const string &filename):
   onph_ph90_(static_cast<float >(bad_val_)),
   b_onph_ph90_(NULL),
   c_onph_ph90_(false),
+  st_(static_cast<float >(bad_val_)),
+  b_st_(NULL),
+  c_st_(false),
+  st40_(static_cast<float >(bad_val_)),
+  b_st40_(NULL),
+  c_st40_(false),
+  st50_(static_cast<float >(bad_val_)),
+  b_st50_(NULL),
+  c_st50_(false),
   w_btag_(static_cast<float >(bad_val_)),
   b_w_btag_(NULL),
   c_w_btag_(false),
+  w_btag40_(static_cast<float >(bad_val_)),
+  b_w_btag40_(NULL),
+  c_w_btag40_(false),
+  w_btag_loose_(static_cast<float >(bad_val_)),
+  b_w_btag_loose_(NULL),
+  c_w_btag_loose_(false),
   w_fs_lep_(static_cast<float >(bad_val_)),
   b_w_fs_lep_(NULL),
   c_w_fs_lep_(false),
+  w_isr_(static_cast<float >(bad_val_)),
+  b_w_isr_(NULL),
+  c_w_isr_(false),
   w_lep_(static_cast<float >(bad_val_)),
   b_w_lep_(NULL),
   c_w_lep_(false),
@@ -1319,6 +1796,12 @@ baby_base::baby_base(const string &filename):
   weight_(static_cast<float >(bad_val_)),
   b_weight_(NULL),
   c_weight_(false),
+  weight_rpv_(static_cast<float >(bad_val_)),
+  b_weight_rpv_(NULL),
+  c_weight_rpv_(false),
+  hig_bin_(static_cast<int >(bad_val_)),
+  b_hig_bin_(NULL),
+  c_hig_bin_(false),
   lumiblock_(static_cast<int >(bad_val_)),
   b_lumiblock_(NULL),
   c_lumiblock_(false),
@@ -1334,6 +1817,15 @@ baby_base::baby_base(const string &filename):
   nbm_(static_cast<int >(bad_val_)),
   b_nbm_(NULL),
   c_nbm_(false),
+  nbm20_(static_cast<int >(bad_val_)),
+  b_nbm20_(NULL),
+  c_nbm20_(false),
+  nbm40_(static_cast<int >(bad_val_)),
+  b_nbm40_(NULL),
+  c_nbm40_(false),
+  nbm50_(static_cast<int >(bad_val_)),
+  b_nbm50_(NULL),
+  c_nbm50_(false),
   nbm_ra2_(static_cast<int >(bad_val_)),
   b_nbm_ra2_(NULL),
   c_nbm_ra2_(false),
@@ -1349,18 +1841,27 @@ baby_base::baby_base(const string &filename):
   nels_vvvl_(static_cast<int >(bad_val_)),
   b_nels_vvvl_(NULL),
   c_nels_vvvl_(false),
-  nfjets_(static_cast<int >(bad_val_)),
-  b_nfjets_(NULL),
-  c_nfjets_(false),
-  nfjets08_(static_cast<int >(bad_val_)),
-  b_nfjets08_(NULL),
-  c_nfjets08_(false),
+  nfjets14_(static_cast<int >(bad_val_)),
+  b_nfjets14_(NULL),
+  c_nfjets14_(false),
+  nfjets40_(static_cast<int >(bad_val_)),
+  b_nfjets40_(NULL),
+  c_nfjets40_(false),
   nisr_me_(static_cast<int >(bad_val_)),
   b_nisr_me_(NULL),
   c_nisr_me_(false),
   njets_(static_cast<int >(bad_val_)),
   b_njets_(NULL),
   c_njets_(false),
+  njets20_(static_cast<int >(bad_val_)),
+  b_njets20_(NULL),
+  c_njets20_(false),
+  njets40_(static_cast<int >(bad_val_)),
+  b_njets40_(NULL),
+  c_njets40_(false),
+  njets50_(static_cast<int >(bad_val_)),
+  b_njets50_(NULL),
+  c_njets50_(false),
   njets_clean_(static_cast<int >(bad_val_)),
   b_njets_clean_(NULL),
   c_njets_clean_(false),
@@ -1424,6 +1925,9 @@ baby_base::baby_base(const string &filename):
   run_(static_cast<int >(bad_val_)),
   b_run_(NULL),
   c_run_(false),
+  type_(static_cast<int >(bad_val_)),
+  b_type_(NULL),
+  c_type_(false),
   els_ele105_(0),
   p_els_ele105_(&els_ele105_),
   b_els_ele105_(NULL),
@@ -1468,6 +1972,18 @@ baby_base::baby_base(const string &filename):
   p_els_vvvl_(&els_vvvl_),
   b_els_vvvl_(NULL),
   c_els_vvvl_(false),
+  jets_h1_(0),
+  p_jets_h1_(&jets_h1_),
+  b_jets_h1_(NULL),
+  c_jets_h1_(false),
+  jets_h2_(0),
+  p_jets_h2_(&jets_h2_),
+  b_jets_h2_(NULL),
+  c_jets_h2_(false),
+  jets_isisr_(0),
+  p_jets_isisr_(&jets_isisr_),
+  b_jets_isisr_(NULL),
+  c_jets_isisr_(false),
   jets_islep_(0),
   p_jets_islep_(&jets_islep_),
   b_jets_islep_(NULL),
@@ -1508,6 +2024,10 @@ baby_base::baby_base(const string &filename):
   p_mus_tm_(&mus_tm_),
   b_mus_tm_(NULL),
   c_mus_tm_(false),
+  mus_trk_quality_(0),
+  p_mus_trk_quality_(&mus_trk_quality_),
+  b_mus_trk_quality_(NULL),
+  c_mus_trk_quality_(false),
   mus_vvvl_(0),
   p_mus_vvvl_(&mus_vvvl_),
   b_mus_vvvl_(NULL),
@@ -1524,6 +2044,14 @@ baby_base::baby_base(const string &filename):
   p_sys_pass_(&sys_pass_),
   b_sys_pass_(NULL),
   c_sys_pass_(false),
+  sys_pass40_(0),
+  p_sys_pass40_(&sys_pass40_),
+  b_sys_pass40_(NULL),
+  c_sys_pass40_(false),
+  tks_tm_(0),
+  p_tks_tm_(&tks_tm_),
+  b_tks_tm_(NULL),
+  c_tks_tm_(false),
   trig_(0),
   p_trig_(&trig_),
   b_trig_(NULL),
@@ -1532,14 +2060,38 @@ baby_base::baby_base(const string &filename):
   p_els_d0_(&els_d0_),
   b_els_d0_(NULL),
   c_els_d0_(false),
+  els_deta_sctrk_(0),
+  p_els_deta_sctrk_(&els_deta_sctrk_),
+  b_els_deta_sctrk_(NULL),
+  c_els_deta_sctrk_(false),
+  els_dphi_sctrk_(0),
+  p_els_dphi_sctrk_(&els_dphi_sctrk_),
+  b_els_dphi_sctrk_(NULL),
+  c_els_dphi_sctrk_(false),
   els_dz_(0),
   p_els_dz_(&els_dz_),
   b_els_dz_(NULL),
   c_els_dz_(false),
+  els_em_e_(0),
+  p_els_em_e_(&els_em_e_),
+  b_els_em_e_(NULL),
+  c_els_em_e_(false),
+  els_eoverp_(0),
+  p_els_eoverp_(&els_eoverp_),
+  b_els_eoverp_(NULL),
+  c_els_eoverp_(false),
   els_eta_(0),
   p_els_eta_(&els_eta_),
   b_els_eta_(NULL),
   c_els_eta_(false),
+  els_hovere_(0),
+  p_els_hovere_(&els_hovere_),
+  b_els_hovere_(NULL),
+  c_els_hovere_(false),
+  els_ip3d_(0),
+  p_els_ip3d_(&els_ip3d_),
+  b_els_ip3d_(NULL),
+  c_els_ip3d_(false),
   els_miniso_(0),
   p_els_miniso_(&els_miniso_),
   b_els_miniso_(NULL),
@@ -1560,6 +2112,14 @@ baby_base::baby_base(const string &filename):
   p_els_sceta_(&els_sceta_),
   b_els_sceta_(NULL),
   c_els_sceta_(false),
+  els_trk_pt_(0),
+  p_els_trk_pt_(&els_trk_pt_),
+  b_els_trk_pt_(NULL),
+  c_els_trk_pt_(false),
+  els_trk_pterr_(0),
+  p_els_trk_pterr_(&els_trk_pterr_),
+  b_els_trk_pterr_(NULL),
+  c_els_trk_pterr_(false),
   els_vvvl_eta_(0),
   p_els_vvvl_eta_(&els_vvvl_eta_),
   b_els_vvvl_eta_(NULL),
@@ -1572,54 +2132,38 @@ baby_base::baby_base(const string &filename):
   p_els_vvvl_pt_(&els_vvvl_pt_),
   b_els_vvvl_pt_(NULL),
   c_els_vvvl_pt_(false),
-  fjets08_eta_(0),
-  p_fjets08_eta_(&fjets08_eta_),
-  b_fjets08_eta_(NULL),
-  c_fjets08_eta_(false),
-  fjets08_m_(0),
-  p_fjets08_m_(&fjets08_m_),
-  b_fjets08_m_(NULL),
-  c_fjets08_m_(false),
-  fjets08_phi_(0),
-  p_fjets08_phi_(&fjets08_phi_),
-  b_fjets08_phi_(NULL),
-  c_fjets08_phi_(false),
-  fjets08_poscsv_(0),
-  p_fjets08_poscsv_(&fjets08_poscsv_),
-  b_fjets08_poscsv_(NULL),
-  c_fjets08_poscsv_(false),
-  fjets08_pt_(0),
-  p_fjets08_pt_(&fjets08_pt_),
-  b_fjets08_pt_(NULL),
-  c_fjets08_pt_(false),
-  fjets08_sumcsv_(0),
-  p_fjets08_sumcsv_(&fjets08_sumcsv_),
-  b_fjets08_sumcsv_(NULL),
-  c_fjets08_sumcsv_(false),
-  fjets_eta_(0),
-  p_fjets_eta_(&fjets_eta_),
-  b_fjets_eta_(NULL),
-  c_fjets_eta_(false),
-  fjets_m_(0),
-  p_fjets_m_(&fjets_m_),
-  b_fjets_m_(NULL),
-  c_fjets_m_(false),
-  fjets_phi_(0),
-  p_fjets_phi_(&fjets_phi_),
-  b_fjets_phi_(NULL),
-  c_fjets_phi_(false),
-  fjets_poscsv_(0),
-  p_fjets_poscsv_(&fjets_poscsv_),
-  b_fjets_poscsv_(NULL),
-  c_fjets_poscsv_(false),
-  fjets_pt_(0),
-  p_fjets_pt_(&fjets_pt_),
-  b_fjets_pt_(NULL),
-  c_fjets_pt_(false),
-  fjets_sumcsv_(0),
-  p_fjets_sumcsv_(&fjets_sumcsv_),
-  b_fjets_sumcsv_(NULL),
-  c_fjets_sumcsv_(false),
+  fjets14_eta_(0),
+  p_fjets14_eta_(&fjets14_eta_),
+  b_fjets14_eta_(NULL),
+  c_fjets14_eta_(false),
+  fjets14_m_(0),
+  p_fjets14_m_(&fjets14_m_),
+  b_fjets14_m_(NULL),
+  c_fjets14_m_(false),
+  fjets14_phi_(0),
+  p_fjets14_phi_(&fjets14_phi_),
+  b_fjets14_phi_(NULL),
+  c_fjets14_phi_(false),
+  fjets14_pt_(0),
+  p_fjets14_pt_(&fjets14_pt_),
+  b_fjets14_pt_(NULL),
+  c_fjets14_pt_(false),
+  fjets40_eta_(0),
+  p_fjets40_eta_(&fjets40_eta_),
+  b_fjets40_eta_(NULL),
+  c_fjets40_eta_(false),
+  fjets40_m_(0),
+  p_fjets40_m_(&fjets40_m_),
+  b_fjets40_m_(NULL),
+  c_fjets40_m_(false),
+  fjets40_phi_(0),
+  p_fjets40_phi_(&fjets40_phi_),
+  b_fjets40_phi_(NULL),
+  c_fjets40_phi_(false),
+  fjets40_pt_(0),
+  p_fjets40_pt_(&fjets40_pt_),
+  b_fjets40_pt_(NULL),
+  c_fjets40_pt_(false),
   jets_csv_(0),
   p_jets_csv_(&jets_csv_),
   b_jets_csv_(NULL),
@@ -1684,10 +2228,18 @@ baby_base::baby_base(const string &filename):
   p_mus_dz_(&mus_dz_),
   b_mus_dz_(NULL),
   c_mus_dz_(false),
+  mus_em_e_(0),
+  p_mus_em_e_(&mus_em_e_),
+  b_mus_em_e_(NULL),
+  c_mus_em_e_(false),
   mus_eta_(0),
   p_mus_eta_(&mus_eta_),
   b_mus_eta_(NULL),
   c_mus_eta_(false),
+  mus_had_e_(0),
+  p_mus_had_e_(&mus_had_e_),
+  b_mus_had_e_(NULL),
+  c_mus_had_e_(false),
   mus_miniso_(0),
   p_mus_miniso_(&mus_miniso_),
   b_mus_miniso_(NULL),
@@ -1700,6 +2252,10 @@ baby_base::baby_base(const string &filename):
   p_mus_pt_(&mus_pt_),
   b_mus_pt_(NULL),
   c_mus_pt_(false),
+  mus_pterr_(0),
+  p_mus_pterr_(&mus_pterr_),
+  b_mus_pterr_(NULL),
+  c_mus_pterr_(false),
   mus_reliso_(0),
   p_mus_reliso_(&mus_reliso_),
   b_mus_reliso_(NULL),
@@ -1732,10 +2288,22 @@ baby_base::baby_base(const string &filename):
   p_sys_bctag_(&sys_bctag_),
   b_sys_bctag_(NULL),
   c_sys_bctag_(false),
+  sys_bctag40_(0),
+  p_sys_bctag40_(&sys_bctag40_),
+  b_sys_bctag40_(NULL),
+  c_sys_bctag40_(false),
+  sys_bctag_loose_(0),
+  p_sys_bctag_loose_(&sys_bctag_loose_),
+  b_sys_bctag_loose_(NULL),
+  c_sys_bctag_loose_(false),
   sys_fs_bctag_(0),
   p_sys_fs_bctag_(&sys_fs_bctag_),
   b_sys_fs_bctag_(NULL),
   c_sys_fs_bctag_(false),
+  sys_fs_bctag40_(0),
+  p_sys_fs_bctag40_(&sys_fs_bctag40_),
+  b_sys_fs_bctag40_(NULL),
+  c_sys_fs_bctag40_(false),
   sys_fs_lep_(0),
   p_sys_fs_lep_(&sys_fs_lep_),
   b_sys_fs_lep_(NULL),
@@ -1744,10 +2312,18 @@ baby_base::baby_base(const string &filename):
   p_sys_fs_udsgtag_(&sys_fs_udsgtag_),
   b_sys_fs_udsgtag_(NULL),
   c_sys_fs_udsgtag_(false),
+  sys_fs_udsgtag40_(0),
+  p_sys_fs_udsgtag40_(&sys_fs_udsgtag40_),
+  b_sys_fs_udsgtag40_(NULL),
+  c_sys_fs_udsgtag40_(false),
   sys_ht_(0),
   p_sys_ht_(&sys_ht_),
   b_sys_ht_(NULL),
   c_sys_ht_(false),
+  sys_ht40_(0),
+  p_sys_ht40_(&sys_ht40_),
+  b_sys_ht40_(NULL),
+  c_sys_ht40_(false),
   sys_isr_(0),
   p_sys_isr_(&sys_isr_),
   b_sys_isr_(NULL),
@@ -1760,10 +2336,18 @@ baby_base::baby_base(const string &filename):
   p_sys_met_(&sys_met_),
   b_sys_met_(NULL),
   c_sys_met_(false),
-  sys_mj_(0),
-  p_sys_mj_(&sys_mj_),
-  b_sys_mj_(NULL),
-  c_sys_mj_(false),
+  sys_mj14_(0),
+  p_sys_mj14_(&sys_mj14_),
+  b_sys_mj14_(NULL),
+  c_sys_mj14_(false),
+  sys_mj14_nolep_(0),
+  p_sys_mj14_nolep_(&sys_mj14_nolep_),
+  b_sys_mj14_nolep_(NULL),
+  c_sys_mj14_nolep_(false),
+  sys_mj40_(0),
+  p_sys_mj40_(&sys_mj40_),
+  b_sys_mj40_(NULL),
+  c_sys_mj40_(false),
   sys_mt_(0),
   p_sys_mt_(&sys_mt_),
   b_sys_mt_(NULL),
@@ -1780,10 +2364,18 @@ baby_base::baby_base(const string &filename):
   p_sys_murf_(&sys_murf_),
   b_sys_murf_(NULL),
   c_sys_murf_(false),
-  sys_pdf_(0),
-  p_sys_pdf_(&sys_pdf_),
-  b_sys_pdf_(NULL),
-  c_sys_pdf_(false),
+  sys_pu_(0),
+  p_sys_pu_(&sys_pu_),
+  b_sys_pu_(NULL),
+  c_sys_pu_(false),
+  sys_st_(0),
+  p_sys_st_(&sys_st_),
+  b_sys_st_(NULL),
+  c_sys_st_(false),
+  sys_st40_(0),
+  p_sys_st40_(&sys_st40_),
+  b_sys_st40_(NULL),
+  c_sys_st40_(false),
   sys_trig_(0),
   p_sys_trig_(&sys_trig_),
   b_sys_trig_(NULL),
@@ -1792,6 +2384,22 @@ baby_base::baby_base(const string &filename):
   p_sys_udsgtag_(&sys_udsgtag_),
   b_sys_udsgtag_(NULL),
   c_sys_udsgtag_(false),
+  sys_udsgtag40_(0),
+  p_sys_udsgtag40_(&sys_udsgtag40_),
+  b_sys_udsgtag40_(NULL),
+  c_sys_udsgtag40_(false),
+  sys_udsgtag_loose_(0),
+  p_sys_udsgtag_loose_(&sys_udsgtag_loose_),
+  b_sys_udsgtag_loose_(NULL),
+  c_sys_udsgtag_loose_(false),
+  tks_d0_(0),
+  p_tks_d0_(&tks_d0_),
+  b_tks_d0_(NULL),
+  c_tks_d0_(false),
+  tks_dz_(0),
+  p_tks_dz_(&tks_dz_),
+  b_tks_dz_(NULL),
+  c_tks_dz_(false),
   tks_eta_(0),
   p_tks_eta_(&tks_eta_),
   b_tks_eta_(NULL),
@@ -1816,42 +2424,54 @@ baby_base::baby_base(const string &filename):
   p_tks_pt_(&tks_pt_),
   b_tks_pt_(NULL),
   c_tks_pt_(false),
+  tks_reliso_(0),
+  p_tks_reliso_(&tks_reliso_),
+  b_tks_reliso_(NULL),
+  c_tks_reliso_(false),
   trig_prescale_(0),
   p_trig_prescale_(&trig_prescale_),
   b_trig_prescale_(NULL),
   c_trig_prescale_(false),
-  w_pdf_(0),
-  p_w_pdf_(&w_pdf_),
-  b_w_pdf_(NULL),
-  c_w_pdf_(false),
   els_charge_(0),
   p_els_charge_(&els_charge_),
   b_els_charge_(NULL),
   c_els_charge_(false),
-  fjets08_btags_(0),
-  p_fjets08_btags_(&fjets08_btags_),
-  b_fjets08_btags_(NULL),
-  c_fjets08_btags_(false),
-  fjets08_nconst_(0),
-  p_fjets08_nconst_(&fjets08_nconst_),
-  b_fjets08_nconst_(NULL),
-  c_fjets08_nconst_(false),
-  fjets_btags_(0),
-  p_fjets_btags_(&fjets_btags_),
-  b_fjets_btags_(NULL),
-  c_fjets_btags_(false),
-  fjets_nconst_(0),
-  p_fjets_nconst_(&fjets_nconst_),
-  b_fjets_nconst_(NULL),
-  c_fjets_nconst_(false),
+  els_trk_nholes_(0),
+  p_els_trk_nholes_(&els_trk_nholes_),
+  b_els_trk_nholes_(NULL),
+  c_els_trk_nholes_(false),
+  fjets14_nconst_(0),
+  p_fjets14_nconst_(&fjets14_nconst_),
+  b_fjets14_nconst_(NULL),
+  c_fjets14_nconst_(false),
+  fjets40_nconst_(0),
+  p_fjets40_nconst_(&fjets40_nconst_),
+  b_fjets40_nconst_(NULL),
+  c_fjets40_nconst_(false),
   jets_fjet08_index_(0),
   p_jets_fjet08_index_(&jets_fjet08_index_),
   b_jets_fjet08_index_(NULL),
   c_jets_fjet08_index_(false),
-  jets_fjet_index_(0),
-  p_jets_fjet_index_(&jets_fjet_index_),
-  b_jets_fjet_index_(NULL),
-  c_jets_fjet_index_(false),
+  jets_fjet12_index_(0),
+  p_jets_fjet12_index_(&jets_fjet12_index_),
+  b_jets_fjet12_index_(NULL),
+  c_jets_fjet12_index_(false),
+  jets_fjet14_index_(0),
+  p_jets_fjet14_index_(&jets_fjet14_index_),
+  b_jets_fjet14_index_(NULL),
+  c_jets_fjet14_index_(false),
+  jets_fjet14_nolep_index_(0),
+  p_jets_fjet14_nolep_index_(&jets_fjet14_nolep_index_),
+  b_jets_fjet14_nolep_index_(NULL),
+  c_jets_fjet14_nolep_index_(false),
+  jets_fjet40_index_(0),
+  p_jets_fjet40_index_(&jets_fjet40_index_),
+  b_jets_fjet40_index_(NULL),
+  c_jets_fjet40_index_(false),
+  jets_fjet50_index_(0),
+  p_jets_fjet50_index_(&jets_fjet50_index_),
+  b_jets_fjet50_index_(NULL),
+  c_jets_fjet50_index_(false),
   jets_hflavor_(0),
   p_jets_hflavor_(&jets_hflavor_),
   b_jets_hflavor_(NULL),
@@ -1864,18 +2484,46 @@ baby_base::baby_base(const string &filename):
   p_mc_mom_(&mc_mom_),
   b_mc_mom_(NULL),
   c_mc_mom_(false),
+  mc_momidx_(0),
+  p_mc_momidx_(&mc_momidx_),
+  b_mc_momidx_(NULL),
+  c_mc_momidx_(false),
+  mc_status_(0),
+  p_mc_status_(&mc_status_),
+  b_mc_status_(NULL),
+  c_mc_status_(false),
   mus_charge_(0),
   p_mus_charge_(&mus_charge_),
   b_mus_charge_(NULL),
   c_mus_charge_(false),
+  mus_trk_algo_(0),
+  p_mus_trk_algo_(&mus_trk_algo_),
+  b_mus_trk_algo_(NULL),
+  c_mus_trk_algo_(false),
+  mus_trk_nholes_in_(0),
+  p_mus_trk_nholes_in_(&mus_trk_nholes_in_),
+  b_mus_trk_nholes_in_(NULL),
+  c_mus_trk_nholes_in_(false),
+  mus_trk_nholes_out_(0),
+  p_mus_trk_nholes_out_(&mus_trk_nholes_out_),
+  b_mus_trk_nholes_out_(NULL),
+  c_mus_trk_nholes_out_(false),
   sys_nbm_(0),
   p_sys_nbm_(&sys_nbm_),
   b_sys_nbm_(NULL),
   c_sys_nbm_(false),
+  sys_nbm40_(0),
+  p_sys_nbm40_(&sys_nbm40_),
+  b_sys_nbm40_(NULL),
+  c_sys_nbm40_(false),
   sys_njets_(0),
   p_sys_njets_(&sys_njets_),
   b_sys_njets_(NULL),
   c_sys_njets_(false),
+  sys_njets40_(0),
+  p_sys_njets40_(&sys_njets40_),
+  b_sys_njets40_(NULL),
+  c_sys_njets40_(false),
   tks_pdg_(0),
   p_tks_pdg_(&tks_pdg_),
   b_tks_pdg_(NULL),
@@ -1884,27 +2532,44 @@ baby_base::baby_base(const string &filename):
   chain_.SetBranchAddress("event", &event_, &b_event_);
   chain_.SetBranchAddress("fromGS", &fromGS_, &b_fromGS_);
   chain_.SetBranchAddress("jetmismeas", &jetmismeas_, &b_jetmismeas_);
+  chain_.SetBranchAddress("json12p9", &json12p9_, &b_json12p9_);
+  chain_.SetBranchAddress("json2p6", &json2p6_, &b_json2p6_);
+  chain_.SetBranchAddress("json4p0", &json4p0_, &b_json4p0_);
+  chain_.SetBranchAddress("json7p65", &json7p65_, &b_json7p65_);
   chain_.SetBranchAddress("low_dphi", &low_dphi_, &b_low_dphi_);
   chain_.SetBranchAddress("nonblind", &nonblind_, &b_nonblind_);
   chain_.SetBranchAddress("pass", &pass_, &b_pass_);
+  chain_.SetBranchAddress("pass20", &pass20_, &b_pass20_);
+  chain_.SetBranchAddress("pass40", &pass40_, &b_pass40_);
+  chain_.SetBranchAddress("pass50", &pass50_, &b_pass50_);
   chain_.SetBranchAddress("pass_cschalo", &pass_cschalo_, &b_pass_cschalo_);
+  chain_.SetBranchAddress("pass_ecaldeadcell", &pass_ecaldeadcell_, &b_pass_ecaldeadcell_);
   chain_.SetBranchAddress("pass_eebadsc", &pass_eebadsc_, &b_pass_eebadsc_);
   chain_.SetBranchAddress("pass_goodv", &pass_goodv_, &b_pass_goodv_);
   chain_.SetBranchAddress("pass_hbhe", &pass_hbhe_, &b_pass_hbhe_);
   chain_.SetBranchAddress("pass_hbheiso", &pass_hbheiso_, &b_pass_hbheiso_);
   chain_.SetBranchAddress("pass_jets", &pass_jets_, &b_pass_jets_);
+  chain_.SetBranchAddress("pass_jets20", &pass_jets20_, &b_pass_jets20_);
+  chain_.SetBranchAddress("pass_jets40", &pass_jets40_, &b_pass_jets40_);
+  chain_.SetBranchAddress("pass_jets50", &pass_jets50_, &b_pass_jets50_);
   chain_.SetBranchAddress("pass_jets_nohf", &pass_jets_nohf_, &b_pass_jets_nohf_);
   chain_.SetBranchAddress("pass_jets_ra2", &pass_jets_ra2_, &b_pass_jets_ra2_);
   chain_.SetBranchAddress("pass_jets_tight", &pass_jets_tight_, &b_pass_jets_tight_);
   chain_.SetBranchAddress("pass_jets_tight_ra2", &pass_jets_tight_ra2_, &b_pass_jets_tight_ra2_);
   chain_.SetBranchAddress("pass_nohf", &pass_nohf_, &b_pass_nohf_);
   chain_.SetBranchAddress("pass_ra2", &pass_ra2_, &b_pass_ra2_);
+  chain_.SetBranchAddress("pass_ra2_badmu", &pass_ra2_badmu_, &b_pass_ra2_badmu_);
   chain_.SetBranchAddress("stitch", &stitch_, &b_stitch_);
+  chain_.SetBranchAddress("trig_lep", &trig_lep_, &b_trig_lep_);
+  chain_.SetBranchAddress("trig_met", &trig_met_, &b_trig_met_);
+  chain_.SetBranchAddress("trig_ra4", &trig_ra4_, &b_trig_ra4_);
+  chain_.SetBranchAddress("trig_vvvl", &trig_vvvl_, &b_trig_vvvl_);
   chain_.SetBranchAddress("dphi1", &dphi1_, &b_dphi1_);
   chain_.SetBranchAddress("dphi2", &dphi2_, &b_dphi2_);
   chain_.SetBranchAddress("dphi3", &dphi3_, &b_dphi3_);
   chain_.SetBranchAddress("dphi4", &dphi4_, &b_dphi4_);
   chain_.SetBranchAddress("dphi_wlep", &dphi_wlep_, &b_dphi_wlep_);
+  chain_.SetBranchAddress("eff_jetid", &eff_jetid_, &b_eff_jetid_);
   chain_.SetBranchAddress("eff_trig", &eff_trig_, &b_eff_trig_);
   chain_.SetBranchAddress("elel_eta", &elel_eta_, &b_elel_eta_);
   chain_.SetBranchAddress("elel_m", &elel_m_, &b_elel_m_);
@@ -1927,21 +2592,42 @@ baby_base::baby_base(const string &filename):
   chain_.SetBranchAddress("elmu_pt1", &elmu_pt1_, &b_elmu_pt1_);
   chain_.SetBranchAddress("elmu_pt2", &elmu_pt2_, &b_elmu_pt2_);
   chain_.SetBranchAddress("elmu_w", &elmu_w_, &b_elmu_w_);
+  chain_.SetBranchAddress("hig1_eta", &hig1_eta_, &b_hig1_eta_);
+  chain_.SetBranchAddress("hig1_m", &hig1_m_, &b_hig1_m_);
+  chain_.SetBranchAddress("hig1_phi", &hig1_phi_, &b_hig1_phi_);
+  chain_.SetBranchAddress("hig1_pt", &hig1_pt_, &b_hig1_pt_);
+  chain_.SetBranchAddress("hig2_eta", &hig2_eta_, &b_hig2_eta_);
+  chain_.SetBranchAddress("hig2_m", &hig2_m_, &b_hig2_m_);
+  chain_.SetBranchAddress("hig2_phi", &hig2_phi_, &b_hig2_phi_);
+  chain_.SetBranchAddress("hig2_pt", &hig2_pt_, &b_hig2_pt_);
+  chain_.SetBranchAddress("hig_am", &hig_am_, &b_hig_am_);
+  chain_.SetBranchAddress("hig_dm", &hig_dm_, &b_hig_dm_);
+  chain_.SetBranchAddress("hig_dphi", &hig_dphi_, &b_hig_dphi_);
+  chain_.SetBranchAddress("hig_drmax", &hig_drmax_, &b_hig_drmax_);
   chain_.SetBranchAddress("ht", &ht_, &b_ht_);
+  chain_.SetBranchAddress("ht40", &ht40_, &b_ht40_);
+  chain_.SetBranchAddress("ht50", &ht50_, &b_ht50_);
   chain_.SetBranchAddress("ht_clean", &ht_clean_, &b_ht_clean_);
   chain_.SetBranchAddress("ht_hlt", &ht_hlt_, &b_ht_hlt_);
   chain_.SetBranchAddress("ht_isr_me", &ht_isr_me_, &b_ht_isr_me_);
   chain_.SetBranchAddress("ht_ra2", &ht_ra2_, &b_ht_ra2_);
   chain_.SetBranchAddress("ht_tru", &ht_tru_, &b_ht_tru_);
+  chain_.SetBranchAddress("htx", &htx_, &b_htx_);
+  chain_.SetBranchAddress("htx40", &htx40_, &b_htx40_);
+  chain_.SetBranchAddress("htx50", &htx50_, &b_htx50_);
   chain_.SetBranchAddress("isr_tru_eta", &isr_tru_eta_, &b_isr_tru_eta_);
   chain_.SetBranchAddress("isr_tru_phi", &isr_tru_phi_, &b_isr_tru_phi_);
   chain_.SetBranchAddress("isr_tru_pt", &isr_tru_pt_, &b_isr_tru_pt_);
   chain_.SetBranchAddress("jetsys_eta", &jetsys_eta_, &b_jetsys_eta_);
+  chain_.SetBranchAddress("jetsys_m", &jetsys_m_, &b_jetsys_m_);
   chain_.SetBranchAddress("jetsys_nob_eta", &jetsys_nob_eta_, &b_jetsys_nob_eta_);
+  chain_.SetBranchAddress("jetsys_nob_m", &jetsys_nob_m_, &b_jetsys_nob_m_);
   chain_.SetBranchAddress("jetsys_nob_phi", &jetsys_nob_phi_, &b_jetsys_nob_phi_);
   chain_.SetBranchAddress("jetsys_nob_pt", &jetsys_nob_pt_, &b_jetsys_nob_pt_);
   chain_.SetBranchAddress("jetsys_phi", &jetsys_phi_, &b_jetsys_phi_);
   chain_.SetBranchAddress("jetsys_pt", &jetsys_pt_, &b_jetsys_pt_);
+  chain_.SetBranchAddress("m_tt", &m_tt_, &b_m_tt_);
+  chain_.SetBranchAddress("mct", &mct_, &b_mct_);
   chain_.SetBranchAddress("met", &met_, &b_met_);
   chain_.SetBranchAddress("met_calo", &met_calo_, &b_met_calo_);
   chain_.SetBranchAddress("met_calo_phi", &met_calo_phi_, &b_met_calo_phi_);
@@ -1961,9 +2647,15 @@ baby_base::baby_base(const string &filename):
   chain_.SetBranchAddress("mht_clean", &mht_clean_, &b_mht_clean_);
   chain_.SetBranchAddress("mht_clean_phi", &mht_clean_phi_, &b_mht_clean_phi_);
   chain_.SetBranchAddress("mht_phi", &mht_phi_, &b_mht_phi_);
-  chain_.SetBranchAddress("mj", &mj_, &b_mj_);
   chain_.SetBranchAddress("mj08", &mj08_, &b_mj08_);
+  chain_.SetBranchAddress("mj12", &mj12_, &b_mj12_);
+  chain_.SetBranchAddress("mj14", &mj14_, &b_mj14_);
+  chain_.SetBranchAddress("mj14_nolep", &mj14_nolep_, &b_mj14_nolep_);
+  chain_.SetBranchAddress("mj40", &mj40_, &b_mj40_);
+  chain_.SetBranchAddress("mj50", &mj50_, &b_mj50_);
   chain_.SetBranchAddress("mt", &mt_, &b_mt_);
+  chain_.SetBranchAddress("mt2", &mt2_, &b_mt2_);
+  chain_.SetBranchAddress("mt2_0mass", &mt2_0mass_, &b_mt2_0mass_);
   chain_.SetBranchAddress("mt_nohf", &mt_nohf_, &b_mt_nohf_);
   chain_.SetBranchAddress("mt_rebal", &mt_rebal_, &b_mt_rebal_);
   chain_.SetBranchAddress("mt_tru", &mt_tru_, &b_mt_tru_);
@@ -1982,6 +2674,7 @@ baby_base::baby_base(const string &filename):
   chain_.SetBranchAddress("mumuv_pt1", &mumuv_pt1_, &b_mumuv_pt1_);
   chain_.SetBranchAddress("mumuv_pt2", &mumuv_pt2_, &b_mumuv_pt2_);
   chain_.SetBranchAddress("mumuv_w", &mumuv_w_, &b_mumuv_w_);
+  chain_.SetBranchAddress("nisr", &nisr_, &b_nisr_);
   chain_.SetBranchAddress("ntrupv_mean", &ntrupv_mean_, &b_ntrupv_mean_);
   chain_.SetBranchAddress("onel_ele105", &onel_ele105_, &b_onel_ele105_);
   chain_.SetBranchAddress("onel_ele23", &onel_ele23_, &b_onel_ele23_);
@@ -1994,27 +2687,41 @@ baby_base::baby_base(const string &filename):
   chain_.SetBranchAddress("onmu_mu8", &onmu_mu8_, &b_onmu_mu8_);
   chain_.SetBranchAddress("onmu_vvvl", &onmu_vvvl_, &b_onmu_vvvl_);
   chain_.SetBranchAddress("onph_ph90", &onph_ph90_, &b_onph_ph90_);
+  chain_.SetBranchAddress("st", &st_, &b_st_);
+  chain_.SetBranchAddress("st40", &st40_, &b_st40_);
+  chain_.SetBranchAddress("st50", &st50_, &b_st50_);
   chain_.SetBranchAddress("w_btag", &w_btag_, &b_w_btag_);
+  chain_.SetBranchAddress("w_btag40", &w_btag40_, &b_w_btag40_);
+  chain_.SetBranchAddress("w_btag_loose", &w_btag_loose_, &b_w_btag_loose_);
   chain_.SetBranchAddress("w_fs_lep", &w_fs_lep_, &b_w_fs_lep_);
+  chain_.SetBranchAddress("w_isr", &w_isr_, &b_w_isr_);
   chain_.SetBranchAddress("w_lep", &w_lep_, &b_w_lep_);
   chain_.SetBranchAddress("w_lumi", &w_lumi_, &b_w_lumi_);
   chain_.SetBranchAddress("w_pu", &w_pu_, &b_w_pu_);
   chain_.SetBranchAddress("w_toppt", &w_toppt_, &b_w_toppt_);
   chain_.SetBranchAddress("weight", &weight_, &b_weight_);
+  chain_.SetBranchAddress("weight_rpv", &weight_rpv_, &b_weight_rpv_);
+  chain_.SetBranchAddress("hig_bin", &hig_bin_, &b_hig_bin_);
   chain_.SetBranchAddress("lumiblock", &lumiblock_, &b_lumiblock_);
   chain_.SetBranchAddress("mgluino", &mgluino_, &b_mgluino_);
   chain_.SetBranchAddress("mlsp", &mlsp_, &b_mlsp_);
   chain_.SetBranchAddress("nbl", &nbl_, &b_nbl_);
   chain_.SetBranchAddress("nbm", &nbm_, &b_nbm_);
+  chain_.SetBranchAddress("nbm20", &nbm20_, &b_nbm20_);
+  chain_.SetBranchAddress("nbm40", &nbm40_, &b_nbm40_);
+  chain_.SetBranchAddress("nbm50", &nbm50_, &b_nbm50_);
   chain_.SetBranchAddress("nbm_ra2", &nbm_ra2_, &b_nbm_ra2_);
   chain_.SetBranchAddress("nbt", &nbt_, &b_nbt_);
   chain_.SetBranchAddress("nels", &nels_, &b_nels_);
   chain_.SetBranchAddress("nels_ele23", &nels_ele23_, &b_nels_ele23_);
   chain_.SetBranchAddress("nels_vvvl", &nels_vvvl_, &b_nels_vvvl_);
-  chain_.SetBranchAddress("nfjets", &nfjets_, &b_nfjets_);
-  chain_.SetBranchAddress("nfjets08", &nfjets08_, &b_nfjets08_);
+  chain_.SetBranchAddress("nfjets14", &nfjets14_, &b_nfjets14_);
+  chain_.SetBranchAddress("nfjets40", &nfjets40_, &b_nfjets40_);
   chain_.SetBranchAddress("nisr_me", &nisr_me_, &b_nisr_me_);
   chain_.SetBranchAddress("njets", &njets_, &b_njets_);
+  chain_.SetBranchAddress("njets20", &njets20_, &b_njets20_);
+  chain_.SetBranchAddress("njets40", &njets40_, &b_njets40_);
+  chain_.SetBranchAddress("njets50", &njets50_, &b_njets50_);
   chain_.SetBranchAddress("njets_clean", &njets_clean_, &b_njets_clean_);
   chain_.SetBranchAddress("njets_ra2", &njets_ra2_, &b_njets_ra2_);
   chain_.SetBranchAddress("nleps", &nleps_, &b_nleps_);
@@ -2036,6 +2743,7 @@ baby_base::baby_base(const string &filename):
   chain_.SetBranchAddress("nvleps", &nvleps_, &b_nvleps_);
   chain_.SetBranchAddress("nvmus", &nvmus_, &b_nvmus_);
   chain_.SetBranchAddress("run", &run_, &b_run_);
+  chain_.SetBranchAddress("type", &type_, &b_type_);
   chain_.SetBranchAddress("els_ele105", &p_els_ele105_, &b_els_ele105_);
   chain_.SetBranchAddress("els_ele23", &p_els_ele23_, &b_els_ele23_);
   chain_.SetBranchAddress("els_ele8", &p_els_ele8_, &b_els_ele8_);
@@ -2047,6 +2755,9 @@ baby_base::baby_base(const string &filename):
   chain_.SetBranchAddress("els_tight", &p_els_tight_, &b_els_tight_);
   chain_.SetBranchAddress("els_tm", &p_els_tm_, &b_els_tm_);
   chain_.SetBranchAddress("els_vvvl", &p_els_vvvl_, &b_els_vvvl_);
+  chain_.SetBranchAddress("jets_h1", &p_jets_h1_, &b_jets_h1_);
+  chain_.SetBranchAddress("jets_h2", &p_jets_h2_, &b_jets_h2_);
+  chain_.SetBranchAddress("jets_isisr", &p_jets_isisr_, &b_jets_isisr_);
   chain_.SetBranchAddress("jets_islep", &p_jets_islep_, &b_jets_islep_);
   chain_.SetBranchAddress("mus_inz", &p_mus_inz_, &b_mus_inz_);
   chain_.SetBranchAddress("mus_inzv", &p_mus_inzv_, &b_mus_inzv_);
@@ -2057,34 +2768,41 @@ baby_base::baby_base(const string &filename):
   chain_.SetBranchAddress("mus_sigid", &p_mus_sigid_, &b_mus_sigid_);
   chain_.SetBranchAddress("mus_tight", &p_mus_tight_, &b_mus_tight_);
   chain_.SetBranchAddress("mus_tm", &p_mus_tm_, &b_mus_tm_);
+  chain_.SetBranchAddress("mus_trk_quality", &p_mus_trk_quality_, &b_mus_trk_quality_);
   chain_.SetBranchAddress("mus_vvvl", &p_mus_vvvl_, &b_mus_vvvl_);
   chain_.SetBranchAddress("ph_ph90", &p_ph_ph90_, &b_ph_ph90_);
   chain_.SetBranchAddress("ph_tm", &p_ph_tm_, &b_ph_tm_);
   chain_.SetBranchAddress("sys_pass", &p_sys_pass_, &b_sys_pass_);
+  chain_.SetBranchAddress("sys_pass40", &p_sys_pass40_, &b_sys_pass40_);
+  chain_.SetBranchAddress("tks_tm", &p_tks_tm_, &b_tks_tm_);
   chain_.SetBranchAddress("trig", &p_trig_, &b_trig_);
   chain_.SetBranchAddress("els_d0", &p_els_d0_, &b_els_d0_);
+  chain_.SetBranchAddress("els_deta_sctrk", &p_els_deta_sctrk_, &b_els_deta_sctrk_);
+  chain_.SetBranchAddress("els_dphi_sctrk", &p_els_dphi_sctrk_, &b_els_dphi_sctrk_);
   chain_.SetBranchAddress("els_dz", &p_els_dz_, &b_els_dz_);
+  chain_.SetBranchAddress("els_em_e", &p_els_em_e_, &b_els_em_e_);
+  chain_.SetBranchAddress("els_eoverp", &p_els_eoverp_, &b_els_eoverp_);
   chain_.SetBranchAddress("els_eta", &p_els_eta_, &b_els_eta_);
+  chain_.SetBranchAddress("els_hovere", &p_els_hovere_, &b_els_hovere_);
+  chain_.SetBranchAddress("els_ip3d", &p_els_ip3d_, &b_els_ip3d_);
   chain_.SetBranchAddress("els_miniso", &p_els_miniso_, &b_els_miniso_);
   chain_.SetBranchAddress("els_phi", &p_els_phi_, &b_els_phi_);
   chain_.SetBranchAddress("els_pt", &p_els_pt_, &b_els_pt_);
   chain_.SetBranchAddress("els_reliso", &p_els_reliso_, &b_els_reliso_);
   chain_.SetBranchAddress("els_sceta", &p_els_sceta_, &b_els_sceta_);
+  chain_.SetBranchAddress("els_trk_pt", &p_els_trk_pt_, &b_els_trk_pt_);
+  chain_.SetBranchAddress("els_trk_pterr", &p_els_trk_pterr_, &b_els_trk_pterr_);
   chain_.SetBranchAddress("els_vvvl_eta", &p_els_vvvl_eta_, &b_els_vvvl_eta_);
   chain_.SetBranchAddress("els_vvvl_phi", &p_els_vvvl_phi_, &b_els_vvvl_phi_);
   chain_.SetBranchAddress("els_vvvl_pt", &p_els_vvvl_pt_, &b_els_vvvl_pt_);
-  chain_.SetBranchAddress("fjets08_eta", &p_fjets08_eta_, &b_fjets08_eta_);
-  chain_.SetBranchAddress("fjets08_m", &p_fjets08_m_, &b_fjets08_m_);
-  chain_.SetBranchAddress("fjets08_phi", &p_fjets08_phi_, &b_fjets08_phi_);
-  chain_.SetBranchAddress("fjets08_poscsv", &p_fjets08_poscsv_, &b_fjets08_poscsv_);
-  chain_.SetBranchAddress("fjets08_pt", &p_fjets08_pt_, &b_fjets08_pt_);
-  chain_.SetBranchAddress("fjets08_sumcsv", &p_fjets08_sumcsv_, &b_fjets08_sumcsv_);
-  chain_.SetBranchAddress("fjets_eta", &p_fjets_eta_, &b_fjets_eta_);
-  chain_.SetBranchAddress("fjets_m", &p_fjets_m_, &b_fjets_m_);
-  chain_.SetBranchAddress("fjets_phi", &p_fjets_phi_, &b_fjets_phi_);
-  chain_.SetBranchAddress("fjets_poscsv", &p_fjets_poscsv_, &b_fjets_poscsv_);
-  chain_.SetBranchAddress("fjets_pt", &p_fjets_pt_, &b_fjets_pt_);
-  chain_.SetBranchAddress("fjets_sumcsv", &p_fjets_sumcsv_, &b_fjets_sumcsv_);
+  chain_.SetBranchAddress("fjets14_eta", &p_fjets14_eta_, &b_fjets14_eta_);
+  chain_.SetBranchAddress("fjets14_m", &p_fjets14_m_, &b_fjets14_m_);
+  chain_.SetBranchAddress("fjets14_phi", &p_fjets14_phi_, &b_fjets14_phi_);
+  chain_.SetBranchAddress("fjets14_pt", &p_fjets14_pt_, &b_fjets14_pt_);
+  chain_.SetBranchAddress("fjets40_eta", &p_fjets40_eta_, &b_fjets40_eta_);
+  chain_.SetBranchAddress("fjets40_m", &p_fjets40_m_, &b_fjets40_m_);
+  chain_.SetBranchAddress("fjets40_phi", &p_fjets40_phi_, &b_fjets40_phi_);
+  chain_.SetBranchAddress("fjets40_pt", &p_fjets40_pt_, &b_fjets40_pt_);
   chain_.SetBranchAddress("jets_csv", &p_jets_csv_, &b_jets_csv_);
   chain_.SetBranchAddress("jets_eta", &p_jets_eta_, &b_jets_eta_);
   chain_.SetBranchAddress("jets_m", &p_jets_m_, &b_jets_m_);
@@ -2101,10 +2819,13 @@ baby_base::baby_base(const string &filename):
   chain_.SetBranchAddress("mc_pt", &p_mc_pt_, &b_mc_pt_);
   chain_.SetBranchAddress("mus_d0", &p_mus_d0_, &b_mus_d0_);
   chain_.SetBranchAddress("mus_dz", &p_mus_dz_, &b_mus_dz_);
+  chain_.SetBranchAddress("mus_em_e", &p_mus_em_e_, &b_mus_em_e_);
   chain_.SetBranchAddress("mus_eta", &p_mus_eta_, &b_mus_eta_);
+  chain_.SetBranchAddress("mus_had_e", &p_mus_had_e_, &b_mus_had_e_);
   chain_.SetBranchAddress("mus_miniso", &p_mus_miniso_, &b_mus_miniso_);
   chain_.SetBranchAddress("mus_phi", &p_mus_phi_, &b_mus_phi_);
   chain_.SetBranchAddress("mus_pt", &p_mus_pt_, &b_mus_pt_);
+  chain_.SetBranchAddress("mus_pterr", &p_mus_pterr_, &b_mus_pterr_);
   chain_.SetBranchAddress("mus_reliso", &p_mus_reliso_, &b_mus_reliso_);
   chain_.SetBranchAddress("mus_vvvl_eta", &p_mus_vvvl_eta_, &b_mus_vvvl_eta_);
   chain_.SetBranchAddress("mus_vvvl_phi", &p_mus_vvvl_phi_, &b_mus_vvvl_phi_);
@@ -2113,42 +2834,65 @@ baby_base::baby_base(const string &filename):
   chain_.SetBranchAddress("ph_phi", &p_ph_phi_, &b_ph_phi_);
   chain_.SetBranchAddress("ph_pt", &p_ph_pt_, &b_ph_pt_);
   chain_.SetBranchAddress("sys_bctag", &p_sys_bctag_, &b_sys_bctag_);
+  chain_.SetBranchAddress("sys_bctag40", &p_sys_bctag40_, &b_sys_bctag40_);
+  chain_.SetBranchAddress("sys_bctag_loose", &p_sys_bctag_loose_, &b_sys_bctag_loose_);
   chain_.SetBranchAddress("sys_fs_bctag", &p_sys_fs_bctag_, &b_sys_fs_bctag_);
+  chain_.SetBranchAddress("sys_fs_bctag40", &p_sys_fs_bctag40_, &b_sys_fs_bctag40_);
   chain_.SetBranchAddress("sys_fs_lep", &p_sys_fs_lep_, &b_sys_fs_lep_);
   chain_.SetBranchAddress("sys_fs_udsgtag", &p_sys_fs_udsgtag_, &b_sys_fs_udsgtag_);
+  chain_.SetBranchAddress("sys_fs_udsgtag40", &p_sys_fs_udsgtag40_, &b_sys_fs_udsgtag40_);
   chain_.SetBranchAddress("sys_ht", &p_sys_ht_, &b_sys_ht_);
+  chain_.SetBranchAddress("sys_ht40", &p_sys_ht40_, &b_sys_ht40_);
   chain_.SetBranchAddress("sys_isr", &p_sys_isr_, &b_sys_isr_);
   chain_.SetBranchAddress("sys_lep", &p_sys_lep_, &b_sys_lep_);
   chain_.SetBranchAddress("sys_met", &p_sys_met_, &b_sys_met_);
-  chain_.SetBranchAddress("sys_mj", &p_sys_mj_, &b_sys_mj_);
+  chain_.SetBranchAddress("sys_mj14", &p_sys_mj14_, &b_sys_mj14_);
+  chain_.SetBranchAddress("sys_mj14_nolep", &p_sys_mj14_nolep_, &b_sys_mj14_nolep_);
+  chain_.SetBranchAddress("sys_mj40", &p_sys_mj40_, &b_sys_mj40_);
   chain_.SetBranchAddress("sys_mt", &p_sys_mt_, &b_sys_mt_);
   chain_.SetBranchAddress("sys_muf", &p_sys_muf_, &b_sys_muf_);
   chain_.SetBranchAddress("sys_mur", &p_sys_mur_, &b_sys_mur_);
   chain_.SetBranchAddress("sys_murf", &p_sys_murf_, &b_sys_murf_);
-  chain_.SetBranchAddress("sys_pdf", &p_sys_pdf_, &b_sys_pdf_);
+  chain_.SetBranchAddress("sys_pu", &p_sys_pu_, &b_sys_pu_);
+  chain_.SetBranchAddress("sys_st", &p_sys_st_, &b_sys_st_);
+  chain_.SetBranchAddress("sys_st40", &p_sys_st40_, &b_sys_st40_);
   chain_.SetBranchAddress("sys_trig", &p_sys_trig_, &b_sys_trig_);
   chain_.SetBranchAddress("sys_udsgtag", &p_sys_udsgtag_, &b_sys_udsgtag_);
+  chain_.SetBranchAddress("sys_udsgtag40", &p_sys_udsgtag40_, &b_sys_udsgtag40_);
+  chain_.SetBranchAddress("sys_udsgtag_loose", &p_sys_udsgtag_loose_, &b_sys_udsgtag_loose_);
+  chain_.SetBranchAddress("tks_d0", &p_tks_d0_, &b_tks_d0_);
+  chain_.SetBranchAddress("tks_dz", &p_tks_dz_, &b_tks_dz_);
   chain_.SetBranchAddress("tks_eta", &p_tks_eta_, &b_tks_eta_);
   chain_.SetBranchAddress("tks_miniso", &p_tks_miniso_, &b_tks_miniso_);
   chain_.SetBranchAddress("tks_mt", &p_tks_mt_, &b_tks_mt_);
   chain_.SetBranchAddress("tks_mt2", &p_tks_mt2_, &b_tks_mt2_);
   chain_.SetBranchAddress("tks_phi", &p_tks_phi_, &b_tks_phi_);
   chain_.SetBranchAddress("tks_pt", &p_tks_pt_, &b_tks_pt_);
+  chain_.SetBranchAddress("tks_reliso", &p_tks_reliso_, &b_tks_reliso_);
   chain_.SetBranchAddress("trig_prescale", &p_trig_prescale_, &b_trig_prescale_);
-  chain_.SetBranchAddress("w_pdf", &p_w_pdf_, &b_w_pdf_);
   chain_.SetBranchAddress("els_charge", &p_els_charge_, &b_els_charge_);
-  chain_.SetBranchAddress("fjets08_btags", &p_fjets08_btags_, &b_fjets08_btags_);
-  chain_.SetBranchAddress("fjets08_nconst", &p_fjets08_nconst_, &b_fjets08_nconst_);
-  chain_.SetBranchAddress("fjets_btags", &p_fjets_btags_, &b_fjets_btags_);
-  chain_.SetBranchAddress("fjets_nconst", &p_fjets_nconst_, &b_fjets_nconst_);
+  chain_.SetBranchAddress("els_trk_nholes", &p_els_trk_nholes_, &b_els_trk_nholes_);
+  chain_.SetBranchAddress("fjets14_nconst", &p_fjets14_nconst_, &b_fjets14_nconst_);
+  chain_.SetBranchAddress("fjets40_nconst", &p_fjets40_nconst_, &b_fjets40_nconst_);
   chain_.SetBranchAddress("jets_fjet08_index", &p_jets_fjet08_index_, &b_jets_fjet08_index_);
-  chain_.SetBranchAddress("jets_fjet_index", &p_jets_fjet_index_, &b_jets_fjet_index_);
+  chain_.SetBranchAddress("jets_fjet12_index", &p_jets_fjet12_index_, &b_jets_fjet12_index_);
+  chain_.SetBranchAddress("jets_fjet14_index", &p_jets_fjet14_index_, &b_jets_fjet14_index_);
+  chain_.SetBranchAddress("jets_fjet14_nolep_index", &p_jets_fjet14_nolep_index_, &b_jets_fjet14_nolep_index_);
+  chain_.SetBranchAddress("jets_fjet40_index", &p_jets_fjet40_index_, &b_jets_fjet40_index_);
+  chain_.SetBranchAddress("jets_fjet50_index", &p_jets_fjet50_index_, &b_jets_fjet50_index_);
   chain_.SetBranchAddress("jets_hflavor", &p_jets_hflavor_, &b_jets_hflavor_);
   chain_.SetBranchAddress("mc_id", &p_mc_id_, &b_mc_id_);
   chain_.SetBranchAddress("mc_mom", &p_mc_mom_, &b_mc_mom_);
+  chain_.SetBranchAddress("mc_momidx", &p_mc_momidx_, &b_mc_momidx_);
+  chain_.SetBranchAddress("mc_status", &p_mc_status_, &b_mc_status_);
   chain_.SetBranchAddress("mus_charge", &p_mus_charge_, &b_mus_charge_);
+  chain_.SetBranchAddress("mus_trk_algo", &p_mus_trk_algo_, &b_mus_trk_algo_);
+  chain_.SetBranchAddress("mus_trk_nholes_in", &p_mus_trk_nholes_in_, &b_mus_trk_nholes_in_);
+  chain_.SetBranchAddress("mus_trk_nholes_out", &p_mus_trk_nholes_out_, &b_mus_trk_nholes_out_);
   chain_.SetBranchAddress("sys_nbm", &p_sys_nbm_, &b_sys_nbm_);
+  chain_.SetBranchAddress("sys_nbm40", &p_sys_nbm40_, &b_sys_nbm40_);
   chain_.SetBranchAddress("sys_njets", &p_sys_njets_, &b_sys_njets_);
+  chain_.SetBranchAddress("sys_njets40", &p_sys_njets40_, &b_sys_njets40_);
   chain_.SetBranchAddress("tks_pdg", &p_tks_pdg_, &b_tks_pdg_);
 }
 
@@ -2169,27 +2913,44 @@ void baby_base::Clear(){
   event_ = static_cast<Long64_t >(bad_val_);
   fromGS_ = static_cast<bool >(bad_val_);
   jetmismeas_ = static_cast<bool >(bad_val_);
+  json12p9_ = static_cast<bool >(bad_val_);
+  json2p6_ = static_cast<bool >(bad_val_);
+  json4p0_ = static_cast<bool >(bad_val_);
+  json7p65_ = static_cast<bool >(bad_val_);
   low_dphi_ = static_cast<bool >(bad_val_);
   nonblind_ = static_cast<bool >(bad_val_);
   pass_ = static_cast<bool >(bad_val_);
+  pass20_ = static_cast<bool >(bad_val_);
+  pass40_ = static_cast<bool >(bad_val_);
+  pass50_ = static_cast<bool >(bad_val_);
   pass_cschalo_ = static_cast<bool >(bad_val_);
+  pass_ecaldeadcell_ = static_cast<bool >(bad_val_);
   pass_eebadsc_ = static_cast<bool >(bad_val_);
   pass_goodv_ = static_cast<bool >(bad_val_);
   pass_hbhe_ = static_cast<bool >(bad_val_);
   pass_hbheiso_ = static_cast<bool >(bad_val_);
   pass_jets_ = static_cast<bool >(bad_val_);
+  pass_jets20_ = static_cast<bool >(bad_val_);
+  pass_jets40_ = static_cast<bool >(bad_val_);
+  pass_jets50_ = static_cast<bool >(bad_val_);
   pass_jets_nohf_ = static_cast<bool >(bad_val_);
   pass_jets_ra2_ = static_cast<bool >(bad_val_);
   pass_jets_tight_ = static_cast<bool >(bad_val_);
   pass_jets_tight_ra2_ = static_cast<bool >(bad_val_);
   pass_nohf_ = static_cast<bool >(bad_val_);
   pass_ra2_ = static_cast<bool >(bad_val_);
+  pass_ra2_badmu_ = static_cast<bool >(bad_val_);
   stitch_ = static_cast<bool >(bad_val_);
+  trig_lep_ = static_cast<bool >(bad_val_);
+  trig_met_ = static_cast<bool >(bad_val_);
+  trig_ra4_ = static_cast<bool >(bad_val_);
+  trig_vvvl_ = static_cast<bool >(bad_val_);
   dphi1_ = static_cast<float >(bad_val_);
   dphi2_ = static_cast<float >(bad_val_);
   dphi3_ = static_cast<float >(bad_val_);
   dphi4_ = static_cast<float >(bad_val_);
   dphi_wlep_ = static_cast<float >(bad_val_);
+  eff_jetid_ = static_cast<float >(bad_val_);
   eff_trig_ = static_cast<float >(bad_val_);
   elel_eta_ = static_cast<float >(bad_val_);
   elel_m_ = static_cast<float >(bad_val_);
@@ -2212,21 +2973,42 @@ void baby_base::Clear(){
   elmu_pt1_ = static_cast<float >(bad_val_);
   elmu_pt2_ = static_cast<float >(bad_val_);
   elmu_w_ = static_cast<float >(bad_val_);
+  hig1_eta_ = static_cast<float >(bad_val_);
+  hig1_m_ = static_cast<float >(bad_val_);
+  hig1_phi_ = static_cast<float >(bad_val_);
+  hig1_pt_ = static_cast<float >(bad_val_);
+  hig2_eta_ = static_cast<float >(bad_val_);
+  hig2_m_ = static_cast<float >(bad_val_);
+  hig2_phi_ = static_cast<float >(bad_val_);
+  hig2_pt_ = static_cast<float >(bad_val_);
+  hig_am_ = static_cast<float >(bad_val_);
+  hig_dm_ = static_cast<float >(bad_val_);
+  hig_dphi_ = static_cast<float >(bad_val_);
+  hig_drmax_ = static_cast<float >(bad_val_);
   ht_ = static_cast<float >(bad_val_);
+  ht40_ = static_cast<float >(bad_val_);
+  ht50_ = static_cast<float >(bad_val_);
   ht_clean_ = static_cast<float >(bad_val_);
   ht_hlt_ = static_cast<float >(bad_val_);
   ht_isr_me_ = static_cast<float >(bad_val_);
   ht_ra2_ = static_cast<float >(bad_val_);
   ht_tru_ = static_cast<float >(bad_val_);
+  htx_ = static_cast<float >(bad_val_);
+  htx40_ = static_cast<float >(bad_val_);
+  htx50_ = static_cast<float >(bad_val_);
   isr_tru_eta_ = static_cast<float >(bad_val_);
   isr_tru_phi_ = static_cast<float >(bad_val_);
   isr_tru_pt_ = static_cast<float >(bad_val_);
   jetsys_eta_ = static_cast<float >(bad_val_);
+  jetsys_m_ = static_cast<float >(bad_val_);
   jetsys_nob_eta_ = static_cast<float >(bad_val_);
+  jetsys_nob_m_ = static_cast<float >(bad_val_);
   jetsys_nob_phi_ = static_cast<float >(bad_val_);
   jetsys_nob_pt_ = static_cast<float >(bad_val_);
   jetsys_phi_ = static_cast<float >(bad_val_);
   jetsys_pt_ = static_cast<float >(bad_val_);
+  m_tt_ = static_cast<float >(bad_val_);
+  mct_ = static_cast<float >(bad_val_);
   met_ = static_cast<float >(bad_val_);
   met_calo_ = static_cast<float >(bad_val_);
   met_calo_phi_ = static_cast<float >(bad_val_);
@@ -2246,9 +3028,15 @@ void baby_base::Clear(){
   mht_clean_ = static_cast<float >(bad_val_);
   mht_clean_phi_ = static_cast<float >(bad_val_);
   mht_phi_ = static_cast<float >(bad_val_);
-  mj_ = static_cast<float >(bad_val_);
   mj08_ = static_cast<float >(bad_val_);
+  mj12_ = static_cast<float >(bad_val_);
+  mj14_ = static_cast<float >(bad_val_);
+  mj14_nolep_ = static_cast<float >(bad_val_);
+  mj40_ = static_cast<float >(bad_val_);
+  mj50_ = static_cast<float >(bad_val_);
   mt_ = static_cast<float >(bad_val_);
+  mt2_ = static_cast<float >(bad_val_);
+  mt2_0mass_ = static_cast<float >(bad_val_);
   mt_nohf_ = static_cast<float >(bad_val_);
   mt_rebal_ = static_cast<float >(bad_val_);
   mt_tru_ = static_cast<float >(bad_val_);
@@ -2267,6 +3055,7 @@ void baby_base::Clear(){
   mumuv_pt1_ = static_cast<float >(bad_val_);
   mumuv_pt2_ = static_cast<float >(bad_val_);
   mumuv_w_ = static_cast<float >(bad_val_);
+  nisr_ = static_cast<float >(bad_val_);
   ntrupv_mean_ = static_cast<float >(bad_val_);
   onel_ele105_ = static_cast<float >(bad_val_);
   onel_ele23_ = static_cast<float >(bad_val_);
@@ -2279,27 +3068,41 @@ void baby_base::Clear(){
   onmu_mu8_ = static_cast<float >(bad_val_);
   onmu_vvvl_ = static_cast<float >(bad_val_);
   onph_ph90_ = static_cast<float >(bad_val_);
+  st_ = static_cast<float >(bad_val_);
+  st40_ = static_cast<float >(bad_val_);
+  st50_ = static_cast<float >(bad_val_);
   w_btag_ = static_cast<float >(bad_val_);
+  w_btag40_ = static_cast<float >(bad_val_);
+  w_btag_loose_ = static_cast<float >(bad_val_);
   w_fs_lep_ = static_cast<float >(bad_val_);
+  w_isr_ = static_cast<float >(bad_val_);
   w_lep_ = static_cast<float >(bad_val_);
   w_lumi_ = static_cast<float >(bad_val_);
   w_pu_ = static_cast<float >(bad_val_);
   w_toppt_ = static_cast<float >(bad_val_);
   weight_ = static_cast<float >(bad_val_);
+  weight_rpv_ = static_cast<float >(bad_val_);
+  hig_bin_ = static_cast<int >(bad_val_);
   lumiblock_ = static_cast<int >(bad_val_);
   mgluino_ = static_cast<int >(bad_val_);
   mlsp_ = static_cast<int >(bad_val_);
   nbl_ = static_cast<int >(bad_val_);
   nbm_ = static_cast<int >(bad_val_);
+  nbm20_ = static_cast<int >(bad_val_);
+  nbm40_ = static_cast<int >(bad_val_);
+  nbm50_ = static_cast<int >(bad_val_);
   nbm_ra2_ = static_cast<int >(bad_val_);
   nbt_ = static_cast<int >(bad_val_);
   nels_ = static_cast<int >(bad_val_);
   nels_ele23_ = static_cast<int >(bad_val_);
   nels_vvvl_ = static_cast<int >(bad_val_);
-  nfjets_ = static_cast<int >(bad_val_);
-  nfjets08_ = static_cast<int >(bad_val_);
+  nfjets14_ = static_cast<int >(bad_val_);
+  nfjets40_ = static_cast<int >(bad_val_);
   nisr_me_ = static_cast<int >(bad_val_);
   njets_ = static_cast<int >(bad_val_);
+  njets20_ = static_cast<int >(bad_val_);
+  njets40_ = static_cast<int >(bad_val_);
+  njets50_ = static_cast<int >(bad_val_);
   njets_clean_ = static_cast<int >(bad_val_);
   njets_ra2_ = static_cast<int >(bad_val_);
   nleps_ = static_cast<int >(bad_val_);
@@ -2321,6 +3124,7 @@ void baby_base::Clear(){
   nvleps_ = static_cast<int >(bad_val_);
   nvmus_ = static_cast<int >(bad_val_);
   run_ = static_cast<int >(bad_val_);
+  type_ = static_cast<int >(bad_val_);
   els_ele105_.clear();
   els_ele23_.clear();
   els_ele8_.clear();
@@ -2332,6 +3136,9 @@ void baby_base::Clear(){
   els_tight_.clear();
   els_tm_.clear();
   els_vvvl_.clear();
+  jets_h1_.clear();
+  jets_h2_.clear();
+  jets_isisr_.clear();
   jets_islep_.clear();
   mus_inz_.clear();
   mus_inzv_.clear();
@@ -2342,34 +3149,41 @@ void baby_base::Clear(){
   mus_sigid_.clear();
   mus_tight_.clear();
   mus_tm_.clear();
+  mus_trk_quality_.clear();
   mus_vvvl_.clear();
   ph_ph90_.clear();
   ph_tm_.clear();
   sys_pass_.clear();
+  sys_pass40_.clear();
+  tks_tm_.clear();
   trig_.clear();
   els_d0_.clear();
+  els_deta_sctrk_.clear();
+  els_dphi_sctrk_.clear();
   els_dz_.clear();
+  els_em_e_.clear();
+  els_eoverp_.clear();
   els_eta_.clear();
+  els_hovere_.clear();
+  els_ip3d_.clear();
   els_miniso_.clear();
   els_phi_.clear();
   els_pt_.clear();
   els_reliso_.clear();
   els_sceta_.clear();
+  els_trk_pt_.clear();
+  els_trk_pterr_.clear();
   els_vvvl_eta_.clear();
   els_vvvl_phi_.clear();
   els_vvvl_pt_.clear();
-  fjets08_eta_.clear();
-  fjets08_m_.clear();
-  fjets08_phi_.clear();
-  fjets08_poscsv_.clear();
-  fjets08_pt_.clear();
-  fjets08_sumcsv_.clear();
-  fjets_eta_.clear();
-  fjets_m_.clear();
-  fjets_phi_.clear();
-  fjets_poscsv_.clear();
-  fjets_pt_.clear();
-  fjets_sumcsv_.clear();
+  fjets14_eta_.clear();
+  fjets14_m_.clear();
+  fjets14_phi_.clear();
+  fjets14_pt_.clear();
+  fjets40_eta_.clear();
+  fjets40_m_.clear();
+  fjets40_phi_.clear();
+  fjets40_pt_.clear();
   jets_csv_.clear();
   jets_eta_.clear();
   jets_m_.clear();
@@ -2386,10 +3200,13 @@ void baby_base::Clear(){
   mc_pt_.clear();
   mus_d0_.clear();
   mus_dz_.clear();
+  mus_em_e_.clear();
   mus_eta_.clear();
+  mus_had_e_.clear();
   mus_miniso_.clear();
   mus_phi_.clear();
   mus_pt_.clear();
+  mus_pterr_.clear();
   mus_reliso_.clear();
   mus_vvvl_eta_.clear();
   mus_vvvl_phi_.clear();
@@ -2398,42 +3215,65 @@ void baby_base::Clear(){
   ph_phi_.clear();
   ph_pt_.clear();
   sys_bctag_.clear();
+  sys_bctag40_.clear();
+  sys_bctag_loose_.clear();
   sys_fs_bctag_.clear();
+  sys_fs_bctag40_.clear();
   sys_fs_lep_.clear();
   sys_fs_udsgtag_.clear();
+  sys_fs_udsgtag40_.clear();
   sys_ht_.clear();
+  sys_ht40_.clear();
   sys_isr_.clear();
   sys_lep_.clear();
   sys_met_.clear();
-  sys_mj_.clear();
+  sys_mj14_.clear();
+  sys_mj14_nolep_.clear();
+  sys_mj40_.clear();
   sys_mt_.clear();
   sys_muf_.clear();
   sys_mur_.clear();
   sys_murf_.clear();
-  sys_pdf_.clear();
+  sys_pu_.clear();
+  sys_st_.clear();
+  sys_st40_.clear();
   sys_trig_.clear();
   sys_udsgtag_.clear();
+  sys_udsgtag40_.clear();
+  sys_udsgtag_loose_.clear();
+  tks_d0_.clear();
+  tks_dz_.clear();
   tks_eta_.clear();
   tks_miniso_.clear();
   tks_mt_.clear();
   tks_mt2_.clear();
   tks_phi_.clear();
   tks_pt_.clear();
+  tks_reliso_.clear();
   trig_prescale_.clear();
-  w_pdf_.clear();
   els_charge_.clear();
-  fjets08_btags_.clear();
-  fjets08_nconst_.clear();
-  fjets_btags_.clear();
-  fjets_nconst_.clear();
+  els_trk_nholes_.clear();
+  fjets14_nconst_.clear();
+  fjets40_nconst_.clear();
   jets_fjet08_index_.clear();
-  jets_fjet_index_.clear();
+  jets_fjet12_index_.clear();
+  jets_fjet14_index_.clear();
+  jets_fjet14_nolep_index_.clear();
+  jets_fjet40_index_.clear();
+  jets_fjet50_index_.clear();
   jets_hflavor_.clear();
   mc_id_.clear();
   mc_mom_.clear();
+  mc_momidx_.clear();
+  mc_status_.clear();
   mus_charge_.clear();
+  mus_trk_algo_.clear();
+  mus_trk_nholes_in_.clear();
+  mus_trk_nholes_out_.clear();
   sys_nbm_.clear();
+  sys_nbm40_.clear();
   sys_njets_.clear();
+  sys_njets40_.clear();
   tks_pdg_.clear();
   }
 
@@ -2447,7 +3287,7 @@ void baby_base::Write(){
   }
 }
 
-string baby_base::Type() const{
+string baby_base::BabyType() const{
   return "";
 }
 
@@ -2462,8 +3302,9 @@ int baby_base::Add(const std::string &filename){
 }
 
 bool baby_base::PassString(TString cut){
-  bool result = (cut=="dummy");
- return result;
+  cout<<cut<<endl;
+  bool result = true;
+  return result;
 }
 
 long baby_base::GetEntries() const{
@@ -2482,27 +3323,44 @@ void baby_base::GetEntry(const long entry){
   c_event_ = false;
   c_fromGS_ = false;
   c_jetmismeas_ = false;
+  c_json12p9_ = false;
+  c_json2p6_ = false;
+  c_json4p0_ = false;
+  c_json7p65_ = false;
   c_low_dphi_ = false;
   c_nonblind_ = false;
   c_pass_ = false;
+  c_pass20_ = false;
+  c_pass40_ = false;
+  c_pass50_ = false;
   c_pass_cschalo_ = false;
+  c_pass_ecaldeadcell_ = false;
   c_pass_eebadsc_ = false;
   c_pass_goodv_ = false;
   c_pass_hbhe_ = false;
   c_pass_hbheiso_ = false;
   c_pass_jets_ = false;
+  c_pass_jets20_ = false;
+  c_pass_jets40_ = false;
+  c_pass_jets50_ = false;
   c_pass_jets_nohf_ = false;
   c_pass_jets_ra2_ = false;
   c_pass_jets_tight_ = false;
   c_pass_jets_tight_ra2_ = false;
   c_pass_nohf_ = false;
   c_pass_ra2_ = false;
+  c_pass_ra2_badmu_ = false;
   c_stitch_ = false;
+  c_trig_lep_ = false;
+  c_trig_met_ = false;
+  c_trig_ra4_ = false;
+  c_trig_vvvl_ = false;
   c_dphi1_ = false;
   c_dphi2_ = false;
   c_dphi3_ = false;
   c_dphi4_ = false;
   c_dphi_wlep_ = false;
+  c_eff_jetid_ = false;
   c_eff_trig_ = false;
   c_elel_eta_ = false;
   c_elel_m_ = false;
@@ -2525,21 +3383,42 @@ void baby_base::GetEntry(const long entry){
   c_elmu_pt1_ = false;
   c_elmu_pt2_ = false;
   c_elmu_w_ = false;
+  c_hig1_eta_ = false;
+  c_hig1_m_ = false;
+  c_hig1_phi_ = false;
+  c_hig1_pt_ = false;
+  c_hig2_eta_ = false;
+  c_hig2_m_ = false;
+  c_hig2_phi_ = false;
+  c_hig2_pt_ = false;
+  c_hig_am_ = false;
+  c_hig_dm_ = false;
+  c_hig_dphi_ = false;
+  c_hig_drmax_ = false;
   c_ht_ = false;
+  c_ht40_ = false;
+  c_ht50_ = false;
   c_ht_clean_ = false;
   c_ht_hlt_ = false;
   c_ht_isr_me_ = false;
   c_ht_ra2_ = false;
   c_ht_tru_ = false;
+  c_htx_ = false;
+  c_htx40_ = false;
+  c_htx50_ = false;
   c_isr_tru_eta_ = false;
   c_isr_tru_phi_ = false;
   c_isr_tru_pt_ = false;
   c_jetsys_eta_ = false;
+  c_jetsys_m_ = false;
   c_jetsys_nob_eta_ = false;
+  c_jetsys_nob_m_ = false;
   c_jetsys_nob_phi_ = false;
   c_jetsys_nob_pt_ = false;
   c_jetsys_phi_ = false;
   c_jetsys_pt_ = false;
+  c_m_tt_ = false;
+  c_mct_ = false;
   c_met_ = false;
   c_met_calo_ = false;
   c_met_calo_phi_ = false;
@@ -2559,9 +3438,15 @@ void baby_base::GetEntry(const long entry){
   c_mht_clean_ = false;
   c_mht_clean_phi_ = false;
   c_mht_phi_ = false;
-  c_mj_ = false;
   c_mj08_ = false;
+  c_mj12_ = false;
+  c_mj14_ = false;
+  c_mj14_nolep_ = false;
+  c_mj40_ = false;
+  c_mj50_ = false;
   c_mt_ = false;
+  c_mt2_ = false;
+  c_mt2_0mass_ = false;
   c_mt_nohf_ = false;
   c_mt_rebal_ = false;
   c_mt_tru_ = false;
@@ -2580,6 +3465,7 @@ void baby_base::GetEntry(const long entry){
   c_mumuv_pt1_ = false;
   c_mumuv_pt2_ = false;
   c_mumuv_w_ = false;
+  c_nisr_ = false;
   c_ntrupv_mean_ = false;
   c_onel_ele105_ = false;
   c_onel_ele23_ = false;
@@ -2592,27 +3478,41 @@ void baby_base::GetEntry(const long entry){
   c_onmu_mu8_ = false;
   c_onmu_vvvl_ = false;
   c_onph_ph90_ = false;
+  c_st_ = false;
+  c_st40_ = false;
+  c_st50_ = false;
   c_w_btag_ = false;
+  c_w_btag40_ = false;
+  c_w_btag_loose_ = false;
   c_w_fs_lep_ = false;
+  c_w_isr_ = false;
   c_w_lep_ = false;
   c_w_lumi_ = false;
   c_w_pu_ = false;
   c_w_toppt_ = false;
   c_weight_ = false;
+  c_weight_rpv_ = false;
+  c_hig_bin_ = false;
   c_lumiblock_ = false;
   c_mgluino_ = false;
   c_mlsp_ = false;
   c_nbl_ = false;
   c_nbm_ = false;
+  c_nbm20_ = false;
+  c_nbm40_ = false;
+  c_nbm50_ = false;
   c_nbm_ra2_ = false;
   c_nbt_ = false;
   c_nels_ = false;
   c_nels_ele23_ = false;
   c_nels_vvvl_ = false;
-  c_nfjets_ = false;
-  c_nfjets08_ = false;
+  c_nfjets14_ = false;
+  c_nfjets40_ = false;
   c_nisr_me_ = false;
   c_njets_ = false;
+  c_njets20_ = false;
+  c_njets40_ = false;
+  c_njets50_ = false;
   c_njets_clean_ = false;
   c_njets_ra2_ = false;
   c_nleps_ = false;
@@ -2634,6 +3534,7 @@ void baby_base::GetEntry(const long entry){
   c_nvleps_ = false;
   c_nvmus_ = false;
   c_run_ = false;
+  c_type_ = false;
   c_els_ele105_ = false;
   c_els_ele23_ = false;
   c_els_ele8_ = false;
@@ -2645,6 +3546,9 @@ void baby_base::GetEntry(const long entry){
   c_els_tight_ = false;
   c_els_tm_ = false;
   c_els_vvvl_ = false;
+  c_jets_h1_ = false;
+  c_jets_h2_ = false;
+  c_jets_isisr_ = false;
   c_jets_islep_ = false;
   c_mus_inz_ = false;
   c_mus_inzv_ = false;
@@ -2655,34 +3559,41 @@ void baby_base::GetEntry(const long entry){
   c_mus_sigid_ = false;
   c_mus_tight_ = false;
   c_mus_tm_ = false;
+  c_mus_trk_quality_ = false;
   c_mus_vvvl_ = false;
   c_ph_ph90_ = false;
   c_ph_tm_ = false;
   c_sys_pass_ = false;
+  c_sys_pass40_ = false;
+  c_tks_tm_ = false;
   c_trig_ = false;
   c_els_d0_ = false;
+  c_els_deta_sctrk_ = false;
+  c_els_dphi_sctrk_ = false;
   c_els_dz_ = false;
+  c_els_em_e_ = false;
+  c_els_eoverp_ = false;
   c_els_eta_ = false;
+  c_els_hovere_ = false;
+  c_els_ip3d_ = false;
   c_els_miniso_ = false;
   c_els_phi_ = false;
   c_els_pt_ = false;
   c_els_reliso_ = false;
   c_els_sceta_ = false;
+  c_els_trk_pt_ = false;
+  c_els_trk_pterr_ = false;
   c_els_vvvl_eta_ = false;
   c_els_vvvl_phi_ = false;
   c_els_vvvl_pt_ = false;
-  c_fjets08_eta_ = false;
-  c_fjets08_m_ = false;
-  c_fjets08_phi_ = false;
-  c_fjets08_poscsv_ = false;
-  c_fjets08_pt_ = false;
-  c_fjets08_sumcsv_ = false;
-  c_fjets_eta_ = false;
-  c_fjets_m_ = false;
-  c_fjets_phi_ = false;
-  c_fjets_poscsv_ = false;
-  c_fjets_pt_ = false;
-  c_fjets_sumcsv_ = false;
+  c_fjets14_eta_ = false;
+  c_fjets14_m_ = false;
+  c_fjets14_phi_ = false;
+  c_fjets14_pt_ = false;
+  c_fjets40_eta_ = false;
+  c_fjets40_m_ = false;
+  c_fjets40_phi_ = false;
+  c_fjets40_pt_ = false;
   c_jets_csv_ = false;
   c_jets_eta_ = false;
   c_jets_m_ = false;
@@ -2699,10 +3610,13 @@ void baby_base::GetEntry(const long entry){
   c_mc_pt_ = false;
   c_mus_d0_ = false;
   c_mus_dz_ = false;
+  c_mus_em_e_ = false;
   c_mus_eta_ = false;
+  c_mus_had_e_ = false;
   c_mus_miniso_ = false;
   c_mus_phi_ = false;
   c_mus_pt_ = false;
+  c_mus_pterr_ = false;
   c_mus_reliso_ = false;
   c_mus_vvvl_eta_ = false;
   c_mus_vvvl_phi_ = false;
@@ -2711,42 +3625,65 @@ void baby_base::GetEntry(const long entry){
   c_ph_phi_ = false;
   c_ph_pt_ = false;
   c_sys_bctag_ = false;
+  c_sys_bctag40_ = false;
+  c_sys_bctag_loose_ = false;
   c_sys_fs_bctag_ = false;
+  c_sys_fs_bctag40_ = false;
   c_sys_fs_lep_ = false;
   c_sys_fs_udsgtag_ = false;
+  c_sys_fs_udsgtag40_ = false;
   c_sys_ht_ = false;
+  c_sys_ht40_ = false;
   c_sys_isr_ = false;
   c_sys_lep_ = false;
   c_sys_met_ = false;
-  c_sys_mj_ = false;
+  c_sys_mj14_ = false;
+  c_sys_mj14_nolep_ = false;
+  c_sys_mj40_ = false;
   c_sys_mt_ = false;
   c_sys_muf_ = false;
   c_sys_mur_ = false;
   c_sys_murf_ = false;
-  c_sys_pdf_ = false;
+  c_sys_pu_ = false;
+  c_sys_st_ = false;
+  c_sys_st40_ = false;
   c_sys_trig_ = false;
   c_sys_udsgtag_ = false;
+  c_sys_udsgtag40_ = false;
+  c_sys_udsgtag_loose_ = false;
+  c_tks_d0_ = false;
+  c_tks_dz_ = false;
   c_tks_eta_ = false;
   c_tks_miniso_ = false;
   c_tks_mt_ = false;
   c_tks_mt2_ = false;
   c_tks_phi_ = false;
   c_tks_pt_ = false;
+  c_tks_reliso_ = false;
   c_trig_prescale_ = false;
-  c_w_pdf_ = false;
   c_els_charge_ = false;
-  c_fjets08_btags_ = false;
-  c_fjets08_nconst_ = false;
-  c_fjets_btags_ = false;
-  c_fjets_nconst_ = false;
+  c_els_trk_nholes_ = false;
+  c_fjets14_nconst_ = false;
+  c_fjets40_nconst_ = false;
   c_jets_fjet08_index_ = false;
-  c_jets_fjet_index_ = false;
+  c_jets_fjet12_index_ = false;
+  c_jets_fjet14_index_ = false;
+  c_jets_fjet14_nolep_index_ = false;
+  c_jets_fjet40_index_ = false;
+  c_jets_fjet50_index_ = false;
   c_jets_hflavor_ = false;
   c_mc_id_ = false;
   c_mc_mom_ = false;
+  c_mc_momidx_ = false;
+  c_mc_status_ = false;
   c_mus_charge_ = false;
+  c_mus_trk_algo_ = false;
+  c_mus_trk_nholes_in_ = false;
+  c_mus_trk_nholes_out_ = false;
   c_sys_nbm_ = false;
+  c_sys_nbm40_ = false;
   c_sys_njets_ = false;
+  c_sys_njets40_ = false;
   c_tks_pdg_ = false;
   entry_ = chain_.LoadTree(entry);
 }
@@ -2784,6 +3721,50 @@ bool  const & baby_base::jetmismeas() const{
   return jetmismeas_;
 }
 
+bool  const & baby_base::json12p9() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_json12p9_ && b_json12p9_){
+    b_json12p9_->GetEntry(entry_);
+    c_json12p9_ = true;
+  }
+  return json12p9_;
+}
+
+bool  const & baby_base::json2p6() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_json2p6_ && b_json2p6_){
+    b_json2p6_->GetEntry(entry_);
+    c_json2p6_ = true;
+  }
+  return json2p6_;
+}
+
+bool  const & baby_base::json4p0() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_json4p0_ && b_json4p0_){
+    b_json4p0_->GetEntry(entry_);
+    c_json4p0_ = true;
+  }
+  return json4p0_;
+}
+
+bool  const & baby_base::json7p65() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_json7p65_ && b_json7p65_){
+    b_json7p65_->GetEntry(entry_);
+    c_json7p65_ = true;
+  }
+  return json7p65_;
+}
+
 bool  const & baby_base::low_dphi() const{
   if(!read_only_){
     throw std::logic_error("Trying to write to const tree.");
@@ -2817,6 +3798,39 @@ bool  const & baby_base::pass() const{
   return pass_;
 }
 
+bool  const & baby_base::pass20() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_pass20_ && b_pass20_){
+    b_pass20_->GetEntry(entry_);
+    c_pass20_ = true;
+  }
+  return pass20_;
+}
+
+bool  const & baby_base::pass40() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_pass40_ && b_pass40_){
+    b_pass40_->GetEntry(entry_);
+    c_pass40_ = true;
+  }
+  return pass40_;
+}
+
+bool  const & baby_base::pass50() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_pass50_ && b_pass50_){
+    b_pass50_->GetEntry(entry_);
+    c_pass50_ = true;
+  }
+  return pass50_;
+}
+
 bool  const & baby_base::pass_cschalo() const{
   if(!read_only_){
     throw std::logic_error("Trying to write to const tree.");
@@ -2826,6 +3840,17 @@ bool  const & baby_base::pass_cschalo() const{
     c_pass_cschalo_ = true;
   }
   return pass_cschalo_;
+}
+
+bool  const & baby_base::pass_ecaldeadcell() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_pass_ecaldeadcell_ && b_pass_ecaldeadcell_){
+    b_pass_ecaldeadcell_->GetEntry(entry_);
+    c_pass_ecaldeadcell_ = true;
+  }
+  return pass_ecaldeadcell_;
 }
 
 bool  const & baby_base::pass_eebadsc() const{
@@ -2881,6 +3906,39 @@ bool  const & baby_base::pass_jets() const{
     c_pass_jets_ = true;
   }
   return pass_jets_;
+}
+
+bool  const & baby_base::pass_jets20() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_pass_jets20_ && b_pass_jets20_){
+    b_pass_jets20_->GetEntry(entry_);
+    c_pass_jets20_ = true;
+  }
+  return pass_jets20_;
+}
+
+bool  const & baby_base::pass_jets40() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_pass_jets40_ && b_pass_jets40_){
+    b_pass_jets40_->GetEntry(entry_);
+    c_pass_jets40_ = true;
+  }
+  return pass_jets40_;
+}
+
+bool  const & baby_base::pass_jets50() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_pass_jets50_ && b_pass_jets50_){
+    b_pass_jets50_->GetEntry(entry_);
+    c_pass_jets50_ = true;
+  }
+  return pass_jets50_;
 }
 
 bool  const & baby_base::pass_jets_nohf() const{
@@ -2949,6 +4007,17 @@ bool  const & baby_base::pass_ra2() const{
   return pass_ra2_;
 }
 
+bool  const & baby_base::pass_ra2_badmu() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_pass_ra2_badmu_ && b_pass_ra2_badmu_){
+    b_pass_ra2_badmu_->GetEntry(entry_);
+    c_pass_ra2_badmu_ = true;
+  }
+  return pass_ra2_badmu_;
+}
+
 bool  const & baby_base::stitch() const{
   if(!read_only_){
     throw std::logic_error("Trying to write to const tree.");
@@ -2958,6 +4027,50 @@ bool  const & baby_base::stitch() const{
     c_stitch_ = true;
   }
   return stitch_;
+}
+
+bool  const & baby_base::trig_lep() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_trig_lep_ && b_trig_lep_){
+    b_trig_lep_->GetEntry(entry_);
+    c_trig_lep_ = true;
+  }
+  return trig_lep_;
+}
+
+bool  const & baby_base::trig_met() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_trig_met_ && b_trig_met_){
+    b_trig_met_->GetEntry(entry_);
+    c_trig_met_ = true;
+  }
+  return trig_met_;
+}
+
+bool  const & baby_base::trig_ra4() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_trig_ra4_ && b_trig_ra4_){
+    b_trig_ra4_->GetEntry(entry_);
+    c_trig_ra4_ = true;
+  }
+  return trig_ra4_;
+}
+
+bool  const & baby_base::trig_vvvl() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_trig_vvvl_ && b_trig_vvvl_){
+    b_trig_vvvl_->GetEntry(entry_);
+    c_trig_vvvl_ = true;
+  }
+  return trig_vvvl_;
 }
 
 float  const & baby_base::dphi1() const{
@@ -3013,6 +4126,17 @@ float  const & baby_base::dphi_wlep() const{
     c_dphi_wlep_ = true;
   }
   return dphi_wlep_;
+}
+
+float  const & baby_base::eff_jetid() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_eff_jetid_ && b_eff_jetid_){
+    b_eff_jetid_->GetEntry(entry_);
+    c_eff_jetid_ = true;
+  }
+  return eff_jetid_;
 }
 
 float  const & baby_base::eff_trig() const{
@@ -3257,6 +4381,138 @@ float  const & baby_base::elmu_w() const{
   return elmu_w_;
 }
 
+float  const & baby_base::hig1_eta() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_hig1_eta_ && b_hig1_eta_){
+    b_hig1_eta_->GetEntry(entry_);
+    c_hig1_eta_ = true;
+  }
+  return hig1_eta_;
+}
+
+float  const & baby_base::hig1_m() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_hig1_m_ && b_hig1_m_){
+    b_hig1_m_->GetEntry(entry_);
+    c_hig1_m_ = true;
+  }
+  return hig1_m_;
+}
+
+float  const & baby_base::hig1_phi() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_hig1_phi_ && b_hig1_phi_){
+    b_hig1_phi_->GetEntry(entry_);
+    c_hig1_phi_ = true;
+  }
+  return hig1_phi_;
+}
+
+float  const & baby_base::hig1_pt() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_hig1_pt_ && b_hig1_pt_){
+    b_hig1_pt_->GetEntry(entry_);
+    c_hig1_pt_ = true;
+  }
+  return hig1_pt_;
+}
+
+float  const & baby_base::hig2_eta() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_hig2_eta_ && b_hig2_eta_){
+    b_hig2_eta_->GetEntry(entry_);
+    c_hig2_eta_ = true;
+  }
+  return hig2_eta_;
+}
+
+float  const & baby_base::hig2_m() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_hig2_m_ && b_hig2_m_){
+    b_hig2_m_->GetEntry(entry_);
+    c_hig2_m_ = true;
+  }
+  return hig2_m_;
+}
+
+float  const & baby_base::hig2_phi() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_hig2_phi_ && b_hig2_phi_){
+    b_hig2_phi_->GetEntry(entry_);
+    c_hig2_phi_ = true;
+  }
+  return hig2_phi_;
+}
+
+float  const & baby_base::hig2_pt() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_hig2_pt_ && b_hig2_pt_){
+    b_hig2_pt_->GetEntry(entry_);
+    c_hig2_pt_ = true;
+  }
+  return hig2_pt_;
+}
+
+float  const & baby_base::hig_am() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_hig_am_ && b_hig_am_){
+    b_hig_am_->GetEntry(entry_);
+    c_hig_am_ = true;
+  }
+  return hig_am_;
+}
+
+float  const & baby_base::hig_dm() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_hig_dm_ && b_hig_dm_){
+    b_hig_dm_->GetEntry(entry_);
+    c_hig_dm_ = true;
+  }
+  return hig_dm_;
+}
+
+float  const & baby_base::hig_dphi() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_hig_dphi_ && b_hig_dphi_){
+    b_hig_dphi_->GetEntry(entry_);
+    c_hig_dphi_ = true;
+  }
+  return hig_dphi_;
+}
+
+float  const & baby_base::hig_drmax() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_hig_drmax_ && b_hig_drmax_){
+    b_hig_drmax_->GetEntry(entry_);
+    c_hig_drmax_ = true;
+  }
+  return hig_drmax_;
+}
+
 float  const & baby_base::ht() const{
   if(!read_only_){
     throw std::logic_error("Trying to write to const tree.");
@@ -3266,6 +4522,28 @@ float  const & baby_base::ht() const{
     c_ht_ = true;
   }
   return ht_;
+}
+
+float  const & baby_base::ht40() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_ht40_ && b_ht40_){
+    b_ht40_->GetEntry(entry_);
+    c_ht40_ = true;
+  }
+  return ht40_;
+}
+
+float  const & baby_base::ht50() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_ht50_ && b_ht50_){
+    b_ht50_->GetEntry(entry_);
+    c_ht50_ = true;
+  }
+  return ht50_;
 }
 
 float  const & baby_base::ht_clean() const{
@@ -3323,6 +4601,39 @@ float  const & baby_base::ht_tru() const{
   return ht_tru_;
 }
 
+float  const & baby_base::htx() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_htx_ && b_htx_){
+    b_htx_->GetEntry(entry_);
+    c_htx_ = true;
+  }
+  return htx_;
+}
+
+float  const & baby_base::htx40() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_htx40_ && b_htx40_){
+    b_htx40_->GetEntry(entry_);
+    c_htx40_ = true;
+  }
+  return htx40_;
+}
+
+float  const & baby_base::htx50() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_htx50_ && b_htx50_){
+    b_htx50_->GetEntry(entry_);
+    c_htx50_ = true;
+  }
+  return htx50_;
+}
+
 float  const & baby_base::isr_tru_eta() const{
   if(!read_only_){
     throw std::logic_error("Trying to write to const tree.");
@@ -3367,6 +4678,17 @@ float  const & baby_base::jetsys_eta() const{
   return jetsys_eta_;
 }
 
+float  const & baby_base::jetsys_m() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_jetsys_m_ && b_jetsys_m_){
+    b_jetsys_m_->GetEntry(entry_);
+    c_jetsys_m_ = true;
+  }
+  return jetsys_m_;
+}
+
 float  const & baby_base::jetsys_nob_eta() const{
   if(!read_only_){
     throw std::logic_error("Trying to write to const tree.");
@@ -3376,6 +4698,17 @@ float  const & baby_base::jetsys_nob_eta() const{
     c_jetsys_nob_eta_ = true;
   }
   return jetsys_nob_eta_;
+}
+
+float  const & baby_base::jetsys_nob_m() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_jetsys_nob_m_ && b_jetsys_nob_m_){
+    b_jetsys_nob_m_->GetEntry(entry_);
+    c_jetsys_nob_m_ = true;
+  }
+  return jetsys_nob_m_;
 }
 
 float  const & baby_base::jetsys_nob_phi() const{
@@ -3420,6 +4753,28 @@ float  const & baby_base::jetsys_pt() const{
     c_jetsys_pt_ = true;
   }
   return jetsys_pt_;
+}
+
+float  const & baby_base::m_tt() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_m_tt_ && b_m_tt_){
+    b_m_tt_->GetEntry(entry_);
+    c_m_tt_ = true;
+  }
+  return m_tt_;
+}
+
+float  const & baby_base::mct() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_mct_ && b_mct_){
+    b_mct_->GetEntry(entry_);
+    c_mct_ = true;
+  }
+  return mct_;
 }
 
 float  const & baby_base::met() const{
@@ -3631,17 +4986,6 @@ float  const & baby_base::mht_phi() const{
   return mht_phi_;
 }
 
-float  const & baby_base::mj() const{
-  if(!read_only_){
-    throw std::logic_error("Trying to write to const tree.");
-  }
-  if(!c_mj_ && b_mj_){
-    b_mj_->GetEntry(entry_);
-    c_mj_ = true;
-  }
-  return mj_;
-}
-
 float  const & baby_base::mj08() const{
   if(!read_only_){
     throw std::logic_error("Trying to write to const tree.");
@@ -3653,6 +4997,61 @@ float  const & baby_base::mj08() const{
   return mj08_;
 }
 
+float  const & baby_base::mj12() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_mj12_ && b_mj12_){
+    b_mj12_->GetEntry(entry_);
+    c_mj12_ = true;
+  }
+  return mj12_;
+}
+
+float  const & baby_base::mj14() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_mj14_ && b_mj14_){
+    b_mj14_->GetEntry(entry_);
+    c_mj14_ = true;
+  }
+  return mj14_;
+}
+
+float  const & baby_base::mj14_nolep() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_mj14_nolep_ && b_mj14_nolep_){
+    b_mj14_nolep_->GetEntry(entry_);
+    c_mj14_nolep_ = true;
+  }
+  return mj14_nolep_;
+}
+
+float  const & baby_base::mj40() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_mj40_ && b_mj40_){
+    b_mj40_->GetEntry(entry_);
+    c_mj40_ = true;
+  }
+  return mj40_;
+}
+
+float  const & baby_base::mj50() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_mj50_ && b_mj50_){
+    b_mj50_->GetEntry(entry_);
+    c_mj50_ = true;
+  }
+  return mj50_;
+}
+
 float  const & baby_base::mt() const{
   if(!read_only_){
     throw std::logic_error("Trying to write to const tree.");
@@ -3662,6 +5061,28 @@ float  const & baby_base::mt() const{
     c_mt_ = true;
   }
   return mt_;
+}
+
+float  const & baby_base::mt2() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_mt2_ && b_mt2_){
+    b_mt2_->GetEntry(entry_);
+    c_mt2_ = true;
+  }
+  return mt2_;
+}
+
+float  const & baby_base::mt2_0mass() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_mt2_0mass_ && b_mt2_0mass_){
+    b_mt2_0mass_->GetEntry(entry_);
+    c_mt2_0mass_ = true;
+  }
+  return mt2_0mass_;
 }
 
 float  const & baby_base::mt_nohf() const{
@@ -3862,6 +5283,17 @@ float  const & baby_base::mumuv_w() const{
   return mumuv_w_;
 }
 
+float  const & baby_base::nisr() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_nisr_ && b_nisr_){
+    b_nisr_->GetEntry(entry_);
+    c_nisr_ = true;
+  }
+  return nisr_;
+}
+
 float  const & baby_base::ntrupv_mean() const{
   if(!read_only_){
     throw std::logic_error("Trying to write to const tree.");
@@ -3994,6 +5426,39 @@ float  const & baby_base::onph_ph90() const{
   return onph_ph90_;
 }
 
+float  const & baby_base::st() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_st_ && b_st_){
+    b_st_->GetEntry(entry_);
+    c_st_ = true;
+  }
+  return st_;
+}
+
+float  const & baby_base::st40() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_st40_ && b_st40_){
+    b_st40_->GetEntry(entry_);
+    c_st40_ = true;
+  }
+  return st40_;
+}
+
+float  const & baby_base::st50() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_st50_ && b_st50_){
+    b_st50_->GetEntry(entry_);
+    c_st50_ = true;
+  }
+  return st50_;
+}
+
 float  const & baby_base::w_btag() const{
   if(!read_only_){
     throw std::logic_error("Trying to write to const tree.");
@@ -4005,6 +5470,28 @@ float  const & baby_base::w_btag() const{
   return w_btag_;
 }
 
+float  const & baby_base::w_btag40() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_w_btag40_ && b_w_btag40_){
+    b_w_btag40_->GetEntry(entry_);
+    c_w_btag40_ = true;
+  }
+  return w_btag40_;
+}
+
+float  const & baby_base::w_btag_loose() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_w_btag_loose_ && b_w_btag_loose_){
+    b_w_btag_loose_->GetEntry(entry_);
+    c_w_btag_loose_ = true;
+  }
+  return w_btag_loose_;
+}
+
 float  const & baby_base::w_fs_lep() const{
   if(!read_only_){
     throw std::logic_error("Trying to write to const tree.");
@@ -4014,6 +5501,17 @@ float  const & baby_base::w_fs_lep() const{
     c_w_fs_lep_ = true;
   }
   return w_fs_lep_;
+}
+
+float  const & baby_base::w_isr() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_w_isr_ && b_w_isr_){
+    b_w_isr_->GetEntry(entry_);
+    c_w_isr_ = true;
+  }
+  return w_isr_;
 }
 
 float  const & baby_base::w_lep() const{
@@ -4071,6 +5569,28 @@ float  const & baby_base::weight() const{
   return weight_;
 }
 
+float  const & baby_base::weight_rpv() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_weight_rpv_ && b_weight_rpv_){
+    b_weight_rpv_->GetEntry(entry_);
+    c_weight_rpv_ = true;
+  }
+  return weight_rpv_;
+}
+
+int  const & baby_base::hig_bin() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_hig_bin_ && b_hig_bin_){
+    b_hig_bin_->GetEntry(entry_);
+    c_hig_bin_ = true;
+  }
+  return hig_bin_;
+}
+
 int  const & baby_base::lumiblock() const{
   if(!read_only_){
     throw std::logic_error("Trying to write to const tree.");
@@ -4124,6 +5644,39 @@ int  const & baby_base::nbm() const{
     c_nbm_ = true;
   }
   return nbm_;
+}
+
+int  const & baby_base::nbm20() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_nbm20_ && b_nbm20_){
+    b_nbm20_->GetEntry(entry_);
+    c_nbm20_ = true;
+  }
+  return nbm20_;
+}
+
+int  const & baby_base::nbm40() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_nbm40_ && b_nbm40_){
+    b_nbm40_->GetEntry(entry_);
+    c_nbm40_ = true;
+  }
+  return nbm40_;
+}
+
+int  const & baby_base::nbm50() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_nbm50_ && b_nbm50_){
+    b_nbm50_->GetEntry(entry_);
+    c_nbm50_ = true;
+  }
+  return nbm50_;
 }
 
 int  const & baby_base::nbm_ra2() const{
@@ -4181,26 +5734,26 @@ int  const & baby_base::nels_vvvl() const{
   return nels_vvvl_;
 }
 
-int  const & baby_base::nfjets() const{
+int  const & baby_base::nfjets14() const{
   if(!read_only_){
     throw std::logic_error("Trying to write to const tree.");
   }
-  if(!c_nfjets_ && b_nfjets_){
-    b_nfjets_->GetEntry(entry_);
-    c_nfjets_ = true;
+  if(!c_nfjets14_ && b_nfjets14_){
+    b_nfjets14_->GetEntry(entry_);
+    c_nfjets14_ = true;
   }
-  return nfjets_;
+  return nfjets14_;
 }
 
-int  const & baby_base::nfjets08() const{
+int  const & baby_base::nfjets40() const{
   if(!read_only_){
     throw std::logic_error("Trying to write to const tree.");
   }
-  if(!c_nfjets08_ && b_nfjets08_){
-    b_nfjets08_->GetEntry(entry_);
-    c_nfjets08_ = true;
+  if(!c_nfjets40_ && b_nfjets40_){
+    b_nfjets40_->GetEntry(entry_);
+    c_nfjets40_ = true;
   }
-  return nfjets08_;
+  return nfjets40_;
 }
 
 int  const & baby_base::nisr_me() const{
@@ -4223,6 +5776,39 @@ int  const & baby_base::njets() const{
     c_njets_ = true;
   }
   return njets_;
+}
+
+int  const & baby_base::njets20() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_njets20_ && b_njets20_){
+    b_njets20_->GetEntry(entry_);
+    c_njets20_ = true;
+  }
+  return njets20_;
+}
+
+int  const & baby_base::njets40() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_njets40_ && b_njets40_){
+    b_njets40_->GetEntry(entry_);
+    c_njets40_ = true;
+  }
+  return njets40_;
+}
+
+int  const & baby_base::njets50() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_njets50_ && b_njets50_){
+    b_njets50_->GetEntry(entry_);
+    c_njets50_ = true;
+  }
+  return njets50_;
 }
 
 int  const & baby_base::njets_clean() const{
@@ -4456,6 +6042,17 @@ int  const & baby_base::run() const{
   return run_;
 }
 
+int  const & baby_base::type() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_type_ && b_type_){
+    b_type_->GetEntry(entry_);
+    c_type_ = true;
+  }
+  return type_;
+}
+
 std::vector<bool>  const & baby_base::els_ele105() const{
   if(!read_only_){
     throw std::logic_error("Trying to write to const tree.");
@@ -4577,6 +6174,39 @@ std::vector<bool>  const & baby_base::els_vvvl() const{
   return els_vvvl_;
 }
 
+std::vector<bool>  const & baby_base::jets_h1() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_jets_h1_ && b_jets_h1_){
+    b_jets_h1_->GetEntry(entry_);
+    c_jets_h1_ = true;
+  }
+  return jets_h1_;
+}
+
+std::vector<bool>  const & baby_base::jets_h2() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_jets_h2_ && b_jets_h2_){
+    b_jets_h2_->GetEntry(entry_);
+    c_jets_h2_ = true;
+  }
+  return jets_h2_;
+}
+
+std::vector<bool>  const & baby_base::jets_isisr() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_jets_isisr_ && b_jets_isisr_){
+    b_jets_isisr_->GetEntry(entry_);
+    c_jets_isisr_ = true;
+  }
+  return jets_isisr_;
+}
+
 std::vector<bool>  const & baby_base::jets_islep() const{
   if(!read_only_){
     throw std::logic_error("Trying to write to const tree.");
@@ -4687,6 +6317,17 @@ std::vector<bool>  const & baby_base::mus_tm() const{
   return mus_tm_;
 }
 
+std::vector<bool>  const & baby_base::mus_trk_quality() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_mus_trk_quality_ && b_mus_trk_quality_){
+    b_mus_trk_quality_->GetEntry(entry_);
+    c_mus_trk_quality_ = true;
+  }
+  return mus_trk_quality_;
+}
+
 std::vector<bool>  const & baby_base::mus_vvvl() const{
   if(!read_only_){
     throw std::logic_error("Trying to write to const tree.");
@@ -4731,6 +6372,28 @@ std::vector<bool>  const & baby_base::sys_pass() const{
   return sys_pass_;
 }
 
+std::vector<bool>  const & baby_base::sys_pass40() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_sys_pass40_ && b_sys_pass40_){
+    b_sys_pass40_->GetEntry(entry_);
+    c_sys_pass40_ = true;
+  }
+  return sys_pass40_;
+}
+
+std::vector<bool>  const & baby_base::tks_tm() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_tks_tm_ && b_tks_tm_){
+    b_tks_tm_->GetEntry(entry_);
+    c_tks_tm_ = true;
+  }
+  return tks_tm_;
+}
+
 std::vector<bool>  const & baby_base::trig() const{
   if(!read_only_){
     throw std::logic_error("Trying to write to const tree.");
@@ -4753,6 +6416,28 @@ std::vector<float>  const & baby_base::els_d0() const{
   return els_d0_;
 }
 
+std::vector<float>  const & baby_base::els_deta_sctrk() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_els_deta_sctrk_ && b_els_deta_sctrk_){
+    b_els_deta_sctrk_->GetEntry(entry_);
+    c_els_deta_sctrk_ = true;
+  }
+  return els_deta_sctrk_;
+}
+
+std::vector<float>  const & baby_base::els_dphi_sctrk() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_els_dphi_sctrk_ && b_els_dphi_sctrk_){
+    b_els_dphi_sctrk_->GetEntry(entry_);
+    c_els_dphi_sctrk_ = true;
+  }
+  return els_dphi_sctrk_;
+}
+
 std::vector<float>  const & baby_base::els_dz() const{
   if(!read_only_){
     throw std::logic_error("Trying to write to const tree.");
@@ -4764,6 +6449,28 @@ std::vector<float>  const & baby_base::els_dz() const{
   return els_dz_;
 }
 
+std::vector<float>  const & baby_base::els_em_e() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_els_em_e_ && b_els_em_e_){
+    b_els_em_e_->GetEntry(entry_);
+    c_els_em_e_ = true;
+  }
+  return els_em_e_;
+}
+
+std::vector<float>  const & baby_base::els_eoverp() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_els_eoverp_ && b_els_eoverp_){
+    b_els_eoverp_->GetEntry(entry_);
+    c_els_eoverp_ = true;
+  }
+  return els_eoverp_;
+}
+
 std::vector<float>  const & baby_base::els_eta() const{
   if(!read_only_){
     throw std::logic_error("Trying to write to const tree.");
@@ -4773,6 +6480,28 @@ std::vector<float>  const & baby_base::els_eta() const{
     c_els_eta_ = true;
   }
   return els_eta_;
+}
+
+std::vector<float>  const & baby_base::els_hovere() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_els_hovere_ && b_els_hovere_){
+    b_els_hovere_->GetEntry(entry_);
+    c_els_hovere_ = true;
+  }
+  return els_hovere_;
+}
+
+std::vector<float>  const & baby_base::els_ip3d() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_els_ip3d_ && b_els_ip3d_){
+    b_els_ip3d_->GetEntry(entry_);
+    c_els_ip3d_ = true;
+  }
+  return els_ip3d_;
 }
 
 std::vector<float>  const & baby_base::els_miniso() const{
@@ -4830,6 +6559,28 @@ std::vector<float>  const & baby_base::els_sceta() const{
   return els_sceta_;
 }
 
+std::vector<float>  const & baby_base::els_trk_pt() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_els_trk_pt_ && b_els_trk_pt_){
+    b_els_trk_pt_->GetEntry(entry_);
+    c_els_trk_pt_ = true;
+  }
+  return els_trk_pt_;
+}
+
+std::vector<float>  const & baby_base::els_trk_pterr() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_els_trk_pterr_ && b_els_trk_pterr_){
+    b_els_trk_pterr_->GetEntry(entry_);
+    c_els_trk_pterr_ = true;
+  }
+  return els_trk_pterr_;
+}
+
 std::vector<float>  const & baby_base::els_vvvl_eta() const{
   if(!read_only_){
     throw std::logic_error("Trying to write to const tree.");
@@ -4863,136 +6614,92 @@ std::vector<float>  const & baby_base::els_vvvl_pt() const{
   return els_vvvl_pt_;
 }
 
-std::vector<float>  const & baby_base::fjets08_eta() const{
+std::vector<float>  const & baby_base::fjets14_eta() const{
   if(!read_only_){
     throw std::logic_error("Trying to write to const tree.");
   }
-  if(!c_fjets08_eta_ && b_fjets08_eta_){
-    b_fjets08_eta_->GetEntry(entry_);
-    c_fjets08_eta_ = true;
+  if(!c_fjets14_eta_ && b_fjets14_eta_){
+    b_fjets14_eta_->GetEntry(entry_);
+    c_fjets14_eta_ = true;
   }
-  return fjets08_eta_;
+  return fjets14_eta_;
 }
 
-std::vector<float>  const & baby_base::fjets08_m() const{
+std::vector<float>  const & baby_base::fjets14_m() const{
   if(!read_only_){
     throw std::logic_error("Trying to write to const tree.");
   }
-  if(!c_fjets08_m_ && b_fjets08_m_){
-    b_fjets08_m_->GetEntry(entry_);
-    c_fjets08_m_ = true;
+  if(!c_fjets14_m_ && b_fjets14_m_){
+    b_fjets14_m_->GetEntry(entry_);
+    c_fjets14_m_ = true;
   }
-  return fjets08_m_;
+  return fjets14_m_;
 }
 
-std::vector<float>  const & baby_base::fjets08_phi() const{
+std::vector<float>  const & baby_base::fjets14_phi() const{
   if(!read_only_){
     throw std::logic_error("Trying to write to const tree.");
   }
-  if(!c_fjets08_phi_ && b_fjets08_phi_){
-    b_fjets08_phi_->GetEntry(entry_);
-    c_fjets08_phi_ = true;
+  if(!c_fjets14_phi_ && b_fjets14_phi_){
+    b_fjets14_phi_->GetEntry(entry_);
+    c_fjets14_phi_ = true;
   }
-  return fjets08_phi_;
+  return fjets14_phi_;
 }
 
-std::vector<float>  const & baby_base::fjets08_poscsv() const{
+std::vector<float>  const & baby_base::fjets14_pt() const{
   if(!read_only_){
     throw std::logic_error("Trying to write to const tree.");
   }
-  if(!c_fjets08_poscsv_ && b_fjets08_poscsv_){
-    b_fjets08_poscsv_->GetEntry(entry_);
-    c_fjets08_poscsv_ = true;
+  if(!c_fjets14_pt_ && b_fjets14_pt_){
+    b_fjets14_pt_->GetEntry(entry_);
+    c_fjets14_pt_ = true;
   }
-  return fjets08_poscsv_;
+  return fjets14_pt_;
 }
 
-std::vector<float>  const & baby_base::fjets08_pt() const{
+std::vector<float>  const & baby_base::fjets40_eta() const{
   if(!read_only_){
     throw std::logic_error("Trying to write to const tree.");
   }
-  if(!c_fjets08_pt_ && b_fjets08_pt_){
-    b_fjets08_pt_->GetEntry(entry_);
-    c_fjets08_pt_ = true;
+  if(!c_fjets40_eta_ && b_fjets40_eta_){
+    b_fjets40_eta_->GetEntry(entry_);
+    c_fjets40_eta_ = true;
   }
-  return fjets08_pt_;
+  return fjets40_eta_;
 }
 
-std::vector<float>  const & baby_base::fjets08_sumcsv() const{
+std::vector<float>  const & baby_base::fjets40_m() const{
   if(!read_only_){
     throw std::logic_error("Trying to write to const tree.");
   }
-  if(!c_fjets08_sumcsv_ && b_fjets08_sumcsv_){
-    b_fjets08_sumcsv_->GetEntry(entry_);
-    c_fjets08_sumcsv_ = true;
+  if(!c_fjets40_m_ && b_fjets40_m_){
+    b_fjets40_m_->GetEntry(entry_);
+    c_fjets40_m_ = true;
   }
-  return fjets08_sumcsv_;
+  return fjets40_m_;
 }
 
-std::vector<float>  const & baby_base::fjets_eta() const{
+std::vector<float>  const & baby_base::fjets40_phi() const{
   if(!read_only_){
     throw std::logic_error("Trying to write to const tree.");
   }
-  if(!c_fjets_eta_ && b_fjets_eta_){
-    b_fjets_eta_->GetEntry(entry_);
-    c_fjets_eta_ = true;
+  if(!c_fjets40_phi_ && b_fjets40_phi_){
+    b_fjets40_phi_->GetEntry(entry_);
+    c_fjets40_phi_ = true;
   }
-  return fjets_eta_;
+  return fjets40_phi_;
 }
 
-std::vector<float>  const & baby_base::fjets_m() const{
+std::vector<float>  const & baby_base::fjets40_pt() const{
   if(!read_only_){
     throw std::logic_error("Trying to write to const tree.");
   }
-  if(!c_fjets_m_ && b_fjets_m_){
-    b_fjets_m_->GetEntry(entry_);
-    c_fjets_m_ = true;
+  if(!c_fjets40_pt_ && b_fjets40_pt_){
+    b_fjets40_pt_->GetEntry(entry_);
+    c_fjets40_pt_ = true;
   }
-  return fjets_m_;
-}
-
-std::vector<float>  const & baby_base::fjets_phi() const{
-  if(!read_only_){
-    throw std::logic_error("Trying to write to const tree.");
-  }
-  if(!c_fjets_phi_ && b_fjets_phi_){
-    b_fjets_phi_->GetEntry(entry_);
-    c_fjets_phi_ = true;
-  }
-  return fjets_phi_;
-}
-
-std::vector<float>  const & baby_base::fjets_poscsv() const{
-  if(!read_only_){
-    throw std::logic_error("Trying to write to const tree.");
-  }
-  if(!c_fjets_poscsv_ && b_fjets_poscsv_){
-    b_fjets_poscsv_->GetEntry(entry_);
-    c_fjets_poscsv_ = true;
-  }
-  return fjets_poscsv_;
-}
-
-std::vector<float>  const & baby_base::fjets_pt() const{
-  if(!read_only_){
-    throw std::logic_error("Trying to write to const tree.");
-  }
-  if(!c_fjets_pt_ && b_fjets_pt_){
-    b_fjets_pt_->GetEntry(entry_);
-    c_fjets_pt_ = true;
-  }
-  return fjets_pt_;
-}
-
-std::vector<float>  const & baby_base::fjets_sumcsv() const{
-  if(!read_only_){
-    throw std::logic_error("Trying to write to const tree.");
-  }
-  if(!c_fjets_sumcsv_ && b_fjets_sumcsv_){
-    b_fjets_sumcsv_->GetEntry(entry_);
-    c_fjets_sumcsv_ = true;
-  }
-  return fjets_sumcsv_;
+  return fjets40_pt_;
 }
 
 std::vector<float>  const & baby_base::jets_csv() const{
@@ -5171,6 +6878,17 @@ std::vector<float>  const & baby_base::mus_dz() const{
   return mus_dz_;
 }
 
+std::vector<float>  const & baby_base::mus_em_e() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_mus_em_e_ && b_mus_em_e_){
+    b_mus_em_e_->GetEntry(entry_);
+    c_mus_em_e_ = true;
+  }
+  return mus_em_e_;
+}
+
 std::vector<float>  const & baby_base::mus_eta() const{
   if(!read_only_){
     throw std::logic_error("Trying to write to const tree.");
@@ -5180,6 +6898,17 @@ std::vector<float>  const & baby_base::mus_eta() const{
     c_mus_eta_ = true;
   }
   return mus_eta_;
+}
+
+std::vector<float>  const & baby_base::mus_had_e() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_mus_had_e_ && b_mus_had_e_){
+    b_mus_had_e_->GetEntry(entry_);
+    c_mus_had_e_ = true;
+  }
+  return mus_had_e_;
 }
 
 std::vector<float>  const & baby_base::mus_miniso() const{
@@ -5213,6 +6942,17 @@ std::vector<float>  const & baby_base::mus_pt() const{
     c_mus_pt_ = true;
   }
   return mus_pt_;
+}
+
+std::vector<float>  const & baby_base::mus_pterr() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_mus_pterr_ && b_mus_pterr_){
+    b_mus_pterr_->GetEntry(entry_);
+    c_mus_pterr_ = true;
+  }
+  return mus_pterr_;
 }
 
 std::vector<float>  const & baby_base::mus_reliso() const{
@@ -5303,6 +7043,28 @@ std::vector<float>  const & baby_base::sys_bctag() const{
   return sys_bctag_;
 }
 
+std::vector<float>  const & baby_base::sys_bctag40() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_sys_bctag40_ && b_sys_bctag40_){
+    b_sys_bctag40_->GetEntry(entry_);
+    c_sys_bctag40_ = true;
+  }
+  return sys_bctag40_;
+}
+
+std::vector<float>  const & baby_base::sys_bctag_loose() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_sys_bctag_loose_ && b_sys_bctag_loose_){
+    b_sys_bctag_loose_->GetEntry(entry_);
+    c_sys_bctag_loose_ = true;
+  }
+  return sys_bctag_loose_;
+}
+
 std::vector<float>  const & baby_base::sys_fs_bctag() const{
   if(!read_only_){
     throw std::logic_error("Trying to write to const tree.");
@@ -5312,6 +7074,17 @@ std::vector<float>  const & baby_base::sys_fs_bctag() const{
     c_sys_fs_bctag_ = true;
   }
   return sys_fs_bctag_;
+}
+
+std::vector<float>  const & baby_base::sys_fs_bctag40() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_sys_fs_bctag40_ && b_sys_fs_bctag40_){
+    b_sys_fs_bctag40_->GetEntry(entry_);
+    c_sys_fs_bctag40_ = true;
+  }
+  return sys_fs_bctag40_;
 }
 
 std::vector<float>  const & baby_base::sys_fs_lep() const{
@@ -5336,6 +7109,17 @@ std::vector<float>  const & baby_base::sys_fs_udsgtag() const{
   return sys_fs_udsgtag_;
 }
 
+std::vector<float>  const & baby_base::sys_fs_udsgtag40() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_sys_fs_udsgtag40_ && b_sys_fs_udsgtag40_){
+    b_sys_fs_udsgtag40_->GetEntry(entry_);
+    c_sys_fs_udsgtag40_ = true;
+  }
+  return sys_fs_udsgtag40_;
+}
+
 std::vector<float>  const & baby_base::sys_ht() const{
   if(!read_only_){
     throw std::logic_error("Trying to write to const tree.");
@@ -5345,6 +7129,17 @@ std::vector<float>  const & baby_base::sys_ht() const{
     c_sys_ht_ = true;
   }
   return sys_ht_;
+}
+
+std::vector<float>  const & baby_base::sys_ht40() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_sys_ht40_ && b_sys_ht40_){
+    b_sys_ht40_->GetEntry(entry_);
+    c_sys_ht40_ = true;
+  }
+  return sys_ht40_;
 }
 
 std::vector<float>  const & baby_base::sys_isr() const{
@@ -5380,15 +7175,37 @@ std::vector<float>  const & baby_base::sys_met() const{
   return sys_met_;
 }
 
-std::vector<float>  const & baby_base::sys_mj() const{
+std::vector<float>  const & baby_base::sys_mj14() const{
   if(!read_only_){
     throw std::logic_error("Trying to write to const tree.");
   }
-  if(!c_sys_mj_ && b_sys_mj_){
-    b_sys_mj_->GetEntry(entry_);
-    c_sys_mj_ = true;
+  if(!c_sys_mj14_ && b_sys_mj14_){
+    b_sys_mj14_->GetEntry(entry_);
+    c_sys_mj14_ = true;
   }
-  return sys_mj_;
+  return sys_mj14_;
+}
+
+std::vector<float>  const & baby_base::sys_mj14_nolep() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_sys_mj14_nolep_ && b_sys_mj14_nolep_){
+    b_sys_mj14_nolep_->GetEntry(entry_);
+    c_sys_mj14_nolep_ = true;
+  }
+  return sys_mj14_nolep_;
+}
+
+std::vector<float>  const & baby_base::sys_mj40() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_sys_mj40_ && b_sys_mj40_){
+    b_sys_mj40_->GetEntry(entry_);
+    c_sys_mj40_ = true;
+  }
+  return sys_mj40_;
 }
 
 std::vector<float>  const & baby_base::sys_mt() const{
@@ -5435,15 +7252,37 @@ std::vector<float>  const & baby_base::sys_murf() const{
   return sys_murf_;
 }
 
-std::vector<float>  const & baby_base::sys_pdf() const{
+std::vector<float>  const & baby_base::sys_pu() const{
   if(!read_only_){
     throw std::logic_error("Trying to write to const tree.");
   }
-  if(!c_sys_pdf_ && b_sys_pdf_){
-    b_sys_pdf_->GetEntry(entry_);
-    c_sys_pdf_ = true;
+  if(!c_sys_pu_ && b_sys_pu_){
+    b_sys_pu_->GetEntry(entry_);
+    c_sys_pu_ = true;
   }
-  return sys_pdf_;
+  return sys_pu_;
+}
+
+std::vector<float>  const & baby_base::sys_st() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_sys_st_ && b_sys_st_){
+    b_sys_st_->GetEntry(entry_);
+    c_sys_st_ = true;
+  }
+  return sys_st_;
+}
+
+std::vector<float>  const & baby_base::sys_st40() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_sys_st40_ && b_sys_st40_){
+    b_sys_st40_->GetEntry(entry_);
+    c_sys_st40_ = true;
+  }
+  return sys_st40_;
 }
 
 std::vector<float>  const & baby_base::sys_trig() const{
@@ -5466,6 +7305,50 @@ std::vector<float>  const & baby_base::sys_udsgtag() const{
     c_sys_udsgtag_ = true;
   }
   return sys_udsgtag_;
+}
+
+std::vector<float>  const & baby_base::sys_udsgtag40() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_sys_udsgtag40_ && b_sys_udsgtag40_){
+    b_sys_udsgtag40_->GetEntry(entry_);
+    c_sys_udsgtag40_ = true;
+  }
+  return sys_udsgtag40_;
+}
+
+std::vector<float>  const & baby_base::sys_udsgtag_loose() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_sys_udsgtag_loose_ && b_sys_udsgtag_loose_){
+    b_sys_udsgtag_loose_->GetEntry(entry_);
+    c_sys_udsgtag_loose_ = true;
+  }
+  return sys_udsgtag_loose_;
+}
+
+std::vector<float>  const & baby_base::tks_d0() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_tks_d0_ && b_tks_d0_){
+    b_tks_d0_->GetEntry(entry_);
+    c_tks_d0_ = true;
+  }
+  return tks_d0_;
+}
+
+std::vector<float>  const & baby_base::tks_dz() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_tks_dz_ && b_tks_dz_){
+    b_tks_dz_->GetEntry(entry_);
+    c_tks_dz_ = true;
+  }
+  return tks_dz_;
 }
 
 std::vector<float>  const & baby_base::tks_eta() const{
@@ -5534,6 +7417,17 @@ std::vector<float>  const & baby_base::tks_pt() const{
   return tks_pt_;
 }
 
+std::vector<float>  const & baby_base::tks_reliso() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_tks_reliso_ && b_tks_reliso_){
+    b_tks_reliso_->GetEntry(entry_);
+    c_tks_reliso_ = true;
+  }
+  return tks_reliso_;
+}
+
 std::vector<float>  const & baby_base::trig_prescale() const{
   if(!read_only_){
     throw std::logic_error("Trying to write to const tree.");
@@ -5543,17 +7437,6 @@ std::vector<float>  const & baby_base::trig_prescale() const{
     c_trig_prescale_ = true;
   }
   return trig_prescale_;
-}
-
-std::vector<float>  const & baby_base::w_pdf() const{
-  if(!read_only_){
-    throw std::logic_error("Trying to write to const tree.");
-  }
-  if(!c_w_pdf_ && b_w_pdf_){
-    b_w_pdf_->GetEntry(entry_);
-    c_w_pdf_ = true;
-  }
-  return w_pdf_;
 }
 
 std::vector<int>  const & baby_base::els_charge() const{
@@ -5567,48 +7450,37 @@ std::vector<int>  const & baby_base::els_charge() const{
   return els_charge_;
 }
 
-std::vector<int>  const & baby_base::fjets08_btags() const{
+std::vector<int>  const & baby_base::els_trk_nholes() const{
   if(!read_only_){
     throw std::logic_error("Trying to write to const tree.");
   }
-  if(!c_fjets08_btags_ && b_fjets08_btags_){
-    b_fjets08_btags_->GetEntry(entry_);
-    c_fjets08_btags_ = true;
+  if(!c_els_trk_nholes_ && b_els_trk_nholes_){
+    b_els_trk_nholes_->GetEntry(entry_);
+    c_els_trk_nholes_ = true;
   }
-  return fjets08_btags_;
+  return els_trk_nholes_;
 }
 
-std::vector<int>  const & baby_base::fjets08_nconst() const{
+std::vector<int>  const & baby_base::fjets14_nconst() const{
   if(!read_only_){
     throw std::logic_error("Trying to write to const tree.");
   }
-  if(!c_fjets08_nconst_ && b_fjets08_nconst_){
-    b_fjets08_nconst_->GetEntry(entry_);
-    c_fjets08_nconst_ = true;
+  if(!c_fjets14_nconst_ && b_fjets14_nconst_){
+    b_fjets14_nconst_->GetEntry(entry_);
+    c_fjets14_nconst_ = true;
   }
-  return fjets08_nconst_;
+  return fjets14_nconst_;
 }
 
-std::vector<int>  const & baby_base::fjets_btags() const{
+std::vector<int>  const & baby_base::fjets40_nconst() const{
   if(!read_only_){
     throw std::logic_error("Trying to write to const tree.");
   }
-  if(!c_fjets_btags_ && b_fjets_btags_){
-    b_fjets_btags_->GetEntry(entry_);
-    c_fjets_btags_ = true;
+  if(!c_fjets40_nconst_ && b_fjets40_nconst_){
+    b_fjets40_nconst_->GetEntry(entry_);
+    c_fjets40_nconst_ = true;
   }
-  return fjets_btags_;
-}
-
-std::vector<int>  const & baby_base::fjets_nconst() const{
-  if(!read_only_){
-    throw std::logic_error("Trying to write to const tree.");
-  }
-  if(!c_fjets_nconst_ && b_fjets_nconst_){
-    b_fjets_nconst_->GetEntry(entry_);
-    c_fjets_nconst_ = true;
-  }
-  return fjets_nconst_;
+  return fjets40_nconst_;
 }
 
 std::vector<int>  const & baby_base::jets_fjet08_index() const{
@@ -5622,15 +7494,59 @@ std::vector<int>  const & baby_base::jets_fjet08_index() const{
   return jets_fjet08_index_;
 }
 
-std::vector<int>  const & baby_base::jets_fjet_index() const{
+std::vector<int>  const & baby_base::jets_fjet12_index() const{
   if(!read_only_){
     throw std::logic_error("Trying to write to const tree.");
   }
-  if(!c_jets_fjet_index_ && b_jets_fjet_index_){
-    b_jets_fjet_index_->GetEntry(entry_);
-    c_jets_fjet_index_ = true;
+  if(!c_jets_fjet12_index_ && b_jets_fjet12_index_){
+    b_jets_fjet12_index_->GetEntry(entry_);
+    c_jets_fjet12_index_ = true;
   }
-  return jets_fjet_index_;
+  return jets_fjet12_index_;
+}
+
+std::vector<int>  const & baby_base::jets_fjet14_index() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_jets_fjet14_index_ && b_jets_fjet14_index_){
+    b_jets_fjet14_index_->GetEntry(entry_);
+    c_jets_fjet14_index_ = true;
+  }
+  return jets_fjet14_index_;
+}
+
+std::vector<int>  const & baby_base::jets_fjet14_nolep_index() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_jets_fjet14_nolep_index_ && b_jets_fjet14_nolep_index_){
+    b_jets_fjet14_nolep_index_->GetEntry(entry_);
+    c_jets_fjet14_nolep_index_ = true;
+  }
+  return jets_fjet14_nolep_index_;
+}
+
+std::vector<int>  const & baby_base::jets_fjet40_index() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_jets_fjet40_index_ && b_jets_fjet40_index_){
+    b_jets_fjet40_index_->GetEntry(entry_);
+    c_jets_fjet40_index_ = true;
+  }
+  return jets_fjet40_index_;
+}
+
+std::vector<int>  const & baby_base::jets_fjet50_index() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_jets_fjet50_index_ && b_jets_fjet50_index_){
+    b_jets_fjet50_index_->GetEntry(entry_);
+    c_jets_fjet50_index_ = true;
+  }
+  return jets_fjet50_index_;
 }
 
 std::vector<int>  const & baby_base::jets_hflavor() const{
@@ -5666,6 +7582,28 @@ std::vector<int>  const & baby_base::mc_mom() const{
   return mc_mom_;
 }
 
+std::vector<int>  const & baby_base::mc_momidx() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_mc_momidx_ && b_mc_momidx_){
+    b_mc_momidx_->GetEntry(entry_);
+    c_mc_momidx_ = true;
+  }
+  return mc_momidx_;
+}
+
+std::vector<int>  const & baby_base::mc_status() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_mc_status_ && b_mc_status_){
+    b_mc_status_->GetEntry(entry_);
+    c_mc_status_ = true;
+  }
+  return mc_status_;
+}
+
 std::vector<int>  const & baby_base::mus_charge() const{
   if(!read_only_){
     throw std::logic_error("Trying to write to const tree.");
@@ -5675,6 +7613,39 @@ std::vector<int>  const & baby_base::mus_charge() const{
     c_mus_charge_ = true;
   }
   return mus_charge_;
+}
+
+std::vector<int>  const & baby_base::mus_trk_algo() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_mus_trk_algo_ && b_mus_trk_algo_){
+    b_mus_trk_algo_->GetEntry(entry_);
+    c_mus_trk_algo_ = true;
+  }
+  return mus_trk_algo_;
+}
+
+std::vector<int>  const & baby_base::mus_trk_nholes_in() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_mus_trk_nholes_in_ && b_mus_trk_nholes_in_){
+    b_mus_trk_nholes_in_->GetEntry(entry_);
+    c_mus_trk_nholes_in_ = true;
+  }
+  return mus_trk_nholes_in_;
+}
+
+std::vector<int>  const & baby_base::mus_trk_nholes_out() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_mus_trk_nholes_out_ && b_mus_trk_nholes_out_){
+    b_mus_trk_nholes_out_->GetEntry(entry_);
+    c_mus_trk_nholes_out_ = true;
+  }
+  return mus_trk_nholes_out_;
 }
 
 std::vector<int>  const & baby_base::sys_nbm() const{
@@ -5688,6 +7659,17 @@ std::vector<int>  const & baby_base::sys_nbm() const{
   return sys_nbm_;
 }
 
+std::vector<int>  const & baby_base::sys_nbm40() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_sys_nbm40_ && b_sys_nbm40_){
+    b_sys_nbm40_->GetEntry(entry_);
+    c_sys_nbm40_ = true;
+  }
+  return sys_nbm40_;
+}
+
 std::vector<int>  const & baby_base::sys_njets() const{
   if(!read_only_){
     throw std::logic_error("Trying to write to const tree.");
@@ -5697,6 +7679,17 @@ std::vector<int>  const & baby_base::sys_njets() const{
     c_sys_njets_ = true;
   }
   return sys_njets_;
+}
+
+std::vector<int>  const & baby_base::sys_njets40() const{
+  if(!read_only_){
+    throw std::logic_error("Trying to write to const tree.");
+  }
+  if(!c_sys_njets40_ && b_sys_njets40_){
+    b_sys_njets40_->GetEntry(entry_);
+    c_sys_njets40_ = true;
+  }
+  return sys_njets40_;
 }
 
 std::vector<int>  const & baby_base::tks_pdg() const{
@@ -5734,6 +7727,38 @@ bool  & baby_base::jetmismeas(){
   return jetmismeas_;
 }
 
+bool  & baby_base::json12p9(){
+  if(read_only_ && !c_json12p9_ && b_json12p9_){
+    b_json12p9_->GetEntry(entry_);
+    c_json12p9_ = true;
+  }
+  return json12p9_;
+}
+
+bool  & baby_base::json2p6(){
+  if(read_only_ && !c_json2p6_ && b_json2p6_){
+    b_json2p6_->GetEntry(entry_);
+    c_json2p6_ = true;
+  }
+  return json2p6_;
+}
+
+bool  & baby_base::json4p0(){
+  if(read_only_ && !c_json4p0_ && b_json4p0_){
+    b_json4p0_->GetEntry(entry_);
+    c_json4p0_ = true;
+  }
+  return json4p0_;
+}
+
+bool  & baby_base::json7p65(){
+  if(read_only_ && !c_json7p65_ && b_json7p65_){
+    b_json7p65_->GetEntry(entry_);
+    c_json7p65_ = true;
+  }
+  return json7p65_;
+}
+
 bool  & baby_base::low_dphi(){
   if(read_only_ && !c_low_dphi_ && b_low_dphi_){
     b_low_dphi_->GetEntry(entry_);
@@ -5758,12 +7783,44 @@ bool  & baby_base::pass(){
   return pass_;
 }
 
+bool  & baby_base::pass20(){
+  if(read_only_ && !c_pass20_ && b_pass20_){
+    b_pass20_->GetEntry(entry_);
+    c_pass20_ = true;
+  }
+  return pass20_;
+}
+
+bool  & baby_base::pass40(){
+  if(read_only_ && !c_pass40_ && b_pass40_){
+    b_pass40_->GetEntry(entry_);
+    c_pass40_ = true;
+  }
+  return pass40_;
+}
+
+bool  & baby_base::pass50(){
+  if(read_only_ && !c_pass50_ && b_pass50_){
+    b_pass50_->GetEntry(entry_);
+    c_pass50_ = true;
+  }
+  return pass50_;
+}
+
 bool  & baby_base::pass_cschalo(){
   if(read_only_ && !c_pass_cschalo_ && b_pass_cschalo_){
     b_pass_cschalo_->GetEntry(entry_);
     c_pass_cschalo_ = true;
   }
   return pass_cschalo_;
+}
+
+bool  & baby_base::pass_ecaldeadcell(){
+  if(read_only_ && !c_pass_ecaldeadcell_ && b_pass_ecaldeadcell_){
+    b_pass_ecaldeadcell_->GetEntry(entry_);
+    c_pass_ecaldeadcell_ = true;
+  }
+  return pass_ecaldeadcell_;
 }
 
 bool  & baby_base::pass_eebadsc(){
@@ -5804,6 +7861,30 @@ bool  & baby_base::pass_jets(){
     c_pass_jets_ = true;
   }
   return pass_jets_;
+}
+
+bool  & baby_base::pass_jets20(){
+  if(read_only_ && !c_pass_jets20_ && b_pass_jets20_){
+    b_pass_jets20_->GetEntry(entry_);
+    c_pass_jets20_ = true;
+  }
+  return pass_jets20_;
+}
+
+bool  & baby_base::pass_jets40(){
+  if(read_only_ && !c_pass_jets40_ && b_pass_jets40_){
+    b_pass_jets40_->GetEntry(entry_);
+    c_pass_jets40_ = true;
+  }
+  return pass_jets40_;
+}
+
+bool  & baby_base::pass_jets50(){
+  if(read_only_ && !c_pass_jets50_ && b_pass_jets50_){
+    b_pass_jets50_->GetEntry(entry_);
+    c_pass_jets50_ = true;
+  }
+  return pass_jets50_;
 }
 
 bool  & baby_base::pass_jets_nohf(){
@@ -5854,12 +7935,52 @@ bool  & baby_base::pass_ra2(){
   return pass_ra2_;
 }
 
+bool  & baby_base::pass_ra2_badmu(){
+  if(read_only_ && !c_pass_ra2_badmu_ && b_pass_ra2_badmu_){
+    b_pass_ra2_badmu_->GetEntry(entry_);
+    c_pass_ra2_badmu_ = true;
+  }
+  return pass_ra2_badmu_;
+}
+
 bool  & baby_base::stitch(){
   if(read_only_ && !c_stitch_ && b_stitch_){
     b_stitch_->GetEntry(entry_);
     c_stitch_ = true;
   }
   return stitch_;
+}
+
+bool  & baby_base::trig_lep(){
+  if(read_only_ && !c_trig_lep_ && b_trig_lep_){
+    b_trig_lep_->GetEntry(entry_);
+    c_trig_lep_ = true;
+  }
+  return trig_lep_;
+}
+
+bool  & baby_base::trig_met(){
+  if(read_only_ && !c_trig_met_ && b_trig_met_){
+    b_trig_met_->GetEntry(entry_);
+    c_trig_met_ = true;
+  }
+  return trig_met_;
+}
+
+bool  & baby_base::trig_ra4(){
+  if(read_only_ && !c_trig_ra4_ && b_trig_ra4_){
+    b_trig_ra4_->GetEntry(entry_);
+    c_trig_ra4_ = true;
+  }
+  return trig_ra4_;
+}
+
+bool  & baby_base::trig_vvvl(){
+  if(read_only_ && !c_trig_vvvl_ && b_trig_vvvl_){
+    b_trig_vvvl_->GetEntry(entry_);
+    c_trig_vvvl_ = true;
+  }
+  return trig_vvvl_;
 }
 
 float  & baby_base::dphi1(){
@@ -5900,6 +8021,14 @@ float  & baby_base::dphi_wlep(){
     c_dphi_wlep_ = true;
   }
   return dphi_wlep_;
+}
+
+float  & baby_base::eff_jetid(){
+  if(read_only_ && !c_eff_jetid_ && b_eff_jetid_){
+    b_eff_jetid_->GetEntry(entry_);
+    c_eff_jetid_ = true;
+  }
+  return eff_jetid_;
 }
 
 float  & baby_base::eff_trig(){
@@ -6078,12 +8207,124 @@ float  & baby_base::elmu_w(){
   return elmu_w_;
 }
 
+float  & baby_base::hig1_eta(){
+  if(read_only_ && !c_hig1_eta_ && b_hig1_eta_){
+    b_hig1_eta_->GetEntry(entry_);
+    c_hig1_eta_ = true;
+  }
+  return hig1_eta_;
+}
+
+float  & baby_base::hig1_m(){
+  if(read_only_ && !c_hig1_m_ && b_hig1_m_){
+    b_hig1_m_->GetEntry(entry_);
+    c_hig1_m_ = true;
+  }
+  return hig1_m_;
+}
+
+float  & baby_base::hig1_phi(){
+  if(read_only_ && !c_hig1_phi_ && b_hig1_phi_){
+    b_hig1_phi_->GetEntry(entry_);
+    c_hig1_phi_ = true;
+  }
+  return hig1_phi_;
+}
+
+float  & baby_base::hig1_pt(){
+  if(read_only_ && !c_hig1_pt_ && b_hig1_pt_){
+    b_hig1_pt_->GetEntry(entry_);
+    c_hig1_pt_ = true;
+  }
+  return hig1_pt_;
+}
+
+float  & baby_base::hig2_eta(){
+  if(read_only_ && !c_hig2_eta_ && b_hig2_eta_){
+    b_hig2_eta_->GetEntry(entry_);
+    c_hig2_eta_ = true;
+  }
+  return hig2_eta_;
+}
+
+float  & baby_base::hig2_m(){
+  if(read_only_ && !c_hig2_m_ && b_hig2_m_){
+    b_hig2_m_->GetEntry(entry_);
+    c_hig2_m_ = true;
+  }
+  return hig2_m_;
+}
+
+float  & baby_base::hig2_phi(){
+  if(read_only_ && !c_hig2_phi_ && b_hig2_phi_){
+    b_hig2_phi_->GetEntry(entry_);
+    c_hig2_phi_ = true;
+  }
+  return hig2_phi_;
+}
+
+float  & baby_base::hig2_pt(){
+  if(read_only_ && !c_hig2_pt_ && b_hig2_pt_){
+    b_hig2_pt_->GetEntry(entry_);
+    c_hig2_pt_ = true;
+  }
+  return hig2_pt_;
+}
+
+float  & baby_base::hig_am(){
+  if(read_only_ && !c_hig_am_ && b_hig_am_){
+    b_hig_am_->GetEntry(entry_);
+    c_hig_am_ = true;
+  }
+  return hig_am_;
+}
+
+float  & baby_base::hig_dm(){
+  if(read_only_ && !c_hig_dm_ && b_hig_dm_){
+    b_hig_dm_->GetEntry(entry_);
+    c_hig_dm_ = true;
+  }
+  return hig_dm_;
+}
+
+float  & baby_base::hig_dphi(){
+  if(read_only_ && !c_hig_dphi_ && b_hig_dphi_){
+    b_hig_dphi_->GetEntry(entry_);
+    c_hig_dphi_ = true;
+  }
+  return hig_dphi_;
+}
+
+float  & baby_base::hig_drmax(){
+  if(read_only_ && !c_hig_drmax_ && b_hig_drmax_){
+    b_hig_drmax_->GetEntry(entry_);
+    c_hig_drmax_ = true;
+  }
+  return hig_drmax_;
+}
+
 float  & baby_base::ht(){
   if(read_only_ && !c_ht_ && b_ht_){
     b_ht_->GetEntry(entry_);
     c_ht_ = true;
   }
   return ht_;
+}
+
+float  & baby_base::ht40(){
+  if(read_only_ && !c_ht40_ && b_ht40_){
+    b_ht40_->GetEntry(entry_);
+    c_ht40_ = true;
+  }
+  return ht40_;
+}
+
+float  & baby_base::ht50(){
+  if(read_only_ && !c_ht50_ && b_ht50_){
+    b_ht50_->GetEntry(entry_);
+    c_ht50_ = true;
+  }
+  return ht50_;
 }
 
 float  & baby_base::ht_clean(){
@@ -6126,6 +8367,30 @@ float  & baby_base::ht_tru(){
   return ht_tru_;
 }
 
+float  & baby_base::htx(){
+  if(read_only_ && !c_htx_ && b_htx_){
+    b_htx_->GetEntry(entry_);
+    c_htx_ = true;
+  }
+  return htx_;
+}
+
+float  & baby_base::htx40(){
+  if(read_only_ && !c_htx40_ && b_htx40_){
+    b_htx40_->GetEntry(entry_);
+    c_htx40_ = true;
+  }
+  return htx40_;
+}
+
+float  & baby_base::htx50(){
+  if(read_only_ && !c_htx50_ && b_htx50_){
+    b_htx50_->GetEntry(entry_);
+    c_htx50_ = true;
+  }
+  return htx50_;
+}
+
 float  & baby_base::isr_tru_eta(){
   if(read_only_ && !c_isr_tru_eta_ && b_isr_tru_eta_){
     b_isr_tru_eta_->GetEntry(entry_);
@@ -6158,12 +8423,28 @@ float  & baby_base::jetsys_eta(){
   return jetsys_eta_;
 }
 
+float  & baby_base::jetsys_m(){
+  if(read_only_ && !c_jetsys_m_ && b_jetsys_m_){
+    b_jetsys_m_->GetEntry(entry_);
+    c_jetsys_m_ = true;
+  }
+  return jetsys_m_;
+}
+
 float  & baby_base::jetsys_nob_eta(){
   if(read_only_ && !c_jetsys_nob_eta_ && b_jetsys_nob_eta_){
     b_jetsys_nob_eta_->GetEntry(entry_);
     c_jetsys_nob_eta_ = true;
   }
   return jetsys_nob_eta_;
+}
+
+float  & baby_base::jetsys_nob_m(){
+  if(read_only_ && !c_jetsys_nob_m_ && b_jetsys_nob_m_){
+    b_jetsys_nob_m_->GetEntry(entry_);
+    c_jetsys_nob_m_ = true;
+  }
+  return jetsys_nob_m_;
 }
 
 float  & baby_base::jetsys_nob_phi(){
@@ -6196,6 +8477,22 @@ float  & baby_base::jetsys_pt(){
     c_jetsys_pt_ = true;
   }
   return jetsys_pt_;
+}
+
+float  & baby_base::m_tt(){
+  if(read_only_ && !c_m_tt_ && b_m_tt_){
+    b_m_tt_->GetEntry(entry_);
+    c_m_tt_ = true;
+  }
+  return m_tt_;
+}
+
+float  & baby_base::mct(){
+  if(read_only_ && !c_mct_ && b_mct_){
+    b_mct_->GetEntry(entry_);
+    c_mct_ = true;
+  }
+  return mct_;
 }
 
 float  & baby_base::met(){
@@ -6350,14 +8647,6 @@ float  & baby_base::mht_phi(){
   return mht_phi_;
 }
 
-float  & baby_base::mj(){
-  if(read_only_ && !c_mj_ && b_mj_){
-    b_mj_->GetEntry(entry_);
-    c_mj_ = true;
-  }
-  return mj_;
-}
-
 float  & baby_base::mj08(){
   if(read_only_ && !c_mj08_ && b_mj08_){
     b_mj08_->GetEntry(entry_);
@@ -6366,12 +8655,68 @@ float  & baby_base::mj08(){
   return mj08_;
 }
 
+float  & baby_base::mj12(){
+  if(read_only_ && !c_mj12_ && b_mj12_){
+    b_mj12_->GetEntry(entry_);
+    c_mj12_ = true;
+  }
+  return mj12_;
+}
+
+float  & baby_base::mj14(){
+  if(read_only_ && !c_mj14_ && b_mj14_){
+    b_mj14_->GetEntry(entry_);
+    c_mj14_ = true;
+  }
+  return mj14_;
+}
+
+float  & baby_base::mj14_nolep(){
+  if(read_only_ && !c_mj14_nolep_ && b_mj14_nolep_){
+    b_mj14_nolep_->GetEntry(entry_);
+    c_mj14_nolep_ = true;
+  }
+  return mj14_nolep_;
+}
+
+float  & baby_base::mj40(){
+  if(read_only_ && !c_mj40_ && b_mj40_){
+    b_mj40_->GetEntry(entry_);
+    c_mj40_ = true;
+  }
+  return mj40_;
+}
+
+float  & baby_base::mj50(){
+  if(read_only_ && !c_mj50_ && b_mj50_){
+    b_mj50_->GetEntry(entry_);
+    c_mj50_ = true;
+  }
+  return mj50_;
+}
+
 float  & baby_base::mt(){
   if(read_only_ && !c_mt_ && b_mt_){
     b_mt_->GetEntry(entry_);
     c_mt_ = true;
   }
   return mt_;
+}
+
+float  & baby_base::mt2(){
+  if(read_only_ && !c_mt2_ && b_mt2_){
+    b_mt2_->GetEntry(entry_);
+    c_mt2_ = true;
+  }
+  return mt2_;
+}
+
+float  & baby_base::mt2_0mass(){
+  if(read_only_ && !c_mt2_0mass_ && b_mt2_0mass_){
+    b_mt2_0mass_->GetEntry(entry_);
+    c_mt2_0mass_ = true;
+  }
+  return mt2_0mass_;
 }
 
 float  & baby_base::mt_nohf(){
@@ -6518,6 +8863,14 @@ float  & baby_base::mumuv_w(){
   return mumuv_w_;
 }
 
+float  & baby_base::nisr(){
+  if(read_only_ && !c_nisr_ && b_nisr_){
+    b_nisr_->GetEntry(entry_);
+    c_nisr_ = true;
+  }
+  return nisr_;
+}
+
 float  & baby_base::ntrupv_mean(){
   if(read_only_ && !c_ntrupv_mean_ && b_ntrupv_mean_){
     b_ntrupv_mean_->GetEntry(entry_);
@@ -6614,6 +8967,30 @@ float  & baby_base::onph_ph90(){
   return onph_ph90_;
 }
 
+float  & baby_base::st(){
+  if(read_only_ && !c_st_ && b_st_){
+    b_st_->GetEntry(entry_);
+    c_st_ = true;
+  }
+  return st_;
+}
+
+float  & baby_base::st40(){
+  if(read_only_ && !c_st40_ && b_st40_){
+    b_st40_->GetEntry(entry_);
+    c_st40_ = true;
+  }
+  return st40_;
+}
+
+float  & baby_base::st50(){
+  if(read_only_ && !c_st50_ && b_st50_){
+    b_st50_->GetEntry(entry_);
+    c_st50_ = true;
+  }
+  return st50_;
+}
+
 float  & baby_base::w_btag(){
   if(read_only_ && !c_w_btag_ && b_w_btag_){
     b_w_btag_->GetEntry(entry_);
@@ -6622,12 +8999,36 @@ float  & baby_base::w_btag(){
   return w_btag_;
 }
 
+float  & baby_base::w_btag40(){
+  if(read_only_ && !c_w_btag40_ && b_w_btag40_){
+    b_w_btag40_->GetEntry(entry_);
+    c_w_btag40_ = true;
+  }
+  return w_btag40_;
+}
+
+float  & baby_base::w_btag_loose(){
+  if(read_only_ && !c_w_btag_loose_ && b_w_btag_loose_){
+    b_w_btag_loose_->GetEntry(entry_);
+    c_w_btag_loose_ = true;
+  }
+  return w_btag_loose_;
+}
+
 float  & baby_base::w_fs_lep(){
   if(read_only_ && !c_w_fs_lep_ && b_w_fs_lep_){
     b_w_fs_lep_->GetEntry(entry_);
     c_w_fs_lep_ = true;
   }
   return w_fs_lep_;
+}
+
+float  & baby_base::w_isr(){
+  if(read_only_ && !c_w_isr_ && b_w_isr_){
+    b_w_isr_->GetEntry(entry_);
+    c_w_isr_ = true;
+  }
+  return w_isr_;
 }
 
 float  & baby_base::w_lep(){
@@ -6670,6 +9071,22 @@ float  & baby_base::weight(){
   return weight_;
 }
 
+float  & baby_base::weight_rpv(){
+  if(read_only_ && !c_weight_rpv_ && b_weight_rpv_){
+    b_weight_rpv_->GetEntry(entry_);
+    c_weight_rpv_ = true;
+  }
+  return weight_rpv_;
+}
+
+int  & baby_base::hig_bin(){
+  if(read_only_ && !c_hig_bin_ && b_hig_bin_){
+    b_hig_bin_->GetEntry(entry_);
+    c_hig_bin_ = true;
+  }
+  return hig_bin_;
+}
+
 int  & baby_base::lumiblock(){
   if(read_only_ && !c_lumiblock_ && b_lumiblock_){
     b_lumiblock_->GetEntry(entry_);
@@ -6708,6 +9125,30 @@ int  & baby_base::nbm(){
     c_nbm_ = true;
   }
   return nbm_;
+}
+
+int  & baby_base::nbm20(){
+  if(read_only_ && !c_nbm20_ && b_nbm20_){
+    b_nbm20_->GetEntry(entry_);
+    c_nbm20_ = true;
+  }
+  return nbm20_;
+}
+
+int  & baby_base::nbm40(){
+  if(read_only_ && !c_nbm40_ && b_nbm40_){
+    b_nbm40_->GetEntry(entry_);
+    c_nbm40_ = true;
+  }
+  return nbm40_;
+}
+
+int  & baby_base::nbm50(){
+  if(read_only_ && !c_nbm50_ && b_nbm50_){
+    b_nbm50_->GetEntry(entry_);
+    c_nbm50_ = true;
+  }
+  return nbm50_;
 }
 
 int  & baby_base::nbm_ra2(){
@@ -6750,20 +9191,20 @@ int  & baby_base::nels_vvvl(){
   return nels_vvvl_;
 }
 
-int  & baby_base::nfjets(){
-  if(read_only_ && !c_nfjets_ && b_nfjets_){
-    b_nfjets_->GetEntry(entry_);
-    c_nfjets_ = true;
+int  & baby_base::nfjets14(){
+  if(read_only_ && !c_nfjets14_ && b_nfjets14_){
+    b_nfjets14_->GetEntry(entry_);
+    c_nfjets14_ = true;
   }
-  return nfjets_;
+  return nfjets14_;
 }
 
-int  & baby_base::nfjets08(){
-  if(read_only_ && !c_nfjets08_ && b_nfjets08_){
-    b_nfjets08_->GetEntry(entry_);
-    c_nfjets08_ = true;
+int  & baby_base::nfjets40(){
+  if(read_only_ && !c_nfjets40_ && b_nfjets40_){
+    b_nfjets40_->GetEntry(entry_);
+    c_nfjets40_ = true;
   }
-  return nfjets08_;
+  return nfjets40_;
 }
 
 int  & baby_base::nisr_me(){
@@ -6780,6 +9221,30 @@ int  & baby_base::njets(){
     c_njets_ = true;
   }
   return njets_;
+}
+
+int  & baby_base::njets20(){
+  if(read_only_ && !c_njets20_ && b_njets20_){
+    b_njets20_->GetEntry(entry_);
+    c_njets20_ = true;
+  }
+  return njets20_;
+}
+
+int  & baby_base::njets40(){
+  if(read_only_ && !c_njets40_ && b_njets40_){
+    b_njets40_->GetEntry(entry_);
+    c_njets40_ = true;
+  }
+  return njets40_;
+}
+
+int  & baby_base::njets50(){
+  if(read_only_ && !c_njets50_ && b_njets50_){
+    b_njets50_->GetEntry(entry_);
+    c_njets50_ = true;
+  }
+  return njets50_;
 }
 
 int  & baby_base::njets_clean(){
@@ -6950,6 +9415,14 @@ int  & baby_base::run(){
   return run_;
 }
 
+int  & baby_base::type(){
+  if(read_only_ && !c_type_ && b_type_){
+    b_type_->GetEntry(entry_);
+    c_type_ = true;
+  }
+  return type_;
+}
+
 std::vector<bool>  & baby_base::els_ele105(){
   if(read_only_ && !c_els_ele105_ && b_els_ele105_){
     b_els_ele105_->GetEntry(entry_);
@@ -7038,6 +9511,30 @@ std::vector<bool>  & baby_base::els_vvvl(){
   return els_vvvl_;
 }
 
+std::vector<bool>  & baby_base::jets_h1(){
+  if(read_only_ && !c_jets_h1_ && b_jets_h1_){
+    b_jets_h1_->GetEntry(entry_);
+    c_jets_h1_ = true;
+  }
+  return jets_h1_;
+}
+
+std::vector<bool>  & baby_base::jets_h2(){
+  if(read_only_ && !c_jets_h2_ && b_jets_h2_){
+    b_jets_h2_->GetEntry(entry_);
+    c_jets_h2_ = true;
+  }
+  return jets_h2_;
+}
+
+std::vector<bool>  & baby_base::jets_isisr(){
+  if(read_only_ && !c_jets_isisr_ && b_jets_isisr_){
+    b_jets_isisr_->GetEntry(entry_);
+    c_jets_isisr_ = true;
+  }
+  return jets_isisr_;
+}
+
 std::vector<bool>  & baby_base::jets_islep(){
   if(read_only_ && !c_jets_islep_ && b_jets_islep_){
     b_jets_islep_->GetEntry(entry_);
@@ -7118,6 +9615,14 @@ std::vector<bool>  & baby_base::mus_tm(){
   return mus_tm_;
 }
 
+std::vector<bool>  & baby_base::mus_trk_quality(){
+  if(read_only_ && !c_mus_trk_quality_ && b_mus_trk_quality_){
+    b_mus_trk_quality_->GetEntry(entry_);
+    c_mus_trk_quality_ = true;
+  }
+  return mus_trk_quality_;
+}
+
 std::vector<bool>  & baby_base::mus_vvvl(){
   if(read_only_ && !c_mus_vvvl_ && b_mus_vvvl_){
     b_mus_vvvl_->GetEntry(entry_);
@@ -7150,6 +9655,22 @@ std::vector<bool>  & baby_base::sys_pass(){
   return sys_pass_;
 }
 
+std::vector<bool>  & baby_base::sys_pass40(){
+  if(read_only_ && !c_sys_pass40_ && b_sys_pass40_){
+    b_sys_pass40_->GetEntry(entry_);
+    c_sys_pass40_ = true;
+  }
+  return sys_pass40_;
+}
+
+std::vector<bool>  & baby_base::tks_tm(){
+  if(read_only_ && !c_tks_tm_ && b_tks_tm_){
+    b_tks_tm_->GetEntry(entry_);
+    c_tks_tm_ = true;
+  }
+  return tks_tm_;
+}
+
 std::vector<bool>  & baby_base::trig(){
   if(read_only_ && !c_trig_ && b_trig_){
     b_trig_->GetEntry(entry_);
@@ -7166,6 +9687,22 @@ std::vector<float>  & baby_base::els_d0(){
   return els_d0_;
 }
 
+std::vector<float>  & baby_base::els_deta_sctrk(){
+  if(read_only_ && !c_els_deta_sctrk_ && b_els_deta_sctrk_){
+    b_els_deta_sctrk_->GetEntry(entry_);
+    c_els_deta_sctrk_ = true;
+  }
+  return els_deta_sctrk_;
+}
+
+std::vector<float>  & baby_base::els_dphi_sctrk(){
+  if(read_only_ && !c_els_dphi_sctrk_ && b_els_dphi_sctrk_){
+    b_els_dphi_sctrk_->GetEntry(entry_);
+    c_els_dphi_sctrk_ = true;
+  }
+  return els_dphi_sctrk_;
+}
+
 std::vector<float>  & baby_base::els_dz(){
   if(read_only_ && !c_els_dz_ && b_els_dz_){
     b_els_dz_->GetEntry(entry_);
@@ -7174,12 +9711,44 @@ std::vector<float>  & baby_base::els_dz(){
   return els_dz_;
 }
 
+std::vector<float>  & baby_base::els_em_e(){
+  if(read_only_ && !c_els_em_e_ && b_els_em_e_){
+    b_els_em_e_->GetEntry(entry_);
+    c_els_em_e_ = true;
+  }
+  return els_em_e_;
+}
+
+std::vector<float>  & baby_base::els_eoverp(){
+  if(read_only_ && !c_els_eoverp_ && b_els_eoverp_){
+    b_els_eoverp_->GetEntry(entry_);
+    c_els_eoverp_ = true;
+  }
+  return els_eoverp_;
+}
+
 std::vector<float>  & baby_base::els_eta(){
   if(read_only_ && !c_els_eta_ && b_els_eta_){
     b_els_eta_->GetEntry(entry_);
     c_els_eta_ = true;
   }
   return els_eta_;
+}
+
+std::vector<float>  & baby_base::els_hovere(){
+  if(read_only_ && !c_els_hovere_ && b_els_hovere_){
+    b_els_hovere_->GetEntry(entry_);
+    c_els_hovere_ = true;
+  }
+  return els_hovere_;
+}
+
+std::vector<float>  & baby_base::els_ip3d(){
+  if(read_only_ && !c_els_ip3d_ && b_els_ip3d_){
+    b_els_ip3d_->GetEntry(entry_);
+    c_els_ip3d_ = true;
+  }
+  return els_ip3d_;
 }
 
 std::vector<float>  & baby_base::els_miniso(){
@@ -7222,6 +9791,22 @@ std::vector<float>  & baby_base::els_sceta(){
   return els_sceta_;
 }
 
+std::vector<float>  & baby_base::els_trk_pt(){
+  if(read_only_ && !c_els_trk_pt_ && b_els_trk_pt_){
+    b_els_trk_pt_->GetEntry(entry_);
+    c_els_trk_pt_ = true;
+  }
+  return els_trk_pt_;
+}
+
+std::vector<float>  & baby_base::els_trk_pterr(){
+  if(read_only_ && !c_els_trk_pterr_ && b_els_trk_pterr_){
+    b_els_trk_pterr_->GetEntry(entry_);
+    c_els_trk_pterr_ = true;
+  }
+  return els_trk_pterr_;
+}
+
 std::vector<float>  & baby_base::els_vvvl_eta(){
   if(read_only_ && !c_els_vvvl_eta_ && b_els_vvvl_eta_){
     b_els_vvvl_eta_->GetEntry(entry_);
@@ -7246,100 +9831,68 @@ std::vector<float>  & baby_base::els_vvvl_pt(){
   return els_vvvl_pt_;
 }
 
-std::vector<float>  & baby_base::fjets08_eta(){
-  if(read_only_ && !c_fjets08_eta_ && b_fjets08_eta_){
-    b_fjets08_eta_->GetEntry(entry_);
-    c_fjets08_eta_ = true;
+std::vector<float>  & baby_base::fjets14_eta(){
+  if(read_only_ && !c_fjets14_eta_ && b_fjets14_eta_){
+    b_fjets14_eta_->GetEntry(entry_);
+    c_fjets14_eta_ = true;
   }
-  return fjets08_eta_;
+  return fjets14_eta_;
 }
 
-std::vector<float>  & baby_base::fjets08_m(){
-  if(read_only_ && !c_fjets08_m_ && b_fjets08_m_){
-    b_fjets08_m_->GetEntry(entry_);
-    c_fjets08_m_ = true;
+std::vector<float>  & baby_base::fjets14_m(){
+  if(read_only_ && !c_fjets14_m_ && b_fjets14_m_){
+    b_fjets14_m_->GetEntry(entry_);
+    c_fjets14_m_ = true;
   }
-  return fjets08_m_;
+  return fjets14_m_;
 }
 
-std::vector<float>  & baby_base::fjets08_phi(){
-  if(read_only_ && !c_fjets08_phi_ && b_fjets08_phi_){
-    b_fjets08_phi_->GetEntry(entry_);
-    c_fjets08_phi_ = true;
+std::vector<float>  & baby_base::fjets14_phi(){
+  if(read_only_ && !c_fjets14_phi_ && b_fjets14_phi_){
+    b_fjets14_phi_->GetEntry(entry_);
+    c_fjets14_phi_ = true;
   }
-  return fjets08_phi_;
+  return fjets14_phi_;
 }
 
-std::vector<float>  & baby_base::fjets08_poscsv(){
-  if(read_only_ && !c_fjets08_poscsv_ && b_fjets08_poscsv_){
-    b_fjets08_poscsv_->GetEntry(entry_);
-    c_fjets08_poscsv_ = true;
+std::vector<float>  & baby_base::fjets14_pt(){
+  if(read_only_ && !c_fjets14_pt_ && b_fjets14_pt_){
+    b_fjets14_pt_->GetEntry(entry_);
+    c_fjets14_pt_ = true;
   }
-  return fjets08_poscsv_;
+  return fjets14_pt_;
 }
 
-std::vector<float>  & baby_base::fjets08_pt(){
-  if(read_only_ && !c_fjets08_pt_ && b_fjets08_pt_){
-    b_fjets08_pt_->GetEntry(entry_);
-    c_fjets08_pt_ = true;
+std::vector<float>  & baby_base::fjets40_eta(){
+  if(read_only_ && !c_fjets40_eta_ && b_fjets40_eta_){
+    b_fjets40_eta_->GetEntry(entry_);
+    c_fjets40_eta_ = true;
   }
-  return fjets08_pt_;
+  return fjets40_eta_;
 }
 
-std::vector<float>  & baby_base::fjets08_sumcsv(){
-  if(read_only_ && !c_fjets08_sumcsv_ && b_fjets08_sumcsv_){
-    b_fjets08_sumcsv_->GetEntry(entry_);
-    c_fjets08_sumcsv_ = true;
+std::vector<float>  & baby_base::fjets40_m(){
+  if(read_only_ && !c_fjets40_m_ && b_fjets40_m_){
+    b_fjets40_m_->GetEntry(entry_);
+    c_fjets40_m_ = true;
   }
-  return fjets08_sumcsv_;
+  return fjets40_m_;
 }
 
-std::vector<float>  & baby_base::fjets_eta(){
-  if(read_only_ && !c_fjets_eta_ && b_fjets_eta_){
-    b_fjets_eta_->GetEntry(entry_);
-    c_fjets_eta_ = true;
+std::vector<float>  & baby_base::fjets40_phi(){
+  if(read_only_ && !c_fjets40_phi_ && b_fjets40_phi_){
+    b_fjets40_phi_->GetEntry(entry_);
+    c_fjets40_phi_ = true;
   }
-  return fjets_eta_;
+  return fjets40_phi_;
 }
 
-std::vector<float>  & baby_base::fjets_m(){
-  if(read_only_ && !c_fjets_m_ && b_fjets_m_){
-    b_fjets_m_->GetEntry(entry_);
-    c_fjets_m_ = true;
+std::vector<float>  & baby_base::fjets40_pt(){
+  if(read_only_ && !c_fjets40_pt_ && b_fjets40_pt_){
+    b_fjets40_pt_->GetEntry(entry_);
+    c_fjets40_pt_ = true;
   }
-  return fjets_m_;
-}
-
-std::vector<float>  & baby_base::fjets_phi(){
-  if(read_only_ && !c_fjets_phi_ && b_fjets_phi_){
-    b_fjets_phi_->GetEntry(entry_);
-    c_fjets_phi_ = true;
-  }
-  return fjets_phi_;
-}
-
-std::vector<float>  & baby_base::fjets_poscsv(){
-  if(read_only_ && !c_fjets_poscsv_ && b_fjets_poscsv_){
-    b_fjets_poscsv_->GetEntry(entry_);
-    c_fjets_poscsv_ = true;
-  }
-  return fjets_poscsv_;
-}
-
-std::vector<float>  & baby_base::fjets_pt(){
-  if(read_only_ && !c_fjets_pt_ && b_fjets_pt_){
-    b_fjets_pt_->GetEntry(entry_);
-    c_fjets_pt_ = true;
-  }
-  return fjets_pt_;
-}
-
-std::vector<float>  & baby_base::fjets_sumcsv(){
-  if(read_only_ && !c_fjets_sumcsv_ && b_fjets_sumcsv_){
-    b_fjets_sumcsv_->GetEntry(entry_);
-    c_fjets_sumcsv_ = true;
-  }
-  return fjets_sumcsv_;
+  return fjets40_pt_;
 }
 
 std::vector<float>  & baby_base::jets_csv(){
@@ -7470,12 +10023,28 @@ std::vector<float>  & baby_base::mus_dz(){
   return mus_dz_;
 }
 
+std::vector<float>  & baby_base::mus_em_e(){
+  if(read_only_ && !c_mus_em_e_ && b_mus_em_e_){
+    b_mus_em_e_->GetEntry(entry_);
+    c_mus_em_e_ = true;
+  }
+  return mus_em_e_;
+}
+
 std::vector<float>  & baby_base::mus_eta(){
   if(read_only_ && !c_mus_eta_ && b_mus_eta_){
     b_mus_eta_->GetEntry(entry_);
     c_mus_eta_ = true;
   }
   return mus_eta_;
+}
+
+std::vector<float>  & baby_base::mus_had_e(){
+  if(read_only_ && !c_mus_had_e_ && b_mus_had_e_){
+    b_mus_had_e_->GetEntry(entry_);
+    c_mus_had_e_ = true;
+  }
+  return mus_had_e_;
 }
 
 std::vector<float>  & baby_base::mus_miniso(){
@@ -7500,6 +10069,14 @@ std::vector<float>  & baby_base::mus_pt(){
     c_mus_pt_ = true;
   }
   return mus_pt_;
+}
+
+std::vector<float>  & baby_base::mus_pterr(){
+  if(read_only_ && !c_mus_pterr_ && b_mus_pterr_){
+    b_mus_pterr_->GetEntry(entry_);
+    c_mus_pterr_ = true;
+  }
+  return mus_pterr_;
 }
 
 std::vector<float>  & baby_base::mus_reliso(){
@@ -7566,12 +10143,36 @@ std::vector<float>  & baby_base::sys_bctag(){
   return sys_bctag_;
 }
 
+std::vector<float>  & baby_base::sys_bctag40(){
+  if(read_only_ && !c_sys_bctag40_ && b_sys_bctag40_){
+    b_sys_bctag40_->GetEntry(entry_);
+    c_sys_bctag40_ = true;
+  }
+  return sys_bctag40_;
+}
+
+std::vector<float>  & baby_base::sys_bctag_loose(){
+  if(read_only_ && !c_sys_bctag_loose_ && b_sys_bctag_loose_){
+    b_sys_bctag_loose_->GetEntry(entry_);
+    c_sys_bctag_loose_ = true;
+  }
+  return sys_bctag_loose_;
+}
+
 std::vector<float>  & baby_base::sys_fs_bctag(){
   if(read_only_ && !c_sys_fs_bctag_ && b_sys_fs_bctag_){
     b_sys_fs_bctag_->GetEntry(entry_);
     c_sys_fs_bctag_ = true;
   }
   return sys_fs_bctag_;
+}
+
+std::vector<float>  & baby_base::sys_fs_bctag40(){
+  if(read_only_ && !c_sys_fs_bctag40_ && b_sys_fs_bctag40_){
+    b_sys_fs_bctag40_->GetEntry(entry_);
+    c_sys_fs_bctag40_ = true;
+  }
+  return sys_fs_bctag40_;
 }
 
 std::vector<float>  & baby_base::sys_fs_lep(){
@@ -7590,12 +10191,28 @@ std::vector<float>  & baby_base::sys_fs_udsgtag(){
   return sys_fs_udsgtag_;
 }
 
+std::vector<float>  & baby_base::sys_fs_udsgtag40(){
+  if(read_only_ && !c_sys_fs_udsgtag40_ && b_sys_fs_udsgtag40_){
+    b_sys_fs_udsgtag40_->GetEntry(entry_);
+    c_sys_fs_udsgtag40_ = true;
+  }
+  return sys_fs_udsgtag40_;
+}
+
 std::vector<float>  & baby_base::sys_ht(){
   if(read_only_ && !c_sys_ht_ && b_sys_ht_){
     b_sys_ht_->GetEntry(entry_);
     c_sys_ht_ = true;
   }
   return sys_ht_;
+}
+
+std::vector<float>  & baby_base::sys_ht40(){
+  if(read_only_ && !c_sys_ht40_ && b_sys_ht40_){
+    b_sys_ht40_->GetEntry(entry_);
+    c_sys_ht40_ = true;
+  }
+  return sys_ht40_;
 }
 
 std::vector<float>  & baby_base::sys_isr(){
@@ -7622,12 +10239,28 @@ std::vector<float>  & baby_base::sys_met(){
   return sys_met_;
 }
 
-std::vector<float>  & baby_base::sys_mj(){
-  if(read_only_ && !c_sys_mj_ && b_sys_mj_){
-    b_sys_mj_->GetEntry(entry_);
-    c_sys_mj_ = true;
+std::vector<float>  & baby_base::sys_mj14(){
+  if(read_only_ && !c_sys_mj14_ && b_sys_mj14_){
+    b_sys_mj14_->GetEntry(entry_);
+    c_sys_mj14_ = true;
   }
-  return sys_mj_;
+  return sys_mj14_;
+}
+
+std::vector<float>  & baby_base::sys_mj14_nolep(){
+  if(read_only_ && !c_sys_mj14_nolep_ && b_sys_mj14_nolep_){
+    b_sys_mj14_nolep_->GetEntry(entry_);
+    c_sys_mj14_nolep_ = true;
+  }
+  return sys_mj14_nolep_;
+}
+
+std::vector<float>  & baby_base::sys_mj40(){
+  if(read_only_ && !c_sys_mj40_ && b_sys_mj40_){
+    b_sys_mj40_->GetEntry(entry_);
+    c_sys_mj40_ = true;
+  }
+  return sys_mj40_;
 }
 
 std::vector<float>  & baby_base::sys_mt(){
@@ -7662,12 +10295,28 @@ std::vector<float>  & baby_base::sys_murf(){
   return sys_murf_;
 }
 
-std::vector<float>  & baby_base::sys_pdf(){
-  if(read_only_ && !c_sys_pdf_ && b_sys_pdf_){
-    b_sys_pdf_->GetEntry(entry_);
-    c_sys_pdf_ = true;
+std::vector<float>  & baby_base::sys_pu(){
+  if(read_only_ && !c_sys_pu_ && b_sys_pu_){
+    b_sys_pu_->GetEntry(entry_);
+    c_sys_pu_ = true;
   }
-  return sys_pdf_;
+  return sys_pu_;
+}
+
+std::vector<float>  & baby_base::sys_st(){
+  if(read_only_ && !c_sys_st_ && b_sys_st_){
+    b_sys_st_->GetEntry(entry_);
+    c_sys_st_ = true;
+  }
+  return sys_st_;
+}
+
+std::vector<float>  & baby_base::sys_st40(){
+  if(read_only_ && !c_sys_st40_ && b_sys_st40_){
+    b_sys_st40_->GetEntry(entry_);
+    c_sys_st40_ = true;
+  }
+  return sys_st40_;
 }
 
 std::vector<float>  & baby_base::sys_trig(){
@@ -7684,6 +10333,38 @@ std::vector<float>  & baby_base::sys_udsgtag(){
     c_sys_udsgtag_ = true;
   }
   return sys_udsgtag_;
+}
+
+std::vector<float>  & baby_base::sys_udsgtag40(){
+  if(read_only_ && !c_sys_udsgtag40_ && b_sys_udsgtag40_){
+    b_sys_udsgtag40_->GetEntry(entry_);
+    c_sys_udsgtag40_ = true;
+  }
+  return sys_udsgtag40_;
+}
+
+std::vector<float>  & baby_base::sys_udsgtag_loose(){
+  if(read_only_ && !c_sys_udsgtag_loose_ && b_sys_udsgtag_loose_){
+    b_sys_udsgtag_loose_->GetEntry(entry_);
+    c_sys_udsgtag_loose_ = true;
+  }
+  return sys_udsgtag_loose_;
+}
+
+std::vector<float>  & baby_base::tks_d0(){
+  if(read_only_ && !c_tks_d0_ && b_tks_d0_){
+    b_tks_d0_->GetEntry(entry_);
+    c_tks_d0_ = true;
+  }
+  return tks_d0_;
+}
+
+std::vector<float>  & baby_base::tks_dz(){
+  if(read_only_ && !c_tks_dz_ && b_tks_dz_){
+    b_tks_dz_->GetEntry(entry_);
+    c_tks_dz_ = true;
+  }
+  return tks_dz_;
 }
 
 std::vector<float>  & baby_base::tks_eta(){
@@ -7734,20 +10415,20 @@ std::vector<float>  & baby_base::tks_pt(){
   return tks_pt_;
 }
 
+std::vector<float>  & baby_base::tks_reliso(){
+  if(read_only_ && !c_tks_reliso_ && b_tks_reliso_){
+    b_tks_reliso_->GetEntry(entry_);
+    c_tks_reliso_ = true;
+  }
+  return tks_reliso_;
+}
+
 std::vector<float>  & baby_base::trig_prescale(){
   if(read_only_ && !c_trig_prescale_ && b_trig_prescale_){
     b_trig_prescale_->GetEntry(entry_);
     c_trig_prescale_ = true;
   }
   return trig_prescale_;
-}
-
-std::vector<float>  & baby_base::w_pdf(){
-  if(read_only_ && !c_w_pdf_ && b_w_pdf_){
-    b_w_pdf_->GetEntry(entry_);
-    c_w_pdf_ = true;
-  }
-  return w_pdf_;
 }
 
 std::vector<int>  & baby_base::els_charge(){
@@ -7758,36 +10439,28 @@ std::vector<int>  & baby_base::els_charge(){
   return els_charge_;
 }
 
-std::vector<int>  & baby_base::fjets08_btags(){
-  if(read_only_ && !c_fjets08_btags_ && b_fjets08_btags_){
-    b_fjets08_btags_->GetEntry(entry_);
-    c_fjets08_btags_ = true;
+std::vector<int>  & baby_base::els_trk_nholes(){
+  if(read_only_ && !c_els_trk_nholes_ && b_els_trk_nholes_){
+    b_els_trk_nholes_->GetEntry(entry_);
+    c_els_trk_nholes_ = true;
   }
-  return fjets08_btags_;
+  return els_trk_nholes_;
 }
 
-std::vector<int>  & baby_base::fjets08_nconst(){
-  if(read_only_ && !c_fjets08_nconst_ && b_fjets08_nconst_){
-    b_fjets08_nconst_->GetEntry(entry_);
-    c_fjets08_nconst_ = true;
+std::vector<int>  & baby_base::fjets14_nconst(){
+  if(read_only_ && !c_fjets14_nconst_ && b_fjets14_nconst_){
+    b_fjets14_nconst_->GetEntry(entry_);
+    c_fjets14_nconst_ = true;
   }
-  return fjets08_nconst_;
+  return fjets14_nconst_;
 }
 
-std::vector<int>  & baby_base::fjets_btags(){
-  if(read_only_ && !c_fjets_btags_ && b_fjets_btags_){
-    b_fjets_btags_->GetEntry(entry_);
-    c_fjets_btags_ = true;
+std::vector<int>  & baby_base::fjets40_nconst(){
+  if(read_only_ && !c_fjets40_nconst_ && b_fjets40_nconst_){
+    b_fjets40_nconst_->GetEntry(entry_);
+    c_fjets40_nconst_ = true;
   }
-  return fjets_btags_;
-}
-
-std::vector<int>  & baby_base::fjets_nconst(){
-  if(read_only_ && !c_fjets_nconst_ && b_fjets_nconst_){
-    b_fjets_nconst_->GetEntry(entry_);
-    c_fjets_nconst_ = true;
-  }
-  return fjets_nconst_;
+  return fjets40_nconst_;
 }
 
 std::vector<int>  & baby_base::jets_fjet08_index(){
@@ -7798,12 +10471,44 @@ std::vector<int>  & baby_base::jets_fjet08_index(){
   return jets_fjet08_index_;
 }
 
-std::vector<int>  & baby_base::jets_fjet_index(){
-  if(read_only_ && !c_jets_fjet_index_ && b_jets_fjet_index_){
-    b_jets_fjet_index_->GetEntry(entry_);
-    c_jets_fjet_index_ = true;
+std::vector<int>  & baby_base::jets_fjet12_index(){
+  if(read_only_ && !c_jets_fjet12_index_ && b_jets_fjet12_index_){
+    b_jets_fjet12_index_->GetEntry(entry_);
+    c_jets_fjet12_index_ = true;
   }
-  return jets_fjet_index_;
+  return jets_fjet12_index_;
+}
+
+std::vector<int>  & baby_base::jets_fjet14_index(){
+  if(read_only_ && !c_jets_fjet14_index_ && b_jets_fjet14_index_){
+    b_jets_fjet14_index_->GetEntry(entry_);
+    c_jets_fjet14_index_ = true;
+  }
+  return jets_fjet14_index_;
+}
+
+std::vector<int>  & baby_base::jets_fjet14_nolep_index(){
+  if(read_only_ && !c_jets_fjet14_nolep_index_ && b_jets_fjet14_nolep_index_){
+    b_jets_fjet14_nolep_index_->GetEntry(entry_);
+    c_jets_fjet14_nolep_index_ = true;
+  }
+  return jets_fjet14_nolep_index_;
+}
+
+std::vector<int>  & baby_base::jets_fjet40_index(){
+  if(read_only_ && !c_jets_fjet40_index_ && b_jets_fjet40_index_){
+    b_jets_fjet40_index_->GetEntry(entry_);
+    c_jets_fjet40_index_ = true;
+  }
+  return jets_fjet40_index_;
+}
+
+std::vector<int>  & baby_base::jets_fjet50_index(){
+  if(read_only_ && !c_jets_fjet50_index_ && b_jets_fjet50_index_){
+    b_jets_fjet50_index_->GetEntry(entry_);
+    c_jets_fjet50_index_ = true;
+  }
+  return jets_fjet50_index_;
 }
 
 std::vector<int>  & baby_base::jets_hflavor(){
@@ -7830,12 +10535,52 @@ std::vector<int>  & baby_base::mc_mom(){
   return mc_mom_;
 }
 
+std::vector<int>  & baby_base::mc_momidx(){
+  if(read_only_ && !c_mc_momidx_ && b_mc_momidx_){
+    b_mc_momidx_->GetEntry(entry_);
+    c_mc_momidx_ = true;
+  }
+  return mc_momidx_;
+}
+
+std::vector<int>  & baby_base::mc_status(){
+  if(read_only_ && !c_mc_status_ && b_mc_status_){
+    b_mc_status_->GetEntry(entry_);
+    c_mc_status_ = true;
+  }
+  return mc_status_;
+}
+
 std::vector<int>  & baby_base::mus_charge(){
   if(read_only_ && !c_mus_charge_ && b_mus_charge_){
     b_mus_charge_->GetEntry(entry_);
     c_mus_charge_ = true;
   }
   return mus_charge_;
+}
+
+std::vector<int>  & baby_base::mus_trk_algo(){
+  if(read_only_ && !c_mus_trk_algo_ && b_mus_trk_algo_){
+    b_mus_trk_algo_->GetEntry(entry_);
+    c_mus_trk_algo_ = true;
+  }
+  return mus_trk_algo_;
+}
+
+std::vector<int>  & baby_base::mus_trk_nholes_in(){
+  if(read_only_ && !c_mus_trk_nholes_in_ && b_mus_trk_nholes_in_){
+    b_mus_trk_nholes_in_->GetEntry(entry_);
+    c_mus_trk_nholes_in_ = true;
+  }
+  return mus_trk_nholes_in_;
+}
+
+std::vector<int>  & baby_base::mus_trk_nholes_out(){
+  if(read_only_ && !c_mus_trk_nholes_out_ && b_mus_trk_nholes_out_){
+    b_mus_trk_nholes_out_->GetEntry(entry_);
+    c_mus_trk_nholes_out_ = true;
+  }
+  return mus_trk_nholes_out_;
 }
 
 std::vector<int>  & baby_base::sys_nbm(){
@@ -7846,12 +10591,28 @@ std::vector<int>  & baby_base::sys_nbm(){
   return sys_nbm_;
 }
 
+std::vector<int>  & baby_base::sys_nbm40(){
+  if(read_only_ && !c_sys_nbm40_ && b_sys_nbm40_){
+    b_sys_nbm40_->GetEntry(entry_);
+    c_sys_nbm40_ = true;
+  }
+  return sys_nbm40_;
+}
+
 std::vector<int>  & baby_base::sys_njets(){
   if(read_only_ && !c_sys_njets_ && b_sys_njets_){
     b_sys_njets_->GetEntry(entry_);
     c_sys_njets_ = true;
   }
   return sys_njets_;
+}
+
+std::vector<int>  & baby_base::sys_njets40(){
+  if(read_only_ && !c_sys_njets40_ && b_sys_njets40_){
+    b_sys_njets40_->GetEntry(entry_);
+    c_sys_njets40_ = true;
+  }
+  return sys_njets40_;
 }
 
 std::vector<int>  & baby_base::tks_pdg(){
@@ -7862,11 +10623,11 @@ std::vector<int>  & baby_base::tks_pdg(){
   return tks_pdg_;
 }
 
-#include "baby_basic.hh"
+#include "baby_full.hh"
 baby_base* NewTree(const std::type_info &type){
 
   if(type == typeid(baby_base)) return new baby_base;
-  else if(type == typeid(baby_basic)) return static_cast<baby_base*>(new baby_basic);
+  else if(type == typeid(baby_full)) return static_cast<baby_base*>(new baby_full);
   else return new baby_base;
 }
 

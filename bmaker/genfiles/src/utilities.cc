@@ -94,8 +94,8 @@ int change_branch_one(TString indir, TString name, TString outdir, vector<TStrin
   vector<vector<bool> * > new_var_vbool_(nvar);
   
   // Hack to protect total weight from NaN, and not include w_pu
-  float w_lumi(1.), w_lumi_old(1.), w_lep(1.), w_fs_lep(1.), w_toppt(1.), w_btag(1.), w_corr(1.);
-
+  float w_lumi(1.), w_lumi_old(1.), w_lep(1.), w_fs_lep(1.), w_btag_old(1.), w_corr(1.);
+  float w_isr_old=1., w_pu_old=1.;
   //Branches
   int nleps_=0, mgluino_(0);
   float eff_trig_(0);
@@ -149,39 +149,46 @@ int change_branch_one(TString indir, TString name, TString outdir, vector<TStrin
 	  <<setw(4)<<roundNumber(i,1,seconds*1000.)<<" kHz"<<endl;
     }
 
-    float minpdf(1e10);
+    // float minpdf(1e10);
     
     //Set vars
     for(int iset=0; iset<nvar; iset++){
-      // Hack to recompute sys_pdf[1] which had a 1e-3 cut
-      if(var[iset].Contains("w_pdf")){
-        for(unsigned int isys=0;isys<new_var_vflt_[iset]->size();isys++)  
-          if(new_var_vflt_[iset]->at(isys) < minpdf) minpdf = new_var_vflt_[iset]->at(isys);
-      }      
+      // // Hack to recompute sys_pdf[1] which had a 1e-3 cut
+      // if(var[iset].Contains("w_pdf")){
+      //   for(unsigned int isys=0;isys<new_var_vflt_[iset]->size();isys++)  
+      //     if(new_var_vflt_[iset]->at(isys) < minpdf) minpdf = new_var_vflt_[iset]->at(isys);
+      // }  
+      
+      //// Events with leptons already have the correct w_lep
       if(isLep[iset] && nleps_!=0) {
         // Hack to protect total weight from NaN, and not include w_pu
         if(var[iset].Contains("w_lep"))    w_lep    = noNaN(new_var_flt_[iset]);
         if(var[iset].Contains("w_fs_lep")) w_fs_lep = noNaN(new_var_flt_[iset]);
         continue; // For lepton scale factors    
       }
-      if(var[iset].Contains("w_toppt"))  {w_toppt  = noNaN(new_var_flt_[iset]); w_corr *= var_val[iset][0].Atof(); }
-      if(var[iset].Contains("w_btag"))   {w_btag   = noNaN(new_var_flt_[iset]); w_corr *= var_val[iset][0].Atof(); }
+      
+      //// Saving values of variables before renormalization
+      if(var[iset].Contains("w_pu"))  {w_pu_old  = noNaN(new_var_flt_[iset]); w_corr *= var_val[iset][0].Atof(); }
+      if(var[iset].Contains("w_isr"))  {w_isr_old  = noNaN(new_var_flt_[iset]); w_corr *= var_val[iset][0].Atof(); }
+      //if(var[iset].Contains("w_toppt"))  {w_toppt_old  = noNaN(new_var_flt_[iset]); w_corr *= var_val[iset][0].Atof(); }
+      if(var[iset].Contains("w_btag"))   {w_btag_old   = noNaN(new_var_flt_[iset]); w_corr *= var_val[iset][0].Atof(); }
       if(var[iset].Contains("w_lumi"))   {w_lumi_old  = noNaN(new_var_flt_[iset]);  }
-      // Hack for empty pdf branches
-      if(var[iset].Contains("w_pdf")){
-        if(new_var_vflt_[iset]->size()==0){
-          new_var_vflt_[iset]->resize(100,1);
-          if (i==0) cout<<"\n[Change Branch One] WARNING: Empty branch of \"w_pdf\". Setting values to 1"<<endl;
-          continue;
-        }
-      }
-      else if(var[iset].Contains("sys_pdf")){
-        if(new_var_vflt_[iset]->size()==0){
-          new_var_vflt_[iset]->resize(2,1);
-          if (i==0) cout<<"[Change Branch One] WARNING: Empty branch of \"sys_pdf\". Setting values to 1"<<endl;
-          continue;
-        }
-      }
+
+      // // Hack for empty pdf branches
+      // if(var[iset].Contains("w_pdf")){
+      //   if(new_var_vflt_[iset]->size()==0){
+      //     new_var_vflt_[iset]->resize(100,1);
+      //     if (i==0) cout<<"\n[Change Branch One] WARNING: Empty branch of \"w_pdf\". Setting values to 1"<<endl;
+      //     continue;
+      //   }
+      // }
+      // else if(var[iset].Contains("sys_pdf")){
+      //   if(new_var_vflt_[iset]->size()==0){
+      //     new_var_vflt_[iset]->resize(2,1);
+      //     if (i==0) cout<<"[Change Branch One] WARNING: Empty branch of \"sys_pdf\". Setting values to 1"<<endl;
+      //     continue;
+      //   }
+      // }
       for(unsigned int vidx=0; vidx<var_val[iset].size(); vidx++){
         if(!multiply[iset][vidx]){
           switch (ivar_type[iset]){
@@ -218,7 +225,7 @@ int change_branch_one(TString indir, TString name, TString outdir, vector<TStrin
 	}
         if(ivar_type[iset] == kvFloat) new_var_vflt_[iset]->at(vidx) = noNaN(new_var_vflt_[iset]->at(vidx));
       } // Loop over elements in each variable
-      if(var[iset].Contains("sys_pdf")) new_var_vflt_[iset]->at(1) = minpdf*var_val[iset][1].Atof(); 
+      // if(var[iset].Contains("sys_pdf")) new_var_vflt_[iset]->at(1) = minpdf*var_val[iset][1].Atof(); 
 
       // Hack to protect total weight from NaN, and not include w_pu
       if(var[iset].Contains("w_lep"))    {w_lep    = new_var_flt_[iset]; w_corr *= var_val[iset][0].Atof(); }
@@ -235,9 +242,8 @@ int change_branch_one(TString indir, TString name, TString outdir, vector<TStrin
     // Hack to protect total weight from NaN, and not include w_pu
     for(int iset=0; iset<nvar; iset++)
       if(var[iset].Contains("weight")){
-        new_var_flt_[iset] = w_lep * w_fs_lep * w_toppt * w_btag * w_lumi  * var_val[iset][0].Atof() 
-	  * eff_jetid; 
-	//* eff_jetid * eff_trig_; 
+        new_var_flt_[iset] = w_lep * w_fs_lep * w_btag_old * w_isr_old * w_pu_old * w_lumi * eff_jetid 
+	  * var_val[iset][0].Atof();
       }
     newtree->Fill();
   }

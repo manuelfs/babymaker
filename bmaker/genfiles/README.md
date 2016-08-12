@@ -123,9 +123,9 @@ The `python/cache.py` script does some crude management of the
 available disk space. To prevent `/scratch/babymaker` from becoming
 full, it accepts options specifying an absolute (`--abs_limit`) and
 relative (`--rel_limit`) amount of disk space to leave empty. If the
-cache is becoming too full, it will delete the least recently modified
+cache is becoming too full, it will delete the least recently used
 files in the cache until it has space for the new files. In the
-extreme scenario where the cache is nearly full with recently modified
+extreme scenario where the cache is nearly full with recently used
 files and being access by multiple processes, this can result in one
 process deleting a cached file that is being read by
 another. Hopefully this occurs very rarely, but the option

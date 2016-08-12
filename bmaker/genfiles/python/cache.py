@@ -8,6 +8,7 @@ import subprocess
 import os
 import tempfile
 import shutil
+import time
 
 import utilities
 
@@ -29,6 +30,13 @@ def cachePath(path):
     cache_root = utilities.fullPath("/scratch/babymaker")
     return os.path.join(cache_root, path[5:])
 
+def lastTime(path):
+    return max(os.path.getctime(path), os.path.getmtime(path), os.path.getatime(path))
+
+def touch(path):
+    t = time.time()
+    os.utime(path, (t,t))
+
 def mapFiles(execute, file_map):
     #Replace executable arguments with cached equivalent
 
@@ -47,7 +55,7 @@ def mapFiles(execute, file_map):
     for arg in expanded_args:
         if ( arg in file_map and os.path.exists(file_map[arg])
              and (not os.path.exists(arg) or os.path.getmtime(file_map[arg])>=os.path.getmtime(arg)) ):
-            #Check if enerated cache for file
+            #Check if generated cache for file
             execute.append(file_map[arg])
         elif isNetFile(arg):
             #Check if pre-existing cache
@@ -76,7 +84,7 @@ def removeOldCache(file_map):
         for f in files:
             path = os.path.join(root, f)
             if path in file_map.values(): continue
-            mod_time = os.path.getmtime(path)
+            mod_time = lastTime(path)
             if mod_time < oldest_mod_time or not found_file:
                 found_file = True
                 oldest_mod_time = mod_time
@@ -121,6 +129,9 @@ def cacheRecurse(caches, file_map, execute, fragile, min_free, no_delete):
         else:
             inv_file_map = dict((cached,net) for net,cached in file_map.iteritems())
 
+        for f in inv_file_map.keys():
+            touch(f)
+
         if len(execute) <= 0: return
 
         args = ["run/wrapper.sh"]
@@ -135,6 +146,7 @@ def cacheRecurse(caches, file_map, execute, fragile, min_free, no_delete):
         subprocess.call(execute)
 
         for f in inv_file_map.keys():
+            #Copy modified files back to /net
             if os.path.getmtime(f) <= old_mod_times[f] and "_BABYMAKER_TEMPFILE_" not in f: continue
             if f in inv_file_map:
                 netCopy(f, inv_file_map[f])
@@ -160,6 +172,7 @@ def cacheRecurse(caches, file_map, execute, fragile, min_free, no_delete):
 
         if os.path.exists(cache_path) and os.path.getmtime(cache_path)>=os.path.getmtime(net_path):
             file_map[net_path] = cache_path
+            touch(cache_path)
 
         cacheRecurse(caches[1:], file_map, execute, fragile, min_free, no_delete)
     else:

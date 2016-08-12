@@ -9,6 +9,11 @@
 #include <iomanip>    // put_time
 #include <utility>    // std::pair
 
+// User include files
+#include "babymaker/bmaker/interface/bmaker_full.hh"
+#include "babymaker/bmaker/interface/baby_full.hh"
+#include "babymaker/bmaker/interface/cross_sections.hh"
+
 // FW include files
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/EDAnalyzer.h"
@@ -28,13 +33,9 @@
 #include "TFile.h"
 #include "TROOT.h"
 
-// User include files
-#include "babymaker/bmaker/interface/bmaker_full.hh"
-#include "babymaker/bmaker/interface/baby_full.hh"
-#include "babymaker/bmaker/interface/cross_sections.hh"
-
 using namespace std;
 using namespace utilities;
+
 
 ///////////////////////// analyze: METHOD CALLED EACH EVENT ///////////////////////////
 void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {

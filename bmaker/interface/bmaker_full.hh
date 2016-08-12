@@ -7,6 +7,7 @@
 #include <memory>
 #include <vector>
 #include <ctime>
+#include "babymaker/bmaker/interface/release.hh"
 
 // FW include files
 #include "FWCore/Framework/interface/Frameworkfwd.h"
@@ -30,10 +31,10 @@
 #include "DataFormats/PatCandidates/interface/PackedCandidate.h"
 #include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h" 
 #include "SimDataFormats/GeneratorProducts/interface/LHEEventProduct.h"
-
-// ROOT include files
-#include "TTree.h"
-#include "TString.h"
+#include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
+#ifdef POST_7_4
+  #include "SimDataFormats/GeneratorProducts/interface/GenLumiInfoHeader.h"
+#endif
 
 // User include files
 #include "babymaker/bmaker/interface/baby_full.hh"
@@ -44,6 +45,10 @@
 #include "babymaker/bmaker/interface/mc_tools.hh"
 #include "babymaker/bmaker/interface/weight_tools.hh"
 #include "babymaker/bmaker/interface/utilities.hh"
+
+// ROOT include files
+#include "TTree.h"
+#include "TString.h"
 
 typedef float& (baby_base::*baby_float)();
 typedef std::vector<float>& (baby_base::*baby_vfloat)();

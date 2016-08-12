@@ -3,28 +3,19 @@
 # in case we decide to use David's batch:
 import os, sys, pprint, glob
 
-ntup_date = '2016_02_09'
-model = "T6ttWW"
+ntup_date = ''
+models = ["T1tttt","TChiWH"]
 
-if model == "T1tttt":
-  outname = "baby_SMS-T1tttt_MASS_TAG_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15FSPremix-MCRUN2_74_V9.root"
-if model == "T5tttt":
-  outname = "baby_SMS-T5ttttDM175_MASS_TAG_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15MiniAODv2-FastAsympt25ns_74X_mcRun2_asymptotic_v2-v1.root"
-if model == "T6ttWW":
-  outname = "baby_SMS-T6ttWW-mLSP50_MASS_TAG_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15FSPremix-MCRUN2_74_V9-v1.root"
-if model == "T2tt":
-  outname = "baby_SMS-T2tt_MASS_TAG_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15FSPremix-MCRUN2_74_V9-v1.root"
 
-outfolder = "/net/cms2/cms2r0/babymaker/babies/"+ntup_date+"/to_normalize/"+model 
-if not os.path.exists(outfolder):
-  os.system("mkdir -p "+outfolder)
+for model in models:
+  infolder = "/net/cms26/cms26r0/babymaker/babies/2016_08_10/to_renormalize/ana/"+model+"/"
+  outfolder = infolder+"split/"
+  if not os.path.exists(outfolder):
+    os.system("mkdir -p "+outfolder)
 
-# CHANGE ACCORDING TO NEEDS: Only sending a specific mass point for a given date here
-dirs = [i for i in glob.glob("/mnt/hadoop/cms/store/user/manuelf/*/*/*/*/") if model in i]
-dirs = [i for i in glob.glob("/net/cms27/cms27r0/manuelf/hadoop/*/*/*/*/") if model in i]
+  outname = "fullbaby_SMS-"+model+"_MASS_TAG_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv2-PUSpring16Fast_80X_mcRun2_asymptotic.root"
 
-os.system("JobSetup.csh")
-for infolder in dirs:
+  os.system("JobSetup.csh")
   cmd = "JobSubmit.csh ./run/wrapper.sh ./run/skim_scan_onefile.exe %s %s" % (infolder, outfolder+"/"+outname)
   print cmd+"\n"
   os.system(cmd)

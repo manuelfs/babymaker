@@ -79,9 +79,9 @@ int main(int argc, char *argv[]){
   }
   if(begrun>0) basename += run_s;
 
-  map<int, set<Long64_t> > events;
+  map<int, map<int, set<Long64_t> > > runs;
   Long64_t event;
-  int run;
+  int run, lumiblock;
 
   for(unsigned idata(0); idata < datasets.size(); idata++){
     TChain chain("tree"), treeglobal("treeglobal");
@@ -93,8 +93,10 @@ int main(int argc, char *argv[]){
     }
     treeglobal.Add(filename);
     gSystem->mkdir(outfolder, kTRUE);
-    TString outname(outfolder+"/baby_"+basename+"_");
-    outname += idata; outname += ".root";
+    TString outname(outfolder+"/baby_");
+    outname += idata;
+    outname += "_"+basename;
+    outname += ".root";
     TFile outfile(outname, "RECREATE");
     outfile.cd();
 
@@ -102,8 +104,9 @@ int main(int argc, char *argv[]){
 
     // TBranch *b_event = chain.Branch("event", &event);
     // TBranch *b_run = chain.Branch("run", &run);
-    TBranch *b_event(NULL), *b_run(NULL);
+    TBranch *b_event(nullptr), *b_lumiblock(nullptr), *b_run(nullptr);
     chain.SetBranchAddress("event", &event, &b_event);
+    chain.SetBranchAddress("lumiblock", &lumiblock, &b_lumiblock);
     chain.SetBranchAddress("run", &run, &b_run);
 
     long entries(chain.GetEntries()), tree_entry;
@@ -124,11 +127,15 @@ int main(int argc, char *argv[]){
       tree_entry = chain.LoadTree(entry);
       b_run->GetEntry(tree_entry);
       if(begrun>0 && (run<begrun || run>endrun)) continue;
+      b_lumiblock->GetEntry(tree_entry);
       b_event->GetEntry(tree_entry);
 
-      if(events.find(run) == events.end()) events[run] = set<Long64_t>(); // New run
-      if(events[run].find(event) == events[run].end()){ // New event
-	events[run].insert(event);
+      if(runs.find(run) == runs.end()) runs.emplace(run, map<int, set<Long64_t> >{}); // New run
+      auto &lumiblocks = runs.at(run);
+      if(lumiblocks.find(lumiblock) == lumiblocks.end()) lumiblocks.emplace(lumiblock, set<Long64_t>{}); // New lumiblock
+      auto &events = lumiblocks.at(lumiblock);
+      if(events.find(event) == events.end()){ // New event
+	events.emplace(event);
 	// You need to load all branches to copy them into outtree
 	chain.GetEntry(entry);
 	outtree->Fill();
@@ -151,7 +158,7 @@ int main(int argc, char *argv[]){
     TString txtname(outfolder+"/runs_"+basename+".txt");
     ofstream txtfile(txtname);
     int prevrun(0);
-    for(map<int, set<Long64_t> >::const_iterator it = events.begin(); it != events.end(); ++it) {
+    for(map<int, map<int, set<Long64_t> > >::const_iterator it = runs.begin(); it != runs.end(); ++it) {
       run = it->first;
       if(run/1000 != prevrun){
 	prevrun = run/1000;

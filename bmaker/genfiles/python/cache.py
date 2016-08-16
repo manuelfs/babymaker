@@ -184,6 +184,7 @@ def cacheRecurse(caches, file_map, execute, fragile, min_free, no_delete):
         with tempfile.NamedTemporaryFile(dir=cache_dir, prefix=name+"_BABYMAKER_TEMPFILE_", suffix=ext) as f:
             print("Creating temporary file "+f.name+"\n")
             file_map[net_path] = f.name
+            utilities.ensureDir(os.path.dirname(net_path))
             cacheRecurse(caches[1:], file_map, execute, fragile, min_free, no_delete)
 
 def cacheRun(caches, execute, fragile, abs_limit, rel_limit, no_delete):

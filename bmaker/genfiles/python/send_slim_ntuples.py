@@ -28,7 +28,7 @@ def sendSlimJob(skim, slim, overwrite):
             print("Keeping pre-existing "+out_file)
             continue
         subprocess.call(['JobSubmit.csh','python/cache.py','-c',out_file,
-                         '-e','python/slim_ntuple.py',' --keep_existing','txt/slim_rules/minimal.txt',out_file,in_files])
+                         '-e','python/slim_ntuple.py','txt/slim_rules/minimal.txt',out_file,in_files])
         total_jobs += 1
 
     return total_jobs

@@ -51,7 +51,7 @@ def sendSkimJob(in_files, out_files, cut, overwrite, exe_name):
             f.write('cache.cacheRun(["'+out_file+'"],["'
                     +os.path.join(python_dir,'skim_ntuple.py')
                     +'","'+cut+'","'+out_file+'","'+in_file
-                    +'"," --keep_existing"],False,10000000000,0.5,False)\n')
+                    +'"],False,10000000000,0.5,False)\n')
     os.chmod(run_file, 0755)
 
     subprocess.call(["JobSubmit.csh","run/wrapper.sh",run_file])

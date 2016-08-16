@@ -9,6 +9,7 @@ import os
 import tempfile
 import shutil
 import time
+import sys
 
 import utilities
 
@@ -143,7 +144,9 @@ def cacheRecurse(caches, file_map, execute, fragile, min_free, no_delete):
         for f in inv_file_map.keys():
             old_mod_times[f] = os.path.getmtime(f)
         print("Executing",execute,"\n")
+        utilities.flush()
         subprocess.call(execute)
+        utilities.flush()
 
         for f in inv_file_map.keys():
             #Copy modified files back to /net

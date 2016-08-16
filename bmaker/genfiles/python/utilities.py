@@ -40,3 +40,7 @@ def ensureDir(path):
 
 def ePrint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
+
+def flush():
+    sys.stdout.flush()
+    sys.stderr.flush()

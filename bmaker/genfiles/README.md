@@ -31,26 +31,26 @@ are issued from the `genfiles` directory for both MC and data.
     combination jobs for groups of `run_files` runs.
 
 2. Skim the combined dataset. Each skim requires one execution of
-`python/send_skim_ntuples.py.` Suppose, for example, that one want to
+`python/send_skim_ntuples.py`. Suppose, for example, that one want to
 produce the standard and baseline skims for the "alldata" combined
 dataset produced in the last step; then one would issue the commands
 
-        python/send_skim_ntuples.py /net/cmsX/cmsXr0/babymaker/babies/YYYY_MM_DD/data/alldata 50 standard
-        python/send_skim_ntuples.py /net/cmsX/cmsXr0/babymaker/babies/YYYY_MM_DD/data/alldata 50 baseline
+        python/send_skim_ntuples.py /net/cmsX/cmsXr0/babymaker/babies/YYYY_MM_DD/data/unskimmed/alldata standard
+        python/send_skim_ntuples.py /net/cmsX/cmsXr0/babymaker/babies/YYYY_MM_DD/data/unskimmed/alldata baseline
 
-    This will produce the subdirectories `skim_standard` and `skim_baseline` inside of `alldata.`
+    This will produce the subdirectories `skim_standard` and `skim_baseline` inside of `data`.
 
 3. Slim and merge the skimmed ntuples. Multiple skims can be slimmed
-with multiple slimming rules using `python/send_slim_ntuples.py.` The
+with multiple slimming rules using `python/send_slim_ntuples.py`. The
 script takes the outer product of the requested slims and skims, so if
 one wanted the minimal and base_data slims for both the standard and
 baseline skims produced in the last step, one would issue the command
 
         python/send_slim_ntuples.py --input_dir /net/cmsX/cmsXr0/babymaker/babies/YYYY_MM_DD/data/alldata --skims standard baseline --slims minimal base_data
 
-    This will produce subdirectories `slim_minimal_standard,`
-`slim_minimal_baseline,` `slim_base_data_standard,` and
-`slim_base_data_baseline` inside `alldata.`
+    This will produce subdirectories `slim_minimal_standard`,
+`slim_minimal_baseline`, `slim_base_data_standard`, and
+`slim_base_data_baseline` inside `alldata`.
 
 4. Validate! More extensive validation scripts are in progress, but
 one should minimally check that the number of root files stays the
@@ -62,16 +62,16 @@ command
 
 ### MC
 
-1. Renormalize the weights so that the cross section is kept constant. For background and signal MC
+1. If one is processing signal scans, separate the mass points. This
+is done with
+
+        run/send_scan_skim.sh /net/cmsX/cmsXr0/babymaker/babies/YYYY_MM_DD/mc/unskimmed /net/cmsX/cmsXr0/babymaker/babies/YYYY_MM_DD/mc/scans 50
+
+2. Renormalize the weights so that the cross section is kept constant. For background and signal MC
 respectively, you'll need to set up the correct `infolder` and `outfolder` in
 
         python/send_bkg_change_weights.py
         python/send_sig_change_weights.py
-
-2. If one is processing signal scans, separate the mass points. This
-is done with
-
-        run/send_scan_skim.sh /net/cmsX/cmsXr0/babymaker/babies/YYYY_MM_DD/mc/unskimmed /net/cmsX/cmsXr0/babymaker/babies/YYYY_MM_DD/mc/scans 50
 
 3. Validate `weight` by setting the proper `infolder`, `outfolder` in 
 
@@ -86,20 +86,20 @@ is done with
 ## Utility scripts and data caching
 
 There are two useful tools for running on the batch system:
-`run/wrapper.sh` and `python/cache.py.` The former should be inserted
+`run/wrapper.sh` and `python/cache.py`. The former should be inserted
 between `JobSubmit.csh` and the issued command for any batch job to
 ensure the environment variables are set correctly during execution on
 the Tier 3. For example, one might send
 
     JobSubmit.csh run/wrapper.sh echo "Hello world"
 
-The latter script, `python/cache.py,` is a bit more general. It has
+The latter script, `python/cache.py`, is a bit more general. It has
 two main options, `--cache` and `--execute.` The `--execute` option is
 followed by a command to be executed, much like `run/wrapper.sh`
 is. The `--cache` option is followed by an arbitrary number of file
 paths (possibly containing wildcards) to be cached in
-`/scratch/babymaker.` If the provided file path already exists, it is
-assumed to be an input file and simply copied to `/scratch/babymaker;`
+`/scratch/babymaker`. If the provided file path already exists, it is
+assumed to be an input file and simply copied to `/scratch/babymaker`;
 if it does not exists, a temporary file is created in
 `/scratch/babymaker` and then copied to the provided path when the
 command given to `--execute` is done. Note that if any file in the
@@ -120,14 +120,14 @@ single file with
 
 There are two things one should observe in this example. First, the
 file `output_file.root` can be used as an argument passed to
-`python/skim_ntuple.py;` the caching script knows to automatically
+`python/skim_ntuple.py`; the caching script knows to automatically
 replace it with the temporary file path created in
-`/scratch/babymaker.` If one does not want this behavior, simply add a
+`/scratch/babymaker`. If one does not want this behavior, simply add a
 `--fragile` and file paths will be left intact. Second, the
 `--keep-existing` argument for `python/skim_ntuple.py` is quoted and
 has a space before the dashes. This is necessary to prevent
 python/cache.py from thinking the option was intended for itself and
-instead have it forward the option to `python/skim_ntuple.py.`
+instead have it forward the option to `python/skim_ntuple.py`.
 
 The `python/cache.py` script does some crude management of the
 available disk space. To prevent `/scratch/babymaker` from becoming

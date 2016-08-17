@@ -8,6 +8,7 @@ import os
 import numpy
 import itertools
 import subprocess
+import re
 
 import utilities
 
@@ -56,11 +57,17 @@ def sendSkimJob(in_files, out_files, cut, overwrite, exe_name):
 
     subprocess.call(["JobSubmit.csh","run/wrapper.sh",run_file])
 
-def sendSkims(in_dir, num_jobs, cut, file_tag, overwrite):
+def sendSkims(in_dir, num_jobs, cut, out_parent, file_tag, overwrite):
     in_dir = utilities.fullPath(in_dir)
     skim_name = getSkimName(cut)
-    out_dir = os.path.join(os.path.dirname(in_dir),"skim_"+skim_name)
 
+    if out_parent == None:
+        dir_pat = re.compile("(.*?/cms[0-9]+/cms[0-9]+r0/babymaker/babies/[0-9]{4}_[0-9]{2}_[0-9]{2}/.*?)/")
+        match = dir_pat.search(in_dir+"/")
+        out_parent = match.group(0)
+
+    out_dir = os.path.join(out_parent,"skim_"+skim_name)
+        
     in_files = [ f for f in glob.glob(utilities.fullPath(os.path.join(in_dir, "*"+file_tag+"*.root"))) ]
     out_files = [ f.replace(in_dir, out_dir).replace(".root","_"+skim_name+".root") for f in in_files ]
 
@@ -78,13 +85,16 @@ def sendSkims(in_dir, num_jobs, cut, file_tag, overwrite):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Submits jobs to skim non-SMS ntuples.",
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument("in_dir", help="Directory from which to read pre-skim ntuples.")
-    parser.add_argument("num_jobs", type=int, help="Number of jobs over which to divide skimming.")
-    parser.add_argument("cut", default="baseline", nargs="?", help="Skim cut to apply.")
+    parser.add_argument("in_dir", help="Directory from which to read pre-skim ntuples. E.g. /net/cmsX/cmsXr0/babymaker/babies/YYYY_MM_DD/data/unskimmed/alldata")
+    parser.add_argument("cut", help="Skim cut to apply.")
+    parser.add_argument("out_dir", default=None, nargs="?",
+                        help="Parent directory in which to place skim_XYZ directory. If omitted, attempts to use the YYYY_MM_DD/data_or_mc directory corresponding to the input directory.")
+    parser.add_argument("num_jobs", type=int, nargs="?", default=100,
+                        help="Number of jobs over which to divide skimming.")
     parser.add_argument("file_tag", metavar="file_tag", default="", nargs="?",
                         help="Only skim files matching %(metavar)s. Matches all files if blank.")
     parser.add_argument("-o","--overwrite", action="store_true",
                         help="Remake skimmed output file even if it already exists.")
     args = parser.parse_args()
 
-    sendSkims(args.in_dir, args.num_jobs, args.cut, args.file_tag, args.overwrite)
+    sendSkims(args.in_dir, args.num_jobs, args.cut, args.out_dir, args.file_tag, args.overwrite)

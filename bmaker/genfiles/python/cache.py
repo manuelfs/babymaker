@@ -103,9 +103,6 @@ def removeOldCache(file_map):
     else:
         return False
 
-def pretty(t):
-    return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(t))
-
 def cacheCopy(src, dst, min_free, file_map, no_delete):
     #Cache a copy of src if possible, removing old files from cache if necessary
 
@@ -120,7 +117,7 @@ def cacheCopy(src, dst, min_free, file_map, no_delete):
         if not removed_file: return
         du = os.statvfs(utilities.fullPath("/scratch/babymaker"))
         avail = du.f_bsize*du.f_bavail
-    print("Caching "+src+" to "+dst)
+    print("Caching "+src+" to "+dst+"\n")
     shutil.copy(src, dst)
     os.chmod(dst, 0775)
 
@@ -185,7 +182,7 @@ def cacheRecurse(caches, file_map, command, fragile, min_free, no_delete):
         cacheCopy(net_path, cache_path, min_free, file_map, no_delete)
 
     if os.path.exists(cache_path) and os.path.getmtime(cache_path)>=os.path.getmtime(net_path):
-        #Only use cache list if cached file was created and up-to-date
+        #Only use cached file if it was created and up-to-date
         file_map[net_path] = cache_path
 
     cacheRecurse(caches[1:], file_map, command, fragile, min_free, no_delete)

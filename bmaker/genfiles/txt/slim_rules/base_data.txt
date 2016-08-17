@@ -1,4 +1,16 @@
 drop *
+
+## General
+keep npv
+keep pass
+keep run
+keep lumiblock
+keep event
+keep type
+keep nonblind
+keep json*
+
+## Hadronic
 keep ht
 keep st
 keep htx
@@ -6,40 +18,63 @@ keep met
 keep met_phi
 keep met_calo
 keep met_calo_phi
-keep nleps
-keep nmus*
-keep nels*
-keep nveto
 keep njets
 keep nbm
-keep mt
 keep mj14
-keep pass*
-keep low_dphi
-keep *blind*
-keep json*
-keep run
-keep lumiblock
-keep event
-keep type
+keep ht40
+keep st40
+keep njets40
+keep nbm40
+keep mj40
+keep nisr
+
+## Leptonic
+keep nleps
+keep nels
+keep nmus
+keep nvleps
+keep nvels
+keep nvmus
+keep nveto
+keep mt
+
+## Triggers
+keep trig*
+keep *vvvl*
+keep on*
+
+## Weights
+keep weight
+keep w_*
+drop w_pdf
+keep eff_*
+
+## Jets
 keep jets_*
-keep els_*
-drop els_trk_*
-drop els_hovere
-drop els_eoverp
-drop els_em_e
-drop els_*_sctrk
-keep mus_*
-drop mus_trk_*
-drop mus_em_e
-drop mus_had_e
-keep jets_*
-drop jets_hflavor
 drop jets_fjet*_index
 keep *fjet14*
 keep *fjets14*
-keep trig*
-keep on*
-drop *tru*
-drop *_tm
+drop *_nolep*
+
+## Dileptons
+keep elel_m
+keep mumu_m
+
+## Electrons
+keep els_pt
+keep els_sceta
+keep els_phi
+keep els_miniso
+keep els_reliso
+keep els_sigid
+keep els_tight
+
+## Muons
+keep mus_pt
+keep mus_eta
+keep mus_phi
+keep mus_miniso
+keep mus_reliso
+keep mus_sigid
+keep mus_tight
 

@@ -1,56 +1,84 @@
 drop *
+
+## General
+keep npv
+keep pass
+keep event
+keep type
+
+## Hadronic
 keep ht
 keep st
 keep htx
 keep met
-keep nleps
-keep nveto
+keep met_phi
+keep met_calo
+keep met_calo_phi
 keep njets
 keep nbm
-keep mt
 keep mj14
+keep ht40
+keep st40
+keep njets40
+keep nbm40
+keep mj40
+keep nisr
+
+## Leptonic
+keep nleps
+keep nels
+keep nmus
+keep nvleps
+keep nvels
+keep nvmus
+keep nveto
+keep mt
+
+## MC
 keep stitch
-keep pass*
-keep weight*
-keep w_*
-drop w_pdf
-keep *blind*
 keep mgluino
 keep mlsp
-keep json*
-keep run
-keep lumiblock
-keep event
-keep type
+keep mc_*
+keep nisr_me
+keep ht_isr_me
+keep m_tt
+keep *tru*
+drop ntrupv*
+
+## Weights
+keep weight
+keep w_*
+drop w_pdf
 keep eff_*
-keep jets_*
-keep els_*
-drop els_trk_*
-drop els_hovere
-drop els_eoverp
-drop els_em_e
-drop els_*_sctrk
-drop els_vvvl
-drop els_ele23
-drop els_ele105
-drop els_ele8
-keep mus_*
-drop mus_trk_*
-drop mus_em_e
-drop mus_had_e
-drop mus_vvvl
-drop mus_isomu18
-drop mus_mu50
-drop mus_mu8
+
+## Jets
 keep jets_*
 drop jets_fjet*_index
 keep *fjet14*
 keep *fjets14*
-keep *tru*
-keep mc_*
-keep mgluino
-keep mlsp
-keep nisr_me
-keep ht_isr_me
-keep m_tt
-keep fromGS
+drop *_nolep*
+
+## Dileptons
+keep elel_m
+keep mumu_m
+
+## Electrons
+keep els_pt
+keep els_sceta
+keep els_phi
+keep els_miniso
+keep els_reliso
+keep els_sigid
+keep els_tight
+
+## Muons
+keep mus_pt
+keep mus_eta
+keep mus_phi
+keep mus_miniso
+keep mus_reliso
+keep mus_sigid
+keep mus_tight
+
+## Clean up
+drop *vvvl*

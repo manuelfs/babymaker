@@ -194,6 +194,9 @@ def cacheRecurse(caches, file_map, command, fragile, min_free, no_delete):
     cacheRecurse(caches[1:], file_map, command, fragile, min_free, no_delete)
 
 def cacheRun(caches, command, fragile, abs_limit, rel_limit, no_delete):
+    if not os.path.isdir("/scratch/babymaker"):
+        cacheRecurse([], dict(), command, True, 0, True)
+        return
     caches = expand(caches)
     du = os.statvfs(utilities.fullPath("/scratch/babymaker"))
     min_free = max(abs_limit, du.f_bsize*du.f_blocks*rel_limit)

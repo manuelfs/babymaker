@@ -1,7 +1,7 @@
 // Brief descriptions of the various baby productions
 
 2016_08_10: (Operation Capybara)
--- 17.1 ifb of Data, all 80X MC, plus T1ttt and TChiWH
+-- 17.1 ifb of Data, all 80X MC, plus T1tttt and TChiWH
 -- Updated with ICHEP recommendations for btag/lepton SFs, PU, ISR, new triggers, JECs
 -- Slimmed babies by 25% not saving fjets for unimportant MJs and w_pdf
 -- Added mj14_nolep and 40/50 GeV variable for PU robustness

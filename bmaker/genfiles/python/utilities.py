@@ -15,6 +15,7 @@ def findBaseSampleNames(folder):
         if ("TTJets_Tune" not in tag) and ("WJetsToLNu_Tune" not in tag) and ("DYJetsToLL_M-50_Tune" not in tag): 
             tag = tag.split("Tune")[0]
         tag = tag.split("13TeV")[0]
+        tag = tag.split("-PromptReco")[0]
         tag = tag.split("pythia")[0]
         tag = tag.split("baby_")[1]
         tag = tag.split("__")[0]

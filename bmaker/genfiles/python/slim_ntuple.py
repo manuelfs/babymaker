@@ -6,13 +6,18 @@ import sys
 import argparse
 import fnmatch
 import os
+import utilities
 
 import ROOT
 
 def getRules(slim_file_name):
-    rules = [ line.rstrip('\n').split() for line in open(slim_file_name) ]
-    good_rules = [ rule for rule in rules if len(rule)==2 and (rule[0]=="keep" or rule[0]=="drop") ]
+    rules = [ line.strip().split() for line in open(slim_file_name) ]
+    good_rules = [ rule for rule in rules
+                   if len(rule)==0
+                   or (len(rule)>0 and rule[0].startswith("#"))
+                   or (len(rule)>=2 and (rule[0]=="keep" or rule[0]=="drop")) ]
     bad_rules = [ rule for rule in rules if rule not in good_rules ]
+    good_rules = [ rule for rule in good_rules if len(rule)>=2 ]
     for rule in bad_rules:
         utilities.ePrint("Invalid rule:",rule,"\n")
     return good_rules

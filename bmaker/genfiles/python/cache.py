@@ -21,7 +21,7 @@ def expand(files):
             for g in globbed:
                 expanded.append(utilities.fullPath(g))
         else:
-            expanded.append(f)
+            expanded.append(utilities.fullPath(f))
     return expanded
 
 def isNetFile(path):
@@ -34,9 +34,9 @@ def cachePath(path):
 def lastTime(path):
     return max(os.path.getctime(path), os.path.getmtime(path), os.path.getatime(path))
 
-def touch(path):
-    t = time.time()
-    os.utime(path, (t,t))
+def touch(path, times):
+    with open(path, "a"):
+        os.utime(path, times)
 
 def mapFiles(execute, file_map):
     #Replace executable arguments with cached equivalent
@@ -103,6 +103,9 @@ def removeOldCache(file_map):
     else:
         return False
 
+def pretty(t):
+    return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(t))
+
 def cacheCopy(src, dst, min_free, file_map, no_delete):
     #Cache a copy of src if possible, removing old files from cache if necessary
 
@@ -117,81 +120,81 @@ def cacheCopy(src, dst, min_free, file_map, no_delete):
         if not removed_file: return
         du = os.statvfs(utilities.fullPath("/scratch/babymaker"))
         avail = du.f_bsize*du.f_bavail
-    print("Caching "+src+" to "+dst+"\n")
+    print("Caching "+src+" to "+dst)
     shutil.copy(src, dst)
     os.chmod(dst, 0775)
 
-def cacheRecurse(caches, file_map, execute, fragile, min_free, no_delete):
+def execute(command, file_map, fragile):
+    inv_file_map = dict()
+    if not fragile:
+        command, inv_file_map = mapFiles(command, file_map)
+    else:
+        inv_file_map = dict((cached,net) for net,cached in file_map.iteritems())
+
+    if len(command) <= 0: return
+
+    args = ["run/wrapper.sh"]
+    for a in command:
+        args.append(a.lstrip())
+    command = args
+
+    old_mod_times = dict()
+    before_time = time.time()-1.
+    # 1 second safety margin in case executable modifies within access
+    # time resolution (typically 1 second)
+    for f in inv_file_map:
+        touch(f, (before_time, before_time))
+        old_mod_times[f] = os.path.getmtime(f)
+
+    print("Executing",command,"\n")
+    utilities.flush()
+    subprocess.call(command)
+    utilities.flush()
+
+    for f in inv_file_map:
+        #Copy modified files back to /net
+        if os.path.getmtime(f) > old_mod_times[f]:
+            netCopy(f, inv_file_map[f])
+
+            #Make sure cache is at least as new as net to avoid recaching...
+            mtime = os.path.getmtime(inv_file_map[f])+1.
+            touch(f, (mtime, mtime))
+
+def cacheRecurse(caches, file_map, command, fragile, min_free, no_delete):
     if len(caches)==0:
         #Caching done, run exectuable
-        inv_file_map = dict()
-        if not fragile:
-            execute, inv_file_map = mapFiles(execute, file_map)
-        else:
-            inv_file_map = dict((cached,net) for net,cached in file_map.iteritems())
-
-        for f in inv_file_map.keys():
-            touch(f)
-
-        if len(execute) <= 0: return
-
-        args = ["run/wrapper.sh"]
-        for a in execute:
-            args.append(a.lstrip())
-        execute = args
-
-        old_mod_times = dict()
-        for f in inv_file_map.keys():
-            old_mod_times[f] = os.path.getmtime(f)
-        print("Executing",execute,"\n")
-        utilities.flush()
-        subprocess.call(execute)
-        utilities.flush()
-
-        for f in inv_file_map.keys():
-            #Copy modified files back to /net
-            if os.path.getmtime(f) <= old_mod_times[f] and "_BABYMAKER_TEMPFILE_" not in f: continue
-            if f in inv_file_map:
-                netCopy(f, inv_file_map[f])
-
+        execute(command, file_map, fragile)
         return
 
     net_path = caches[0]
     if not isNetFile(net_path):
         utilities.ePrint("Cannot cache "+net_path+"\n")
-        cacheRecurse(caches[1:], file_map, execute, fragile, min_free, no_delete)
+        cacheRecurse(caches[1:], file_map, command, fragile, min_free, no_delete)
         return
 
+    utilities.ensureDir(os.path.dirname(net_path))
+    if not os.path.exists(net_path):
+        #If /net file does not exist, create new empty file
+        with open(net_path, "a"):
+            pass
     cache_path = cachePath(net_path)
-    cache_dir = os.path.dirname(cache_path)
-    utilities.ensureDir(cache_dir)
-    base_name = os.path.basename(net_path)
+    utilities.ensureDir(os.path.dirname(cache_path))
 
-    if os.path.exists(net_path):
-        #File exists in /net, so treat as input file to be copied to cache
-        if not os.path.exists(cache_path) or os.path.getmtime(cache_path)<os.path.getmtime(net_path):
-            #Cache doesn't exist or is outdated, so copy file from /net
-            cacheCopy(net_path, cache_path, min_free, file_map, no_delete)
+    if not os.path.exists(cache_path) or os.path.getmtime(cache_path)<os.path.getmtime(net_path):
+        #Cache doesn't exist or is outdated, so copy file from /net
+        cacheCopy(net_path, cache_path, min_free, file_map, no_delete)
 
-        if os.path.exists(cache_path) and os.path.getmtime(cache_path)>=os.path.getmtime(net_path):
-            file_map[net_path] = cache_path
-            touch(cache_path)
+    if os.path.exists(cache_path) and os.path.getmtime(cache_path)>=os.path.getmtime(net_path):
+        #Only use cache list if cached file was created and up-to-date
+        file_map[net_path] = cache_path
 
-        cacheRecurse(caches[1:], file_map, execute, fragile, min_free, no_delete)
-    else:
-        #File does not exist, so assume it's output to be sent to /net when done
-        name, ext = os.path.splitext(base_name)
-        with tempfile.NamedTemporaryFile(dir=cache_dir, prefix=name+"_BABYMAKER_TEMPFILE_", suffix=ext) as f:
-            print("Creating temporary file "+f.name+"\n")
-            file_map[net_path] = f.name
-            utilities.ensureDir(os.path.dirname(net_path))
-            cacheRecurse(caches[1:], file_map, execute, fragile, min_free, no_delete)
+    cacheRecurse(caches[1:], file_map, command, fragile, min_free, no_delete)
 
-def cacheRun(caches, execute, fragile, abs_limit, rel_limit, no_delete):
+def cacheRun(caches, command, fragile, abs_limit, rel_limit, no_delete):
     caches = expand(caches)
     du = os.statvfs(utilities.fullPath("/scratch/babymaker"))
     min_free = max(abs_limit, du.f_bsize*du.f_blocks*rel_limit)
-    cacheRecurse(caches, dict(), execute, fragile, min_free, no_delete)
+    cacheRecurse(caches, dict(), command, fragile, min_free, no_delete)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Automatically creates and, if necessary, deletes local caches of files from /net/cmsX/cmsXr0/babymaker and remaps any files in the provided command to their cached version.",

@@ -48,7 +48,7 @@ def sendSkimJob(in_files, out_files, cut, overwrite, exe_name):
         for in_file, out_file in itertools.izip(in_files, out_files):
             if os.path.exists(out_file) and not overwrite:
                 continue
-            f.write('cache.cacheRun(["'+out_file+'"],["'
+            f.write('cache.cacheRun(["'+out_file+'","'+in_file+'"],["'
                     +os.path.join(python_dir,'skim_ntuple.py')
                     +'","'+cut+'","'+out_file+'","'+in_file
                     +'"],False,10000000000,0.5,False)\n')

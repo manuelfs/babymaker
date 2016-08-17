@@ -75,6 +75,11 @@ def mapFiles(execute, file_map):
 def netCopy(src, dst):
     print("Copying "+src+" to "+dst+"\n")
     shutil.copy(src, dst)
+    dst_time = os.path.getmtime(dst)
+    src_time = os.path.getmtime(src)
+    if src_time < dst_time:
+        #Make sure cached copy is newer than /net copy
+        touch(src, (dst_time+1., dst_time+1.))
 
 def removeOldCache(file_map):
     #Deletes oldest cached file
@@ -120,6 +125,11 @@ def cacheCopy(src, dst, min_free, file_map, no_delete):
     print("Caching "+src+" to "+dst+"\n")
     shutil.copy(src, dst)
     os.chmod(dst, 0775)
+    src_time = os.path.getmtime(src)
+    dst_time = os.path.getmtime(dst)
+    if dst_time < src_time:
+        #Make sure cached copy is newer than /net copy
+        touch(dst, (src_time+1., src_time+1.))
 
 def execute(command, file_map, fragile):
     inv_file_map = dict()
@@ -152,10 +162,6 @@ def execute(command, file_map, fragile):
         #Copy modified files back to /net
         if os.path.getmtime(f) > old_mod_times[f]:
             netCopy(f, inv_file_map[f])
-
-            #Make sure cache is at least as new as net to avoid recaching...
-            mtime = os.path.getmtime(inv_file_map[f])+1.
-            touch(f, (mtime, mtime))
 
 def cacheRecurse(caches, file_map, command, fragile, min_free, no_delete):
     if len(caches)==0:

@@ -36,10 +36,8 @@ def slimNtuple(slim_file_name, output_file_name, input_file_names, keep_existing
         return
 
     in_tree = ROOT.TChain("tree", "tree")
-    in_treeglobal = ROOT.TChain("treeglobal", "treeglobal")
     for input_file_name in input_file_names:
         in_tree.Add(input_file_name)
-        in_treeglobal.Add(input_file_name)
 
     branch_names = [ branch.GetName() for branch in in_tree.GetListOfBranches() ]
     rules = getRules(slim_file_name)
@@ -56,10 +54,8 @@ def slimNtuple(slim_file_name, output_file_name, input_file_names, keep_existing
         if branch in kept_branches: in_tree.SetBranchStatus(branch, True)
         else:                       in_tree.SetBranchStatus(branch, False)
 
-    output_file = ROOT.TFile(output_file_name, "recreate")
-    in_tree.Merge(output_file, 0, "fast keep")
-    in_treeglobal.Merge(output_file, 0, "fast keep")
-    output_file.Close()
+    with utilities.ROOTFile(output_file_name, "recreate") as output_file:
+        in_tree.Merge(output_file, 0, "fast keep")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Prunes branches from an ntuple",

@@ -68,16 +68,13 @@ def skimFiles(in_files, out_file, cut, keep_existing):
         print("Keeping pre-existing "+out_file+"\n")
         return
 
-    in_treeglobal = ROOT.TChain("treeglobal", "treeglobal")
     in_tree = ROOT.TChain("tree", "tree")
     for in_file in in_files:
-        in_treeglobal.Add(in_file)
         in_tree.Add(in_file)
 
-    out = ROOT.TFile(out_file, "recreate")
-    out_tree = in_tree.CopyTree(cut)
-    out_tree.Write()
-    in_treeglobal.Merge(out, 0, "fast")
+    with utilities.ROOTFile(out_file, "recreate") as out:
+        out_tree = in_tree.CopyTree(cut)
+        out_tree.Write()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Skims non-SMS ntuples.",

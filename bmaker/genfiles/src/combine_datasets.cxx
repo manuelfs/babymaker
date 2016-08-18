@@ -84,14 +84,13 @@ int main(int argc, char *argv[]){
   int run, lumiblock;
 
   for(unsigned idata(0); idata < datasets.size(); idata++){
-    TChain chain("tree"), treeglobal("treeglobal");
+    TChain chain("tree");
     TString filename(infolder+"/*"+datasets[idata]+"*.root");
     int files = chain.Add(filename);
     if(files<1) {
       cout<<"No files found for "<<filename<<endl;
       continue;
     }
-    treeglobal.Add(filename);
     gSystem->mkdir(outfolder, kTRUE);
     TString outname(outfolder+"/baby_");
     outname += idata;
@@ -142,7 +141,6 @@ int main(int argc, char *argv[]){
       } 
     } // Loop over entries
     outtree->Write();
-    treeglobal.CloneTree(-1,"fast");
     outfile.Write();
     outfile.Close();
     time(&curTime);

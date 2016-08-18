@@ -6,6 +6,7 @@ import glob
 import string
 import os
 import sys
+import ROOT
 
 ## Finding basename for each dataset
 def findBaseSampleNames(folder):
@@ -46,3 +47,31 @@ def ePrint(*args, **kwargs):
 def flush():
     sys.stdout.flush()
     sys.stderr.flush()
+
+class NonROOTFileError(Exception):
+    def __init__(self, path):
+        self.path = path
+    def __str__(self):
+        return self.path+" is not a ROOT file"
+
+class ROOTOpenError(Exception):
+    def __init__(self, path, mode):
+        self.path = path
+        self.mode = mode
+    def __str__(self):
+        return "Could not open "+self.path+" in "+self.mode+" mode"
+
+class ROOTFile(object):
+    def __init__(self, path, mode):
+        if os.path.splitext(path)[1] != ".root":
+            raise NonROOTFileError(path)
+        self.path = path
+        self.mode = mode
+    def __enter__(self):
+        self.file = ROOT.TFile(self.path, self.mode)
+        if self.file.IsZombie() or not self.file.IsOpen():
+            raise ROOTOpenError(self.path, self.mode)
+        return self.file
+    def __exit__(self, type, value, traceback):
+        self.file.Close()
+

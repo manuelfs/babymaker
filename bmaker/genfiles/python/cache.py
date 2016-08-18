@@ -13,6 +13,14 @@ import sys
 
 import utilities
 
+def mkdirPermissions(path, mode):
+    if not path or os.path.exists(path):
+        return
+    (head, tail) = os.path.split(path)
+    mkdirPermissions(head, mode)
+    os.mkdir(path)
+    os.chmod(path, mode)
+
 def expand(files):
     expanded = []
     for f in files:
@@ -34,15 +42,11 @@ def cachePath(path):
 def lastTime(path):
     return max(os.path.getctime(path), os.path.getmtime(path), os.path.getatime(path))
 
-def touch(path, times):
-    with open(path, "a"):
-        os.utime(path, times)
-
-def mapFiles(execute, file_map):
+def mapFiles(command, file_map):
     #Replace executable arguments with cached equivalent
 
     expanded_args = []
-    for arg in execute:
+    for arg in command:
         globbed = glob.glob(arg)
         if len(globbed) > 0:
             #Argument represents file(s)
@@ -51,35 +55,39 @@ def mapFiles(execute, file_map):
         else:
             expanded_args.append(arg)
 
-    execute = []
+    command = []
     inv_file_map = dict((cached,net) for net,cached in file_map.iteritems())
     for arg in expanded_args:
         if ( arg in file_map and os.path.exists(file_map[arg])
-             and (not os.path.exists(arg) or os.path.getmtime(file_map[arg])>=os.path.getmtime(arg)) ):
+             and (not os.path.exists(arg) or os.path.getmtime(file_map[arg])==os.path.getmtime(arg)) ):
             #Check if generated cache for file
-            execute.append(file_map[arg])
+            command.append(file_map[arg])
         elif isNetFile(arg):
             #Check if pre-existing cache
             cache_path = cachePath(arg)
             if ( os.path.exists(cache_path)
-                 and (not os.path.exists(arg) or os.path.getmtime(cache_path)>=os.path.getmtime(arg)) ):
-                execute.append(cache_path)
+                 and (not os.path.exists(arg) or os.path.getmtime(cache_path)==os.path.getmtime(arg)) ):
+                command.append(cache_path)
                 inv_file_map[cache_path] = arg
             else:
-                execute.append(arg)
+                command.append(arg)
         else:
-            execute.append(arg)
+            command.append(arg)
 
-    return execute, inv_file_map
+    return command, inv_file_map
 
 def netCopy(src, dst):
     print("Copying "+src+" to "+dst+"\n")
-    shutil.copy(src, dst)
-    dst_time = os.path.getmtime(dst)
-    src_time = os.path.getmtime(src)
-    if src_time < dst_time:
-        #Make sure cached copy is newer than /net copy
-        touch(src, (dst_time+1., dst_time+1.))
+    try:
+        shutil.copy(src, dst)
+        now = round(time.time())
+        os.utime(src, (now, now))
+        os.utime(dst, (now, now))
+    except:
+        os.remove(dst)
+        os.remove(src)
+        utilities.ePrint("Failed to copy "+src+" to "+dst+"\n")
+        raise
 
 def removeOldCache(file_map):
     #Deletes oldest cached file
@@ -89,7 +97,7 @@ def removeOldCache(file_map):
     for root, dirs, files in os.walk(utilities.fullPath("/scratch/babymaker")):
         for f in files:
             path = os.path.join(root, f)
-            if path in file_map.values(): continue
+            if path in file_map.itervalues(): continue
             mod_time = lastTime(path)
             if mod_time < oldest_mod_time or not found_file:
                 found_file = True
@@ -123,13 +131,29 @@ def cacheCopy(src, dst, min_free, file_map, no_delete):
         du = os.statvfs(utilities.fullPath("/scratch/babymaker"))
         avail = du.f_bsize*du.f_bavail
     print("Caching "+src+" to "+dst+"\n")
-    shutil.copy(src, dst)
-    os.chmod(dst, 0775)
-    src_time = os.path.getmtime(src)
-    dst_time = os.path.getmtime(dst)
-    if dst_time < src_time:
-        #Make sure cached copy is newer than /net copy
-        touch(dst, (src_time+1., src_time+1.))
+    try:
+        shutil.copy(src, dst)
+        os.chmod(dst, 0775)
+        now = round(time.time())
+        src_m = round(os.path.getmtime(src))
+        os.utime(dst, (now, src_m))
+        os.utime(src, (now, src_m))
+    except:
+        os.remove(dst)
+        utilities.ePrint("Failed to cache "+src+" to "+dst+"\n")
+        raise
+
+def syncCache(net_path, cache_path):
+    try:
+        now = round(time.time())
+        net_m_time = round(os.path.getmtime(net_path))
+        net_a_time = round(os.path.getatime(net_path))
+        os.utime(cache_path, (now, net_m_time))
+        os.utime(net_path, (net_a_time, net_m_time))
+    except:
+        os.remove(cache_path)
+        utilities.ePrint("Failed to sync cache times")
+        raise
 
 def execute(command, file_map, fragile):
     inv_file_map = dict()
@@ -145,23 +169,34 @@ def execute(command, file_map, fragile):
         args.append(a.lstrip())
     command = args
 
-    old_mod_times = dict()
-    before_time = time.time()-1.
-    # 1 second safety margin in case executable modifies within access
-    # time resolution (typically 1 second)
-    for f in inv_file_map:
-        touch(f, (before_time, before_time))
-        old_mod_times[f] = os.path.getmtime(f)
+    try:
+        old_mod_times = dict()
+        before_time = round(time.time()-2.)
+        # 2 second safety margin in case executable modifies within access
+        # time resolution (typically 1 second)
+        for f in inv_file_map.iterkeys():
+            os.utime(f, (before_time, before_time))
+            old_mod_times[f] = os.path.getmtime(f)
 
-    print("Executing",command,"\n")
-    utilities.flush()
-    subprocess.call(command)
-    utilities.flush()
+        print("Executing",command,"\n")
+        utilities.flush()
+        exit_code = subprocess.call(command)
+        utilities.flush()
 
-    for f in inv_file_map:
-        #Copy modified files back to /net
-        if os.path.getmtime(f) > old_mod_times[f]:
-            netCopy(f, inv_file_map[f])
+        if exit_code != 0:
+            raise Exception("Executable returned non-zero exit code.")
+    except:
+        for f in inv_file_map.iterkeys():
+            os.remove(f)
+        utilities.ePrint("Failed to execute",command,"\n")
+        raise
+    else:
+        for cache_path, net_path in inv_file_map.iteritems():
+            if os.path.getmtime(cache_path) > old_mod_times[cache_path]:
+                #Copy modified files back to /net
+                netCopy(cache_path, net_path)
+            else:
+                syncCache(net_path, cache_path)
 
 def cacheRecurse(caches, file_map, command, fragile, min_free, no_delete):
     if len(caches)==0:
@@ -175,19 +210,19 @@ def cacheRecurse(caches, file_map, command, fragile, min_free, no_delete):
         cacheRecurse(caches[1:], file_map, command, fragile, min_free, no_delete)
         return
 
-    utilities.ensureDir(os.path.dirname(net_path))
+    mkdirPermissions(os.path.dirname(net_path), 0775)
     if not os.path.exists(net_path):
         #If /net file does not exist, create new empty file
         with open(net_path, "a"):
             pass
     cache_path = cachePath(net_path)
-    utilities.ensureDir(os.path.dirname(cache_path))
+    mkdirPermissions(os.path.dirname(cache_path), 0775)
 
-    if not os.path.exists(cache_path) or os.path.getmtime(cache_path)<os.path.getmtime(net_path):
+    if not (os.path.exists(cache_path) and os.path.getmtime(cache_path)==os.path.getmtime(net_path)):
         #Cache doesn't exist or is outdated, so copy file from /net
         cacheCopy(net_path, cache_path, min_free, file_map, no_delete)
 
-    if os.path.exists(cache_path) and os.path.getmtime(cache_path)>=os.path.getmtime(net_path):
+    if os.path.exists(cache_path) and os.path.getmtime(cache_path)==os.path.getmtime(net_path):
         #Only use cached file if it was created and up-to-date
         file_map[net_path] = cache_path
 

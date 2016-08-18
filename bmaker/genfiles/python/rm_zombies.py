@@ -6,6 +6,7 @@ import os
 import ROOT
 
 def killZombies(in_dirs):
+    ROOT.gErrorIgnoreLevel = 6000
     for d in in_dirs:
         for root, dirs, files in os.walk(d):
             for f in files:
@@ -16,6 +17,7 @@ def killZombies(in_dirs):
                 kill = tfile.IsZombie() or not tfile.IsOpen()
                 tfile.Close()
                 if kill:
+                    print "Removing "+path
                     os.remove(path)
 
 if __name__ == "__main__":

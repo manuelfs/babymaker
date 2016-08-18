@@ -2,13 +2,18 @@
 
 import argparse
 import os
+import glob
 
 import ROOT
 
+import utilities
+
 def killZombies(in_dirs):
+    in_dirs = [ utilities.fullPath(d) for sublist in in_dirs for d in glob.glob(sublist) ]
     ROOT.gErrorIgnoreLevel = 6000
     for d in in_dirs:
         for root, dirs, files in os.walk(d):
+            print "In "+root
             for f in files:
                 path = os.path.join(root, f)
                 if os.path.splitext(f)[1] != ".root":

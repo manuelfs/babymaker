@@ -16,6 +16,7 @@ def findBaseSampleNames(folder):
             tag = tag.split("Tune")[0]
         tag = tag.split("13TeV")[0]
         tag = tag.split("-PromptReco")[0]
+        tag = tag.split("_runs")[0]
         tag = tag.split("pythia")[0]
         tag = tag.split("baby_")[1]
         tag = tag.split("__")[0]

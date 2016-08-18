@@ -14,12 +14,15 @@ import sys
 import utilities
 
 def mkdirPermissions(path, mode):
-    if not path or os.path.exists(path):
+    if not path or path == "/":
         return
     (head, tail) = os.path.split(path)
     mkdirPermissions(head, mode)
-    os.mkdir(path)
-    os.chmod(path, mode)
+    try:
+        os.mkdir(path)
+        os.chmod(path, mode)
+    except OSError:
+        pass
 
 def expand(files):
     expanded = []
@@ -84,8 +87,10 @@ def netCopy(src, dst):
         os.utime(src, (now, now))
         os.utime(dst, (now, now))
     except:
-        os.remove(dst)
-        os.remove(src)
+        try:
+            os.remove(dst)
+        finally:
+            os.remove(src)
         utilities.ePrint("Failed to copy "+src+" to "+dst+"\n")
         raise
 

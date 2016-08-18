@@ -13,7 +13,7 @@ def sendSlimJob(skim, slim, overwrite):
     mc_dir = os.path.dirname(skim)
     skim_name = os.path.basename(skim)
     slim_name = os.path.splitext(os.path.basename(slim))[0]
-    out_dir = os.path.join(mc_dir, "slim_"+slim_name+"_"+skim_name).replace("_skim_","_")
+    out_dir = os.path.join(mc_dir, "merged_"+slim_name+"_"+skim_name).replace("_skim_","_")
     run_dir = os.path.join(out_dir, "run")
     python_dir = utilities.fullPath(os.path.dirname(__file__))
 
@@ -23,12 +23,11 @@ def sendSlimJob(skim, slim, overwrite):
     total_jobs = 0
     for tag in tags:
         in_files = os.path.join(skim,"*"+tag+"*.root")
-        out_file = os.path.join(out_dir,"slimbaby_"+tag+"_nfiles_"+str(len(glob.glob(in_files)))+".root")
+        out_file = os.path.join(out_dir,"mergedbaby_"+tag+"_"+skim_name+"_"+slim_name+"_nfiles_"+str(len(glob.glob(in_files)))+".root")
         if os.path.exists(out_file) and not overwrite:
             print("Keeping pre-existing "+out_file)
             continue
-        subprocess.call(['JobSubmit.csh','python/cache.py','-c',out_file,
-                         '-e','python/slim_ntuple.py','txt/slim_rules/minimal.txt',out_file,in_files])
+        subprocess.call(['JobSubmit.csh','python/cache.py','-c',slim,out_file,'-e','python/slim_ntuple.py',slim,out_file,in_files])
         total_jobs += 1
 
     return total_jobs

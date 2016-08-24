@@ -210,6 +210,7 @@ namespace xsec{
 	else if(hig_mass == 950) { xsec = 1.32692; xsec_unc = 0.117027;  return;}
 	else if(hig_mass == 975) { xsec = 1.12975; xsec_unc = 0.121244;  return;}
 	else if(hig_mass ==1000) { xsec = 0.968853; xsec_unc = 0.126209; return;}
+	else{ xsec = 0; xsec_unc = 0;}
   }
 
 

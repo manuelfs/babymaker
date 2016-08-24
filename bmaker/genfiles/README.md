@@ -65,7 +65,7 @@ command
 1. If one is processing signal scans, separate the mass points. This
 is done with the script below after setting the proper `infolder` and `outfolder` and `outname`
 
-	./run/send_split_scan.py 
+        ./run/send_split_scan.py 
 
 
 2. Renormalize the weights so that the cross section is kept constant. For background and signal MC

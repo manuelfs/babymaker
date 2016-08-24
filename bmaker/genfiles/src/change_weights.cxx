@@ -141,6 +141,7 @@ int main(int argc, char *argv[]){
   if (sample.Contains("SMS")){
     float exsec(0.);
     if(sample.Contains("T1") || sample.Contains("T5")) xsec::signalCrossSection(ch.mgluino(), xsec, exsec);
+    else if(sample.Contains("TChiHH")) xsec::higgsinoCrossSection(ch.mgluino(), xsec, exsec);
     else  xsec::stopCrossSection(ch.mgluino(), xsec, exsec);
   }
   float w_lumi = xsec*luminosity / nent_eff;

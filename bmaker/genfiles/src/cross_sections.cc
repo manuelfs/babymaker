@@ -175,6 +175,43 @@ namespace xsec{
     return fneg;
   }
 
+  void higgsinoCrossSection(int hig_mass, float &xsec, float &xsec_unc) {
+	if(hig_mass == 127) { xsec =  7602.2; xsec_unc = 0.0393921; return;}
+	else if(hig_mass == 150) { xsec = 3832.31; xsec_unc = 0.0413612; return;}
+	else if(hig_mass == 225) { xsec = 860.597; xsec_unc = 0.0504217; return;}
+	else if(hig_mass == 250) { xsec = 577.314; xsec_unc = 0.0532731; return;}
+	else if(hig_mass == 275) { xsec = 400.107; xsec_unc = 0.0560232; return;}
+	else if(hig_mass == 300) { xsec = 284.855; xsec_unc = 0.0586867; return;}
+	else if(hig_mass == 325) { xsec =  207.36; xsec_unc = 0.0613554; return;}
+	else if(hig_mass == 350) { xsec = 153.841; xsec_unc = 0.0640598; return;}
+	else if(hig_mass == 375) { xsec = 116.006; xsec_unc = 0.066892;  return;}
+	else if(hig_mass == 400) { xsec = 88.7325; xsec_unc = 0.0697517; return;}
+	else if(hig_mass == 425) { xsec = 68.6963; xsec_unc = 0.0723531; return;}
+	else if(hig_mass == 450) { xsec = 53.7702; xsec_unc = 0.0748325; return;}
+	else if(hig_mass == 475) { xsec = 42.4699; xsec_unc = 0.0775146; return;}
+	else if(hig_mass == 500) { xsec = 33.8387; xsec_unc = 0.0802572; return;}
+	else if(hig_mass == 525) { xsec = 27.1867; xsec_unc = 0.0825803; return;}
+	else if(hig_mass == 550) { xsec = 21.9868; xsec_unc = 0.0849278; return;}
+	else if(hig_mass == 575) { xsec = 17.9062; xsec_unc = 0.087561;  return;}
+	else if(hig_mass == 600) { xsec = 14.6677; xsec_unc = 0.0900693; return;}
+	else if(hig_mass == 625) { xsec =  12.062; xsec_unc = 0.091959;  return;}
+	else if(hig_mass == 650) { xsec = 9.96406; xsec_unc = 0.094065;  return;}
+	else if(hig_mass == 675) { xsec = 8.28246; xsec_unc = 0.0957436; return;}
+	else if(hig_mass == 700) { xsec = 6.89981; xsec_unc = 0.0982894; return;}
+	else if(hig_mass == 725) { xsec = 5.78355; xsec_unc = 0.0999915; return;}
+	else if(hig_mass == 750) { xsec =  4.8731; xsec_unc = 0.101211;  return;}
+	else if(hig_mass == 775) { xsec = 4.09781; xsec_unc = 0.104646;  return;}
+	else if(hig_mass == 800) { xsec = 3.46143; xsec_unc = 0.107618;  return;}
+	else if(hig_mass == 825) { xsec =  2.9337; xsec_unc = 0.108353;  return;}
+	else if(hig_mass == 850) { xsec =  2.4923; xsec_unc = 0.110016;  return;}
+	else if(hig_mass == 875) { xsec = 2.13679; xsec_unc = 0.112636;  return;}
+	else if(hig_mass == 900) { xsec = 1.80616; xsec_unc = 0.1134;    return;}
+	else if(hig_mass == 925) { xsec = 1.55453; xsec_unc = 0.116949;  return;}
+	else if(hig_mass == 950) { xsec = 1.32692; xsec_unc = 0.117027;  return;}
+	else if(hig_mass == 975) { xsec = 1.12975; xsec_unc = 0.121244;  return;}
+	else if(hig_mass ==1000) { xsec = 0.968853; xsec_unc = 0.126209; return;}
+  }
+
 
   void signalCrossSection(int glu_mass, float &xsec, float &xsec_unc){
     if (glu_mass == 595) { xsec = 0.; xsec_unc = 0.; return; } // we shouldn't have these points

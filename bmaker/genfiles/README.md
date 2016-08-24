@@ -63,9 +63,10 @@ command
 ### MC
 
 1. If one is processing signal scans, separate the mass points. This
-is done with
+is done with the script below after setting the proper `infolder` and `outfolder` and `outname`
 
-        run/send_scan_skim.sh /net/cmsX/cmsXr0/babymaker/babies/YYYY_MM_DD/mc/unskimmed /net/cmsX/cmsXr0/babymaker/babies/YYYY_MM_DD/mc/scans 50
+	./run/send_split_scan.py 
+
 
 2. Renormalize the weights so that the cross section is kept constant. For background and signal MC
 respectively, you'll need to set up the correct `infolder` and `outfolder` in

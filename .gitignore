@@ -32,7 +32,8 @@ bin/*
 # emacs backups
 *~
 *#
-
+# vim temporary
+*.swp
 # Other
 /*.root
 out/*.root

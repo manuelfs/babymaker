@@ -12,13 +12,20 @@ def singleFileDelete(path):
     dirname = os.path.dirname(path)
     prefix = os.path.splitext(os.path.basename(path))[0]+"_TMP_"
     with tempfile.NamedTemporaryFile(dir=dirname, prefix=prefix, suffix=".root") as tmp:
-        with utilities.ROOTFile(path, "read") as orig:
-            tree = orig.Get("tree")
-            with utilities.ROOTFile(tmp.name, "recreate") as outfile:
-                clone = tree.CloneTree(-1, "fast")
-                clone.Write()
-        print "Deleting treeglobal from "+path
-        shutil.copy(tmp.name, path)
+        try:
+            with utilities.ROOTFile(path, "read") as orig:
+                tree = orig.Get("tree")
+                if not tree:
+                    utilities.ePrint("Could not find tree in "+path+". Skipping.")
+                    return
+                with utilities.ROOTFile(tmp.name, "recreate") as outfile:
+                    clone = tree.CloneTree(-1, "fast")
+                    clone.Write()
+            print "Deleting treeglobal from "+path
+            shutil.copy(tmp.name, path)
+        except (utilities.ROOTOpenError, utilities.NonROOTFileError) as r:
+            utilities.ePrint("Could not open "+path+". Skipping.")
+            return
 
 def recursiveDelete(file_dir):
     try:
@@ -27,6 +34,7 @@ def recursiveDelete(file_dir):
     except utilities.NonROOTFileError:
         pass
     except IOError as e:
+        #Directory, not file
         if e.errno != 21:
             raise
 

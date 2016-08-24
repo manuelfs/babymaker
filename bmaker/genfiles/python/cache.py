@@ -10,8 +10,19 @@ import tempfile
 import shutil
 import time
 import sys
+import signal
 
 import utilities
+
+class SignalError(Exception):
+    def __init__(self, signum, frame):
+        self.signum = signum
+        self.frame = frame
+    def __str__(self):
+        return "Caught signal number "+str(self.signum)
+
+def signalHandler(signum, frame):
+    raise SignalError(signum, frame)
 
 def mkdirPermissions(path, mode):
     if not path or path == "/":
@@ -23,6 +34,12 @@ def mkdirPermissions(path, mode):
         os.chmod(path, mode)
     except OSError:
         pass
+
+def cacheUpToDate(cache_path, net_path):
+    return (os.path.exists(cache_path)
+            and (not os.path.exists(net_path)
+                 or (os.path.getmtime(cache_path) >= os.path.getmtime(net_path)
+                     and os.path.getsize(cache_path) == os.path.getsize(net_path))))
 
 def expand(files):
     expanded = []
@@ -61,15 +78,13 @@ def mapFiles(command, file_map):
     command = []
     inv_file_map = dict((cached,net) for net,cached in file_map.iteritems())
     for arg in expanded_args:
-        if ( arg in file_map and os.path.exists(file_map[arg])
-             and (not os.path.exists(arg) or os.path.getmtime(file_map[arg])==os.path.getmtime(arg)) ):
+        if arg in file_map and cacheUpToDate(file_map[arg], arg):
             #Check if generated cache for file
             command.append(file_map[arg])
         elif isNetFile(arg):
             #Check if pre-existing cache
             cache_path = cachePath(arg)
-            if ( os.path.exists(cache_path)
-                 and (not os.path.exists(arg) or os.path.getmtime(cache_path)==os.path.getmtime(arg)) ):
+            if cacheUpToDate(file_map[arg], arg):
                 command.append(cache_path)
                 inv_file_map[cache_path] = arg
             else:
@@ -83,9 +98,10 @@ def netCopy(src, dst):
     print("Copying "+src+" to "+dst+"\n")
     try:
         shutil.copy(src, dst)
-        now = round(time.time())
-        os.utime(src, (now, now))
-        os.utime(dst, (now, now))
+        while not cacheUpToDate(src, dst):
+            #Want cache to be newer so it's considered up to date
+            now = time.time()
+            os.utime(src, (now, now))
     except:
         try:
             os.remove(dst)
@@ -139,10 +155,9 @@ def cacheCopy(src, dst, min_free, file_map, no_delete):
     try:
         shutil.copy(src, dst)
         os.chmod(dst, 0775)
-        now = round(time.time())
-        src_m = round(os.path.getmtime(src))
-        os.utime(dst, (now, src_m))
-        os.utime(src, (now, src_m))
+        while not cacheUpToDate(dst, src):
+            now = time.time()
+            os.utime(dst, (now, now))
     except:
         os.remove(dst)
         utilities.ePrint("Failed to cache "+src+" to "+dst+"\n")
@@ -150,11 +165,14 @@ def cacheCopy(src, dst, min_free, file_map, no_delete):
 
 def syncCache(net_path, cache_path):
     try:
-        now = round(time.time())
-        net_m_time = round(os.path.getmtime(net_path))
-        net_a_time = round(os.path.getatime(net_path))
-        os.utime(cache_path, (now, net_m_time))
-        os.utime(net_path, (net_a_time, net_m_time))
+        net_m_time = os.path.getmtime(net_path)
+        net_a_time = os.path.getatime(net_path)
+        os.utime(cache_path, (time.time(), net_m_time))
+        cache_m_time = os.path.getmtime(cache_path)
+        while not cacheUpToDate(cache_path, net_path):
+            #Make sure cache is newer
+            cache_m_time += 1.
+            os.utime(cache_path, (time.time(), cache_m_time))
     except:
         os.remove(cache_path)
         utilities.ePrint("Failed to sync cache times")
@@ -183,9 +201,14 @@ def execute(command, file_map, fragile):
             os.utime(f, (before_time, before_time))
             old_mod_times[f] = os.path.getmtime(f)
 
+        exit_code = 0
         print("Executing",command,"\n")
         utilities.flush()
-        exit_code = subprocess.call(command)
+        try:
+            exit_code = subprocess.call(command)
+        except SignalError as e:
+            if e.signum != signal.SIGCLD and e.signum != signal.SIGCHLD:
+                raise e
         utilities.flush()
 
         if exit_code != 0:
@@ -223,17 +246,24 @@ def cacheRecurse(caches, file_map, command, fragile, min_free, no_delete):
     cache_path = cachePath(net_path)
     mkdirPermissions(os.path.dirname(cache_path), 0775)
 
-    if not (os.path.exists(cache_path) and os.path.getmtime(cache_path)==os.path.getmtime(net_path)):
+    if not cacheUpToDate(cache_path, net_path):
         #Cache doesn't exist or is outdated, so copy file from /net
         cacheCopy(net_path, cache_path, min_free, file_map, no_delete)
 
-    if os.path.exists(cache_path) and os.path.getmtime(cache_path)==os.path.getmtime(net_path):
+    if cacheUpToDate(cache_path, net_path):
         #Only use cached file if it was created and up-to-date
         file_map[net_path] = cache_path
 
     cacheRecurse(caches[1:], file_map, command, fragile, min_free, no_delete)
 
 def cacheRun(caches, command, fragile, abs_limit, rel_limit, no_delete):
+    for s in [sig for sig in dir(signal) if sig.startswith("SIG")
+              and not sig.startswith("SIG_")
+              and sig!="SIGKILL"
+              and sig!="SIGSTOP"]:
+        signum = getattr(signal, s)
+        signal.signal(signum,signalHandler)
+
     if not os.path.isdir("/scratch/babymaker"):
         cacheRecurse([], dict(), command, True, 0, True)
         return

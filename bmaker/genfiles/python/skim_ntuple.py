@@ -12,7 +12,7 @@ import utilities
 def expandCut(cut):
     pass_ra2b="globalTightHalo2016Filter==1&&HBHENoiseFilter==1&&HBHEIsoNoiseFilter==1&&eeBadScFilter==1"
     if cut=="standard":
-        return "nleps>=1&&st>500&&met>200"
+        return "nleps>=1&&st>500&&met>150"
     elif cut=="met150":
         return "nleps>=1&&st>500&&met>150&&met<=200&&njets>=5"
     elif cut=="abcd":

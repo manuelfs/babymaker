@@ -11,11 +11,11 @@ import pprint
 
 # Setting folders
 datasets = 'txt/alldata.txt'
-infolder  = '/net/cms2/cms2r0/babymaker/babies/2016_08_10/data/unskimmed/'
-outfolder = '/net/cms2/cms2r0/babymaker/babies/2016_08_10/data/unskimmed/alldata/'
+infolder  = '/net/cms2/cms2r0/babymaker/babies/2016_08_10/data/unprocessed/'
+outfolder = '/net/cms2/cms2r0/babymaker/babies/2016_08_10/data/unskimmed/'
 jsonfile = '../../data/json/golden_Cert_271036-277933_13TeV_PromptReco_Collisions16_NoL1T.json'
 
-runs_file = 3 # Number of runs in each ntuple
+runs_file = 1 # Number of runs in each ntuple
 
 
 runs = []

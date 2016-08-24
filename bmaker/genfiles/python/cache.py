@@ -84,7 +84,7 @@ def mapFiles(command, file_map):
         elif isNetFile(arg):
             #Check if pre-existing cache
             cache_path = cachePath(arg)
-            if cacheUpToDate(file_map[arg], arg):
+            if cacheUpToDate(cache_path, arg):
                 command.append(cache_path)
                 inv_file_map[cache_path] = arg
             else:

@@ -36,10 +36,17 @@ def mkdirPermissions(path, mode):
         pass
 
 def cacheUpToDate(cache_path, net_path):
-    return (os.path.exists(cache_path)
-            and (not os.path.exists(net_path)
-                 or (os.path.getmtime(cache_path) >= os.path.getmtime(net_path)
-                     and os.path.getsize(cache_path) == os.path.getsize(net_path))))
+    cache = None
+    net = None
+    try: cache = os.stat(cache_path)
+    except OSError as e:
+        if e.errno == 2: return False
+        else: raise
+    try: net = os.stat(net_path)
+    except OSError as e:
+        if e.errno == 2: return True
+        else: raise
+    return cache.st_mtime >= net.st_mtime and cache.st_size == net.st_size
 
 def expand(files):
     expanded = []
@@ -60,7 +67,8 @@ def cachePath(path):
     return os.path.join(cache_root, path[5:])
 
 def lastTime(path):
-    return max(os.path.getctime(path), os.path.getmtime(path), os.path.getatime(path))
+    s = os.stat(path)
+    return max(s.st_ctime, s.st_mtime, s.st_atime)
 
 def mapFiles(command, file_map):
     #Replace executable arguments with cached equivalent
@@ -125,6 +133,9 @@ def removeOldCache(file_map):
                 oldest_mod_time = mod_time
                 oldest_path = path
 
+    if time.time()-oldest_mod_time <= 86400.:
+        #Don't delete files used in last 24 hours
+        return False
     oldest_path = utilities.fullPath(oldest_path)
     if found_file:
         print("Deleting "+oldest_path+" from cache\n")
@@ -165,14 +176,14 @@ def cacheCopy(src, dst, min_free, file_map, no_delete):
 
 def syncCache(net_path, cache_path):
     try:
-        net_m_time = os.path.getmtime(net_path)
-        net_a_time = os.path.getatime(net_path)
-        os.utime(cache_path, (time.time(), net_m_time))
+        now = time.time()
+        os.utime(cache_path, (now, now))
         cache_m_time = os.path.getmtime(cache_path)
         while not cacheUpToDate(cache_path, net_path):
             #Make sure cache is newer
             cache_m_time += 1.
-            os.utime(cache_path, (time.time(), cache_m_time))
+            now = max(cache_m_time, time.time())
+            os.utime(cache_path, (now, now))
     except:
         os.remove(cache_path)
         utilities.ePrint("Failed to sync cache times")

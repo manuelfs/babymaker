@@ -139,7 +139,8 @@ def removeOldCache(file_map):
     oldest_path = utilities.fullPath(oldest_path)
     if found_file:
         print("Deleting "+oldest_path+" from cache\n")
-        os.remove(oldest_path)
+        try: os.remove(oldest_path)
+        except: return False
         while oldest_path != "/" and oldest_path != "":
             try: os.rmdir(oldest_path)
             except OSError: pass

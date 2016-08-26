@@ -32,11 +32,11 @@ int main(int argc, char *argv[]){
 
   if(argc < 3) {
     cout<<endl<<"Required at least 2 arguments: "
-	<<"./plot/skim_ntuples.exe infolder outfolder [cuts=\"nleps==1&&ht>500&&met>200&&njets>=6&&nbm>=1&&mj14>250&&nveto==0\"] "
+	<<"./plot/skim_ntuples.exe infolder outfolder [cuts=\"nleps==1&&st>500&&met>200&&njets>=6&&nbm>=1&&mj14>250&&nveto==0\"] "
 	<<"[njobs=0] [ijob=0] [filetag=\"\"]"<<endl<<endl;;
     return 1;
   }
-  TString folder(argv[1]), outfolder(argv[2]), cuts="nleps==1&&ht>500&&met>200&&njets>=6&&nbm>=1&&mj14>250&&nveto==0";
+  TString folder(argv[1]), outfolder(argv[2]), cuts="nleps==1&&st>500&&met>200&&njets>=6&&nbm>=1&&mj14>250&&nveto==0";
   if(argc >= 4) cuts = argv[3]; 
   unsigned njobs(0), ijob(0);
   if(argc >= 6) {
@@ -47,12 +47,12 @@ int main(int argc, char *argv[]){
   if(argc >= 7) filetag = argv[6];
 
   TString tag = cuts; // Using tag to avoid file names too long for TFile
-  if(cuts=="standard") cuts="nleps>=1&&ht>500&&met>200";
-  if(cuts=="met150") cuts="nleps>=1&&ht>500&&met>150&&met<=200&&njets>=5";
-  if(cuts=="abcd") cuts="nleps==1&&ht>500&&met>200&&njets>=6&&nbm>=1&&mj14>250&&nveto==0";
-  if(cuts=="baseline") cuts="nleps==1&&ht>500&&met>200&&njets>=6&&nbm>=1";
+  if(cuts=="standard") cuts="nleps>=1&&st>500&&met>150";
+  if(cuts=="met150") cuts="nleps>=1&&st>500&&met>150&&met<=200&&njets>=5";
+  if(cuts=="abcd") cuts="nleps==1&&st>500&&met>200&&njets>=6&&nbm>=1&&mj14>250&&nveto==0";
+  if(cuts=="baseline") cuts="nleps==1&&st>500&&met>200&&njets>=6&&nbm>=1";
   if(cuts=="sys_abcd") 
-    cuts = "nleps==1&&max(ht,Max$(sys_ht))>500&&max(met,Max$(sys_met))>200&&max(njets,Max$(sys_njets))>=6&&max(nbm,Max$(sys_nbm))>=1&&max(mj,Max$(sys_mj))>250";
+    cuts = "nleps==1&&max(st,Max$(sys_st))>500&&max(met,Max$(sys_met))>200&&max(njets,Max$(sys_njets))>=6&&max(nbm,Max$(sys_nbm))>=1&&max(mj,Max$(sys_mj))>250";
   if(cuts=="zisr")
     cuts = "nvleps==2&&nleps>=1&&Max$(leps_pt)>30&&((elelv_m>80&&elelv_m<100)||(mumuv_m>80&&mumuv_m<100))";
   if(cuts=="dy_ht300")
@@ -70,9 +70,9 @@ int main(int argc, char *argv[]){
   if(cuts=="qcd_njet10")
      cuts = "ht>1000&&met<50&&(nvmus+nvels)==0&&njets>=10";
   if(cuts=="mm_std")
-	 cuts="Sum$(mm_nleps>=1&&mm_ht>500.&&mm_met>200.)>0";	     
+	 cuts="Sum$(mm_nleps>=1&&mm_st>500.&&mm_met>200.)>0";	     
   if(cuts=="mm_std_nj5mj250")
-	 cuts="Sum$(mm_nleps>=1&&mm_ht>500&&mm_met>200&&mm_njets>=5&&mm_mj14_lep>250)>0||Sum$(mm_nleps>=1&&mm_ht>500&&mm_met>200&&mm_njets>=5&&mm_mj14_nolep>250)>0";
+	 cuts="Sum$(mm_nleps>=1&&mm_st>500&&mm_met>200&&mm_njets>=5&&mm_mj14_lep>250)>0||Sum$(mm_nleps>=1&&mm_st>500&&mm_met>200&&mm_njets>=5&&mm_mj14_nolep>250)>0";
   if(cuts=="higloose")
 	cuts="met>100&&nvleps==0&&(njets==4||njets==5)&&nbm>=2";
 

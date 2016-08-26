@@ -5,8 +5,8 @@ import os, sys, subprocess
 import string
 from utilities import *
 
-infolder  = '/net/cms26/cms26r0/babymaker/babies/2016_08_10/to_renormalize/manuelf/'
-outfolder = '/net/cms26/cms26r0/babymaker/babies/2016_08_10/mc/unskimmed/manuelf/' 
+infolder  = '/net/cms29/cms29r0/babymaker/babies/2016_08_10/mc/unprocessed/'
+outfolder = '/net/cms29/cms29r0/babymaker/babies/2016_08_10/mc/unskimmed/'
 
 
 ## Finding tags for each dataset

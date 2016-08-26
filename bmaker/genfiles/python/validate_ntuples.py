@@ -34,7 +34,7 @@ oldfolder    = '/net/cms2/cms2r0/babymaker/babies/2015_11_28/mc/skim_1lht500met2
 newfolder    = '/net/cms27/cms27r0/babymaker/2016_04_29/mc/merged_1lht500met200'
 
 oldfolder    = '/net/cms2/cms2r0/babymaker/babies/2016_04_29/mc/unskimmed/'
-newfolder    = '/net/cms2/cms2r0/babymaker/babies/2016_08_10/mc/unskimmed/manuelf/'
+newfolder    = '/net/cms29/cms29r0/babymaker/babies/2016_08_10/mc/unskimmed/'
 
 oweight = "weight/w_toppt/eff_trig"
 nweight = "weight/w_isr/w_pu"

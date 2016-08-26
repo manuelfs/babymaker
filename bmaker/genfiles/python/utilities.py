@@ -13,8 +13,6 @@ def findBaseSampleNames(folder):
     infiles = set()
     for file in glob.glob(folder+'/*.root'):
         tag = file.split("RunII")[0]
-        if ("TTJets_Tune" not in tag) and ("WJetsToLNu_Tune" not in tag) and ("DYJetsToLL_M-50_Tune" not in tag): 
-            tag = tag.split("Tune")[0]
         tag = tag.split("13TeV")[0]
         tag = tag.split("-PromptReco")[0]
         tag = tag.split("_runs")[0]

@@ -297,7 +297,7 @@ if __name__ == "__main__":
                         help="Minimum number of bytes to leave available in cache.")
     parser.add_argument("--rel_limit", default=0.5, type=float,
                         help="Minimum fraction of cache to leave available.")
-    parser.add_argument("--no_delete", action="store_true",
+    parser.add_argument("--no_delete", action="store_false",
                         help="If cache is full, prevents deletion of old files to make room for new ones. Note that it is possible to delete a cached file currently being used by another script, so it is polite to use this flag if the cache is under heavy load.")
     args = parser.parse_args()
 

@@ -781,7 +781,7 @@ vCands bmaker_full::writeMuons(edm::Handle<pat::MuonCollection> muons,
     baby.mus_dz().push_back(dz);
     baby.mus_d0().push_back(d0);
     baby.mus_charge().push_back(lep.charge());
-    baby.mus_sigid().push_back(lepTool->idMuon(lep, vtx, lepTool->kMedium));
+    baby.mus_sigid().push_back(lepTool->idMuon(lep, vtx, lepTool->kMediumICHEP));
     baby.mus_tight().push_back(lepTool->idMuon(lep, vtx, lepTool->kTight));
     baby.mus_miniso().push_back(lep_iso);
     baby.mus_reliso().push_back(lep_reliso);

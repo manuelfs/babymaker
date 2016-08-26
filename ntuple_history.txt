@@ -5,6 +5,7 @@
 -- Updated with ICHEP recommendations for btag/lepton SFs, PU, ISR, new triggers, JECs
 -- Slimmed babies by 25% not saving fjets for unimportant MJs and w_pdf
 -- Added mj14_nolep and 40/50 GeV variable for PU robustness
+-- mus_sigid is incorrect. Uses kMedium instead of kMediumICHEP
 
 2016_07_18 (ISR study): 
 -- TTJets (only 1l and 2l extensions), plus T1tttt, T1qqqq, T2tt benchmark points

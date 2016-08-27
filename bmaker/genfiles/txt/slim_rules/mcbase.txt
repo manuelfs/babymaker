@@ -25,6 +25,7 @@ keep mj40
 keep nisr
 
 ## Leptonic
+keep leps*
 keep nleps
 keep nels
 keep nmus

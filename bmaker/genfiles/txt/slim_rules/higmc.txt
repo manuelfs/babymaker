@@ -1,0 +1,57 @@
+drop *
+
+## General
+keep npv
+keep pass
+keep event
+keep type
+
+## Higgsino specific
+keep hig*
+
+## Hadronic
+keep ht
+keep mht
+keep mht_phi
+keep met
+keep met_phi
+keep met_calo
+keep met_calo_phi
+keep njets
+keep nbl
+keep nbm
+keep nbt
+keep nisr
+keep dphi1
+keep dphi2
+keep dphi3
+keep dphi4
+keep low_dphi
+keep mct
+
+## Leptonic
+keep nvleps
+keep ntks
+
+## MC
+keep stitch
+keep mgluino
+keep mlsp
+keep mc_*
+keep nisr_me
+keep ht_isr_me
+keep m_tt
+keep *tru*
+drop ntrupv*
+
+## Weights
+keep weight
+keep w_*
+drop w_pdf
+keep eff_*
+
+## Jets
+keep jets_*
+drop *fjet*
+drop jets_islep
+

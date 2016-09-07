@@ -716,6 +716,10 @@ vector<LVector> bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
     baby.mct() = sqrt(2*pb1.pt()*pb2.pt() * (1+cos(deltaPhi(pb1.phi(), pb2.phi()))) );
   }
 
+  if(isFastSim) baby.pass_fsmet() = eventTool->passFSMET(alljets, genjets);
+  else baby.pass_fsmet() = true;  
+
+
   return all_baby_jets;
 } // writeJets
 
@@ -1209,16 +1213,15 @@ void bmaker_full::writeFilters(const edm::TriggerNames &fnames,
   //baby.pass_goodv() &= eventTool->hasGoodPV(vtx); // We needed to re-run it for Run2015B
   //baby.pass_cschalo() = eventTool->passBeamHalo(baby.run(), baby.event()); // now taken from miniAOD
 
-  baby.pass() = baby.pass_goodv() && baby.pass_eebadsc() && baby.pass_cschalo() && baby.pass_hbhe() && baby.pass_hbheiso() && baby.pass_ecaldeadcell() 
-    && baby.pass_jets();
+  baby.pass() = baby.pass_goodv() && baby.pass_eebadsc() && baby.pass_cschalo() && baby.pass_hbhe() && baby.pass_hbheiso() && baby.pass_ecaldeadcell() && baby.pass_jets() && baby.pass_fsmet();
   baby.pass40() = baby.pass_goodv() && baby.pass_eebadsc() && baby.pass_cschalo() && baby.pass_hbhe() && baby.pass_hbheiso() && baby.pass_ecaldeadcell() 
-    && baby.pass_jets40();
+    && baby.pass_jets40() && baby.pass_fsmet();
   baby.pass50() = baby.pass_goodv() && baby.pass_eebadsc() && baby.pass_cschalo() && baby.pass_hbhe() && baby.pass_hbheiso() && baby.pass_ecaldeadcell() 
-    && baby.pass_jets50();
+    && baby.pass_jets50() && baby.pass_fsmet();
   baby.pass_ra2() = baby.pass_goodv() && baby.pass_eebadsc() && baby.pass_cschalo() && baby.pass_hbhe() && baby.pass_hbheiso() && baby.pass_ecaldeadcell()  
-    && baby.pass_jets_ra2();
+    && baby.pass_jets_ra2() && baby.pass_fsmet();
   baby.pass_nohf() = baby.pass_goodv() && baby.pass_eebadsc() && baby.pass_cschalo() && baby.pass_hbhe() && baby.pass_hbheiso() && baby.pass_ecaldeadcell() 
-    && baby.pass_jets_nohf();
+    && baby.pass_jets_nohf() && baby.pass_fsmet();
 
   for (size_t ijet(0); ijet < baby.jets_pt().size(); ijet++){
     if (abs(baby.jets_eta()[ijet])>2.4 || baby.jets_pt()[ijet]<200.) continue;

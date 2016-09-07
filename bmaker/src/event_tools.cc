@@ -45,6 +45,36 @@ bool event_tools::passBeamHalo(int run, int event){
   return false;
 }
 
+//// Clean up the FastSim MET events with unmatched genJets
+//// https://twiki.cern.ch/twiki/bin/viewauth/CMS/SUSRecommendationsICHEP16#Cleaning_up_of_fastsim_jets_from
+bool event_tools::passFSMET(edm::Handle<pat::JetCollection> alljets, edm::Handle<edm::View <reco::GenJet> > genjets){
+  for (size_t ijet(0); ijet < alljets->size(); ijet++) {
+    const pat::Jet &jet = (*alljets)[ijet];
+    if(fabs(jet.eta()) >= 2.5 || jet.pt()<=20 || jet.chargedHadronEnergyFraction()>=0.1) continue;
+    
+    bool matched = false;
+    for (size_t gjet(0); gjet < genjets->size(); gjet++) {
+      const reco::GenJet &genjet = (*genjets)[gjet];
+      double dr(deltaR(jet, genjet));
+      if(dr < 0.3) {
+	matched = true;
+	break;
+      }
+    } // Loop over genjets
+    if(!matched) {
+      // cout<<endl<<endl<<"GENJETs"<<endl;
+      // for (size_t gjet(0); gjet < genjets->size(); gjet++) {
+      // 	const pat::Jet &genjet = (*genjets)[gjet];
+      // 	cout<<"("<<genjet.pt()<<", "<<genjet.eta()<<", "<<genjet.phi()<<")"<<endl;
+      // }
+      // cout<<"Jet unmatched ("<<jet.pt()<<", "<<jet.eta()<<", "<<jet.phi()<<")"<<endl;
+      return false;
+    }
+  } // Loop over jets
+  
+  return true;
+}
+
 void event_tools::fillBeamHaloMap(string eventList){
   cout<<"BABYMAKER::event_tools: Reading CSC Beam Halo filter file "<<eventList.c_str()<<endl;
   ifstream file(eventList.c_str());
@@ -68,9 +98,8 @@ void event_tools::fillBeamHaloMap(string eventList){
     //cout << run << "  "<<endl;
   }
 
-
-
 }
+
 
 int event_tools::type(const string &name){
   int sample = -999, category = -9, bin = -99;

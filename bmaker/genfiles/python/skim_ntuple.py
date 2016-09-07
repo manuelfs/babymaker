@@ -13,8 +13,12 @@ def expandCut(cut):
     pass_ra2b="globalTightHalo2016Filter==1&&HBHENoiseFilter==1&&HBHEIsoNoiseFilter==1&&eeBadScFilter==1"
     if cut=="standard":
         return "nleps>=1&&st>500&&met>150"
+    elif cut=="stdnj5":
+        return "nleps>=1&&(ht+Sum$(leps_pt))>500&&met>150&&njets>=5"
     elif cut=="met150":
         return "nleps>=1&&st>500&&met>150&&met<=200&&njets>=5"
+    elif cut=="higtight":
+        return "met>200&&nvleps==0&&njets>=4&&njets<=5&&nbt>=2&&!low_dphi&&hig_drmax<2.2"
     elif cut=="abcd":
         return "nleps==1&&st>500&&met>200&&njets>=6&&nbm>=1&&mj14>250&&nveto==0"
     elif cut=="baseline":

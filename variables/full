@@ -301,6 +301,7 @@ bool pass_goodv;
 bool pass_cschalo;
 bool pass_eebadsc;
 bool pass_ecaldeadcell;
+bool pass_fsmet;
 bool pass;
 bool pass20;
 bool pass40;

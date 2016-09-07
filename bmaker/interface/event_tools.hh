@@ -9,6 +9,8 @@
 #include <set>
 
 #include "FWCore/Framework/interface/ESHandle.h"
+#include "DataFormats/PatCandidates/interface/Jet.h"
+#include "DataFormats/JetReco/interface/GenJet.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h" // For VertexCollection
 
@@ -22,6 +24,7 @@ public:
   bool isInJSON(std::string type, int run, int lumiblock);
   bool hasGoodPV(edm::Handle<reco::VertexCollection> vtx);
   bool passBeamHalo(int run, int event);
+  bool passFSMET(edm::Handle<pat::JetCollection> alljets, edm::Handle<edm::View <reco::GenJet> > genjets);
   void fillBeamHaloMap(std::string eventList);
 
   const std::vector<std::vector<int> > VRunLumi2015nonblind;

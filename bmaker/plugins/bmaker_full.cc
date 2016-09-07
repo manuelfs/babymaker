@@ -1673,8 +1673,9 @@ void bmaker_full::writeWeights(const vCands &sig_leps, edm::Handle<GenEventInfoP
   baby.sys_murf().push_back(weightTool->theoryWeight(weight_tools::muRup_muFup));
   baby.sys_murf().push_back(weightTool->theoryWeight(weight_tools::muRdown_muFdown));
 
+  //// Applying ISR weights only to ttbar and strong SUSY
   baby.w_isr() = 1.; baby.sys_isr().resize(2,1.);
-  if (baby.type()/1000==1){
+  if (baby.type()/1000==1 || (baby.type()/1000>=100 && !outname.Contains("TChi"))){
     const float isr_norm_tt = 1.117;
     float isr_wgt = -999.;
     if (baby.nisr()==0)      isr_wgt = 1.; 

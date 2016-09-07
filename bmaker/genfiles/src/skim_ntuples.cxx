@@ -52,7 +52,7 @@ int main(int argc, char *argv[]){
   if(cuts=="abcd") cuts="nleps==1&&st>500&&met>200&&njets>=6&&nbm>=1&&mj14>250&&nveto==0";
   if(cuts=="baseline") cuts="nleps==1&&st>500&&met>200&&njets>=6&&nbm>=1";
   if(cuts=="sys_abcd") 
-    cuts = "nleps==1&&max(st,Max$(sys_st))>500&&max(met,Max$(sys_met))>200&&max(njets,Max$(sys_njets))>=6&&max(nbm,Max$(sys_nbm))>=1&&max(mj,Max$(sys_mj))>250";
+    cuts = "nleps==1&&max(st,Max$(sys_st))>500&&max(met,Max$(sys_met))>200&&max(njets,Max$(sys_njets))>=6&&max(nbm,Max$(sys_nbm))>=1&&max(mj14,Max$(sys_mj14))>250";
   if(cuts=="zisr")
     cuts = "nvleps==2&&nleps>=1&&Max$(leps_pt)>30&&((elelv_m>80&&elelv_m<100)||(mumuv_m>80&&mumuv_m<100))";
   if(cuts=="dy_ht300")
@@ -75,6 +75,10 @@ int main(int argc, char *argv[]){
 	 cuts="Sum$(mm_nleps>=1&&mm_st>500&&mm_met>200&&mm_njets>=5&&mm_mj14_lep>250)>0||Sum$(mm_nleps>=1&&mm_st>500&&mm_met>200&&mm_njets>=5&&mm_mj14_nolep>250)>0";
   if(cuts=="higloose")
 	cuts="met>100&&nvleps==0&&(njets==4||njets==5)&&nbm>=2";
+  if(cuts=="rpvfit")
+    cuts = "max(st,Max$(sys_st))>1200&&max(njets,Max$(sys_njets))>=4&&max(nbm,Max$(sys_nbm))>=1&&(max(mj14,Max$(sys_mj14))>500||mj12>500)";
+  if(cuts=="st1200")
+    cuts = "max(st,Max$(sys_st))>1200";
 
   //// RA2/b skims
   TString pass="globalTightHalo2016Filter==1&&HBHENoiseFilter==1&&HBHEIsoNoiseFilter==1&&eeBadScFilter==1";

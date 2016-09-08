@@ -75,6 +75,7 @@ int main(int argc, char *argv[]){
   // double sum_pdf_min(0.);
  
   int nentries = ch.GetEntries();
+  //nentries = 10;
   //Loop over events and get sum of weights
   time(&begtime);
   for(int ientry=0; ientry<nentries; ientry++){
@@ -95,33 +96,28 @@ int main(int argc, char *argv[]){
     sum_btag  +=  noNaN(ch.w_btag());
     sum_pu    +=  noNaN(ch.w_pu());
     sum_toppt +=  noNaN(ch.w_toppt());
-    sum_wisr  +=  noNaN(ch.w_isr());
     // for(unsigned int isys=0;isys<ch.w_pdf().size();isys++)           sum_wpdf[isys]        +=  noNaN(ch.w_pdf().at(isys));
     for(unsigned int isys=0;isys<ch.sys_bctag().size();isys++)       sum_bctag[isys]       +=  noNaN(ch.sys_bctag().at(isys));
     for(unsigned int isys=0;isys<ch.sys_udsgtag().size();isys++)     sum_udsgtag[isys]     +=  noNaN(ch.sys_udsgtag().at(isys));
     for(unsigned int isys=0;isys<ch.sys_fs_bctag().size();isys++)    sum_fs_bctag[isys]    +=  noNaN(ch.sys_fs_bctag().at(isys));
     for(unsigned int isys=0;isys<ch.sys_fs_udsgtag().size();isys++)  sum_fs_udsgtag[isys]  +=  noNaN(ch.sys_fs_udsgtag().at(isys));
-    for(unsigned int isys=0;isys<ch.sys_isr().size();isys++)         sum_isr[isys]         +=  noNaN(ch.sys_isr().at(isys));
     for(unsigned int isys=0;isys<ch.sys_mur().size();isys++)         sum_mur[isys]         +=  noNaN(ch.sys_mur().at(isys));
     for(unsigned int isys=0;isys<ch.sys_muf().size();isys++)         sum_muf[isys]         +=  noNaN(ch.sys_muf().at(isys));
     for(unsigned int isys=0;isys<ch.sys_murf().size();isys++)        sum_murf[isys]        +=  noNaN(ch.sys_murf().at(isys));
-    // if (ch.sys_pdf().size()==0) { 
-    //   for(unsigned int isys=0;isys<2;isys++)  sum_spdf[isys]  +=  1; 
-    // } else {
-    //   for(unsigned int isys=0;isys<ch.sys_pdf().size();isys++)       sum_spdf[isys]        +=  noNaN(ch.sys_pdf().at(isys));
-    // }
 
-    // // Hack to recompute sys_pdf[1] which had a 1e-3 cut
-    // float minpdf(1e10);
-    // for(unsigned int isys=0;isys<ch.w_pdf().size();isys++)  
-    //   if(ch.w_pdf()[isys] < minpdf) minpdf = ch.w_pdf()[isys];
-    // if(ch.w_pdf().size()==0)
-    //   sum_pdf_min += 1;
-    // else
-    //   sum_pdf_min += minpdf;
-				      
-    double weight = noNaN(ch.w_lep()) * noNaN(ch.w_fs_lep()) * noNaN(ch.w_btag()) *
-      noNaN(ch.w_isr()) * noNaN(ch.w_pu());
+    float w_isr=1.;
+    if (sample.Contains("SMS") && !sample.Contains("TChi")){
+      vector<float> sys_isr;
+      w_isr  =  wISR(ch.nisr(), sys_isr);
+      for(unsigned int isys=0;isys<ch.sys_isr().size();isys++)         sum_isr[isys]         +=  sys_isr[isys];    
+      // cout<<"nisr "<<ch.nisr()<<", w_isr "<< wISR(ch.nisr(), sys_isr)<<", sys_isr[0] "<<sys_isr[0]<<endl;
+    } else {// if strong SUSY, need to fix w_isr
+      w_isr  =  noNaN(ch.w_isr());
+      for(unsigned int isys=0;isys<ch.sys_isr().size();isys++)         sum_isr[isys]         +=  noNaN(ch.sys_isr().at(isys));
+    }
+    sum_wisr  +=  w_isr;
+			      
+    double weight = noNaN(ch.w_lep()) * noNaN(ch.w_fs_lep()) * noNaN(ch.w_btag()) * w_isr * noNaN(ch.w_pu());
     //Lepton weights
     if(ch.nleps()==0) {
       nent_zlep += 1;

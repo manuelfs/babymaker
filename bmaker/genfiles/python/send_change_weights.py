@@ -8,6 +8,9 @@ from utilities import *
 infolder  = '/net/cms29/cms29r0/babymaker/babies/2016_08_10/mc/unprocessed/'
 outfolder = '/net/cms29/cms29r0/babymaker/babies/2016_08_10/mc/unskimmed/'
 
+infolder  = '/net/cms29/cms29r0/babymaker/babies/2016_08_10/T1tttt/unprocessed/'
+outfolder = '/net/cms29/cms29r0/babymaker/babies/2016_08_10/T1tttt/unskimmed/'
+
 
 ## Finding tags for each dataset
 sortedfiles = findBaseSampleNames(infolder)
@@ -25,12 +28,12 @@ for ifile in sortedfiles:
   fexe = open(exename,"w")
   os.system("chmod u+x "+exename)
   fexe.write("#!/bin/bash\n\n")
-  execmd = "./run/change_weights.exe "+infolder+' "*'+ifile+'*" '+outfolder+'\n'
+  execmd = "\n./run/change_weights.exe "+infolder+' "*'+ifile+'*" '+outfolder
   fexe.write(execmd)
   fexe.close()
   cmd = "JobSubmit.csh ./run/wrapper.sh "+exename
-  os.system(cmd)
   print execmd
+  os.system(cmd)
   #print '\n\n'
   #print "./run/change_weights.exe "+infolder+' "*'+ifile+'*" '+outfolder+'\n'
   # os.system('ls '+infolder+'*'+ifile+'*')

@@ -51,6 +51,7 @@ void get_count_and_uncertainty(TTree& tree,
                                double& uncertainty);
 void AddPoint(TGraph& graph, const double x, const double y);
 TString hoursMinSec(long seconds);
+float wISR(int nisr, std::vector<float> & sys_isr);
 std::vector<TString> dirlist(const TString &folder,
                              const TString &inname="dir",
                              const TString &tag="");

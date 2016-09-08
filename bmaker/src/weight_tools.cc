@@ -71,12 +71,12 @@ float weight_tools::triggerEfficiency(int &nmus, int &nels, float &met, vector<f
       if(met>100&&met<=150) eff_trig = 0.958;
       if(met>150&&met<=200) eff_trig = 0.988;
       // 1% systematic for met < 200
-      sys_trig[0] = eff_trig+0.01;
-      sys_trig[1] = min(1., eff_trig-0.01);
+      sys_trig[0] = min(1., eff_trig+0.01);
+      sys_trig[1] = eff_trig-0.01;
       if(met>200) {
         eff_trig = 0.998;
-        sys_trig[0] = eff_trig+0.005;
-        sys_trig[1] = min(1., eff_trig+0.005);
+        sys_trig[0] = min(1., eff_trig+0.005);
+        sys_trig[1] = eff_trig-0.005;
       }
     }
     if(nmus==1){
@@ -85,20 +85,20 @@ float weight_tools::triggerEfficiency(int &nmus, int &nels, float &met, vector<f
       if(met>100&&met<=150) eff_trig = 0.965;
       if(met>150&&met<=200) eff_trig = 0.994;
       // 1% systematic for met < 200
-      sys_trig[0] = eff_trig+0.01;
-      sys_trig[1] = min(1., eff_trig-0.01);
+      sys_trig[0] = min(1., eff_trig+0.01);
+      sys_trig[1] = eff_trig-0.01;
       if(met>200){
         eff_trig = 0.997;
-        sys_trig[0] = eff_trig+0.005;
-        sys_trig[1] = min(1., eff_trig+0.005);
+        sys_trig[0] = min(1., eff_trig+0.005);
+        sys_trig[1] = eff_trig-0.005;
       }
     }
   } // nleps == 1
 
   if(nleps == 2){
     eff_trig = 1.;
-    sys_trig[0] = 0.995;
-    sys_trig[1] = 1.;
+    sys_trig[0] = 1.;
+    sys_trig[1] = 0.995;
   } // nleps == 2
   return eff_trig;
 }

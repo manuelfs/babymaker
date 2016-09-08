@@ -14,13 +14,14 @@ def findBaseSampleNames(folder):
     for file in glob.glob(folder+'/*.root'):
         tag = file.split("RunII")[0]
         tag = tag.split("13TeV")[0]
+        tag = tag.split("CUETP")[0]
         tag = tag.split("-PromptReco")[0]
         tag = tag.split("_runs")[0]
         tag = tag.split("pythia")[0]
         tag = tag.split("baby_")[1]
         tag = tag.split("__")[0]
         if tag[0] != '_': tag = "_"+tag
-        if tag[-1] != '_': tag = tag+"_"
+        if tag[-1] != '_' and "Tune" not in tag: tag = tag+"_"
         infiles.add(tag)
     sortedfiles = list()
     for file in infiles:

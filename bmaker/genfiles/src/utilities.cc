@@ -98,9 +98,10 @@ int change_branch_one(TString indir, TString name, TString outdir, vector<TStrin
   float w_isr_old=1., w_pu_old=1.;
   //Branches
   int nleps_=0, mgluino_(0);
-  float eff_trig_(0);
+  float eff_trig_(0), nisr_(0);
   oldtree->SetBranchAddress("eff_trig",&eff_trig_);
   oldtree->SetBranchAddress("nleps",&nleps_);
+  oldtree->SetBranchAddress("nisr",&nisr_);
   oldtree->SetBranchAddress("mgluino",&mgluino_);
 
   for(int ibch=0; ibch<nvar; ibch++){
@@ -224,6 +225,16 @@ int change_branch_one(TString indir, TString name, TString outdir, vector<TStrin
 	  } else new_var_flt_[iset] = noNaN(new_var_flt_[iset]);
 	}
         if(ivar_type[iset] == kvFloat) new_var_vflt_[iset]->at(vidx) = noNaN(new_var_vflt_[iset]->at(vidx));
+	if (name.Contains("SMS") && !name.Contains("TChi")){
+	  vector<float> sys_isr;
+	  w_isr_old =  wISR(nisr_, sys_isr); // this is the "old" value, since it is in change_weight to calculate weight
+	  if(var[iset].Contains("sys_isr")) new_var_vflt_[iset]->at(vidx)  = sys_isr[vidx] * var_val[iset][vidx].Atof();
+	  if(var[iset].Contains("w_isr")) {
+	    new_var_flt_[iset]  =  w_isr_old * var_val[iset][vidx].Atof();
+	    // cout<<"nisr "<<nisr_<<", w_isr "<< w_isr_old <<", sys_isr[0] "<<sys_isr[0]<<" and new w "
+	    // 	<< w_isr_old * var_val[iset][vidx].Atof()<<", new sys "<< sys_isr[vidx] * var_val[iset][vidx].Atof()<<endl;
+	  }
+	} // it strong SUSY
       } // Loop over elements in each variable
       // if(var[iset].Contains("sys_pdf")) new_var_vflt_[iset]->at(1) = minpdf*var_val[iset][1].Atof(); 
 
@@ -597,6 +608,26 @@ TString hoursMinSec(long seconds){
   hhmmss += seconds%60; 
 
   return hhmmss;
+}
+
+float wISR(int nisr, vector<float> & sys_isr){
+  float isr_wgt = -999.;
+  const float isr_norm_tt = 1.117; // normalization so that is roughly correct even without renormalization
+  if (nisr==0)      isr_wgt = 1.; 
+  else if (nisr==1) isr_wgt = 0.882; 
+  else if (nisr==2) isr_wgt = 0.792; 
+  else if (nisr==3) isr_wgt = 0.702; 
+  else if (nisr==4) isr_wgt = 0.648; 
+  else if (nisr==5) isr_wgt = 0.601; 
+  else if (nisr>=6) isr_wgt = 0.515; 
+
+  //assign relative unc = 50% of the deviation from flat
+  float absolute_unc = (1-isr_wgt)/2.;
+  sys_isr.resize(2);
+  sys_isr[0] = isr_norm_tt*(isr_wgt+absolute_unc); 
+  sys_isr[1] = isr_norm_tt*(isr_wgt-absolute_unc); 
+  
+  return isr_wgt*isr_norm_tt;
 }
 
 void mergeNtuples(vector<TString> ntuples, TString outname){

@@ -68,11 +68,9 @@ is done with the script below after setting the proper `infolder` and `outfolder
         ./run/send_split_scan.py 
 
 
-2. Renormalize the weights so that the cross section is kept constant. For background and signal MC
-respectively, you'll need to set up the correct `infolder` and `outfolder` in
+2. Renormalize the weights so that the cross section is kept constant. Set up the correct `infolder` and `outfolder` and run
 
-        python/send_bkg_change_weights.py
-        python/send_sig_change_weights.py
+        python/send_change_weights.py
 
 3. Validate `weight` by setting the proper `infolder`, `outfolder` in 
 

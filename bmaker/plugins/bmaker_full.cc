@@ -275,6 +275,7 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   if (debug) cout<<"INFO: Retrieving hard scatter info..."<<endl;
   edm::Handle<LHEEventProduct> lhe_info;
   baby.stitch() = true;
+  baby.stitch_ht() = true;
   if (outname.Contains("SMS-") && outname.Contains("PUSpring16Fast")) {
     baby.mgluino() = mprod_;
     baby.mlsp() = mlsp_;
@@ -284,9 +285,14 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
     if(lhe_info.isValid()) writeGenInfo(lhe_info);
     if((outname.Contains("TTJets") && (outname.Contains("Lept")) && baby.ht_isr_me()>600)
        || (outname.Contains("DYJetsToLL_M-50_TuneCUETP8M")  && baby.ht_isr_me()>100)
-       || (outname.Contains("WJetsToLNu_TuneCUETP8M1")  && baby.ht_isr_me()>100))
+       || (outname.Contains("WJetsToLNu_TuneCUETP8M1")  && baby.ht_isr_me()>100)){
       baby.stitch() = false;
-    if(outname.Contains("TTJets_Tune") && baby.ntruleps()!=0) baby.stitch()=false; 
+      baby.stitch_ht() = false;
+    }
+    if(outname.Contains("TTJets_Tune")){
+      if(baby.ntruleps()!=0) baby.stitch()=false;
+      if(baby.ht_isr_me()>600) baby.stitch_ht()=false;
+    }
   } // if it is not data
          
   //////////////// Weights and systematics //////////////////

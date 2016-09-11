@@ -11,6 +11,8 @@ bool json7p65
 bool json12p9
 ## stitch is used to stitch an MC sample with its corresponding HT-bin sample
 bool stitch
+## stitch_ht = stitch, but also adds an ht_me_isr<=600 cut on the inc. TTJets sample (*TTJets_Tune*)
+bool stitch_ht
 
 float nisr
 

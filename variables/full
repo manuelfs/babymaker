@@ -117,6 +117,9 @@ std::vector<float> jets_csv
 std::vector<float> jets_pt_res
 std::vector<bool>  jets_islep
 std::vector<bool>  jets_isisr
+std::vector<int>   jets_gs_index
+std::vector<int>   jets_ntrub
+std::vector<int>   jets_ntruc
 std::vector<int>   jets_fjet14_nolep_index
 std::vector<int>   jets_fjet08_index
 std::vector<int>   jets_fjet12_index
@@ -126,6 +129,16 @@ std::vector<int>   jets_fjet50_index
 std::vector<int>   jets_hflavor
 std::vector<bool>  jets_h1
 std::vector<bool>  jets_h2
+
+######### b-jet pairs ###########
+std::vector<float> dr_bb
+std::vector<float> bb_pt
+std::vector<float> bb_m
+int bb_highcsv_idx
+std::vector<int> bb_jet_idx1
+std::vector<int> bb_jet_idx2
+std::vector<int> bb_gs_idx
+std::vector<int> bb_gs_flavor
 
 ##################   Leptons   ################
 int nleps
@@ -326,6 +339,13 @@ std::vector<float> fjets14_phi
 std::vector<float> fjets14_m
 std::vector<int> fjets14_nconst
 
+int nfjets08
+std::vector<float> fjets08_pt
+std::vector<float> fjets08_eta
+std::vector<float> fjets08_phi
+std::vector<float> fjets08_m
+std::vector<int> fjets08_nconst
+
 int nfjets40
 float mj40
 std::vector<float> fjets40_pt
@@ -346,7 +366,14 @@ std::vector<float> mc_mass
 std::vector<int>   mc_id
 std::vector<int>   mc_mom
 std::vector<int>   mc_momidx
+std::vector<int>   mc_num_dau
 std::vector<int>   mc_status
+std::vector<int>   mc_jetidx
+std::vector<bool>  mc_gs
+std::vector<int>   mc_gs_dau_jetmatch
+std::vector<float> mc_gs_dau_dr
+
+
 float m_tt
 bool fromGS
 int ntruleps
@@ -368,6 +395,7 @@ float w_pu
 float w_btag
 float w_btag40
 float w_btag_loose
+float w_btag_tight
 float w_toppt
 float w_isr
 float w_lep
@@ -403,6 +431,8 @@ std::vector<float> sys_bctag40
 std::vector<float> sys_udsgtag40
 std::vector<float> sys_bctag_loose
 std::vector<float> sys_udsgtag_loose
+std::vector<float> sys_bctag_tight
+std::vector<float> sys_udsgtag_tight
 std::vector<float> sys_isr
 std::vector<float> sys_lep
 std::vector<float> sys_fs_lep

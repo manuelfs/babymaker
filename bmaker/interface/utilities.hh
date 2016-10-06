@@ -23,6 +23,7 @@ namespace utilities{
   enum SysEnum{kSysJER, kSysJECUp, kSysJECDn, kSysLast};
   bool contains(const std::string &s, const std::string &pat);
   float sumMass(const LVector &a, const LVector &b);
+  float sumPt(const LVector &a, const LVector &b);
   float dPhi(float phi1, float phi2);
   float dR(float phi1, float phi2, float eta1, float eta2);
   bool greaterPt(const reco::Candidate *a, const reco::Candidate *b);

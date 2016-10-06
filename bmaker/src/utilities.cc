@@ -17,6 +17,10 @@ namespace utilities{
     return sqrt(a.mass2()+b.mass2()+2.*(a.E()*b.E()-a.Px()*b.Px()-a.Py()*b.Py()-a.Pz()*b.Pz()));
   }
 
+  float sumPt(const LVector &a, const LVector &b){
+    return sqrt(pow((a.Px()+b.Px()),2) +pow((a.Py()+b.Py()),2));
+  }
+
   float dPhi(float phi1, float phi2){
     float delphi = TMath::Abs(TMath::Abs(TMath::Abs(phi1 - phi2) - TMath::Pi())-TMath::Pi());
     return delphi;

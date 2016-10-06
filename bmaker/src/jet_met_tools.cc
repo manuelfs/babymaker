@@ -24,7 +24,7 @@
 using namespace std;
 using namespace utilities;
 
-const vector<BTagEntry::OperatingPoint> jet_met_tools::op_pts_{BTagEntry::OP_MEDIUM, BTagEntry::OP_LOOSE};
+const vector<BTagEntry::OperatingPoint> jet_met_tools::op_pts_{BTagEntry::OP_MEDIUM, BTagEntry::OP_LOOSE, BTagEntry::OP_TIGHT};
 const vector<BTagEntry::JetFlavor> jet_met_tools::flavors_{BTagEntry::FLAV_B, BTagEntry::FLAV_C, BTagEntry::FLAV_UDSG};
 
 namespace{
@@ -355,25 +355,36 @@ float jet_met_tools::getMCTagEfficiency(int pdgId, float pT, float eta, BTagEntr
 }
 
 // get deltaR between two b-tagged CSVM jets
-void jet_met_tools::getDeltaRbb(vector<float> & deltaRbb, const vector<LVector> &jets, const vector<float> &jets_csv, const vector<bool> &jets_islep)
+void jet_met_tools::fillDeltaRbb(vector<float> & deltaRbb, vector<float> & bb_pt,vector<float> & bb_m,vector<int> & bb_jet_idx1, vector<int> & bb_jet_idx2,vector<int> & bb_gs_idx,vector<int> & bb_gs_flavor, const vector<LVector> &jets, const vector<float> &jets_csv, const vector<bool> &jets_islep, const vector<float> &jets_pt, const vector<size_t> &branks, int & highcsv_index)
 {
   for(size_t ijet(0); ijet<jets.size(); ijet++) {
     for(size_t jjet=ijet+1; jjet<jets.size(); jjet++) {
+      if(jets_pt[ijet]<JetPtCut || jets_pt[jjet]<JetPtCut) continue;
       if(jets_csv[ijet]<CSVMedium || jets_csv[jjet]<CSVMedium) continue;
       if(jets_islep[ijet] || jets_islep[jjet]) continue;
       deltaRbb.push_back(deltaR(jets.at(ijet), jets.at(jjet)));
+      bb_pt.push_back(sumPt(jets.at(ijet), jets.at(jjet)));
+      bb_m.push_back(sumMass(jets.at(ijet), jets.at(jjet)));
+      bb_jet_idx1.push_back(ijet);
+      bb_jet_idx2.push_back(jjet);
+      
+      //Save index of pair with highest CSV
+      if((ijet==branks.at(0) && jjet==branks.at(1)) || (ijet==branks.at(1) && jjet==branks.at(0))) highcsv_index = deltaRbb.size()-1;
+      
+      bb_gs_idx.push_back(-1); //Filled in writeMC
+      bb_gs_flavor.push_back(0); //Filled in writeMC
     }
   }
 
 }
 
-// ranks jets by CSV, breaking ties by pt and mass, with jets matched to leptons last
+// ranks jets by CSV, breaking ties by pt and mass, with jets less than 30 GeV or matched to leptons last
 vector<size_t> jet_met_tools::getBRanking(const vector<LVector> &momentum, const vector<float> &csv,
                                           const vector<bool> &is_lep){
   typedef tuple<bool, float, float, float> Bness;
   vector<pair<Bness, long> > jets;
   for(size_t i = 0; i < momentum.size(); ++i){
-    jets.push_back(pair<Bness, size_t>(Bness(!is_lep.at(i), csv.at(i), momentum.at(i).pt(), momentum.at(i).M()), -i));
+    jets.push_back(pair<Bness, size_t>(Bness(!(is_lep.at(i)||momentum.at(i).pt()<30.0), csv.at(i), momentum.at(i).pt(), momentum.at(i).M()), -i));
   }
   sort(jets.rbegin(), jets.rend());
   vector<size_t> indices(jets.size());
@@ -383,7 +394,7 @@ vector<size_t> jet_met_tools::getBRanking(const vector<LVector> &momentum, const
   return indices;
 }
 
-float jet_met_tools::getDeltaRbb(const vector<LVector> &momentum, const vector<size_t> &brank, size_t nb){
+float jet_met_tools::getDeltaRbbHighCSV(const vector<LVector> &momentum, const vector<size_t> &brank, size_t nb){
   return (brank.size() > 1 && nb > 1) ? deltaR(momentum.at(brank.at(0)), momentum.at(brank.at(1))) : -1.;
 }
 

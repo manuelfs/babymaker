@@ -167,6 +167,7 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   vector<LVector> all_baby_jets;
   vector<double> jetsMuonEnergyFrac;
   vector<vector<LVector> > sys_jets;
+
   if (!doSystematics) {
     all_baby_jets = writeJets(alljets, genjets, sig_leps, veto_leps, photons, tks, sys_jets, jetsMuonEnergyFrac);
   } else {
@@ -179,6 +180,7 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
       baby.sys_mj40().push_back(jetTool->getSysMJ(1.4, sys_jets[isys], baby.jets_islep(), 40., cluster_leps));
     }
   }
+
   writeFatJets();
 
   ////////////////////// mT, dphi /////////////////////
@@ -366,8 +368,9 @@ vector<LVector> bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
   baby.pass_jets_ra2() = true; baby.pass_jets_tight_ra2() = true; 
   baby.sys_bctag().resize(2, 1.); baby.sys_udsgtag().resize(2, 1.);
   baby.sys_bctag_loose().resize(2, 1.); baby.sys_udsgtag_loose().resize(2, 1.);
+  baby.sys_bctag_tight().resize(2, 1.); baby.sys_udsgtag_tight().resize(2, 1.);
   baby.sys_bctag40().resize(2, 1.); baby.sys_udsgtag40().resize(2, 1.);
-  baby.w_btag() = baby.w_btag_loose() = 1.;
+  baby.w_btag() = baby.w_btag_loose() = baby.w_btag_tight() = 1.;
   baby.w_btag40() = 1.;
   baby.hig_dphi() = 9999.;
   if (isFastSim){ 
@@ -420,6 +423,9 @@ vector<LVector> bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
       if(!isData && jetTool->genJetPt[ijet]>0.) baby.jets_pt_res().push_back(jetp4.pt()/jetTool->genJetPt[ijet]);
       else baby.jets_pt_res().push_back(-99999.);
       baby.jets_hflavor().push_back(jet.hadronFlavour());
+      baby.jets_ntrub().push_back(0); //filled in writeMC
+      baby.jets_ntruc().push_back(0); //filled in writeMC
+      baby.jets_gs_index().push_back(-1);  //filled in writeMC
       baby.jets_csv().push_back(csv);
       if (goodPtEta || isLep) jets.push_back(jetp4);
       baby.jets_h1().push_back(false);
@@ -444,6 +450,7 @@ vector<LVector> bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
         if(addBTagWeights && goodPtEta) {
           bool btag(csv > jetTool->CSVMedium);
           bool btagLoose(csv > jetTool->CSVLoose);
+	  bool btagTight(csv > jetTool->CSVTight);
           //central weight for fastsim taken into account together with the fullsim inside jetTool->jetBTagWeight()
           baby.w_btag() *= jetTool->jetBTagWeight(jet, jetp4, btag, BTagEntry::OP_MEDIUM,
 						  "central", "central");
@@ -458,6 +465,11 @@ vector<LVector> bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
           baby.sys_bctag_loose()[1]   *= jetTool->jetBTagWeight(jet, jetp4, btagLoose, BTagEntry::OP_LOOSE, "down",    "central");
           baby.sys_udsgtag_loose()[0] *= jetTool->jetBTagWeight(jet, jetp4, btagLoose, BTagEntry::OP_LOOSE, "central", "up");
           baby.sys_udsgtag_loose()[1] *= jetTool->jetBTagWeight(jet, jetp4, btagLoose, BTagEntry::OP_LOOSE, "central", "down");
+	  baby.w_btag_tight()         *= jetTool->jetBTagWeight(jet, jetp4, btagTight, BTagEntry::OP_TIGHT, "central", "central");
+          baby.sys_bctag_tight()[0]   *= jetTool->jetBTagWeight(jet, jetp4, btagTight, BTagEntry::OP_TIGHT, "up",      "central");
+          baby.sys_bctag_tight()[1]   *= jetTool->jetBTagWeight(jet, jetp4, btagTight, BTagEntry::OP_TIGHT, "down",    "central");
+          baby.sys_udsgtag_tight()[0] *= jetTool->jetBTagWeight(jet, jetp4, btagTight, BTagEntry::OP_TIGHT, "central", "up");
+          baby.sys_udsgtag_tight()[1] *= jetTool->jetBTagWeight(jet, jetp4, btagTight, BTagEntry::OP_TIGHT, "central", "down");
           if (isFastSim) { 
             // now we vary only the FastSim SF
             baby.sys_fs_bctag()[0]   *= jetTool->jetBTagWeight(jet, jetp4, btag, BTagEntry::OP_MEDIUM,
@@ -627,7 +639,11 @@ vector<LVector> bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
   baby.jetsys_nob_phi() = jetsys_nob_p4.phi();
   baby.jetsys_nob_m()   = jetsys_nob_p4.mass();
 
-  vector<size_t> branks = jet_met_tools::getBRanking(jets, baby.jets_csv(), baby.jets_islep());
+  // write deltaR between csvm jets
+  vector<size_t> branks = jet_met_tools::getBRanking(all_baby_jets, baby.jets_csv(), baby.jets_islep());
+  baby.bb_highcsv_idx() = -1;
+  jetTool->fillDeltaRbb(baby.dr_bb(),baby.bb_pt(),baby.bb_m(),baby.bb_jet_idx1(),baby.bb_jet_idx2(),  baby.bb_gs_idx(), baby.bb_gs_flavor(),all_baby_jets, baby.jets_csv(), baby.jets_islep(),baby.jets_pt(),branks,baby.bb_highcsv_idx());
+ 
   if(baby.nbm() >= 2 && sig_leps.size()>0){
     const auto &jet1 = jets.at(branks.at(0));
     const auto &jet2 = jets.at(branks.at(1));
@@ -740,8 +756,13 @@ void bmaker_full::writeFatJets(){
 
   cluster_leps = true;
   fdummy.clear(); idummy.clear();
-  jetTool->clusterFatJets(intdummy, baby.mj08(), fdummy, fdummy, fdummy, 
-                          fdummy, idummy, baby.jets_fjet08_index(),
+   // jetTool->clusterFatJets(intdummy, baby.mj08(), fdummy, fdummy, fdummy, 
+   //                        fdummy, idummy, baby.jets_fjet08_index(),
+   //                        baby, 0.8, jetTool->JetPtCut, cluster_leps);
+  jetTool->clusterFatJets(baby.nfjets08(), baby.mj08(),
+                          baby.fjets08_pt(), baby.fjets08_eta(),
+                          baby.fjets08_phi(), baby.fjets08_m(),
+                          baby.fjets08_nconst(), baby.jets_fjet08_index(),
                           baby, 0.8, jetTool->JetPtCut, cluster_leps);
 
   fdummy.clear(); idummy.clear();
@@ -1350,7 +1371,6 @@ void bmaker_full::writeMC(edm::Handle<reco::GenParticleCollection> genParticles,
   //// Indices and pointers to the particles we decide to save
   vector<pair<int, const reco::GenParticle *> > indices;
   int Nsaved=0;
-
   for (size_t imc(0); imc < genParticles->size(); imc++) {
     const reco::GenParticle &mc = (*genParticles)[imc];
     size_t id = abs(mc.pdgId());
@@ -1360,8 +1380,7 @@ void bmaker_full::writeMC(edm::Handle<reco::GenParticleCollection> genParticles,
     if(mcMom){
       if(mcMom->pdgId() == mc.pdgId()) isFirst = false;
     }
-    // mcTool->printParticle(mc); // Prints various properties of the MC particle
-
+    
     const reco::GenParticle *mom = nullptr;
     size_t momid = abs(mcTool->mom(mc, mom));
     bool isTop(id==6);
@@ -1384,11 +1403,45 @@ void bmaker_full::writeMC(edm::Handle<reco::GenParticleCollection> genParticles,
     bool fromTop(momid==6);
     bool mg_me = mc.status()==23;
 
+    //Identify if c or b is from gluon splitting. Save first pair after splitting (arbitrary choice) 
+    bool from_gs = false;
+    if(isFirst && (id==4 || id==5) && mcTool->isFromGSP(dynamic_cast<const reco::Candidate*>(&mc))) from_gs = true;
+    if(from_gs && !baby.fromGS()) baby.fromGS() = true;
+
+    //isLast is not safe, since 21 -> -4,4,21 fails isLast but yields 4s that pass isFromGSP
+    if(id==21){
+      for(size_t idau(0); idau < mc.numberOfDaughters(); idau++) {
+	int dauid(abs(mc.daughter(idau)->pdgId()));
+	if(dauid == 4 || dauid==5) { 
+	  if(mcTool->isFromGSP(mc.daughter(idau))){ 
+	    from_gs=true; 
+	    break;
+	  }
+	}
+      }
+    }
+
+
     //////// Saving interesting true particles
     if((isLast && (isTop || isNewPhysics || isZ || isH))
        || (isFirst && (fromHiggs || isW || bTopOrBSM || eFromTopZ || muFromTopZ 
                        || tauFromTopZ || nuFromZ || fromWOrWTau || fromTop))
-       || mg_me){
+       || mg_me || from_gs){
+
+      //Find jet associated with interesting particles
+      //Match using anti-kt, R=0.4 metric between mc vector and jets
+      //Require dR inside 0.4 as well (This represents a jet being closed and removed from list)
+      double mind=999.;
+      int minjetidx=-1;
+      for(size_t ind(0); ind < baby.jets_pt().size(); ind++) {
+	double dr = dR(baby.jets_phi()[ind],mc.phi(),baby.jets_eta()[ind],mc.eta());
+	double dij = pow(max(baby.jets_pt()[ind],static_cast<float>(mc.pt())),-2)*dr*pow(0.4,-2);
+	if(dij<mind && dr < 0.4){
+	  mind=dij;
+	  minjetidx=ind;
+	}
+      }
+
       baby.mc_status().push_back(mc.status());
       baby.mc_id().push_back(mc.pdgId());
       baby.mc_pt().push_back(mc.pt());
@@ -1396,11 +1449,29 @@ void bmaker_full::writeMC(edm::Handle<reco::GenParticleCollection> genParticles,
       baby.mc_phi().push_back(mc.phi());
       baby.mc_mass().push_back(mc.mass());
       baby.mc_mom().push_back(mcTool->mom(mc,mom));
+      baby.mc_gs().push_back(from_gs);
+      baby.mc_gs_dau_jetmatch().push_back(-1); //Filled after loop
+      baby.mc_gs_dau_dr().push_back(-1.); //Filled after loop
+      baby.mc_jetidx().push_back(minjetidx);
+      baby.mc_num_dau().push_back(mc.numberOfDaughters());
+   
       // Saving mother index
       baby.mc_momidx().push_back(mcTool->getMomIndex(mc,indices));
       indices.push_back(pair<int, const reco::GenParticle *>(Nsaved, &mc));
       Nsaved++;
+
+
+
+      //Store some convenient info in jets collection
+      if(minjetidx>=0){
+	if(id==5) baby.jets_ntrub()[minjetidx]++;
+	if(id==4) baby.jets_ntruc()[minjetidx]++; 
+	if(from_gs && (id==4||id==5)) baby.jets_gs_index()[minjetidx]= baby.mc_momidx().back();
+      }
+
+
     }
+
 
     if(isLast){
       if(isTop) mc.pdgId()>0 ? topIndex=imc : antitopIndex=imc;
@@ -1534,8 +1605,6 @@ void bmaker_full::writeMC(edm::Handle<reco::GenParticleCollection> genParticles,
       }
     } // If undetected neutral particle
 
-    // don't need to check for gluon splitting if flag is already set
-    if(!baby.fromGS()) baby.fromGS()|=mcTool->isFromGSP(dynamic_cast<const reco::Candidate*>(&mc));
   } // Loop over genParticles
     // calculate invariant mass of ttbar pair
   if(topIndex>=0 && antitopIndex>=0) {
@@ -1543,6 +1612,47 @@ void bmaker_full::writeMC(edm::Handle<reco::GenParticleCollection> genParticles,
     reco::Candidate::LorentzVector antitopP4 = genParticles->at(antitopIndex).p4();
     reco::Candidate::LorentzVector ttbarP4 = topP4+antitopP4;
     baby.m_tt()=ttbarP4.mass();
+  }
+
+  //Loop over gluon splitting gluons to mark truth info in bb pairs
+  for(size_t ind(0); ind < baby.mc_pt().size(); ind++) {
+    if(baby.mc_gs()[ind] && baby.mc_id()[ind]==21){
+
+      //Found gluon that splits to bb or cc. Now find daughter quarks, and store their index
+      vector<int> q_pair_idx;
+      for(size_t indd(0); indd < baby.mc_pt().size(); indd++) {
+	if(static_cast<size_t>(baby.mc_momidx()[indd])==ind) q_pair_idx.push_back(indd);
+      }
+      if(q_pair_idx.size()!=2) continue;
+
+      //Store info about daughters in mc collection, associated with gluon
+      //store dR of gluon daughters
+      baby.mc_gs_dau_dr()[ind]= dR(baby.mc_phi()[q_pair_idx[0]], baby.mc_phi()[q_pair_idx[1]],baby.mc_eta()[q_pair_idx[0]], baby.mc_eta()[q_pair_idx[1]]);
+
+
+      // mc_gs_dau_jetmatch convention
+      // -1: default, remains this way if number of daughters is not 2
+      // 0: both quarks fail jet matching
+      // 1: 1 quark is matched to a jet, 1 quark is lost
+      // 2: both quarks are matched to the same jet
+      // 3: both quarks are matched to different jets
+     
+      if(baby.mc_jetidx()[q_pair_idx[0]]<0 && baby.mc_jetidx()[q_pair_idx[1]]<0)  baby.mc_gs_dau_jetmatch()[ind]=0;
+      else if(baby.mc_jetidx()[q_pair_idx[0]]<0 || baby.mc_jetidx()[q_pair_idx[1]]<0) baby.mc_gs_dau_jetmatch()[ind]=1;
+      else if(baby.mc_jetidx()[q_pair_idx[0]] == baby.mc_jetidx()[q_pair_idx[1]] ) baby.mc_gs_dau_jetmatch()[ind]=2;
+      else baby.mc_gs_dau_jetmatch()[ind]=3;
+					   
+      
+
+      //loop over bb pairs, to fill truth info
+      for(size_t indbb(0);indbb<baby.dr_bb().size();indbb++){
+	//if quark1 matches jet1 and q2 matches jet2, or vice versa, fill bb_idx and bb_gs_flavor
+	if(((baby.mc_jetidx()[q_pair_idx[0]]==baby.bb_jet_idx1()[indbb]) && (baby.mc_jetidx()[q_pair_idx[1]]==baby.bb_jet_idx2()[indbb])) ||((baby.mc_jetidx()[q_pair_idx[0]]==baby.bb_jet_idx2()[indbb]) && (baby.mc_jetidx()[q_pair_idx[1]]==baby.bb_jet_idx1()[indbb]))){
+	  baby.bb_gs_idx()[indbb]=ind; //using gluon index
+	  baby.bb_gs_flavor()[indbb]=baby.mc_id()[q_pair_idx[0]];
+	}	
+      }
+    }
   }
 
   baby.ntruleps() = baby.ntrumus()+baby.ntruels()+baby.ntrutaush()+baby.ntrutausl();
@@ -1619,7 +1729,7 @@ void bmaker_full::writeWeights(const vCands &sig_leps, edm::Handle<GenEventInfoP
 
   // Initializing weights
   if(isData) {
-    baby.eff_trig() = baby.w_btag() = baby.w_btag_loose() = baby.w_pu() = baby.w_pu() = baby.w_lep() = baby.w_fs_lep() = baby.w_toppt() = 1.;
+    baby.eff_trig() = baby.w_btag() = baby.w_btag_loose() = baby.w_btag_tight() = baby.w_pu() = baby.w_pu() = baby.w_lep() = baby.w_fs_lep() = baby.w_toppt() = 1.;
     baby.eff_jetid() = baby.w_lumi() = baby.weight() = baby.weight_rpv() = 1.;
     return;
   }

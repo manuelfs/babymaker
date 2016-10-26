@@ -49,7 +49,7 @@ def getNumberOfEvents(dataset):
       sumevents+=idata.get('result').get('value')
     return sumevents
 
-doAdam = False
+doAdam = False 
 doAna = False
 doJae = False
 doManuel = False
@@ -57,30 +57,50 @@ doManuel = False
 datasets = [[]]
 
 if doAdam:
-  datasets.append(["/MET/Run2016B-PromptReco-v2/MINIAOD"])
-  datasets.append(["/MET/Run2016C-PromptReco-v2/MINIAOD"])
-  datasets.append(["/MET/Run2016D-PromptReco-v2/MINIAOD"])
+#  datasets.append(["/MET/Run2016B-PromptReco-v2/MINIAOD"])
+#  datasets.append(["/MET/Run2016C-PromptReco-v2/MINIAOD"])
+#  datasets.append(["/MET/Run2016D-PromptReco-v2/MINIAOD"])
   datasets.append(["/MET/Run2016E-PromptReco-v2/MINIAOD"])
+  datasets.append(["/MET/Run2016F-PromptReco-v1/MINIAOD"])
+  datasets.append(["/MET/Run2016G-PromptReco-v1/MINIAOD"])
+  datasets.append(["/MET/Run2016H-PromptReco-v1/MINIAOD"])
+  datasets.append(["/MET/Run2016H-PromptReco-v2/MINIAOD"])
 
-  datasets.append(["/SingleElectron/Run2016B-PromptReco-v2/MINIAOD"])
-  datasets.append(["/SingleElectron/Run2016C-PromptReco-v2/MINIAOD"])
-  datasets.append(["/SingleElectron/Run2016D-PromptReco-v2/MINIAOD"])
+#  datasets.append(["/SingleElectron/Run2016B-PromptReco-v2/MINIAOD"])
+#  datasets.append(["/SingleElectron/Run2016C-PromptReco-v2/MINIAOD"])
+#  datasets.append(["/SingleElectron/Run2016D-PromptReco-v2/MINIAOD"])
   datasets.append(["/SingleElectron/Run2016E-PromptReco-v2/MINIAOD"])
+  datasets.append(["/SingleElectron/Run2016F-PromptReco-v1/MINIAOD"])
+  datasets.append(["/SingleElectron/Run2016G-PromptReco-v1/MINIAOD"])
+  datasets.append(["/SingleElectron/Run2016H-PromptReco-v1/MINIAOD"])
+  datasets.append(["/SingleElectron/Run2016H-PromptReco-v2/MINIAOD"])
 
-  datasets.append(["/SingleMuon/Run2016B-PromptReco-v2/MINIAOD"])
-  datasets.append(["/SingleMuon/Run2016C-PromptReco-v2/MINIAOD"])
-  datasets.append(["/SingleMuon/Run2016D-PromptReco-v2/MINIAOD"])
+#  datasets.append(["/SingleMuon/Run2016B-PromptReco-v2/MINIAOD"])
+#  datasets.append(["/SingleMuon/Run2016C-PromptReco-v2/MINIAOD"])
+#  datasets.append(["/SingleMuon/Run2016D-PromptReco-v2/MINIAOD"])
   datasets.append(["/SingleMuon/Run2016E-PromptReco-v2/MINIAOD"])
+  datasets.append(["/SingleMuon/Run2016F-PromptReco-v1/MINIAOD"])
+  datasets.append(["/SingleMuon/Run2016G-PromptReco-v1/MINIAOD"])
+  datasets.append(["/SingleMuon/Run2016H-PromptReco-v1/MINIAOD"])
+  datasets.append(["/SingleMuon/Run2016H-PromptReco-v2/MINIAOD"])
 
-  datasets.append(["/JetHT/Run2016B-PromptReco-v2/MINIAOD"])
-  datasets.append(["/JetHT/Run2016C-PromptReco-v2/MINIAOD"])
-  datasets.append(["/JetHT/Run2016D-PromptReco-v2/MINIAOD"])
+#  datasets.append(["/JetHT/Run2016B-PromptReco-v2/MINIAOD"])
+#  datasets.append(["/JetHT/Run2016C-PromptReco-v2/MINIAOD"])
+#  datasets.append(["/JetHT/Run2016D-PromptReco-v2/MINIAOD"])
   datasets.append(["/JetHT/Run2016E-PromptReco-v2/MINIAOD"])
+  datasets.append(["/JetHT/Run2016F-PromptReco-v1/MINIAOD"])
+  datasets.append(["/JetHT/Run2016G-PromptReco-v1/MINIAOD"])
+  datasets.append(["/JetHT/Run2016H-PromptReco-v1/MINIAOD"])
+  datasets.append(["/JetHT/Run2016H-PromptReco-v2/MINIAOD"])
 
-  datasets.append(["/HTMHT/Run2016B-PromptReco-v2/MINIAOD"])
-  datasets.append(["/HTMHT/Run2016C-PromptReco-v2/MINIAOD"])
-  datasets.append(["/HTMHT/Run2016D-PromptReco-v2/MINIAOD"])
+#  datasets.append(["/HTMHT/Run2016B-PromptReco-v2/MINIAOD"])
+#  datasets.append(["/HTMHT/Run2016C-PromptReco-v2/MINIAOD"])
+#  datasets.append(["/HTMHT/Run2016D-PromptReco-v2/MINIAOD"])
   datasets.append(["/HTMHT/Run2016E-PromptReco-v2/MINIAOD"])
+  datasets.append(["/HTMHT/Run2016F-PromptReco-v1/MINIAOD"])
+  datasets.append(["/HTMHT/Run2016G-PromptReco-v1/MINIAOD"])
+  datasets.append(["/HTMHT/Run2016H-PromptReco-v1/MINIAOD"])
+  datasets.append(["/HTMHT/Run2016H-PromptReco-v2/MINIAOD"])
 
 if doManuel:
   datasets.append(["/TTJets_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM"])

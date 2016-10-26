@@ -21,6 +21,10 @@ outName="fullbaby_TTJets_HT-2500toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_Run
 
 # inFile=/net/cms2/cms2r0/babymaker/miniaod/SMS-T1tttt_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv2_PUSpring16Fast_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1.root
 # outName=fullbaby_SMS-T1tttt_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv2_PUSpring16Fast_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1.root
+
+#inFile=/store/data/Run2016F/SingleElectron/MINIAOD/PromptReco-v1/000/277/981/00000/08034EC5-C759-E611-9E7B-FA163E4E25AC.root
+inFile=/store/data/Run2016G/MET/MINIAOD/PromptReco-v1/000/280/385/00000/889C6ADD-A078-E611-9996-02163E011A1B.root
+outName="fullbaby_MET_Run2016G_PromptReco-v1.root"
 nEvents="100"
 
 json=do_not_want_json # If it can't find the file, it doesn't pre-apply the JSON
@@ -46,6 +50,7 @@ fi
    
 if [[ ($inFile == *"store"*) && ($inFile != *"hadoop"*) ]]
 then
+    echo "cmsRun bmaker/python/bmaker_full_cfg.py inputFiles=$inFile nEvents=$nEvents json=$json $outName 2>&1 | tee logout.log"
     cmsRun bmaker/python/bmaker_full_cfg.py inputFiles=$inFile nEvents=$nEvents json=$json $outName 2>&1 | tee logout.log
 else 
     cmsRun bmaker/python/bmaker_full_cfg.py inputFiles=file:$inFile nEvents=$nEvents json=$json $outName 2>&1 | tee logout.log

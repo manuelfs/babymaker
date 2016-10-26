@@ -28,7 +28,7 @@ options.register('nEvents',
                  VarParsing.varType.int,
                  "Number of events to run over.")
 options.register('json',
-                 'babymaker/data/json/golden_Cert_246908-258714_13TeV_PromptReco_Collisions15_25ns_JSON.json',
+                 'babymaker/data/json/Cert_271036-283059_minus_271036-277933.json', 
                  VarParsing.multiplicity.singleton,
                  VarParsing.varType.string,
                  "Path to json starting with babymaker/...")
@@ -69,7 +69,7 @@ else: fastsim = False
 if "Run2016" in outName:
     isData = True
     # These only used for the official application of JECs
-    globalTag = "80X_dataRun2_Prompt_v8" #"74X_dataRun2_v2"
+    globalTag = "80X_dataRun2_Prompt_v14" #"74X_dataRun2_v2"
     processRECO = "RECO"
     jecLevels = ['L1FastJet', 'L2Relative', 'L3Absolute', 'L2L3Residual']
 else:

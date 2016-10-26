@@ -14,8 +14,8 @@ CMSSW code to generate babies (small flat ntuples) from MINIAOD
 To set up the code and generate a file named `baby.root`, issue the following commands 
 on lxplus:
 
-    cmsrel CMSSW_8_0_16
-    cd CMSSW_8_0_16/src
+    cmsrel CMSSW_8_0_20
+    cd CMSSW_8_0_20/src
     cmsenv
     git cms-init
     git cms-merge-topic -u cms-met:CMSSW_8_0_X-METFilterUpdate	

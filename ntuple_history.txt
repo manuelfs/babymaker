@@ -1,5 +1,10 @@
 // Brief descriptions of the various baby productions
 
+2016_10_26 (data topup)
+-- 14.3 ifb of data after 17.1 ifb 
+-- Used CMSSW_8_0_20 and global 80X_dataRun2_Prompt_v14
+-- There are 1, 2, 1, 4, and 7 jobs incomplete out of 427 for JetHT, MET, HTMHT, SingleE and SingleM in period G
+
 2016_08_10: (Operation Capybara)
 -- 17.1 ifb of Data, all 80X MC, plus T1tttt and TChiWH
 -- Updated with ICHEP recommendations for btag/lepton SFs, PU, ISR, new triggers, JECs

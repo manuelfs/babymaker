@@ -79,6 +79,8 @@ int main(int argc, char *argv[]){
     cuts = "max(st,Max$(sys_st))>1200&&max(njets,Max$(sys_njets))>=4&&max(nbm,Max$(sys_nbm))>=1&&(max(mj14,Max$(sys_mj14))>500||mj12>500)";
   if(cuts=="st1200")
     cuts = "max(st,Max$(sys_st))>1200";
+  if(cuts=="llm60nj2")
+    cuts = "(mumuv_m>60||elelv_m>60)&&njets>=2"
 
   //// RA2/b skims
   TString pass="globalTightHalo2016Filter==1&&HBHENoiseFilter==1&&HBHEIsoNoiseFilter==1&&eeBadScFilter==1";

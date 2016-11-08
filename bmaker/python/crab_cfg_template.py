@@ -41,7 +41,7 @@ config.Data.ignoreLocality = True
 if "Run201" in taskname:
     config.Data.splitting = 'LumiBased'
     config.Data.unitsPerJob = 75
-    config.Data.lumiMask = 'golden_Cert_271036-284044_13TeV_PromptReco_Collisions16_JSON_NoL1T.txt' 
+    config.Data.lumiMask = 'babymaker/data/json/golden_Cert_271036-284044_13TeV_PromptReco_Collisions16_JSON_NoL1T.txt' 
                           
 
 else:

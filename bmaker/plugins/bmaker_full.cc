@@ -1080,14 +1080,15 @@ bool bmaker_full::writeTriggers(const edm::TriggerNames &names,
   }
   // OR-ing triggers used in RA4
   vector<TString> trigs_ra4({"HLT_PFMET100_PFMHT100_IDTight_v", "HLT_PFMETNoMu100_PFMHTNoMu100_IDTight_v",
-  "HLT_PFMET110_PFMHT110_IDTight_v", "HLT_PFMETNoMu110_PFMHTNoMu110_IDTight_v",
-  "HLT_Mu15_IsoVVVL_PFHT350_v", "HLT_Mu15_IsoVVVL_PFHT400_v", "HLT_Mu50_IsoVVVL_PFHT400_v", 
-  "HLT_Ele15_IsoVVVL_PFHT350_v", "HLT_Ele15_IsoVVVL_PFHT400_v", "HLT_Ele50_IsoVVVL_PFHT400_v", 
-  "HLT_IsoMu22_eta2p1_v", "HLT_IsoMu24_v", "HLT_Mu50_v",
-  "HLT_Ele25_eta2p1_WPTight_Gsf_v", "HLT_Ele27_eta2p1_WPLoose_Gsf_v", "HLT_Ele105_CaloIdVT_GsfTrkIdT_v",
-  "HLT_Ele115_CaloIdVT_GsfTrkIdT_v"});
+	"HLT_PFMET110_PFMHT110_IDTight_v", "HLT_PFMETNoMu110_PFMHTNoMu110_IDTight_v",
+	"HLT_PFMET120_PFMHT120_IDTight_v", "HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_v",
+	"HLT_Mu15_IsoVVVL_PFHT350_v", "HLT_Mu15_IsoVVVL_PFHT400_v", "HLT_Mu50_IsoVVVL_PFHT400_v", 
+	"HLT_Ele15_IsoVVVL_PFHT350_v", "HLT_Ele15_IsoVVVL_PFHT400_v", "HLT_Ele50_IsoVVVL_PFHT400_v", 
+	"HLT_IsoMu22_eta2p1_v", "HLT_IsoMu24_v", "HLT_IsoTkMu24_v", "HLT_Mu50_v",
+	"HLT_Ele25_eta2p1_WPTight_Gsf_v", "HLT_Ele27_eta2p1_WPLoose_Gsf_v", "HLT_Ele27_WPTight_Gsf_v", 
+	"HLT_Ele105_CaloIdVT_GsfTrkIdT_v", "HLT_Ele115_CaloIdVT_GsfTrkIdT_v"});
   vector<TString> trigs_met({"HLT_PFMET100_PFMHT100_IDTight_v", "HLT_PFMETNoMu100_PFMHTNoMu100_IDTight_v",
-  "HLT_PFMET110_PFMHT110_IDTight_v", "HLT_PFMETNoMu110_PFMHTNoMu110_IDTight_v"});
+	"HLT_PFMET110_PFMHT110_IDTight_v", "HLT_PFMETNoMu110_PFMHTNoMu110_IDTight_v"});
   vector<TString> trigs_vvvl({"HLT_Mu15_IsoVVVL_PFHT350_v", "HLT_Mu15_IsoVVVL_PFHT400_v", "HLT_Mu50_IsoVVVL_PFHT400_v", 
   "HLT_Ele15_IsoVVVL_PFHT350_v", "HLT_Ele15_IsoVVVL_PFHT400_v", "HLT_Ele50_IsoVVVL_PFHT400_v"});
   vector<TString> trigs_lep({"HLT_IsoMu22_eta2p1_v", "HLT_IsoMu24_v", "HLT_Mu50_v",
@@ -1933,25 +1934,27 @@ bmaker_full::bmaker_full(const edm::ParameterSet& iConfig):
       trig_name.push_back("HLT_Ele50_IsoVVVL_PFHT400_v");                       // 36
       trig_name.push_back("HLT_Ele15_IsoVVVL_BTagCSV_p067_PFHT400_v");          // 37
       trig_name.push_back("HLT_Mu15_IsoVVVL_PFHT400_PFMET50_v");                // 38 
-      trig_name.push_back("HLT_Ele15_IsoVVVL_PFHT400_PFMET50_v");       // 39
-      trig_name.push_back("HLT_Ele27_WPTight_Gsf_v");                   // 40
+      trig_name.push_back("HLT_Ele15_IsoVVVL_PFHT400_PFMET50_v");		// 39
+      trig_name.push_back("HLT_Ele27_WPTight_Gsf_v");				// 40
 
-      trig_name.push_back("HLT_Ele115_CaloIdVT_GsfTrkIdT_v");           // 41
-      trig_name.push_back("HLT_IsoMu22_eta2p1_v");			// 42
-      trig_name.push_back("HLT_PFHT300_PFMET110_v");                    // 43 
-      trig_name.push_back("HLT_PFHT200_DiPFJetAve90_PFAlphaT0p63_v");   // 44
-      trig_name.push_back("HLT_PFHT250_DiPFJetAve90_PFAlphaT0p58_v");   // 45
-      trig_name.push_back("HLT_PFHT300_DiPFJetAve90_PFAlphaT0p54_v");   // 46
-      trig_name.push_back("HLT_PFHT200_v");				// 47
-      trig_name.push_back("HLT_PFHT250_v");				// 48
-      trig_name.push_back("HLT_PFHT300_v");				// 49
-      trig_name.push_back("HLT_PFHT350_v");				// 50
+      trig_name.push_back("HLT_Ele115_CaloIdVT_GsfTrkIdT_v");			// 41
+      trig_name.push_back("HLT_IsoMu22_eta2p1_v");				// 42
+      trig_name.push_back("HLT_PFHT300_PFMET110_v");				// 43 
+      trig_name.push_back("HLT_PFHT200_DiPFJetAve90_PFAlphaT0p63_v");		// 44
+      trig_name.push_back("HLT_PFHT250_DiPFJetAve90_PFAlphaT0p58_v");		// 45
+      trig_name.push_back("HLT_PFHT300_DiPFJetAve90_PFAlphaT0p54_v");		// 46
+      trig_name.push_back("HLT_PFHT200_v");					// 47
+      trig_name.push_back("HLT_PFHT250_v");					// 48
+      trig_name.push_back("HLT_PFHT300_v");					// 49
+      trig_name.push_back("HLT_PFHT350_v");					// 50
 
-      trig_name.push_back("HLT_PFHT400_v");				// 51
-      trig_name.push_back("HLT_PFHT600_v");				// 52
-      trig_name.push_back("HLT_PFHT650_v");				// 53
-      trig_name.push_back("HLT_PFHT900_v");				// 54
-      trig_name.push_back("HLT_IsoTkMu24_v");				// 55
+      trig_name.push_back("HLT_PFHT400_v");					// 51
+      trig_name.push_back("HLT_PFHT600_v");					// 52
+      trig_name.push_back("HLT_PFHT650_v");					// 53
+      trig_name.push_back("HLT_PFHT900_v");					// 54
+      trig_name.push_back("HLT_IsoTkMu24_v");					// 55
+      trig_name.push_back("HLT_PFJet450_v");					// 56
+      trig_name.push_back("HLT_AK8PFJet450_v");				        // 57
     } else {
       trig_name.push_back("HLT_PFHT350_PFMET100_");                               // 0 
       trig_name.push_back("HLT_Mu15_IsoVVVL_PFHT350_PFMET50_v");                  // 1 

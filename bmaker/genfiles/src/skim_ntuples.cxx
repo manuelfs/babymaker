@@ -80,7 +80,7 @@ int main(int argc, char *argv[]){
   if(cuts=="st1200")
     cuts = "max(st,Max$(sys_st))>1200";
   if(cuts=="llm60nj2")
-    cuts = "(mumuv_m>60||elelv_m>60)&&njets>=2"
+    cuts = "(mumuv_m>60||elelv_m>60)&&njets>=2";
 
   //// RA2/b skims
   TString pass="globalTightHalo2016Filter==1&&HBHENoiseFilter==1&&HBHEIsoNoiseFilter==1&&eeBadScFilter==1";

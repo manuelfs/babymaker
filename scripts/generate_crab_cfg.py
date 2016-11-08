@@ -53,8 +53,53 @@ doAdam = False
 doAna = False
 doJae = False
 doManuel = False
+doRyan = True
+doRohan = False
+
 
 datasets = [[]]
+if doRyan:
+  datasets.append(["/MET/Run2016B-23Sep2016-v3/MINIAOD"])
+  datasets.append(["/MET/Run2016C-23Sep2016-v1/MINIAOD"])
+  datasets.append(["/MET/Run2016D-23Sep2016-v1/MINIAOD"])
+  datasets.append(["/MET/Run2016E-23Sep2016-v1/MINIAOD"])
+  datasets.append(["/MET/Run2016F-23Sep2016-v1/MINIAOD"])
+  datasets.append(["/MET/Run2016G-23Sep2016-v1/MINIAOD"])
+  
+  datasets.append(["/SingleElectron/Run2016B-23Sep2016-v3/MINIAOD"])
+  datasets.append(["/SingleElectron/Run2016C-23Sep2016-v1/MINIAOD"])
+  datasets.append(["/SingleElectron/Run2016D-23Sep2016-v1/MINIAOD"])
+  datasets.append(["/SingleElectron/Run2016E-23Sep2016-v1/MINIAOD"])
+  datasets.append(["/SingleElectron/Run2016F-23Sep2016-v1/MINIAOD"])
+  datasets.append(["/SingleElectron/Run2016G-23Sep2016-v1/MINIAOD"])
+
+  datasets.append(["/SingleMuon/Run2016B-23Sep2016-v3/MINIAOD"])
+  datasets.append(["/SingleMuon/Run2016C-23Sep2016-v1/MINIAOD"])
+  datasets.append(["/SingleMuon/Run2016D-23Sep2016-v1/MINIAOD"])
+  datasets.append(["/SingleMuon/Run2016E-23Sep2016-v1/MINIAOD"])
+  datasets.append(["/SingleMuon/Run2016F-23Sep2016-v1/MINIAOD"])
+  datasets.append(["/SingleMuon/Run2016G-23Sep2016-v1/MINIAOD"])
+
+
+
+if doRohan:
+  datasets.append(["/JetHT/Run2016B-23Sep2016-v3/MINIAOD"])
+  datasets.append(["/JetHT/Run2016C-23Sep2016-v1/MINIAOD"])
+  datasets.append(["/JetHT/Run2016D-23Sep2016-v1/MINIAOD"])
+  datasets.append(["/JetHT/Run2016E-23Sep2016-v1/MINIAOD"])
+  datasets.append(["/JetHT/Run2016F-23Sep2016-v1/MINIAOD"])
+  datasets.append(["/JetHT/Run2016G-23Sep2016-v1/MINIAOD"])
+  
+
+  datasets.append(["/HTMHT/Run2016B-23Sep2016-v3/MINIAOD"])
+  datasets.append(["/HTMHT/Run2016C-23Sep2016-v1/MINIAOD"])
+  datasets.append(["/HTMHT/Run2016D-23Sep2016-v1/MINIAOD"])
+  datasets.append(["/HTMHT/Run2016E-23Sep2016-v1/MINIAOD"])
+  datasets.append(["/HTMHT/Run2016F-23Sep2016-v1/MINIAOD"])
+  datasets.append(["/HTMHT/Run2016G-23Sep2016-v2/MINIAOD"])
+
+
+
 
 if doAdam:
 #  datasets.append(["/MET/Run2016B-PromptReco-v2/MINIAOD"])

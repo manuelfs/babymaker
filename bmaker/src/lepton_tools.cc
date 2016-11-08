@@ -284,9 +284,37 @@ bool lepton_tools::idElectron(const pat::Electron &lep, edm::Handle<reco::Vertex
     ooeminusoop_cut, reliso_cut, misshits_cut;
   bool req_conv_veto;
 
+
+  
+  if(barrel){
+    ieta_cut        = chooseVal(threshold       ,0.0115,  0.011,   0.00998, 0.00998);
+    deta_cut        = chooseVal(threshold       ,0.00749, 0.00477, 0.00311, 0.00308);
+    dphi_cut        = chooseVal(threshold       ,0.228,	  0.222,   0.103,   0.0816);
+    hovere_cut      = chooseVal(threshold       ,0.356,   0.298,   0.253,   0.0414);
+    reliso_cut      = chooseVal(threshold       ,0.175,   0.0994,  0.0695,  0.0588);
+    ooeminusoop_cut = chooseVal(threshold       ,0.299,   0.241,   0.134,   0.0129);
+    d0_cut          = chooseVal(threshold       ,0.05,    0.05,    0.05,    0.05);
+    dz_cut          = chooseVal(threshold       ,0.10 ,   0.10,    0.10,    0.10);
+    misshits_cut    = chooseVal(threshold       ,2,   1,   1,   1);
+    req_conv_veto   = chooseVal(threshold       ,true           ,  true         ,  true         ,  true );
+  } else {
+    ieta_cut        = chooseVal(threshold       ,0.037,   0.0314,  0.0298,  0.0292);
+    deta_cut        = chooseVal(threshold       ,0.00895, 0.00868, 0.00609, 0.00605);
+    dphi_cut        = chooseVal(threshold       ,0.213,   0.213,   0.045,   0.0394);
+    hovere_cut      = chooseVal(threshold       ,0.211,   0.101,   0.0878,  0.0641);
+    reliso_cut      = chooseVal(threshold       ,0.159,   0.107,   0.0821,  0.0571);
+    ooeminusoop_cut = chooseVal(threshold       ,0.15,    0.14,    0.13,    0.0129);
+    d0_cut          = chooseVal(threshold       ,0.10 ,   0.10,    0.10,    0.10);
+    dz_cut          = chooseVal(threshold       ,0.20 ,   0.20,    0.20,    0.20);
+    misshits_cut    = chooseVal(threshold       ,3, 1, 1, 1);
+    req_conv_veto   = chooseVal(threshold       ,true   ,  true   ,  true   ,  true );
+  }
+
+
+
   //https://twiki.cern.ch/twiki/bin/viewauth/CMS/CutBasedElectronIdentificationRun2#Working_points_for_Spring15_MC_s
   // Last updated October 8th
-  if(barrel){
+  /*if(barrel){
     ieta_cut        = chooseVal(threshold       ,0.0114,  0.0103,  0.0101,  0.0101);
     deta_cut        = chooseVal(threshold       ,0.0152,  0.0105,  0.0103,  0.00926);
     dphi_cut        = chooseVal(threshold       ,0.216,   0.115,   0.0336,  0.0336);
@@ -309,7 +337,7 @@ bool lepton_tools::idElectron(const pat::Electron &lep, edm::Handle<reco::Vertex
     misshits_cut    = chooseVal(threshold       ,3, 1, 1, 1);
     req_conv_veto   = chooseVal(threshold       ,true   ,  true   ,  true   ,  true );
   }
-
+  */
   double dz(0.), d0(0.);
   vertexElectron(lep, vtx, dz, d0);
 

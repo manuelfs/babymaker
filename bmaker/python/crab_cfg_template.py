@@ -37,10 +37,11 @@ config.JobType.pyCfgParams = ['nEventsSample=' + str(nevents), 'outputFile=fullb
 config.section_("Data")
 config.Data.inputDataset = dataset
 config.Data.inputDBS = 'global'
+config.Data.ignoreLocality = True
 if "Run201" in taskname:
     config.Data.splitting = 'LumiBased'
-    config.Data.unitsPerJob = 100
-    config.Data.lumiMask = 'babymaker/data/json/Cert_271036-283059_minus_271036-277933.json' 
+    config.Data.unitsPerJob = 75
+    config.Data.lumiMask = 'golden_Cert_271036-284044_13TeV_PromptReco_Collisions16_JSON_NoL1T.txt' 
                           
 
 else:
@@ -53,7 +54,7 @@ config.Data.publication = False # used to be True for cfA production
 config.section_("Site")
 config.Site.storageSite = 'T2_US_UCSD'
 #config.Site.storageSite = 'T3_US_UCSB'
-#config.Site.whitelist = ['T2_US_Caltech','T2_US_Florida', 'T2_US_MIT', 'T2_US_Nebraska', 'T2_US_Purdue', 'T2_US_UCSD', 'T2_US_Vanderbilt', 'T2_US_Wisconsin', 'T1_US_FNAL','T2_US_MIT', 'T3_US_UCSB']
-config.Site.blacklist = ['T1_RU_JINR', 'T1_FR_CCIN2P3']
+config.Site.whitelist = ['T2_US_Caltech','T2_US_Florida', 'T2_US_MIT', 'T2_US_Nebraska', 'T2_US_Purdue', 'T2_US_UCSD', 'T2_US_Vanderbilt', 'T2_US_Wisconsin', 'T1_US_FNAL','T2_US_MIT', 'T3_US_UCSB']
+#config.Site.blacklist = ['T1_RU_JINR', 'T1_FR_CCIN2P3']
 # you may want to uncomment this line and force jobs to run in the US
 # only a few datasets (mostly very new ones) will not be accessible

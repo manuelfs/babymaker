@@ -1231,7 +1231,8 @@ void bmaker_full::writeFilters(const edm::TriggerNames &fnames,
     bool pass = static_cast<bool>(filterBits->accept(i));
     if (name=="Flag_goodVertices") baby.pass_goodv() = pass;
     //else if (name=="Flag_CSCTightHaloFilter") baby.pass_cschalo() = pass; // Requires reading it from txt file
-    else if (name=="Flag_CSCTightHalo2015Filter") baby.pass_cschalo() = pass;
+    //else if (name=="Flag_CSCTightHalo2015Filter") baby.pass_cschalo() = pass; 
+    else if (name=="Flag_globalTightHalo2016Filter")  baby.pass_cschalo() = pass; //recommendation since apr 27, updated nov 8
     else if (name=="Flag_eeBadScFilter") baby.pass_eebadsc() = pass;
     else if (name=="Flag_EcalDeadCellTriggerPrimitiveFilter") baby.pass_ecaldeadcell() = pass;
     else if (name=="Flag_HBHENoiseFilter") baby.pass_hbhe() = pass; 

@@ -1088,7 +1088,8 @@ bool bmaker_full::writeTriggers(const edm::TriggerNames &names,
 	"HLT_Ele25_eta2p1_WPTight_Gsf_v", "HLT_Ele27_eta2p1_WPLoose_Gsf_v", "HLT_Ele27_WPTight_Gsf_v", 
 	"HLT_Ele105_CaloIdVT_GsfTrkIdT_v", "HLT_Ele115_CaloIdVT_GsfTrkIdT_v"});
   vector<TString> trigs_met({"HLT_PFMET100_PFMHT100_IDTight_v", "HLT_PFMETNoMu100_PFMHTNoMu100_IDTight_v",
-	"HLT_PFMET110_PFMHT110_IDTight_v", "HLT_PFMETNoMu110_PFMHTNoMu110_IDTight_v"});
+	"HLT_PFMET110_PFMHT110_IDTight_v", "HLT_PFMETNoMu110_PFMHTNoMu110_IDTight_v",
+	"HLT_PFMET120_PFMHT120_IDTight_v", "HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_v"});
   vector<TString> trigs_vvvl({"HLT_Mu15_IsoVVVL_PFHT350_v", "HLT_Mu15_IsoVVVL_PFHT400_v", "HLT_Mu50_IsoVVVL_PFHT400_v", 
   "HLT_Ele15_IsoVVVL_PFHT350_v", "HLT_Ele15_IsoVVVL_PFHT400_v", "HLT_Ele50_IsoVVVL_PFHT400_v"});
   vector<TString> trigs_lep({"HLT_IsoMu22_eta2p1_v", "HLT_IsoMu24_v", "HLT_Mu50_v",

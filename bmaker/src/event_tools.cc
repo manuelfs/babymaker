@@ -233,17 +233,17 @@ int event_tools::type(const string &name){
   }else if(contains(name, "ZH_")){ sample = 13;
     if(contains(name, "ZH_HToBB_ZToNuNu")){ category = 0; bin = 0;
     }
-  }else if(contains(name, "WW")){ sample = 14;
+  }else if(contains(name, "WW") && !contains(name,"TChiHH")){ sample = 14;
     if(contains(name, "WWToLNuQQ")){ category = 0; bin = 0;
     }else if(contains(name, "WWTo2L2Nu")){ category = 1; bin = 0;
     }
-  }else if(contains(name, "WZ")){ sample = 15;
+  }else if(contains(name, "WZ") && !contains(name,"TChiHH")){ sample = 15;
     if(contains(name, "WZTo1L3Nu")){ category = 0; bin = 0;
     }else if(contains(name, "WZTo1L1Nu2Q")){ category = 1; bin = 0;
     }else if(contains(name, "WZTo2L2Q")){ category = 2; bin = 0;
     }else if(contains(name, "WZTo3LNu")){ category = 3; bin = 0;
     }
-  }else if(contains(name, "ZZ")){ sample = 16;
+  }else if(contains(name, "ZZ") && !contains(name,"TChiHH")){ sample = 16;
     if(contains(name, "ZZ_Tune")){ category = 0; bin = 0;
     }
   }else if(contains(name, "T1tttt")){ sample = 100; category = 0; bin = 0;

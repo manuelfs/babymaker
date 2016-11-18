@@ -53,11 +53,15 @@ doAdam = False
 doAna = False
 doJae = False
 doManuel = False
-doRyan = True
+doRyan = False
 doRohan = False
 
 
+
 datasets = [[]]
+
+datasets.append(["/SMS-TChiHH_HToWWZZTauTau_HToWWZZTauTau_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring16MiniAODv2-PUSpring16Fast_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM"])
+
 if doRyan:
   datasets.append(["/MET/Run2016B-23Sep2016-v3/MINIAOD"])
   datasets.append(["/MET/Run2016C-23Sep2016-v1/MINIAOD"])

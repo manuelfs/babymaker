@@ -131,16 +131,27 @@ void mc_tools::printParticle(const reco::GenParticle &mc){
 void mc_tools::getMassPoints(TString mpoints, int &mgluino, int &mlsp){
 
   TString ml(mpoints), mg(mpoints);
-  ml.Remove(0, ml.Last('_')+1);
-  ml.ReplaceAll("\n","");
-  mg.Remove(mg.Last('_'));
-  mg.Remove(0, mg.Last('_')+1);
-
-  if(!mg.IsFloat() || !ml.IsFloat()){
-    cout<<"ERROR: Improper parsing of mass points"<<endl;
-    cout<<"Mass of gluino parsed as \""<<mg<<"\""<<endl;
-    cout<<"Mass of LSP parsed as \""<<ml<<"\""<<endl;
-    exit(0);
+  if (mpoints.Contains("TChiHH")){
+    mg.Remove(0, ml.Last('_')+1);
+    mg.ReplaceAll("\n","");
+    ml = "1";
+    if(!mg.IsFloat()){
+      cout<<"ERROR: Improper parsing of mass points"<<endl;
+      cout<<"Mass of gluino parsed as \""<<mg<<"\""<<endl;
+      exit(0);
+    }
+  } else {
+    ml.Remove(0, ml.Last('_')+1);
+    ml.ReplaceAll("\n","");
+    mg.Remove(mg.Last('_'));
+    mg.Remove(0, mg.Last('_')+1);
+    
+    if(!mg.IsFloat() || !ml.IsFloat()){
+      cout<<"ERROR: Improper parsing of mass points"<<endl;
+      cout<<"Mass of gluino parsed as \""<<mg<<"\""<<endl;
+      cout<<"Mass of LSP parsed as \""<<ml<<"\""<<endl;
+      exit(0);
+    }
   }
 
   mgluino = mg.Atoi();

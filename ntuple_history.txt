@@ -1,5 +1,12 @@
 // Brief descriptions of the various baby productions
 
+2016_11_21 (Prompt data topup)
+--  8.5 ifb of Run2016H PromptReco data
+
+2016_11_08 (ReReco Data)
+-- 27.7 ifb of 23Sep ReReco data (Run2016B-G)
+-- Updated triggers, electron ID, halo filter
+
 2016_10_26 (data topup)
 -- 14.3 ifb of data after 17.1 ifb 
 -- Used CMSSW_8_0_20 and global 80X_dataRun2_Prompt_v14

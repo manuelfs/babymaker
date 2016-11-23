@@ -28,10 +28,18 @@ keep dphi3
 keep dphi4
 keep low_dphi
 keep mct
+keep mt
 
 ## Leptonic
+keep nleps
+keep nels
+keep nmus
 keep nvleps
+keep nvels
+keep nvmus
 keep ntks
+keep mumu*
+keep elel*
 
 ## MC
 keep stitch
@@ -55,3 +63,5 @@ keep jets_*
 drop *fjet*
 drop jets_islep
 
+## Systematics
+keep sys_*tag*

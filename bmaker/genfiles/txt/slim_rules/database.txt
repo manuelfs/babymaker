@@ -12,8 +12,11 @@ keep json*
 
 ## Hadronic
 keep ht
+keep ht_ra2
 keep st
 keep htx
+keep mht
+keep low_dphi
 keep met
 keep met_phi
 keep met_calo
@@ -58,8 +61,8 @@ keep *fjets14*
 drop *_nolep*
 
 ## Dileptons
-keep elel_m
-keep mumu_m
+keep elel*
+keep mumu*
 
 ## Electrons
 keep els_pt

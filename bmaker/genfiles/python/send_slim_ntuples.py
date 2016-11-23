@@ -23,6 +23,7 @@ def sendSlimJob(skim, slim, overwrite, out_dir):
     tags = utilities.findBaseSampleNames(skim)
     total_jobs = 0
     for tag in tags:
+        #if "TTJets_SingleLeptFromT_" not in tag: continue
         in_files = os.path.join(skim,"*"+tag+"*.root")
         out_name = "mergedbaby_"+tag+"_"+skim_name+"_"+slim_name+"_nfiles_"+str(len(glob.glob(in_files)))
         out_file = os.path.join(out_dir,out_name+".root")
@@ -33,7 +34,8 @@ def sendSlimJob(skim, slim, overwrite, out_dir):
             continue
         with open(run_file, "wb") as f:
             f.write("#! /bin/bash\n\n")
-            f.write("python/cache.py -c "+slim+" "+out_file+" -e python/slim_ntuple.py "+slim+" "+out_file+" "+in_files+"\n")
+            #f.write("python/cache.py -c "+slim+" "+out_file+" -e python/slim_ntuple.py "+slim+" "+out_file+" "+in_files+"\n")
+            f.write("python/slim_ntuple.py "+slim+" "+out_file+" "+in_files+"\n")
             os.fchmod(f.fileno(),0755)
         subprocess.call(["JobSubmit.csh","run/wrapper.sh",run_file])
         total_jobs += 1

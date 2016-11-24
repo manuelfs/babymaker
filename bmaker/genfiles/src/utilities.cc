@@ -98,7 +98,8 @@ int change_branch_one(TString indir, TString name, TString outdir, vector<TStrin
   float w_isr_old=1., w_pu_old=1.;
   //Branches
   int nleps_=0, mgluino_(0);
-  float eff_trig_(0), nisr_(0);
+  float eff_trig_(0), eff_jetid_(0), nisr_(0);
+  oldtree->SetBranchAddress("eff_jetid",&eff_jetid_);
   oldtree->SetBranchAddress("eff_trig",&eff_trig_);
   oldtree->SetBranchAddress("nleps",&nleps_);
   oldtree->SetBranchAddress("nisr",&nisr_);
@@ -130,8 +131,6 @@ int change_branch_one(TString indir, TString name, TString outdir, vector<TStrin
   name.ReplaceAll(".root","_renorm.root");
   TFile* newfile = new TFile(outdir+name,"recreate");
   TTree* newtree = oldtree->CloneTree(0);
-  double eff_jetid(1.); // If not FastSim, we apply as pass
-  if(name.Contains("FSPremix")) eff_jetid = 0.99;
 
   //Loop and fill events with new weights
   int nentries = oldtree->GetEntries();
@@ -253,7 +252,7 @@ int change_branch_one(TString indir, TString name, TString outdir, vector<TStrin
     // Hack to protect total weight from NaN, and not include w_pu
     for(int iset=0; iset<nvar; iset++)
       if(var[iset].Contains("weight")){
-        new_var_flt_[iset] = w_lep * w_fs_lep * w_btag_old * w_isr_old * w_pu_old * w_lumi * eff_jetid 
+        new_var_flt_[iset] = w_lep * w_fs_lep * w_btag_old * w_isr_old * w_pu_old * w_lumi * eff_jetid_ //* eff_trig_
 	  * var_val[iset][0].Atof();
       }
     newtree->Fill();

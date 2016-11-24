@@ -73,14 +73,22 @@ int main(int argc, char *argv[]){
 	 cuts="Sum$(mm_nleps>=1&&mm_st>500.&&mm_met>200.)>0";	     
   if(cuts=="mm_std_nj5mj250")
 	 cuts="Sum$(mm_nleps>=1&&mm_st>500&&mm_met>200&&mm_njets>=5&&mm_mj14_lep>250)>0||Sum$(mm_nleps>=1&&mm_st>500&&mm_met>200&&mm_njets>=5&&mm_mj14_nolep>250)>0";
-  if(cuts=="higloose")
-	cuts="met>100&&nvleps==0&&(njets==4||njets==5)&&nbm>=2";
   if(cuts=="rpvfit")
     cuts = "max(st,Max$(sys_st))>1200&&max(njets,Max$(sys_njets))>=4&&max(nbm,Max$(sys_nbm))>=1&&(max(mj14,Max$(sys_mj14))>500||mj12>500)";
   if(cuts=="st1200")
     cuts = "max(st,Max$(sys_st))>1200";
   if(cuts=="llm60nj2")
     cuts = "(mumuv_m>60||elelv_m>60)&&njets>=2";
+  if(cuts=="httrig") // Prescaled HT triggers for fake MET trigger efficiency measurement
+    cuts = "pass&&nvleps==0&&(trig[11]||trig[12]||trig[47]||trig[48]||trig[49]||trig[50]||trig[51]||trig[52]||trig[53]||trig[54])";
+
+  //// Higgsino skims
+  if(cuts=="higloose")
+    cuts="met>100&&nvleps==0&&(njets==4||njets==5)&&nbm>=2";
+  if(cuts=="higlep1") // 1l CR for Higgsino
+    cuts="met>100&&nleps==1&&(njets==4||njets==5)&&nbm>=2";
+  if(cuts=="higlep2") // 2l CR for Higgsino
+    cuts="nleps==2&&(mumu_m*(mumu_m>0)+elel_m*(elel_m>0))>80&&(mumu_m*(mumu_m>0)+elel_m*(elel_m>0))<100&&(njets==4||njets==5)";
 
   //// RA2/b skims
   TString pass="globalTightHalo2016Filter==1&&HBHENoiseFilter==1&&HBHEIsoNoiseFilter==1&&eeBadScFilter==1";

@@ -75,12 +75,18 @@ public:
 
   // Functions that do the branch writing
   void writeMET(edm::Handle<pat::METCollection> mets, edm::Handle<pat::METCollection> mets_nohf);
-  std::vector<reco::Candidate::LorentzVector> writeJets(edm::Handle<pat::JetCollection> alljets, 
+  std::vector<reco::Candidate::LorentzVector> writeJets(edm::Handle<pat::JetCollection> alljets,
+							std::vector<unsigned> &all_baby_jets_idx,
                  edm::Handle<edm::View <reco::GenJet> > genjets, 
                  vCands &sig_leps, vCands &veto_leps, 
                  vCands &photons, vCands &tks, 
                  std::vector<std::vector<LVector> > &sysjets,
                  std::vector<double> &jetsMuonEnergyFrac);
+  void writeBTagWeights(edm::Handle<pat::JetCollection> alljets,
+			std::vector<reco::Candidate::LorentzVector>  &all_baby_jets,
+			std::vector<unsigned> &all_baby_jet_idx);
+  void writeHiggVars(std::vector<reco::Candidate::LorentzVector> &all_baby_jets);
+
   void writeFatJets();
   vCands writeMuons(edm::Handle<pat::MuonCollection> muons, 
 		    edm::Handle<pat::PackedCandidateCollection> pfcands, 

@@ -165,13 +165,15 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   /// Jets
   if (debug) cout<<"INFO: Writing jets..."<<endl;
   vector<LVector> all_baby_jets;
+  vector<unsigned> all_baby_jets_idx;
   vector<double> jetsMuonEnergyFrac;
   vector<vector<LVector> > sys_jets;
-
-  if (!doSystematics) {
-    all_baby_jets = writeJets(alljets, genjets, sig_leps, veto_leps, photons, tks, sys_jets, jetsMuonEnergyFrac);
-  } else {
-    all_baby_jets = writeJets(alljets, genjets, sig_leps, veto_leps, photons, tks, sys_jets, jetsMuonEnergyFrac);
+  all_baby_jets = writeJets(alljets, all_baby_jets_idx, genjets, sig_leps, veto_leps, photons, tks, sys_jets, jetsMuonEnergyFrac);
+  if (addBTagWeights) writeBTagWeights(alljets, all_baby_jets, all_baby_jets_idx);
+  writeHiggVars(all_baby_jets);
+  writeFatJets();
+  
+  if (doSystematics) {
     for (unsigned isys(0); isys<kSysLast; isys++){
       bool cluster_leps = false;
       baby.sys_mj14_nolep().push_back(jetTool->getSysMJ(1.4, sys_jets[isys], baby.jets_islep(), jetTool->JetPtCut, cluster_leps));
@@ -179,8 +181,6 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
       baby.sys_mj14().push_back(jetTool->getSysMJ(1.4, sys_jets[isys], baby.jets_islep(), jetTool->JetPtCut, cluster_leps));
     }
   }
-
-  writeFatJets();
 
   ////////////////////// mT, dphi /////////////////////
   // It requires previous storing of MET
@@ -346,29 +346,20 @@ void bmaker_full::writeMET(edm::Handle<pat::METCollection> mets, edm::Handle<pat
 }
 
 // Requires having called jetTool->getJetCorrections(alljets, rhoEvent_) beforehand
-vector<LVector> bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets, 
+vector<LVector> bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
+				       vector<unsigned> &all_baby_jets_idx,
                             edm::Handle<edm::View <reco::GenJet> > genjets,
                             vCands &sig_leps, vCands &veto_leps, vCands &photons, vCands &tks,
                             vector<vector<LVector> > &sys_jets,
                             vector<double> &jetsMuonEnergyFrac){
-  vector<int> hi_csv(5,-1); // Indices of the 5 jets with highest CSV
   vector<LVector> all_baby_jets;
   vCands jets_ra2;
-  vector<LVector> jets;
   LVector jetsys_p4, jetsys_nob_p4;
   baby.njets() = 0; baby.nbl() = 0; baby.nbm() = 0;  baby.nbt() = 0;
   baby.ht() = 0.; baby.st() = 0.; baby.ht_hlt() = 0.;
   baby.njets_ra2() = 0; baby.njets_clean() = 0; baby.nbm_ra2() = 0; baby.ht_ra2() = 0.; baby.ht_clean() = 0.; 
   baby.pass_jets() = true; baby.pass_jets_nohf() = true; baby.pass_jets_tight() = true; 
   baby.pass_jets_ra2() = true; baby.pass_jets_tight_ra2() = true; 
-  baby.sys_bctag().resize(2, 1.); baby.sys_udsgtag().resize(2, 1.);
-  baby.sys_bctag_loose().resize(2, 1.); baby.sys_udsgtag_loose().resize(2, 1.);
-  baby.sys_bctag_tight().resize(2, 1.); baby.sys_udsgtag_tight().resize(2, 1.);
-  baby.w_btag() = baby.w_btag_loose() = baby.w_btag_tight() = 1.;
-  baby.hig_dphi() = 9999.;
-  if (isFastSim){ 
-    baby.sys_fs_bctag().resize(2, 1.); baby.sys_fs_udsgtag().resize(2, 1.);
-  }
   if (doSystematics) {
     baby.sys_njets().resize(kSysLast, 0); baby.sys_nbm().resize(kSysLast, 0); 
     baby.sys_pass().resize(kSysLast, true); baby.sys_ht().resize(kSysLast, 0.); 
@@ -399,6 +390,7 @@ vector<LVector> bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
     //----------------------------
     if((looseID && goodPtEta) || isLep) {
       all_baby_jets.push_back(jetp4);
+      all_baby_jets_idx.push_back(ijet);
       baby.jets_pt().push_back(jetp4.pt());
       baby.jets_eta().push_back(jet.eta());
       baby.jets_phi().push_back(jet.phi());
@@ -412,73 +404,19 @@ vector<LVector> bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
       baby.jets_ntruc().push_back(0); //filled in writeMC
       baby.jets_gs_index().push_back(-1);  //filled in writeMC
       baby.jets_csv().push_back(csv);
-      if (goodPtEta || isLep) jets.push_back(jetp4);
-      baby.jets_h1().push_back(false);
-      baby.jets_h2().push_back(false);
-      float dphi = reco::deltaPhi(jet.phi(), baby.met_phi());
-      if(dphi < baby.hig_dphi()) baby.hig_dphi() = dphi;
-
-      // Finding the N jets with highest CSV values
-      if (goodPtEta && !isLep){ //don't consider lepton jets, matters for WH
-        for(size_t ind(0); ind<hi_csv.size(); ind++){
-          int icsv = hi_csv[ind];
-          if(icsv==-1 || csv > baby.jets_csv()[icsv]){
-            for(size_t ind2(hi_csv.size()-1); ind2>=ind+1; ind2--) hi_csv[ind2] = hi_csv[ind2-1];
-            hi_csv[ind] = baby.jets_csv().size()-1;
-            break;
-          }
-        } // Loop over highest CSV jets
+ 
+      if(!isLep && goodPtEta){
+	jetsys_p4 += jet.p4();
+	baby.njets()++;
+	baby.ht() += jetp4.pt();
+	baby.st() += jetp4.pt();
+	if(csv > jetTool->CSVLoose)  baby.nbl()++;
+	if(csv > jetTool->CSVMedium) baby.nbm()++;
+	else jetsys_nob_p4 += jet.p4();
+	if(csv > jetTool->CSVTight)  baby.nbt()++;
       }
-
-
-      if(!isLep){
-        if(addBTagWeights && goodPtEta) {
-          bool btag(csv > jetTool->CSVMedium);
-          bool btagLoose(csv > jetTool->CSVLoose);
-	  bool btagTight(csv > jetTool->CSVTight);
-          //central weight for fastsim taken into account together with the fullsim inside jetTool->jetBTagWeight()
-          baby.w_btag() *= jetTool->jetBTagWeight(jet, jetp4, btag, BTagEntry::OP_MEDIUM,
-						  "central", "central");
-          // now, vary only the full sim scale factor, regardless of whether we run on Fast or Full sim
-          // this is necessary since uncertainties for FastSim and FullSim are uncorrelated 
-          baby.sys_bctag()[0]   *= jetTool->jetBTagWeight(jet, jetp4, btag, BTagEntry::OP_MEDIUM, "up",      "central");
-          baby.sys_bctag()[1]   *= jetTool->jetBTagWeight(jet, jetp4, btag, BTagEntry::OP_MEDIUM, "down",    "central");
-          baby.sys_udsgtag()[0] *= jetTool->jetBTagWeight(jet, jetp4, btag, BTagEntry::OP_MEDIUM, "central", "up");
-          baby.sys_udsgtag()[1] *= jetTool->jetBTagWeight(jet, jetp4, btag, BTagEntry::OP_MEDIUM, "central", "down");
-          baby.w_btag_loose()         *= jetTool->jetBTagWeight(jet, jetp4, btagLoose, BTagEntry::OP_LOOSE, "central", "central");
-          baby.sys_bctag_loose()[0]   *= jetTool->jetBTagWeight(jet, jetp4, btagLoose, BTagEntry::OP_LOOSE, "up",      "central");
-          baby.sys_bctag_loose()[1]   *= jetTool->jetBTagWeight(jet, jetp4, btagLoose, BTagEntry::OP_LOOSE, "down",    "central");
-          baby.sys_udsgtag_loose()[0] *= jetTool->jetBTagWeight(jet, jetp4, btagLoose, BTagEntry::OP_LOOSE, "central", "up");
-          baby.sys_udsgtag_loose()[1] *= jetTool->jetBTagWeight(jet, jetp4, btagLoose, BTagEntry::OP_LOOSE, "central", "down");
-	  baby.w_btag_tight()         *= jetTool->jetBTagWeight(jet, jetp4, btagTight, BTagEntry::OP_TIGHT, "central", "central");
-          baby.sys_bctag_tight()[0]   *= jetTool->jetBTagWeight(jet, jetp4, btagTight, BTagEntry::OP_TIGHT, "up",      "central");
-          baby.sys_bctag_tight()[1]   *= jetTool->jetBTagWeight(jet, jetp4, btagTight, BTagEntry::OP_TIGHT, "down",    "central");
-          baby.sys_udsgtag_tight()[0] *= jetTool->jetBTagWeight(jet, jetp4, btagTight, BTagEntry::OP_TIGHT, "central", "up");
-          baby.sys_udsgtag_tight()[1] *= jetTool->jetBTagWeight(jet, jetp4, btagTight, BTagEntry::OP_TIGHT, "central", "down");
-          if (isFastSim) { 
-            // now we vary only the FastSim SF
-            baby.sys_fs_bctag()[0]   *= jetTool->jetBTagWeight(jet, jetp4, btag, BTagEntry::OP_MEDIUM,
-							       "central", "central", "up",      "central");
-            baby.sys_fs_bctag()[1]   *= jetTool->jetBTagWeight(jet, jetp4, btag, BTagEntry::OP_MEDIUM,
-							       "central", "central", "down",    "central");
-            baby.sys_fs_udsgtag()[0] *= jetTool->jetBTagWeight(jet, jetp4, btag, BTagEntry::OP_MEDIUM,
-							       "central", "central", "central", "up");
-            baby.sys_fs_udsgtag()[1] *= jetTool->jetBTagWeight(jet, jetp4, btag, BTagEntry::OP_MEDIUM,
-							       "central", "central", "central", "down");
-      	  }
-      	}
-      	if (goodPtEta){
-      	  jetsys_p4 += jet.p4();
-      	  baby.njets()++;
-          baby.ht() += jetp4.pt();
-      	  baby.st() += jetp4.pt();
-      	  if(csv > jetTool->CSVLoose)  baby.nbl()++;
-      	  if(csv > jetTool->CSVMedium) baby.nbm()++;
-      	  else jetsys_nob_p4 += jet.p4();
-      	  if(csv > jetTool->CSVTight)  baby.nbt()++;
-      	}
-      } 
-    }
+    } 
+    
 
     //    HLT HT definition
     //----------------------------
@@ -576,8 +514,8 @@ vector<LVector> bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
   jetTool->fillDeltaRbb(baby.dr_bb(),baby.bb_pt(),baby.bb_m(),baby.bb_jet_idx1(),baby.bb_jet_idx2(),  baby.bb_gs_idx(), baby.bb_gs_flavor(),all_baby_jets, baby.jets_csv(), baby.jets_islep(),baby.jets_pt(),branks,baby.bb_highcsv_idx());
  
   if(baby.nbm() >= 2 && sig_leps.size()>0){
-    const auto &jet1 = jets.at(branks.at(0));
-    const auto &jet2 = jets.at(branks.at(1));
+    const auto &jet1 = all_baby_jets.at(branks.at(0));
+    const auto &jet2 = all_baby_jets.at(branks.at(1));
     double px = baby.met()*cos(baby.met_phi())+sig_leps.at(0)->px();
     double py = baby.met()*sin(baby.met_phi())+sig_leps.at(0)->py();
     baby.mt2() = getMT2(jet1.mass(), jet1.pt(), jet1.phi(),
@@ -589,6 +527,91 @@ vector<LVector> bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
   }else{
     baby.mt2() = -1.;
   }
+
+  if(isFastSim) baby.pass_fsmet() = eventTool->passFSMET(alljets, genjets);
+  else baby.pass_fsmet() = true;  
+
+
+  return all_baby_jets;
+} // writeJets
+
+void bmaker_full::writeBTagWeights(edm::Handle<pat::JetCollection> alljets,
+		      std::vector<reco::Candidate::LorentzVector>  &all_baby_jets,
+		      std::vector<unsigned> &all_baby_jet_idx){
+
+  baby.w_btag() = baby.w_btag_loose() = baby.w_btag_tight() = 1.;
+  if (doSystematics){ 
+    baby.sys_bctag().resize(2, 1.); baby.sys_udsgtag().resize(2, 1.);
+    baby.sys_bctag_loose().resize(2, 1.); baby.sys_udsgtag_loose().resize(2, 1.);
+    baby.sys_bctag_tight().resize(2, 1.); baby.sys_udsgtag_tight().resize(2, 1.);
+    if (isFastSim) baby.sys_fs_bctag().resize(2, 1.); baby.sys_fs_udsgtag().resize(2, 1.);
+  }
+
+  for (size_t ijet(0); ijet < all_baby_jet_idx.size(); ijet++) {
+    const pat::Jet &jet = (*alljets)[all_baby_jet_idx[ijet]];
+    LVector &jetp4 = all_baby_jets[ijet];
+    if(!baby.jets_islep()[ijet]){
+      float csv(baby.jets_csv()[ijet]);
+      bool btag(csv > jetTool->CSVMedium);
+      bool btagLoose(csv > jetTool->CSVLoose);
+      bool btagTight(csv > jetTool->CSVTight);
+      const string ctr("central"), vup("up"), vdn("down");
+      //central weight for fastsim taken into account together with the fullsim inside jetTool->jetBTagWeight()
+      baby.w_btag()       *= jetTool->jetBTagWeight(jet, jetp4, btag, BTagEntry::OP_MEDIUM, ctr, ctr);
+      baby.w_btag_loose() *= jetTool->jetBTagWeight(jet, jetp4, btagLoose, BTagEntry::OP_LOOSE, ctr, ctr);
+      baby.w_btag_tight() *= jetTool->jetBTagWeight(jet, jetp4, btagTight, BTagEntry::OP_TIGHT, ctr, ctr);
+      if (doSystematics){
+	// now, vary only the full sim scale factor, regardless of whether we run on Fast or Full sim
+	// this is necessary since uncertainties for FastSim and FullSim are uncorrelated 
+	baby.sys_bctag()[0]   *= jetTool->jetBTagWeight(jet, jetp4, btag, BTagEntry::OP_MEDIUM, vup, ctr);
+	baby.sys_bctag()[1]   *= jetTool->jetBTagWeight(jet, jetp4, btag, BTagEntry::OP_MEDIUM, vdn, ctr);
+	baby.sys_udsgtag()[0] *= jetTool->jetBTagWeight(jet, jetp4, btag, BTagEntry::OP_MEDIUM, ctr, vup);
+	baby.sys_udsgtag()[1] *= jetTool->jetBTagWeight(jet, jetp4, btag, BTagEntry::OP_MEDIUM, ctr, vdn);
+	baby.sys_bctag_loose()[0]   *= jetTool->jetBTagWeight(jet, jetp4, btagLoose, BTagEntry::OP_LOOSE, vup, ctr);
+	baby.sys_bctag_loose()[1]   *= jetTool->jetBTagWeight(jet, jetp4, btagLoose, BTagEntry::OP_LOOSE, vdn, ctr);
+	baby.sys_udsgtag_loose()[0] *= jetTool->jetBTagWeight(jet, jetp4, btagLoose, BTagEntry::OP_LOOSE, ctr, vup);
+	baby.sys_udsgtag_loose()[1] *= jetTool->jetBTagWeight(jet, jetp4, btagLoose, BTagEntry::OP_LOOSE, ctr, vdn);
+	baby.sys_bctag_tight()[0]   *= jetTool->jetBTagWeight(jet, jetp4, btagTight, BTagEntry::OP_TIGHT, vup, ctr);
+	baby.sys_bctag_tight()[1]   *= jetTool->jetBTagWeight(jet, jetp4, btagTight, BTagEntry::OP_TIGHT, vdn, ctr);
+	baby.sys_udsgtag_tight()[0] *= jetTool->jetBTagWeight(jet, jetp4, btagTight, BTagEntry::OP_TIGHT, ctr, vup);
+	baby.sys_udsgtag_tight()[1] *= jetTool->jetBTagWeight(jet, jetp4, btagTight, BTagEntry::OP_TIGHT, ctr, vdn);
+	if (isFastSim) { 
+	  // now we vary only the FastSim SF
+	  baby.sys_fs_bctag()[0]   *= jetTool->jetBTagWeight(jet, jetp4, btag, BTagEntry::OP_MEDIUM, ctr, ctr, vup, ctr);
+	  baby.sys_fs_bctag()[1]   *= jetTool->jetBTagWeight(jet, jetp4, btag, BTagEntry::OP_MEDIUM, ctr, ctr, vdn, ctr);
+	  baby.sys_fs_udsgtag()[0] *= jetTool->jetBTagWeight(jet, jetp4, btag, BTagEntry::OP_MEDIUM, ctr, ctr, ctr, vup);
+	  baby.sys_fs_udsgtag()[1] *= jetTool->jetBTagWeight(jet, jetp4, btag, BTagEntry::OP_MEDIUM, ctr, ctr, ctr, vdn);
+	}
+      }
+    }
+  }
+}
+
+void bmaker_full::writeHiggVars(vector<LVector> &all_baby_jets){
+  vector<int> hi_csv(5,-1); // Indices of the 5 jets with highest CSV
+  baby.hig_dphi() = 9999.;
+
+  for (size_t ijet(0); ijet < baby.jets_pt().size(); ijet++) {
+    baby.jets_h1().push_back(false);
+    baby.jets_h2().push_back(false);
+
+    //matters for WH to not work with lepton jets
+    if (baby.jets_islep()[ijet]) continue;
+        
+    float dphi = reco::deltaPhi(baby.jets_phi()[ijet], baby.met_phi());
+    if(dphi < baby.hig_dphi()) baby.hig_dphi() = dphi;
+
+    // Finding the N jets with highest CSV values
+    float csv(baby.jets_csv()[ijet]);
+    for(size_t ind(0); ind<hi_csv.size(); ind++){
+      int icsv = hi_csv[ind];
+      if(icsv==-1 || csv > baby.jets_csv()[icsv]){
+	for(size_t ind2(hi_csv.size()-1); ind2>=ind+1; ind2--) hi_csv[ind2] = hi_csv[ind2-1];
+	hi_csv[ind] = ijet;
+	break;
+      }
+    } // Loop over highest CSV jets
+  } // Loop over jets  
 
   //// Variables for the Higgsino analysis
   if(hi_csv[3]>=0){
@@ -643,9 +666,10 @@ vector<LVector> bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
 
     // Setting up the ABCD bin: 
     // 2 -> SIG, 1 -> SB, 0 -> in between, not used
-    if(baby.hig_dm()<40 && baby.hig_am()>100 && baby.hig_am()<140) baby.hig_bin() = 2;
-    else if(baby.hig_dm()>40 || baby.hig_am()<100 || baby.hig_am()>140) baby.hig_bin() = 1;
-    else baby.hig_bin() = 0;
+    if(baby.hig_dm()<=40) {
+      if (baby.hig_am()>100 && baby.hig_am()<140) baby.hig_bin() = 2;
+      else  baby.hig_bin() = 1;
+    } else baby.hig_bin() = 0;
     // 20 -> 2b, 30 -> 3b, 40 -> 4b
     if(baby.nbt()>=2) {
       baby.hig_bin() += 20;
@@ -669,12 +693,9 @@ vector<LVector> bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
     baby.mct() = sqrt(2*pb1.pt()*pb2.pt() * (1+cos(deltaPhi(pb1.phi(), pb2.phi()))) );
   }
 
-  if(isFastSim) baby.pass_fsmet() = eventTool->passFSMET(alljets, genjets);
-  else baby.pass_fsmet() = true;  
+  return;
+}
 
-
-  return all_baby_jets;
-} // writeJets
 
 void bmaker_full::writeFatJets(){
   vector<float> fdummy;

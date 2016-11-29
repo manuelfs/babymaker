@@ -92,7 +92,8 @@ if isData: # Processing only lumis in JSON
     import FWCore.PythonUtilities.LumiList as LumiList
     jsonfile = findFileInPath(options.json)
     process.source.lumisToProcess = LumiList.LumiList(filename = jsonfile).getVLuminosityBlockRange()
-
+    doSystematics = False
+    
 process.baby_full = cms.EDAnalyzer('bmaker_full',
                                     condor_subtime = cms.string(options.condorSubTime),
                                     outputFile = cms.string(outName),

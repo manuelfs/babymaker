@@ -344,6 +344,8 @@ std::vector<float> mc_gs_dau_dr
 
 
 float m_tt
+float top_pt
+float antitop_pt
 bool fromGS
 int ntruleps
 int ntrumus

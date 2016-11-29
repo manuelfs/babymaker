@@ -32,9 +32,13 @@ outName="fullbaby_MET_Run2016C_23Sep2016-v1_2_oldfilter.root"
 inFile=/store/data/Run2016C/SingleElectron/MINIAOD/23Sep2016-v1/50000/00972D76-E68C-E611-B134-0025905A607E.root
 outName="fullbaby_SingleElectron_Run2016C_23Sep2016-v1.root"
 
+inFile=/home/users/ana/CMSSW_8_0_16/src/data/SMS-TChiHH_HToWWZZTauTau_HToWWZZTauTau_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv2_PUSpring16Fast_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1.root
+outName="fullbaby_SMS-TChiHH_HToWWZZTauTau_HToWWZZTauTau_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PUSpring16Fast_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1.root"
 
+inFile=/home/users/ana/data/SMS-TChiHH_HToBB_HToBB_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv2_PUSpring16Fast_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1.root
+outName="fullbaby_SMS-TChiHH_HToBB_HToBB_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv2_PUSpring16Fast_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1.root"
 
-nEvents="10000"
+nEvents="1000"
 
 json=do_not_want_json # If it can't find the file, it doesn't pre-apply the JSON
 # json="babymaker/data/json/golden_Cert_271036-275125_13TeV_PromptReco_Collisions16.json"

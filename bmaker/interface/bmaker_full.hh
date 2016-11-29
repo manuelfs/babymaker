@@ -86,6 +86,7 @@ public:
 			std::vector<reco::Candidate::LorentzVector>  &all_baby_jets,
 			std::vector<unsigned> &all_baby_jet_idx);
   void writeHiggVars(std::vector<reco::Candidate::LorentzVector> &all_baby_jets);
+  void writeBBVars(std::vector<reco::Candidate::LorentzVector>  &all_baby_jets, vCands &sig_leps);
 
   void writeFatJets();
   vCands writeMuons(edm::Handle<pat::MuonCollection> muons, 

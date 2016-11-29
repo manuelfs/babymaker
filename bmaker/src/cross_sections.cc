@@ -61,9 +61,10 @@ namespace xsec{
     double mtt_1000_eff=(11.16/670.3);
     if(file.Contains("TTJets_Mtt-1000toInf")) xsec = 815.96*mtt_1000_eff;
 
-    if(file.Contains("TTJets_DiLept")) xsec = 85.66; // (3*0.108)^2*815.96
+    if(file.Contains("TTJets_DiLept") || file.Contains("TTTo2L2Nu")) xsec = 85.66; // (3*0.108)^2*815.96
     if(file.Contains("TTJets_SingleLept")) xsec = 178.7; //(1- ((1-3*0.108)^2+(3*0.108)^2))*815.96*0.5 per half
-
+    if(file.Contains("TTToSemiLeptonic")) xsec = 357.4;
+    
     // cross sections from mcm
     if(file.Contains("TTG")) xsec = 3.697;                
     if(file.Contains("TTTT_TuneCUETP8M1_13TeV-amcatnlo")) xsec = 0.009103;

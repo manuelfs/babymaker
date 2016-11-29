@@ -171,6 +171,7 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   all_baby_jets = writeJets(alljets, all_baby_jets_idx, genjets, sig_leps, veto_leps, photons, tks, sys_jets, jetsMuonEnergyFrac);
   if (addBTagWeights) writeBTagWeights(alljets, all_baby_jets, all_baby_jets_idx);
   writeHiggVars(all_baby_jets);
+  writeBBVars(all_baby_jets, sig_leps);
   writeFatJets();
   
   if (doSystematics) {
@@ -284,13 +285,13 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
     iEvent.getByToken(tok_extLHEProducer_, lhe_info);
     if(!lhe_info.isValid()) iEvent.getByToken(tok_source_, lhe_info);
     if(lhe_info.isValid()) writeGenInfo(lhe_info);
-    if((outname.Contains("TTJets") && (outname.Contains("Lept")) && baby.ht_isr_me()>600)
+    if((outname.Contains("TTJets") && outname.Contains("Lept") && outname.Contains("madgraphMLM") && baby.ht_isr_me()>600)
        || (outname.Contains("DYJetsToLL_M-50_TuneCUETP8M")  && baby.ht_isr_me()>100)
        || (outname.Contains("WJetsToLNu_TuneCUETP8M1")  && baby.ht_isr_me()>100)){
       baby.stitch() = false;
       baby.stitch_ht() = false;
     }
-    if(outname.Contains("TTJets_Tune")){
+    if(outname.Contains("TTJets_Tune") && outname.Contains("madgraphMLM")){
       if(baby.ntruleps()!=0) baby.stitch()=false;
       if(baby.ht_isr_me()>600) baby.stitch_ht()=false;
     }
@@ -417,7 +418,6 @@ vector<LVector> bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
       }
     } 
     
-
     //    HLT HT definition
     //----------------------------
     if(jetp4.pt() > jetTool->JetHLTPtCut && fabs(jet.eta()) <= jetTool->JetHLTEtaCut) baby.ht_hlt() += jetp4.pt();
@@ -470,7 +470,7 @@ vector<LVector> bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
         //cutting on unaltered goodPtEtaLoose since indices must match baby.jets_islep()
         if((looseID && goodPtEta) || isLep) sys_jets[isys].push_back(jetp4); 
         //now cutting on altered variable for calculation of njets, ht, st
-        if(looseID && goodPtEta) {
+        if(looseID && jetp4.pt() > jetTool->JetPtCut && fabs(jet.eta()) <= jetTool->JetEtaCut) {
           if(!isLep){
             baby.sys_njets()[isys]++;
             baby.sys_ht()[isys] += jetp4.pt();
@@ -508,29 +508,8 @@ vector<LVector> bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
   baby.jetsys_nob_phi() = jetsys_nob_p4.phi();
   baby.jetsys_nob_m()   = jetsys_nob_p4.mass();
 
-  // write deltaR between csvm jets
-  vector<size_t> branks = jet_met_tools::getBRanking(all_baby_jets, baby.jets_csv(), baby.jets_islep());
-  baby.bb_highcsv_idx() = -1;
-  jetTool->fillDeltaRbb(baby.dr_bb(),baby.bb_pt(),baby.bb_m(),baby.bb_jet_idx1(),baby.bb_jet_idx2(),  baby.bb_gs_idx(), baby.bb_gs_flavor(),all_baby_jets, baby.jets_csv(), baby.jets_islep(),baby.jets_pt(),branks,baby.bb_highcsv_idx());
- 
-  if(baby.nbm() >= 2 && sig_leps.size()>0){
-    const auto &jet1 = all_baby_jets.at(branks.at(0));
-    const auto &jet2 = all_baby_jets.at(branks.at(1));
-    double px = baby.met()*cos(baby.met_phi())+sig_leps.at(0)->px();
-    double py = baby.met()*sin(baby.met_phi())+sig_leps.at(0)->py();
-    baby.mt2() = getMT2(jet1.mass(), jet1.pt(), jet1.phi(),
-                        jet2.mass(), jet2.pt(), jet2.phi(),
-                        hypot(px, py), atan2(py, px));
-    baby.mt2_0mass() = getMT2(0., jet1.pt(), jet1.phi(),
-			      0., jet2.pt(), jet2.phi(),
-			      hypot(px, py), atan2(py, px));
-  }else{
-    baby.mt2() = -1.;
-  }
-
   if(isFastSim) baby.pass_fsmet() = eventTool->passFSMET(alljets, genjets);
   else baby.pass_fsmet() = true;  
-
 
   return all_baby_jets;
 } // writeJets
@@ -696,6 +675,27 @@ void bmaker_full::writeHiggVars(vector<LVector> &all_baby_jets){
   return;
 }
 
+void bmaker_full::writeBBVars(std::vector<reco::Candidate::LorentzVector>  &all_baby_jets, vCands &sig_leps){
+  // write deltaR between csvm jets
+  vector<size_t> branks = jet_met_tools::getBRanking(all_baby_jets, baby.jets_csv(), baby.jets_islep());
+  baby.bb_highcsv_idx() = -1;
+  jetTool->fillDeltaRbb(baby.dr_bb(),baby.bb_pt(),baby.bb_m(),baby.bb_jet_idx1(),baby.bb_jet_idx2(),  baby.bb_gs_idx(), baby.bb_gs_flavor(),all_baby_jets, baby.jets_csv(), baby.jets_islep(),baby.jets_pt(),branks,baby.bb_highcsv_idx());
+ 
+  if(baby.nbm() >= 2 && sig_leps.size()>0){
+    const auto &jet1 = all_baby_jets.at(branks.at(0));
+    const auto &jet2 = all_baby_jets.at(branks.at(1));
+    double px = baby.met()*cos(baby.met_phi())+sig_leps.at(0)->px();
+    double py = baby.met()*sin(baby.met_phi())+sig_leps.at(0)->py();
+    baby.mt2() = getMT2(jet1.mass(), jet1.pt(), jet1.phi(),
+                        jet2.mass(), jet2.pt(), jet2.phi(),
+                        hypot(px, py), atan2(py, px));
+    baby.mt2_0mass() = getMT2(0., jet1.pt(), jet1.phi(),
+			      0., jet2.pt(), jet2.phi(),
+			      hypot(px, py), atan2(py, px));
+  }else{
+    baby.mt2() = -1.;
+  }
+}
 
 void bmaker_full::writeFatJets(){
   vector<float> fdummy;
@@ -1301,7 +1301,7 @@ void bmaker_full::writeMC(edm::Handle<reco::GenParticleCollection> genParticles,
   baby.ntruleps()=0; baby.ntrumus()=0; baby.ntruels()=0; baby.ntrutaush()=0; baby.ntrutausl()=0;
   baby.nleps_tm()=0;
   baby.fromGS()=false;
-  baby.m_tt()=0;
+  baby.m_tt()=0; baby.top_pt()=0; baby.antitop_pt()=0; 
   vector<float> top_pt;
   int topIndex=-1;
   int antitopIndex=-1;
@@ -1416,11 +1416,11 @@ void bmaker_full::writeMC(edm::Handle<reco::GenParticleCollection> genParticles,
       if(isTop) mc.pdgId()>0 ? topIndex=imc : antitopIndex=imc;
 
       //////// Finding p4 of ME ISR system
-      if((isTop && outname.Contains("TTJets"))
+      if((isTop && (outname.Contains("TTJets") || outname.Contains("TT_") || outname.Contains("TTTo")))
          || (isGluino && (outname.Contains("SMS") || outname.Contains("RPV")))
          || (isZ && outname.Contains("DY"))) isr_p4 -= mc.p4();
 
-      if(isTop && (outname.Contains("TTJets") || outname.Contains("TT_"))){
+      if(isTop && (outname.Contains("TTJets") || outname.Contains("TT_") || outname.Contains("TTTo"))){
         top_pt.push_back(mc.pt());
       }
 
@@ -1551,6 +1551,8 @@ void bmaker_full::writeMC(edm::Handle<reco::GenParticleCollection> genParticles,
     reco::Candidate::LorentzVector antitopP4 = genParticles->at(antitopIndex).p4();
     reco::Candidate::LorentzVector ttbarP4 = topP4+antitopP4;
     baby.m_tt()=ttbarP4.mass();
+    baby.top_pt()=topP4.pt();
+    baby.antitop_pt()=antitopP4.pt();
   }
 
   //Loop over gluon splitting gluons to mark truth info in bb pairs
@@ -1599,7 +1601,7 @@ void bmaker_full::writeMC(edm::Handle<reco::GenParticleCollection> genParticles,
   baby.isr_tru_eta() = isr_p4.eta();
   baby.isr_tru_phi() = isr_p4.phi();
 
-  if((outname.Contains("TTJets") || outname.Contains("TT_")) && top_pt.size() == 2) baby.w_toppt() = weightTool->topPtWeight(top_pt.at(0),top_pt.at(1));
+  if((outname.Contains("TTJets") || outname.Contains("TT_") || outname.Contains("TTTo")) && top_pt.size() == 2) baby.w_toppt() = weightTool->topPtWeight(top_pt.at(0),top_pt.at(1));
   else baby.w_toppt() = 1.;
 
   baby.met_tru_nuw() = hypot(metw_tru_x, metw_tru_y);

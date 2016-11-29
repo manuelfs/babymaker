@@ -104,12 +104,15 @@ float weight_tools::triggerEfficiency(int &nmus, int &nels, float &met, vector<f
 }
 
 float weight_tools::topPtWeight(float toppt1, float toppt2){
-  float pt1,pt2;
-  if(toppt1>400) pt1=400;
-  else pt1=toppt1;
-  if(toppt2>400) pt2=400;
-  else pt2=toppt2;
-  return sqrt(exp(0.156-0.00137*pt1)*exp(0.156-0.00137*pt2));
+  // 8TeV
+  // float pt1,pt2;
+  // if(toppt1>400) pt1=400;
+  // else pt1=toppt1;
+  // if(toppt2>400) pt2=400;
+  // else pt2=toppt2;
+  //  return sqrt(exp(0.156-0.00137*pt1)*exp(0.156-0.00137*pt2));
+  // 13 TeV
+  return sqrt(exp(0.0615-0.0005*toppt1)*exp(0.0615-0.0005*toppt2));
 }
 
 float weight_tools::isrWeight(float isrpt){

@@ -21,14 +21,7 @@ int npv
 int ntrupv
 float ntrupv_mean
 float ht
-float ht40
-float ht50
-float htx
-float htx40
-float htx50
 float st
-float st40
-float st50
 float ht_ra2
 float ht_clean
 float ht_hlt
@@ -82,14 +75,8 @@ float hig2_m
 
 ###################   Jets   ##################
 int njets
-int njets20
-int njets40
-int njets50
 int nbl
 int nbm
-int nbm20
-int nbm40
-int nbm50
 int nbt
 
 int njets_ra2
@@ -124,8 +111,6 @@ std::vector<int>   jets_fjet14_nolep_index
 std::vector<int>   jets_fjet08_index
 std::vector<int>   jets_fjet12_index
 std::vector<int>   jets_fjet14_index
-std::vector<int>   jets_fjet40_index
-std::vector<int>   jets_fjet50_index
 std::vector<int>   jets_hflavor
 std::vector<bool>  jets_h1
 std::vector<bool>  jets_h2
@@ -303,9 +288,6 @@ std::vector<float> els_vvvl_phi
 
 ###################   Quality   ##################
 bool pass_jets;
-bool pass_jets20;
-bool pass_jets40;
-bool pass_jets50;
 bool pass_jets_tight;
 bool pass_jets_nohf;
 bool pass_jets_ra2;
@@ -318,9 +300,6 @@ bool pass_eebadsc;
 bool pass_ecaldeadcell;
 bool pass_fsmet;
 bool pass;
-bool pass20;
-bool pass40;
-bool pass50;
 bool pass_ra2;
 bool pass_nohf;
 bool pass_ra2_badmu;
@@ -345,16 +324,6 @@ std::vector<float> fjets08_eta
 std::vector<float> fjets08_phi
 std::vector<float> fjets08_m
 std::vector<int> fjets08_nconst
-
-int nfjets40
-float mj40
-std::vector<float> fjets40_pt
-std::vector<float> fjets40_eta
-std::vector<float> fjets40_phi
-std::vector<float> fjets40_m
-std::vector<int> fjets40_nconst
-
-float mj50
 
 ################  Truth   ##################
 int nisr_me
@@ -393,7 +362,6 @@ float weight_rpv
 float w_lumi
 float w_pu
 float w_btag
-float w_btag40
 float w_btag_loose
 float w_btag_tight
 float w_toppt
@@ -406,18 +374,12 @@ float eff_jetid
 ################  Systematic variations   ##################
 # variations have index 0 (JER smearing), 1 (JEC up) and 2 (JEC down)
 std::vector<float> sys_ht
-std::vector<float> sys_ht40
 std::vector<float> sys_st
-std::vector<float> sys_st40
 std::vector<int>   sys_njets
-std::vector<int>   sys_njets40
 std::vector<int>   sys_nbm
-std::vector<int>   sys_nbm40
 std::vector<bool>  sys_pass
-std::vector<bool>  sys_pass40
 std::vector<float> sys_mj14_nolep
 std::vector<float> sys_mj14
-std::vector<float> sys_mj40
 std::vector<float> sys_met
 std::vector<float> sys_mt
 
@@ -427,8 +389,6 @@ std::vector<float> sys_muf
 std::vector<float> sys_murf
 std::vector<float> sys_bctag
 std::vector<float> sys_udsgtag
-std::vector<float> sys_bctag40
-std::vector<float> sys_udsgtag40
 std::vector<float> sys_bctag_loose
 std::vector<float> sys_udsgtag_loose
 std::vector<float> sys_bctag_tight
@@ -438,7 +398,5 @@ std::vector<float> sys_lep
 std::vector<float> sys_fs_lep
 std::vector<float> sys_fs_bctag
 std::vector<float> sys_fs_udsgtag
-std::vector<float> sys_fs_bctag40
-std::vector<float> sys_fs_udsgtag40
 std::vector<float> sys_trig
 std::vector<float> sys_pu

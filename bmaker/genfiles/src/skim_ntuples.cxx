@@ -85,6 +85,8 @@ int main(int argc, char *argv[]){
   //// Higgsino skims
   if(cuts=="higloose")
     cuts="met>100&&nvleps==0&&(njets==4||njets==5)&&nbm>=2";
+  if(cuts=="higtight")
+    cuts="met>150&&nvleps==0&&(njets>=4||njets<=5)&&nbt>=2&&ntks==0&&!low_dphi&&hig_drmax<2.2";
   if(cuts=="higlep1") // 1l CR for Higgsino
     cuts="met>100&&nleps==1&&(njets==4||njets==5)&&nbm>=2";
   if(cuts=="higlep2") // 2l CR for Higgsino

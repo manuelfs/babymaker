@@ -1,0 +1,63 @@
+drop *
+
+## General
+keep npv
+keep pass
+keep run
+keep lumiblock
+keep event
+keep type
+keep nonblind
+keep json*
+
+## Higgsino specific
+keep hig*
+
+## Hadronic
+keep ht
+keep mht
+keep mht_phi
+keep met
+keep met_phi
+keep met_calo
+keep met_calo_phi
+keep njets
+keep nbl
+keep nbm
+keep nbt
+keep nisr
+keep dphi1
+keep dphi2
+keep dphi3
+keep dphi4
+keep low_dphi
+keep mct
+keep mt
+
+## Leptonic
+keep nleps
+keep nels
+keep nmus
+keep nvleps
+keep nvels
+keep nvmus
+keep ntks
+keep mumu*
+keep elel*
+
+## Weights
+keep weight
+keep w_*
+drop w_pdf
+keep eff_*
+
+## Jets
+keep jets_*
+drop *fjet*
+drop jets_islep
+
+## Triggers
+keep trig*
+keep *vvvl*
+keep on*
+

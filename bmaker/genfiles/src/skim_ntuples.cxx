@@ -81,7 +81,9 @@ int main(int argc, char *argv[]){
     cuts = "(mumuv_m>60||elelv_m>60)&&njets>=2";
   if(cuts=="httrig") // Prescaled HT triggers for fake MET trigger efficiency measurement
     cuts = "pass&&nvleps==0&&(trig[11]||trig[12]||trig[47]||trig[48]||trig[49]||trig[50]||trig[51]||trig[52]||trig[53]||trig[54])";
-
+  if(cuts=="httrig_w_leps") // Prescaled HT triggers
+    cuts = "pass&&(trig[11]||trig[12]||trig[47]||trig[48]||trig[49]||trig[50]||trig[51]||trig[52]||trig[53]||trig[54])";
+  
   //// Higgsino skims
   if(cuts=="higloose")
     cuts="met>100&&nvleps==0&&(njets==4||njets==5)&&nbm>=2";

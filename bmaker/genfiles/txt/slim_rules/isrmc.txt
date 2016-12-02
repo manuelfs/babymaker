@@ -1,0 +1,91 @@
+drop *
+
+## General
+keep npv
+keep pass
+keep event
+keep type
+
+## Hadronic
+keep ht
+keep st
+keep low_dphi
+keep met
+keep met_phi
+keep met_calo
+keep met_calo_phi
+keep njets
+keep nbm
+keep nbt
+keep nbl
+keep mj14
+keep nisr
+keep jetsys*
+
+
+## Leptonic
+keep leps*
+keep nleps
+keep nels
+keep nmus
+keep nvleps
+keep nvels
+keep nvmus
+keep nveto
+keep mt
+
+## MC
+keep stitch
+keep mgluino
+keep mlsp
+keep mc_*
+keep nisr_me
+keep ht_isr_me
+keep m_tt
+keep *tru*
+keep *top_pt
+drop ntrupv*
+
+
+## Weights
+keep weight
+keep w_*
+drop w_pdf
+keep eff_*
+
+## Jets
+keep jets_*
+drop jets_fjet*_index
+drop *_nolep*
+drop jets_h1
+drop jets_h2
+drop jets_pt_res
+
+keep 
+## Dileptons
+keep elel*_m
+keep mumu*_m
+keep elel*_pt
+keep mumu*_pt
+
+
+## Electrons
+keep els_pt
+keep els_sceta
+keep els_phi
+keep els_miniso
+keep els_reliso
+keep els_sigid
+keep els_tight
+
+## Muons
+keep mus_pt
+keep mus_eta
+keep mus_phi
+keep mus_miniso
+keep mus_reliso
+keep mus_sigid
+keep mus_tight
+
+## Clean up
+drop *vvvl*

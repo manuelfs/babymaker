@@ -9,8 +9,8 @@ import string
 import time
 import math
 
-mcdir = '/cms2r0/babymaker/babies/2016_06_14/mc/unskimmed'
-dadir = '/cms2r0/babymaker/babies/2016_06_14/data/unskimmed'
+mcdir = '/cms2r0/babymaker/babies/2016_08_10/mc/unskimmed'
+dadir = '/cms2r0/babymaker/babies/2016_11_08/data/unskimmed'
 
 mcset = set([i.split('_RunIISpring')[0].split('fullbaby_')[-1] for i in glob.glob(mcdir+"/*.root")])
 daset = set([i.strip(i.split('_')[-1]).rstrip('_').split('fullbaby_')[-1] for i in glob.glob(dadir+"/*.root")])

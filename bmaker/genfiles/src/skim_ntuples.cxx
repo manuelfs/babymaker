@@ -91,11 +91,11 @@ int main(int argc, char *argv[]){
   TString nbcut = "&&nbt>=2";
   TString zcand = "&&(mumu_m*(mumu_m>0)+elel_m*(elel_m>0))>80&&(mumu_m*(mumu_m>0)+elel_m*(elel_m>0))<100";
   TString higtrim = "&&hig_drmax<2.2&&hig_dm<=40&&hig_am<=200";
-  if(cuts=="higqcd")   cuts = njcut+"&&met>150&&nvleps==0";
-  if(cuts=="higloose") cuts = njcut+nbcut+"&&met>100&&nvleps==0";
-  if(cuts=="higtight") cuts = njcut+nbcut+"&&met>150&&nvleps==0&&ntks==0&&!low_dphi"+higtrim;
-  if(cuts=="higlep1")  cuts = njcut+nbcut+"met>100&&nleps==1";
-  if(cuts=="higlep2")  cuts = njcut+zcand+"&&nleps==2&&Max$(leps_pt)>40";
+  if(cuts=="higqcd")   cuts = njcut      +"&& met>150 && nvleps==0";
+  if(cuts=="higloose") cuts = njcut+nbcut+"&& met>100 && nvleps==0";
+  if(cuts=="higtight") cuts = njcut+nbcut+"&& met>150 && nvleps==0 && ntks==0&&!low_dphi"+higtrim;
+  if(cuts=="higlep1")  cuts = njcut+nbcut+"&& met>100 && nleps==1";
+  if(cuts=="higlep2")  cuts = njcut+zcand+"&& nleps==2 && Max$(leps_pt)>40";
 
   //// RA2/b skims
   TString pass="globalTightHalo2016Filter==1&&HBHENoiseFilter==1&&HBHEIsoNoiseFilter==1&&eeBadScFilter==1";

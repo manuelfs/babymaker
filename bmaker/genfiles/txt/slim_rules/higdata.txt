@@ -3,6 +3,7 @@ drop *
 ## General
 keep npv
 keep pass
+keep pass_ra2_badmu
 keep run
 keep lumiblock
 keep event
@@ -44,6 +45,8 @@ keep nvmus
 keep ntks
 keep mumu*
 keep elel*
+keep leps_pt
+keep leps_id
 
 ## Weights
 keep weight

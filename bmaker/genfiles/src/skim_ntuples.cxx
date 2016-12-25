@@ -54,7 +54,9 @@ int main(int argc, char *argv[]){
   if(cuts=="sys_abcd") 
     cuts = "nleps==1&&max(st,Max$(sys_st))>500&&max(met,Max$(sys_met))>200&&max(njets,Max$(sys_njets))>=6&&max(nbm,Max$(sys_nbm))>=1&&max(mj14,Max$(sys_mj14))>250";
   if(cuts=="zisr")
-    cuts = "nvleps==2&&nleps>=1&&Max$(leps_pt)>30&&((elelv_m>80&&elelv_m<100)||(mumuv_m>80&&mumuv_m<100))";
+    cuts = "nleps==2&&Max$(leps_pt)>30&&((elel_m>80&&elel_m<100)||(mumu_m>80&&mumu_m<100))";
+  if(cuts=="zcand")
+    cuts = "nleps==2&&((elel_m>80&&elel_m<100)||(mumu_m>80&&mumu_m<100))";
   if(cuts=="dy_ht300")
     cuts = "nvleps==2&&nleps>=1&&Max$(leps_pt)>30&&((elelv_m>80&&elelv_m<100)||(mumuv_m>80&&mumuv_m<100))&&ht>300";
   if(cuts=="ttisr")
@@ -85,21 +87,22 @@ int main(int argc, char *argv[]){
     cuts = "pass&&(trig[11]||trig[12]||trig[47]||trig[48]||trig[49]||trig[50]||trig[51]||trig[52]||trig[53]||trig[54])";
   
   //// Higgsino skims
-  if(cuts=="higloose")
-    cuts="met>100&&nvleps==0&&(njets==4||njets==5)&&nbm>=2";
-  if(cuts=="higtight")
-    cuts="met>150&&nvleps==0&&(njets>=4||njets<=5)&&nbt>=2&&ntks==0&&!low_dphi&&hig_drmax<2.2";
-  if(cuts=="higlep1") // 1l CR for Higgsino
-    cuts="met>100&&nleps==1&&(njets==4||njets==5)&&nbm>=2";
-  if(cuts=="higlep2") // 2l CR for Higgsino
-    cuts="nleps==2&&(mumu_m*(mumu_m>0)+elel_m*(elel_m>0))>80&&(mumu_m*(mumu_m>0)+elel_m*(elel_m>0))<100&&(njets==4||njets==5)";
+  TString njcut = "njets>=4&&njets<=5";
+  TString nbcut = "&&nbt>=2";
+  TString zcand = "&&(mumu_m*(mumu_m>0)+elel_m*(elel_m>0))>80&&(mumu_m*(mumu_m>0)+elel_m*(elel_m>0))<100";
+  TString higtrim = "&&hig_drmax<2.2&&hig_dm<=40&&hig_am<=200";
+  if(cuts=="higqcd")   cuts = njcut+"&&met>150&&nvleps==0";
+  if(cuts=="higloose") cuts = njcut+nbcut+"&&met>100&&nvleps==0";
+  if(cuts=="higtight") cuts = njcut+nbcut+"&&met>150&&nvleps==0&&ntks==0&&!low_dphi"+higtrim;
+  if(cuts=="higlep1")  cuts = njcut+nbcut+"met>100&&nleps==1";
+  if(cuts=="higlep2")  cuts = njcut+zcand+"&&nleps==2&&Max$(leps_pt)>40";
 
   //// RA2/b skims
   TString pass="globalTightHalo2016Filter==1&&HBHENoiseFilter==1&&HBHEIsoNoiseFilter==1&&eeBadScFilter==1";
   pass += "&&EcalDeadCellTriggerPrimitiveFilter==1&&BadChargedCandidateFilter&&BadPFMuonFilter&&NVtx>0&&JetID";
-  if(cuts=="ra2_qcd") cuts = pass+"&&(@Electrons.size()+@Muons.size())==0&&NJets>=3";	     
-  if(cuts=="ra2_ht300") cuts = pass+"&&HT>300";	     
-  if(cuts=="ra2_eht300") cuts = pass+"&&Max$(Electrons.Pt()*(abs(Electrons.Eta())<2))>35&&HT>300";	     
+  if(cuts=="ra2_qcd")     cuts = pass+"&&(@Electrons.size()+@Muons.size())==0&&NJets>=3";	     
+  if(cuts=="ra2_ht300")   cuts = pass+"&&HT>300";	     
+  if(cuts=="ra2_eht300")  cuts = pass+"&&Max$(Electrons.Pt()*(abs(Electrons.Eta())<2))>35&&HT>300";	     
   if(cuts=="ra2_zmht200") cuts = pass+"&&@ZCandidates.size()>=1&&MHT>200";	     
 	     
 

@@ -3,6 +3,7 @@ drop *
 ## General
 keep npv
 keep pass
+keep pass_ra2_badmu
 keep event
 keep type
 

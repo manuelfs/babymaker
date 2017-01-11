@@ -12,6 +12,7 @@ taskname = taskname.replace('TuneCUETP8M1_13TeV-madgraphMLM-pythia8','13TeV-MG-P
 taskname = taskname.replace('RunIISpring15MiniAODv2-Asympt25ns_74X_mcRun2_asymptotic_v2','MiniAODv2')
 taskname = taskname.replace('RunIISpring16MiniAODv1-PUSpring16_80X_mcRun2_asymptotic_2016','80XMiniAODv1')
 taskname = taskname.replace('RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2','80XMiniAODv2')
+taskname = taskname.replace('RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV','Moriond17_80XMiniAODv2')
 taskname = taskname.replace(':','___')
 
 if(len(taskname)>100): taskname = taskname[0:99]

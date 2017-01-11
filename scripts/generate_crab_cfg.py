@@ -64,8 +64,10 @@ datasets = [[]]
 # datasets.append(["/TTToSemiLeptonic_TuneCUETP8M1_alphaS01273_13TeV-powheg-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM"])
 # datasets.append(["/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/RunIISpring16MiniAODv2-premix_withHLT_80X_mcRun2_asymptotic_v14-v1/MINIAODSIM"])
 # datasets.append(["/TTJets_TuneCUETP8M1_alphaS0118_13TeV-amcatnloFXFX-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM"])
-datasets.append(["/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring16MiniAODv2-PUSpring16RAWAODSIM_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM"])
+#datasets.append(["/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring16MiniAODv2-PUSpring16RAWAODSIM_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM"])
 # datasets.append(["/SMS-TChiHH_HToWWZZTauTau_HToWWZZTauTau_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring16MiniAODv2-PUSpring16Fast_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM"])
+
+datasets.append(["/TTJets_SingleLeptFromT_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM"])
 
 if doRyan:
   datasets.append(["/MET/Run2016B-23Sep2016-v3/MINIAOD"])
@@ -285,9 +287,7 @@ if doAna:
 for ilist in datasets:
   nevents=0
   print ""
-  print "new list"
   for ids in ilist:
-    print "ids is "+ids
     #nevents += getNumberOfEvents(ids) # Not working currently
     nevents += 1000000 ## Only needed to get w_lumi right on the first go, will fix at renormalization
     #print "running nevents is "+str(nevents)

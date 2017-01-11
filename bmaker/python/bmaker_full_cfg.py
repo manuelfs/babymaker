@@ -62,6 +62,8 @@ elif "Run2016" in outName: jecLabel = 'Spring16_25nsV6_DATA'
 elif "RunIISpring16MiniAOD" in outName:
     if "Fast" in outName or "FSPremix" in outName: jecLabel = 'Spring16_FastSimV1_MC'
     else: jecLabel = 'Spring16_25nsV6_MC'
+elif "RunIISummer16MiniAOD" in outName:
+    jecLabel = 'miniAOD_Spring16_25nsV6_MC'
 
 if "FSPremix" in outName or "Fast" in outName: fastsim = True
 else: fastsim = False

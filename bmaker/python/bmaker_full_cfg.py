@@ -48,22 +48,32 @@ cmsswRel = environ["CMSSW_BASE"]
 if "RunIISpring15DR74" in outName or "RunIISpring15FSPremix" in outName: 
     if cmsswRel.find("CMSSW_7_4_6") == -1: sys.exit("ERROR: Trying to run miniAOD V1 in a new release. Exiting")
 
-## This refers to the official JEC methods. To apply on-the-fly, just set jecLabel to something different from miniAOD
-doJEC = False  
-if doJEC: jets_label = "patJetsReapplyJEC"
+## JECs must be undone and reapplied when rerunning b-tagging
+## => if doJEC = False, DeepCSV discriminator will not be included
+doJEC = True  
+if doJEC: jets_label = "updatedPatJetsTransientCorrectedUpdatedJEC"
 else: jets_label = "slimmedJets"
 
-# jecLabel must contain the JEC version; this is needed for uncertainty calculation
-# if there is no need to apply JECs then the jecLabel must also contain 'miniAOD' (as well as the version)
-jecLabel = 'miniAOD_Summer15_25nsV6_MC' # for 7.4.14 mc, don't apply JEC, but still give the JEC tag because of systematics
-if "Run2015D" in outName: jecLabel = 'Summer15_25nsV6_DATA' # for 7.4.12 data
-elif "RunIISpring15FSPremix" in outName: jecLabel = 'MCRUN2_74_V9'
-elif "Run2016" in outName: jecLabel = 'Spring16_25nsV6_DATA'
+# to apply JECs with txt files in babymaker, 
+# prefix jecLabel with "onthefly_", e.g. onthefly_Spring16_25nsV6_MC
+# systematics will also be calculated using this tag, even if JECs are not re-applied
+# N.B. JECs change in the middle of RunF, thereby the Run2016F1 vs Run2016F2 distinction
+jecLabel = 'onthefly_Spring16_25nsV6_MC'
+if ("Run2016B" in outName) or ("Run2016C" in outName) or ("Run2016D" in outName): 
+  jecLabel = 'Summer16_23Sep2016BCDV2_DATA'
+elif ("Run2016E" in outName) or ("Run2016F1" in outName):
+  jecLabel = 'Summer16_23Sep2016EFV2_DATA'
+elif ("Run2016F2" in outName) or ("Run2016G" in outName):
+  jecLabel = 'Summer16_23Sep2016GV2_DATA'
+elif ("Run2016H" in outName): 
+  jecLabel = 'Summer16_23Sep2016HV2_DATA'
 elif "RunIISpring16MiniAOD" in outName:
     if "Fast" in outName or "FSPremix" in outName: jecLabel = 'Spring16_FastSimV1_MC'
-    else: jecLabel = 'Spring16_25nsV6_MC'
+    else: jecLabel = 'Spring16_23Sep2016V2_MC' # for ICHEP MC against re-reco data
 elif "RunIISummer16MiniAOD" in outName:
-    jecLabel = 'miniAOD_Spring16_25nsV6_MC'
+    jecLabel = 'Summer16_23Sep2016V2_MC'
+
+print "BABYMAKER: Applying JECs with jecLabel:", jecLabel
 
 if "FSPremix" in outName or "Fast" in outName: fastsim = True
 else: fastsim = False
@@ -71,19 +81,16 @@ else: fastsim = False
 if "Run2016" in outName:
     isData = True
     # These only used for the official application of JECs
-    globalTag = "80X_dataRun2_Prompt_v14" #"74X_dataRun2_v2"
+    globalTag = "80X_dataRun2_2016SeptRepro_v6"
     processRECO = "RECO"
     jecLevels = ['L1FastJet', 'L2Relative', 'L3Absolute', 'L2L3Residual']
 else:
     isData = False
     # These only used for the official application of JECs
-    globalTag = "74X_mcRun2_asymptotic_v2"
-    if "RunIISpring16MiniAOD" in outName: globalTag = "80X_mcRun2_asymptotic_2016_miniAODv2"
+    globalTag = "80X_mcRun2_asymptotic_2016_miniAODv2"
+    if "RunIISummer16MiniAOD" in outName: globalTag = "80X_mcRun2_asymptotic_2016_TrancheIV_v7"
     processRECO = "PAT"
     jecLevels = ['L1FastJet', 'L2Relative', 'L3Absolute']
-
-# The 7.4.14 re-miniAOD already has V5 JECs with the new prescription
-# if cmsswRel.find("CMSSW_7_4_14") != -1: jecLabel = 'miniAOD' 
 
 ###### Defining Baby process, input and output files 
 process = cms.Process("Baby")
@@ -95,7 +102,16 @@ if isData: # Processing only lumis in JSON
     jsonfile = findFileInPath(options.json)
     process.source.lumisToProcess = LumiList.LumiList(filename = jsonfile).getVLuminosityBlockRange()
     doSystematics = False
-    
+
+process.load("Configuration.Geometry.GeometryRecoDB_cff")
+process.load("Configuration.StandardSequences.MagneticField_cff")
+
+###### Setting global tag 
+## From https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookJetEnergyCorrections#JecGlobalTag
+process.load('Configuration.StandardSequences.Services_cff')
+process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
+process.GlobalTag.globaltag = globalTag
+
 process.baby_full = cms.EDAnalyzer('bmaker_full',
                                     condor_subtime = cms.string(options.condorSubTime),
                                     outputFile = cms.string(outName),
@@ -118,13 +134,6 @@ process.load("FWCore.MessageService.MessageLogger_cfi")
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(options.nEvents) )
 process.MessageLogger.cerr.FwkReport.reportEvery = 100000
 
-###### Setting global tag 
-## From https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookJetEnergyCorrections#JecGlobalTag
-process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
-process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff")
-process.GlobalTag.globaltag = globalTag
-
-
 
 if not fastsim:
     process.load('Configuration.StandardSequences.Services_cff')
@@ -141,20 +150,11 @@ if not fastsim:
     process.BadPFMuonFilter.PFCandidates = cms.InputTag("packedPFCandidates")
     process.BadPFMuonFilter.debug = cms.bool(False)
 
-
-
-###### HBHE
-## HBHE noise filter needs to be recomputed in early 2015 data
-##___________________________HCAL_Noise_Filter________________________________||
-#if "FSPremix" in outName: fastsim = True #(moved earlier)
-#else: fastsim = False
-#if not fastsim:
-#    process.load('CommonTools.RecoAlgos.HBHENoiseFilterResultProducer_cfi')
-#    process.HBHENoiseFilterResultProducer.minZeros = cms.int32(99999)
-#    process.HBHENoiseFilterResultProducer.IgnoreTS4TS5ifJetInLowBVRegion=cms.bool(False) 
-#    process.HBHENoiseFilterResultProducer.defaultDecision = cms.string("HBHENoiseFilterResultRun2Loose")
-
 if doJEC:
+    process.options = cms.untracked.PSet(
+      allowUnscheduled = cms.untracked.bool(True),
+      wantSummary = cms.untracked.bool(False)
+    )
     ###### Setting sqlite file for the JECs that are in newer global tags 
     ## From https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookJetEnergyCorrections#JecSqliteFile
     process.load("CondCore.DBCommon.CondDBCommon_cfi")
@@ -166,60 +166,40 @@ if doJEC:
                                        record = cms.string("JetCorrectionsRecord"),
                                        tag    = cms.string("JetCorrectorParametersCollection_"+jecLabel+"_AK4PFchs"),
                                        label  = cms.untracked.string("AK4PFchs")
-                                   ),
-                        cms.PSet(
-                            record = cms.string("JetCorrectionsRecord"),
-                            tag    = cms.string("JetCorrectorParametersCollection_"+jecLabel+"_AK4PF"),
-                            label  = cms.untracked.string("AK4PF")
-                        )
+                                   )
                 )
     )
     process.es_prefer_jec = cms.ESPrefer("PoolDBESSource","jec")
-    ###### Jets 
+    ###### Applying JECs and including deepCSV info
     ## From https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookJetEnergyCorrections#CorrPatJets
-    from PhysicsTools.PatAlgos.producersLayer1.jetUpdater_cff import patJetCorrFactorsUpdated
-    process.patJetCorrFactorsReapplyJEC = patJetCorrFactorsUpdated.clone(
-        src = cms.InputTag("slimmedJets"),
-        levels = jecLevels,
-        payload = 'AK4PFchs' ) # Make sure to choose the appropriate levels and payload here!
-
-    from PhysicsTools.PatAlgos.producersLayer1.jetUpdater_cff import patJetsUpdated
-    process.patJetsReapplyJEC = patJetsUpdated.clone(
-        jetSource = cms.InputTag("slimmedJets"),
-        jetCorrFactorsSource = cms.VInputTag(cms.InputTag("patJetCorrFactorsReapplyJEC"))
+    from PhysicsTools.PatAlgos.tools.jetTools import updateJetCollection
+    updateJetCollection(
+      process,
+      jetSource = cms.InputTag('slimmedJets'),
+      labelName = 'UpdatedJEC',
+      jetCorrections = ('AK4PFchs', cms.vstring(jecLevels), 'None'),
+      btagDiscriminators = ["deepFlavourJetTags:probudsg", 
+                            "deepFlavourJetTags:probb", 
+                            "deepFlavourJetTags:probc", 
+                            "deepFlavourJetTags:probbb", 
+                            "deepFlavourJetTags:probcc"]
     )
+    process.options.allowUnscheduled = cms.untracked.bool(True)
+
+    process.content = cms.EDAnalyzer("EventContentAnalyzer")
 
     ###### Apply new JECs to MET
-    ## From https://github.com/cms-met/cmssw/blob/METCorUnc74X/PhysicsTools/PatAlgos/test/corMETFromMiniAOD.py
-    process.options = cms.untracked.PSet(
-        allowUnscheduled = cms.untracked.bool(True),
-        wantSummary = cms.untracked.bool(False)
-    )
+    ## From https://twiki.cern.ch/twiki/bin/view/CMS/MissingETUncertaintyPrescription
     from PhysicsTools.PatUtils.tools.runMETCorrectionsAndUncertainties import runMetCorAndUncFromMiniAOD
+    ## If you only want to re-correct and get the proper uncertainties, no reclustering
     runMetCorAndUncFromMiniAOD(process,
-                               isData=isData,
-                               pfCandColl=cms.InputTag("packedPFCandidates")
-                           )
-    if isData:
-        process.patPFMetT1T2Corr.jetCorrLabelRes = cms.InputTag("L3Absolute")
-        process.patPFMetT1T2SmearCorr.jetCorrLabelRes = cms.InputTag("L3Absolute")
-        process.patPFMetT2Corr.jetCorrLabelRes = cms.InputTag("L3Absolute")
-        process.patPFMetT2SmearCorr.jetCorrLabelRes = cms.InputTag("L3Absolute")
-        process.shiftedPatJetEnDown.jetCorrLabelUpToL3Res = cms.InputTag("ak4PFCHSL1FastL2L3Corrector")
-        process.shiftedPatJetEnUp.jetCorrLabelUpToL3Res = cms.InputTag("ak4PFCHSL1FastL2L3Corrector")
-    # Redefine process for data to RECO
-    process.slimmedMETs.t01Variation = cms.InputTag("slimmedMETs","",processRECO)
+                               isData = isData,
+    )
 
-    ###### Path
-    process.p = cms.Path(process.patJetCorrFactorsReapplyJEC*
-                         process.patJetsReapplyJEC*
-                         #process.HBHENoiseFilterResultProducer* #produces HBHE baseline bools
+###### Path
+if not fastsim:
+    process.p = cms.Path(process.BadChargedCandidateFilter*
+                         process.BadPFMuonFilter*
                          process.baby_full)
 else:
-    ###### Path
-    if not fastsim:
-        process.p = cms.Path(process.BadChargedCandidateFilter*
-                             process.BadPFMuonFilter*
-                             process.baby_full)
-    else:
-        process.p = cms.Path(process.baby_full)
+    process.p = cms.Path(process.baby_full)

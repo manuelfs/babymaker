@@ -14,11 +14,17 @@ taskname = taskname.replace('RunIISpring16MiniAODv1-PUSpring16_80X_mcRun2_asympt
 taskname = taskname.replace('RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2','80XMiniAODv2')
 taskname = taskname.replace('RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV','Moriond17_80XMiniAODv2')
 taskname = taskname.replace(':','___')
+# make sure task name is unique for each part of RunF
+if ('RUN_RANGE'=='Run2016F1'): taskname = taskname.replace('Run2016F', 'Run2016F1') 
+elif ('RUN_RANGE'=='Run2016F2'): taskname = taskname.replace('Run2016F', 'Run2016F2') 
 
 if(len(taskname)>100): taskname = taskname[0:99]
 
 datasetID = dataset.replace('/','',1).replace('/', '_', 1)
 datasetID = datasetID[0:datasetID.find('/')]
+# make sure baby filename is unique for each part of RunF
+if ("Run2016F1" in taskname): datasetID = datasetID.replace('Run2016F', 'Run2016F1')
+elif ("Run2016F2" in taskname): datasetID = datasetID.replace('Run2016F', 'Run2016F2')
 
 from WMCore.Configuration import Configuration
 config = Configuration()
@@ -43,8 +49,9 @@ if "Run201" in taskname:
     config.Data.splitting = 'LumiBased'
     config.Data.unitsPerJob = 75
     config.Data.lumiMask = 'babymaker/data/json/golden_Cert_271036-284044_13TeV_PromptReco_Collisions16_JSON_NoL1T.txt' 
-                          
-
+    # split due to JECs: https://hypernews.cern.ch/HyperNews/CMS/get/jes/642.html
+    if ("Run2016F1" in taskname): config.Data.runRange = '277772-278801'
+    elif ("Run2016F2" in taskname): config.Data.runRange = '278802-278808'
 else:
     config.Data.splitting = 'FileBased'
     config.Data.unitsPerJob = 5

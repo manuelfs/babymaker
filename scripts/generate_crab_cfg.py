@@ -302,12 +302,17 @@ for ilist in datasets:
     s = open(inputfile).read()
     s = s.replace('DATASETNAME', ids)
     s = s.replace('NEVENTS', str(nevents))
-    f = open(outputfile, 'w')
-    f.write(s)
-    f.close()
-    print "Wrote crab configuration file " + outputfile
+    if ("Run2016F" in datasetID): # split RunF in two parts due to JECs
+      outputfile = "crab_cfg_" + datasetID + "_part1.py"
+      with open(outputfile, 'w') as f: f.write(s.replace('RUN_RANGE', 'Run2016F1'))
+      os.system("crab submit -c " + outputfile)
 
-    cmd = "crab submit -c " + outputfile
-    os.system(cmd)
+      outputfile = "crab_cfg_" + datasetID + "_part2.py"
+      with open(outputfile, 'w') as f: f.write(s.replace('RUN_RANGE', 'Run2016F2'))      
+      os.system("crab submit -c " + outputfile)
+    else:
+      with open(outputfile, 'w') as f: f.write(s)
+      os.system("crab submit -c " + outputfile)
+
     print "Submitted ",ids
     # sys.exit(0)

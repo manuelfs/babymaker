@@ -14,15 +14,21 @@ CMSSW code to generate babies (small flat ntuples) from MINIAOD
 To set up the code and generate a file named `baby.root`, issue the following commands 
 on lxplus:
 
-    cmsrel CMSSW_8_0_20
-    cd CMSSW_8_0_20/src
+    cmsrel CMSSW_8_0_25
+    cd CMSSW_8_0_25/src
     cmsenv
     git cms-init
-    git cms-merge-topic -u cms-met:CMSSW_8_0_X-METFilterUpdate	
+    git cms-merge-topic -u cms-met:METRecipe_8020
+    git cms-merge-topic -u cms-met:fromCMSSW_8_0_20_postICHEPfilter
+    git cms-merge-topic -u mverzett:DeepFlavour-from-CMSSW_8_0_21
+    mkdir RecoBTag/DeepFlavour/data/
+    cd RecoBTag/DeepFlavour/data/
+    wget http://home.fnal.gov/~verzetti//DeepFlavour/training/DeepFlavourNoSL.json
+    cd -
     git clone git@github.com:manuelfs/babymaker
     cd babymaker
     ./compile.sh
-    ./scripts/cmsRun.sh <inputfile> <nevents=1000> <outname>
+    ./scripts/cmsrun.sh <inputfile> <nevents=1000> <outname>
 
 The `compile.sh` script first compiles the `babymaker/bmaker/genfiles` folder, which
 automatically generates the tree structure (see below), and then issues `scram b`

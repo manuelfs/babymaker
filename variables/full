@@ -101,6 +101,7 @@ std::vector<float> jets_eta
 std::vector<float> jets_phi
 std::vector<float> jets_m
 std::vector<float> jets_csv
+std::vector<float> jets_csvd
 std::vector<float> jets_pt_res
 std::vector<bool>  jets_islep
 std::vector<bool>  jets_isisr

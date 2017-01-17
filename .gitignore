@@ -11,8 +11,9 @@ bmaker/interface/release.hh
 *__init_*
 ._*
 
-# Big event list file
+# Big event list file and jecs
 data/csc_beamhalo_filter/*
+data/jec/*txt
 
 # Compiled Dynamic libraries
 *.so

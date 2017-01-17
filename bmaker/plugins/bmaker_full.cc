@@ -374,6 +374,8 @@ vector<LVector> bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
 
     LVector jetp4(jetTool->corrJet[ijet]);
     float csv(jet.bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags"));
+    float csvd(jet.bDiscriminator("deepFlavourJetTags:probb"));
+
     bool isLep = jetTool->leptonInJet(jet, sig_leps);
     bool looseID = jetTool->idJet(jet, jetTool->kLoose);
     bool tightID = jetTool->idJet(jet, jetTool->kTight);
@@ -405,6 +407,7 @@ vector<LVector> bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
       baby.jets_ntruc().push_back(0); //filled in writeMC
       baby.jets_gs_index().push_back(-1);  //filled in writeMC
       baby.jets_csv().push_back(csv);
+      baby.jets_csvd().push_back(csvd);
  
       if(!isLep && goodPtEta){
 	jetsys_p4 += jet.p4();

@@ -793,27 +793,30 @@ jet_met_tools::jet_met_tools(TString ijecName, bool doSys, bool fastSim):
   btag_efficiencies_(op_pts_.size()){
   if (jecName.Contains("DATA")) isData = true;
   else if (jecName.Contains("MC")) isData = false;
-  else cout<<endl<<"BABYMAKER: jet_met_tools: The jecLabel string must contain either 'DATA' or 'MC'. Currently running with "<<jecName<<endl<<endl;
+  else cout<<endl<<"BABYMAKER: jet_met_tools: The jecLabel string must contain either 'DATA' or 'MC'. "
+                 <<"Currently running with "<<jecName<<endl<<endl;
 
-  doJEC = !jecName.Contains("miniAOD");
-  jecName.ReplaceAll("miniAOD_","");
+  doJEC = jecName.Contains("onthefly"); 
+  jecName.ReplaceAll("onthefly_","");
   string basename(getenv("CMSSW_BASE"));
   basename += "/src/babymaker/data/jec/";
   basename += jecName.Data();
 
   if(doJEC || doSystematics) {
     vector<JetCorrectorParameters> jecFiles;
-    if (doJEC) cout<<endl<<"BABYMAKER: jet_met_tools: Applying JECs on-the-fly with files "<<basename.c_str()<<"*.txt"<<endl<<endl;
-    else       cout<<endl<<"BABYMAKER: jet_met_tools: Reading JECs needed to determine "
-                   <<"residuals uncertainty with files "<<basename.c_str()<<"*.txt"<<endl<<endl;
+    if (doJEC) cout<<endl<<"BABYMAKER: jet_met_tools: Applying JECs on-the-fly with files "
+      <<basename.c_str()<<"*.txt"<<endl<<endl;
+    //these files need to be loaded even if doing only systematics
     jecFiles.push_back(JetCorrectorParameters(basename+"_L1FastJet_AK4PFchs.txt"));
     jecFiles.push_back(JetCorrectorParameters(basename+"_L2Relative_AK4PFchs.txt"));
     jecFiles.push_back(JetCorrectorParameters(basename+"_L3Absolute_AK4PFchs.txt"));
-    if(jecName.Contains("DATA")) jecFiles.push_back(JetCorrectorParameters(basename+"_L2L3Residual_AK4PFchs.txt"));
+    if(jecName.Contains("DATA")) 
+      jecFiles.push_back(JetCorrectorParameters(basename+"_L2L3Residual_AK4PFchs.txt"));
     jetCorrector.reset(new FactorizedJetCorrectorCalculator(jecFiles));
   }
   if (doSystematics){
-    cout<<endl<<"BABYMAKER: jet_met_tools: Using JEC uncertainties from file "<<basename.c_str()<<"_Uncertainty_AK4PFchs.txt"<<endl<<endl;
+    cout<<endl<<"BABYMAKER: jet_met_tools: Using JEC uncertainties from file "
+              <<basename.c_str()<<"_Uncertainty_AK4PFchs.txt"<<endl<<endl;
     jecUncProvider.reset(new JetCorrectionUncertainty(basename+"_Uncertainty_AK4PFchs.txt"));
   }
 

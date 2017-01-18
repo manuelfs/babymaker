@@ -68,7 +68,7 @@ elif ("Run2016F2" in outName) or ("Run2016G" in outName):
 elif ("Run2016H" in outName): 
   jecLabel = 'Summer16_23Sep2016HV2_DATA'
 elif "RunIISpring16MiniAOD" in outName:
-    if "Fast" in outName or "FSPremix" in outName: jecLabel = 'Spring16_FastSimV1_MC'
+    if "Fast" in outName or "FSPremix" in outName: jecLabel = 'manual_Spring16_25nsFastSimV1_MC'
     else: jecLabel = 'Spring16_23Sep2016V2_MC' # for ICHEP MC against re-reco data
 elif "RunIISummer16MiniAOD" in outName:
     jecLabel = 'Summer16_23Sep2016V2_MC'
@@ -142,12 +142,14 @@ if not fastsim:
     process.load('RecoMET.METFilters.BadChargedCandidateFilter_cfi')
     process.BadChargedCandidateFilter.muons = cms.InputTag("slimmedMuons")
     process.BadChargedCandidateFilter.PFCandidates = cms.InputTag("packedPFCandidates")
+    process.BadChargedCandidateFilter.taggingMode = cms.bool(True)
     process.BadChargedCandidateFilter.debug = cms.bool(False)
 
     ##_____________Bad muon filter_____________________________||
     process.load('RecoMET.METFilters.BadPFMuonFilter_cfi')
     process.BadPFMuonFilter.muons = cms.InputTag("slimmedMuons")
     process.BadPFMuonFilter.PFCandidates = cms.InputTag("packedPFCandidates")
+    process.BadPFMuonFilter.taggingMode = cms.bool(True)
     process.BadPFMuonFilter.debug = cms.bool(False)
 
 if doJEC:
@@ -197,9 +199,4 @@ if doJEC:
     )
 
 ###### Path
-if not fastsim:
-    process.p = cms.Path(process.BadChargedCandidateFilter*
-                         process.BadPFMuonFilter*
-                         process.baby_full)
-else:
-    process.p = cms.Path(process.baby_full)
+process.p = cms.Path(process.baby_full)

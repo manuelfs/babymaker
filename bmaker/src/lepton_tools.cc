@@ -56,7 +56,7 @@ namespace{
   }
 
   pair<double, double> MergeSF(pair<double, double> a,
-			       pair<double, double> b){
+                               pair<double, double> b){
     double sf = a.first * b.first;
     double err = hypot(a.first*b.second, b.first*a.second);
     return {sf, err};
@@ -66,14 +66,14 @@ namespace{
     struct Point{
       double xl, xh, y, e;
       Point(double xl_in, double xh_in, double y_in, double e_in):
-	xl(xl_in),
-	xh(xh_in),
-	y(y_in),
-	e(e_in){
+        xl(xl_in),
+        xh(xh_in),
+        y(y_in),
+        e(e_in){
       }
       bool operator<(const Point &p) const{
-	return make_tuple(xl, xh, fabs(log(fabs(y))), fabs(e))
-	  <make_tuple(p.xl, p.xh, fabs(log(fabs(p.y))), fabs(p.e));
+        return make_tuple(xl, xh, fabs(log(fabs(y))), fabs(e))
+          <make_tuple(p.xl, p.xh, fabs(log(fabs(p.y))), fabs(p.e));
       }
     };
     vector<Point> bins;
@@ -85,50 +85,50 @@ namespace{
     Double_t *yh = g.GetEYhigh();
     for(int i = 0; i < g.GetN(); ++i){
       bins.emplace_back(x[i]-fabs(xl[i]), x[i]+fabs(xh[i]),
-			y[i], max(fabs(yl[i]), fabs(yh[i])));
+                        y[i], max(fabs(yl[i]), fabs(yh[i])));
     }
     bool problems = true;
     while(problems){
       stable_sort(bins.begin(), bins.end());
       problems = false;
       for(auto low = bins.begin(); !problems && low != bins.end(); ++low){
-	auto high = low;
-	++high;
-	if(high == bins.end()) break;
-	double new_y = sqrt(low->y * high->y);
-	double top = max(low->y+low->e, high->y+high->e);
-	double bot = min(low->y-low->e, high->y-high->e);
-	double new_e = max(top-new_y, new_y-bot);
-	if(low->xh < high->xl){
-	  //Gap
-	  bins.insert(high, Point(low->xh, high->xl, new_y, new_e));
-	}else if(low->xh > high->xl){
-	  //Overlap
-	  problems = true;
-	  if(low->xh < high->xh){
-	    //Plain overlap
-	    Point new_low(low->xl, high->xl, low->y, low->e);
-	    Point new_mid(high->xl, low->xh, new_y, new_e);
-	    Point new_high(low->xh, high->xh, high->y, high->e);
-	    *low = new_low;
-	    *high = new_high;
-	    bins.insert(high, new_mid);
-	  }else if(low->xh == high->xh){
-	    //Subset -> 2 bins
-	    Point new_low(low->xl, high->xl, low->y, low->e);
-	    Point new_high(high->xl, high->xh, new_y, new_e);
-	    *low = new_low;
-	    *high = new_high;
-	  }else{
-	    //Subset -> 3 bins
-	    Point new_low(low->xl, high->xl, low->y, low->e);
-	    Point new_mid(high->xl, high->xh, new_y, new_e);
-	    Point new_high(high->xh, low->xh, low->y, low->e);
-	    *low = new_low;
-	    *high = new_high;
-	    bins.insert(high, new_mid);
-	  }
-	}
+        auto high = low;
+        ++high;
+        if(high == bins.end()) break;
+        double new_y = sqrt(low->y * high->y);
+        double top = max(low->y+low->e, high->y+high->e);
+        double bot = min(low->y-low->e, high->y-high->e);
+        double new_e = max(top-new_y, new_y-bot);
+        if(low->xh < high->xl){
+          //Gap
+          bins.insert(high, Point(low->xh, high->xl, new_y, new_e));
+        }else if(low->xh > high->xl){
+          //Overlap
+          problems = true;
+          if(low->xh < high->xh){
+            //Plain overlap
+            Point new_low(low->xl, high->xl, low->y, low->e);
+            Point new_mid(high->xl, low->xh, new_y, new_e);
+            Point new_high(low->xh, high->xh, high->y, high->e);
+            *low = new_low;
+            *high = new_high;
+            bins.insert(high, new_mid);
+          }else if(low->xh == high->xh){
+            //Subset -> 2 bins
+            Point new_low(low->xl, high->xl, low->y, low->e);
+            Point new_high(high->xl, high->xh, new_y, new_e);
+            *low = new_low;
+            *high = new_high;
+          }else{
+            //Subset -> 3 bins
+            Point new_low(low->xl, high->xl, low->y, low->e);
+            Point new_mid(high->xl, high->xh, new_y, new_e);
+            Point new_high(high->xh, low->xh, low->y, low->e);
+            *low = new_low;
+            *high = new_high;
+            bins.insert(high, new_mid);
+          }
+        }
       }
     }
     vector<double> bin_edges(bins.size()+1);
@@ -137,15 +137,15 @@ namespace{
     }
     bin_edges.back() = bins.back().xh;
     TH2D h(g.GetName(), (string(g.GetTitle())+";"+g.GetXaxis()->GetTitle()+";"+g.GetYaxis()->GetTitle()).c_str(),
-	   1, 0., 1.e4, bin_edges.size()-1, &bin_edges.at(0));
+           1, 0., 1.e4, bin_edges.size()-1, &bin_edges.at(0));
     for(int ix = 0; ix <= 2; ++ix){
       h.SetBinContent(ix, 0, 1.);
       h.SetBinError(ix, 0, 1.);
       h.SetBinContent(ix, h.GetNbinsY()+1, 1.);
       h.SetBinError(ix, h.GetNbinsY()+1, 1.);
       for(int iy = 1; iy <= h.GetNbinsY(); ++iy){
-	h.SetBinContent(ix, iy, bins.at(iy-1).y);
-	h.SetBinError(ix ,iy, bins.at(iy-1).e);
+        h.SetBinContent(ix, iy, bins.at(iy-1).y);
+        h.SetBinError(ix ,iy, bins.at(iy-1).e);
       }
     }
     return h;
@@ -154,23 +154,23 @@ namespace{
 
 //////////////////// Scale Factor loading
 const TH2F lepton_tools::sf_full_muon_medium = GetSF<TH2F>("sf_full_muon_medium.root",
-							   "pt_abseta_PLOT_pair_probeMultiplicity_bin0");
+                                                           "pt_abseta_PLOT_pair_probeMultiplicity_bin0");
 const TH2F lepton_tools::sf_full_muon_iso = GetSF<TH2F>("sf_full_muon_iso.root",
-							"pt_abseta_PLOT_pair_probeMultiplicity_bin0_&_Medium2016_pass");
+                                                        "pt_abseta_PLOT_pair_probeMultiplicity_bin0_&_Medium2016_pass");
 const TH2D lepton_tools::sf_full_muon_tracking = GraphToHist(GetSF<TGraphAsymmErrors>("sf_full_muon_tracking.root",
-										      "ratio_eta"));
+                                                                                      "ratio_eta"));
 const TH2F lepton_tools::sf_full_electron_medium = GetSF<TH2F>("sf_full_electron_idiso.root",
-							       "GsfElectronToMedium");
+                                                               "GsfElectronToMedium");
 const TH2F lepton_tools::sf_full_electron_iso = GetSF<TH2F>("sf_full_electron_idiso.root",
-							    "MVAVLooseElectronToMini");
+                                                            "MVAVLooseElectronToMini");
 const TH2F lepton_tools::sf_full_electron_tracking = GetSF<TH2F>("sf_full_electron_tracking.root",
-								 "EGamma_SF2D");
+                                                                 "EGamma_SF2D");
 const TH2D lepton_tools::sf_fast_muon_medium = GetSF<TH2D>("sf_fast_muon_medium.root",
-							   "histo2D");
+                                                           "histo2D");
 const TH2D lepton_tools::sf_fast_muon_iso = GetSF<TH2D>("sf_fast_muon_iso.root",
-							"histo2D");
+                                                        "histo2D");
 const TH2D lepton_tools::sf_fast_electron_mediumiso = GetSF<TH2D>("sf_fast_electron_mediumiso.root",
-								  "histo2D");
+                                                                  "histo2D");
 
 //////////////////// Muons
 bool lepton_tools::isSignalMuon(const pat::Muon &lep, edm::Handle<reco::VertexCollection> vtx, double lepIso){
@@ -178,7 +178,7 @@ bool lepton_tools::isSignalMuon(const pat::Muon &lep, edm::Handle<reco::VertexCo
   if(lep.pt() <= SignalLeptonPtCut) return false;
   if(fabs(lep.eta()) > MuonEtaCut) return false;
   // ID cuts (includes dz/dz0 cuts)
-  if(!idMuon(lep, vtx, kMediumICHEP)) return false;
+  if(!idMuon(lep, vtx, kMedium)) return false;
   // Isolation cuts
   if(lepIso >= 0 && lepIso > MuonMiniIsoCut) return false;
 
@@ -190,7 +190,7 @@ bool lepton_tools::isVetoMuon(const pat::Muon &lep, edm::Handle<reco::VertexColl
   if(lep.pt() <= VetoLeptonPtCut) return false;
   if(fabs(lep.eta()) > MuonEtaCut) return false;
   // ID cuts (includes dz/dz0 cuts)
-  if(!idMuon(lep, vtx, kMediumICHEP)) return false; // Using RA2/b muons
+  if(!idMuon(lep, vtx, kMedium)) return false; // Using RA2/b muons
   // Isolation cuts
   if(lepIso >= 0 && lepIso > MuonMiniIsoCut) return false;
 
@@ -283,38 +283,34 @@ bool lepton_tools::idElectron(const pat::Electron &lep, edm::Handle<reco::Vertex
   double deta_cut, dphi_cut, ieta_cut, hovere_cut, d0_cut, dz_cut,
     ooeminusoop_cut, reliso_cut, misshits_cut;
   bool req_conv_veto;
-
-
   
-  if(barrel){
-    ieta_cut        = chooseVal(threshold       ,0.0115,  0.011,   0.00998, 0.00998);
-    deta_cut        = chooseVal(threshold       ,0.00749, 0.00477, 0.00311, 0.00308);
-    dphi_cut        = chooseVal(threshold       ,0.228,	  0.222,   0.103,   0.0816);
-    hovere_cut      = chooseVal(threshold       ,0.356,   0.298,   0.253,   0.0414);
-    reliso_cut      = chooseVal(threshold       ,0.175,   0.0994,  0.0695,  0.0588);
-    ooeminusoop_cut = chooseVal(threshold       ,0.299,   0.241,   0.134,   0.0129);
-    d0_cut          = chooseVal(threshold       ,0.05,    0.05,    0.05,    0.05);
-    dz_cut          = chooseVal(threshold       ,0.10 ,   0.10,    0.10,    0.10);
-    misshits_cut    = chooseVal(threshold       ,2,   1,   1,   1);
-    req_conv_veto   = chooseVal(threshold       ,true           ,  true         ,  true         ,  true );
-  } else {
-    ieta_cut        = chooseVal(threshold       ,0.037,   0.0314,  0.0298,  0.0292);
-    deta_cut        = chooseVal(threshold       ,0.00895, 0.00868, 0.00609, 0.00605);
-    dphi_cut        = chooseVal(threshold       ,0.213,   0.213,   0.045,   0.0394);
-    hovere_cut      = chooseVal(threshold       ,0.211,   0.101,   0.0878,  0.0641);
-    reliso_cut      = chooseVal(threshold       ,0.159,   0.107,   0.0821,  0.0571);
-    ooeminusoop_cut = chooseVal(threshold       ,0.15,    0.14,    0.13,    0.0129);
-    d0_cut          = chooseVal(threshold       ,0.10 ,   0.10,    0.10,    0.10);
-    dz_cut          = chooseVal(threshold       ,0.20 ,   0.20,    0.20,    0.20);
-    misshits_cut    = chooseVal(threshold       ,3, 1, 1, 1);
-    req_conv_veto   = chooseVal(threshold       ,true   ,  true   ,  true   ,  true );
-  }
-
-
+  // if(barrel){
+  //   ieta_cut        = chooseVal(threshold       ,0.0115,  0.011,   0.00998, 0.00998);
+  //   deta_cut        = chooseVal(threshold       ,0.00749, 0.00477, 0.00311, 0.00308);
+  //   dphi_cut        = chooseVal(threshold       ,0.228,   0.222,   0.103,   0.0816);
+  //   hovere_cut      = chooseVal(threshold       ,0.356,   0.298,   0.253,   0.0414);
+  //   reliso_cut      = chooseVal(threshold       ,0.175,   0.0994,  0.0695,  0.0588);
+  //   ooeminusoop_cut = chooseVal(threshold       ,0.299,   0.241,   0.134,   0.0129);
+  //   d0_cut          = chooseVal(threshold       ,0.05,    0.05,    0.05,    0.05);
+  //   dz_cut          = chooseVal(threshold       ,0.10 ,   0.10,    0.10,    0.10);
+  //   misshits_cut    = chooseVal(threshold       ,2,   1,   1,   1);
+  //   req_conv_veto   = chooseVal(threshold       ,true           ,  true         ,  true         ,  true );
+  // } else {
+  //   ieta_cut        = chooseVal(threshold       ,0.037,   0.0314,  0.0298,  0.0292);
+  //   deta_cut        = chooseVal(threshold       ,0.00895, 0.00868, 0.00609, 0.00605);
+  //   dphi_cut        = chooseVal(threshold       ,0.213,   0.213,   0.045,   0.0394);
+  //   hovere_cut      = chooseVal(threshold       ,0.211,   0.101,   0.0878,  0.0641);
+  //   reliso_cut      = chooseVal(threshold       ,0.159,   0.107,   0.0821,  0.0571);
+  //   ooeminusoop_cut = chooseVal(threshold       ,0.15,    0.14,    0.13,    0.0129);
+  //   d0_cut          = chooseVal(threshold       ,0.10 ,   0.10,    0.10,    0.10);
+  //   dz_cut          = chooseVal(threshold       ,0.20 ,   0.20,    0.20,    0.20);
+  //   misshits_cut    = chooseVal(threshold       ,3, 1, 1, 1);
+  //   req_conv_veto   = chooseVal(threshold       ,true   ,  true   ,  true   ,  true );
+  // }
 
   //https://twiki.cern.ch/twiki/bin/viewauth/CMS/CutBasedElectronIdentificationRun2#Working_points_for_Spring15_MC_s
   // Last updated October 8th
-  /*if(barrel){
+  if(barrel){
     ieta_cut        = chooseVal(threshold       ,0.0114,  0.0103,  0.0101,  0.0101);
     deta_cut        = chooseVal(threshold       ,0.0152,  0.0105,  0.0103,  0.00926);
     dphi_cut        = chooseVal(threshold       ,0.216,   0.115,   0.0336,  0.0336);
@@ -337,7 +333,7 @@ bool lepton_tools::idElectron(const pat::Electron &lep, edm::Handle<reco::Vertex
     misshits_cut    = chooseVal(threshold       ,3, 1, 1, 1);
     req_conv_veto   = chooseVal(threshold       ,true   ,  true   ,  true   ,  true );
   }
-  */
+
   double dz(0.), d0(0.);
   vertexElectron(lep, vtx, dz, d0);
 
@@ -403,10 +399,10 @@ pair<double, double> lepton_tools::getScaleFactor(const reco::Candidate &cand){
 
 pair<double, double> lepton_tools::getScaleFactor(const vCands &sig_leps){
   return accumulate(sig_leps.cbegin(), sig_leps.cend(), make_pair(1., 0.),
-		    [](pair<double, double> sf, const reco::Candidate* cand){
-		      if(cand == nullptr) ERROR("Dereferencing nullptr");
-		      return MergeSF(sf, getScaleFactor(*cand));
-		    });
+                    [](pair<double, double> sf, const reco::Candidate* cand){
+                      if(cand == nullptr) ERROR("Dereferencing nullptr");
+                      return MergeSF(sf, getScaleFactor(*cand));
+                    });
 }
 
 pair<double, double> lepton_tools::getScaleFactorFs(const reco::Candidate &cand){
@@ -422,10 +418,10 @@ pair<double, double> lepton_tools::getScaleFactorFs(const reco::Candidate &cand)
 
 pair<double, double> lepton_tools::getScaleFactorFs(const vCands &sig_leps){
   return accumulate(sig_leps.cbegin(), sig_leps.cend(), make_pair(1., 0.),
-		    [](pair<double, double> sf, const reco::Candidate* cand){
-		      if(cand == nullptr) ERROR("Dereferencing nullptr");
-		      return MergeSF(sf, getScaleFactorFs(*cand));
-		    });
+                    [](pair<double, double> sf, const reco::Candidate* cand){
+                      if(cand == nullptr) ERROR("Dereferencing nullptr");
+                      return MergeSF(sf, getScaleFactorFs(*cand));
+                    });
 }
 
 pair<double, double> lepton_tools::getScaleFactor(const reco::Muon &lep){

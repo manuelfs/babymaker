@@ -193,6 +193,8 @@ private:
   edm::EDGetTokenT<LHEEventProduct> tok_extLHEProducer_;
   edm::EDGetTokenT<LHEEventProduct> tok_source_;
   edm::EDGetTokenT<GenEventInfoProduct> tok_generator_;
+  edm::EDGetTokenT<bool> tok_badChCandFilter_;
+  edm::EDGetTokenT<bool> tok_badPFMuonFilter_;
   #ifdef POST_7_4
     edm::EDGetTokenT<GenLumiInfoHeader> tok_genlumiheader_;
   #endif

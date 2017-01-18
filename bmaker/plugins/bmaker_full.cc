@@ -208,23 +208,15 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   }
 
   ///////////////////// Filters ///////////////////////
-  // the HBHE noise filter needs to be recomputed in early 2015 data
   if (debug) cout<<"INFO: Writing filters..."<<endl; 
-/* now these are taken from miniAOD 
-  edm::Handle<bool> filter_hbhe;
-  if(iEvent.getByToken(tok_HBHENoiseFilter_,filter_hbhe)) { 
-    if(filter_hbhe.isValid()) 
-      baby.pass_hbhe() = *filter_hbhe;
-    else
-      baby.pass_hbhe() = true;
+  edm::Handle<bool> ifilterbadChCand;
+  iEvent.getByToken(tok_badChCandFilter_, ifilterbadChCand);
+  baby.pass_badchhad() = ifilterbadChCand.isValid() ? (*ifilterbadChCand): true;
 
-    iEvent.getByToken(tok_HBHEIsoNoiseFilter_,filter_hbhe);
-    if(filter_hbhe.isValid()) 
-      baby.pass_hbheiso() = *filter_hbhe;
-    else
-      baby.pass_hbheiso() = true;
-  }
-*/
+  edm::Handle<bool> ifilterbadPFMuon;
+  iEvent.getByToken(tok_badPFMuonFilter_, ifilterbadPFMuon);
+  baby.pass_badpfmu() = ifilterbadPFMuon.isValid() ? (*ifilterbadPFMuon): true;
+
   edm::Handle<edm::TriggerResults> filterBits;
   if(isData) iEvent.getByToken(tok_trigResults_reco_,filterBits);  
   else iEvent.getByToken(tok_trigResults_pat_,filterBits);  
@@ -1187,11 +1179,21 @@ void bmaker_full::writeFilters(const edm::TriggerNames &fnames,
   //baby.pass_goodv() &= eventTool->hasGoodPV(vtx); // We needed to re-run it for Run2015B
   //baby.pass_cschalo() = eventTool->passBeamHalo(baby.run(), baby.event()); // now taken from miniAOD
 
-  baby.pass() = baby.pass_goodv() && baby.pass_eebadsc() && baby.pass_cschalo() && baby.pass_hbhe() && baby.pass_hbheiso() && baby.pass_ecaldeadcell() && baby.pass_jets() && baby.pass_fsmet();
-  baby.pass_ra2() = baby.pass_goodv() && baby.pass_eebadsc() && baby.pass_cschalo() && baby.pass_hbhe() && baby.pass_hbheiso() && baby.pass_ecaldeadcell()  
-    && baby.pass_jets_ra2() && baby.pass_fsmet();
-  baby.pass_nohf() = baby.pass_goodv() && baby.pass_eebadsc() && baby.pass_cschalo() && baby.pass_hbhe() && baby.pass_hbheiso() && baby.pass_ecaldeadcell() 
-    && baby.pass_jets_nohf() && baby.pass_fsmet();
+  baby.pass() = baby.pass_goodv() && baby.pass_eebadsc() && 
+                baby.pass_cschalo() && baby.pass_hbhe() && 
+                baby.pass_hbheiso() && baby.pass_ecaldeadcell() && 
+                baby.pass_badpfmu() && baby.pass_badchhad() && // these two are prefilled in analyze()
+                baby.pass_jets() && baby.pass_fsmet();
+  baby.pass_ra2() = baby.pass_goodv() && baby.pass_eebadsc() && 
+                baby.pass_cschalo() && baby.pass_hbhe() && 
+                baby.pass_hbheiso() && baby.pass_ecaldeadcell() &&
+                baby.pass_badpfmu() && baby.pass_badchhad() && // these two are prefilled in analyze()
+                baby.pass_jets_ra2() && baby.pass_fsmet();
+  baby.pass_nohf() = baby.pass_goodv() && baby.pass_eebadsc() && 
+                baby.pass_cschalo() && baby.pass_hbhe() && 
+                baby.pass_hbheiso() && baby.pass_ecaldeadcell() && 
+                baby.pass_badpfmu() && baby.pass_badchhad() && // these two are prefilled in analyze()
+                baby.pass_jets_nohf() && baby.pass_fsmet();
 
   for (size_t ijet(0); ijet < baby.jets_pt().size(); ijet++){
     if (abs(baby.jets_eta()[ijet])>2.4 || baby.jets_pt()[ijet]<200.) continue;
@@ -1805,7 +1807,9 @@ bmaker_full::bmaker_full(const edm::ParameterSet& iConfig):
   tok_pruneGenPart_(consumes<reco::GenParticleCollection>(edm::InputTag("prunedGenParticles"))),
   tok_extLHEProducer_(consumes<LHEEventProduct>(edm::InputTag("externalLHEProducer"))),
   tok_source_(consumes<LHEEventProduct>(edm::InputTag("source"))),
-  tok_generator_(consumes<GenEventInfoProduct>(edm::InputTag("generator")))
+  tok_generator_(consumes<GenEventInfoProduct>(edm::InputTag("generator"))),
+  tok_badChCandFilter_(consumes<bool>(edm::InputTag("BadChargedCandidateFilter"))),
+  tok_badPFMuonFilter_(consumes<bool>(edm::InputTag("BadPFMuonFilter")))
   #ifdef POST_7_4
   ,
     tok_genlumiheader_(consumes<GenLumiInfoHeader,edm::InLumi>(edm::InputTag("generator")))

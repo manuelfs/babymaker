@@ -98,7 +98,7 @@ float jet_met_tools::trueHT(edm::Handle<edm::View <reco::GenJet> > genjets){
 
 bool jet_met_tools::idJet(const pat::Jet &jet, CutLevel cut){
   // From https://twiki.cern.ch/twiki/bin/view/CMS/JetID
-  double eta = jet.eta();
+  double eta = fabs(jet.eta());
   double NHF = jet.neutralHadronEnergyFraction();
   double NEMF = jet.neutralEmEnergyFraction();
   double NumConst = jet.chargedMultiplicity()+jet.neutralMultiplicity();
@@ -111,43 +111,22 @@ bool jet_met_tools::idJet(const pat::Jet &jet, CutLevel cut){
   if(cut == kPBNR){  // RA2/b's PBNR and old Jet ID
     bool eta_l_2p4 =  NumConst>=2 && NHF<0.9 && NEMF<0.95 && CHM>0 && CHF>0 && CEMF<0.99;
     bool eta_geq_2p4 =  NHF<0.9 && NEMF<0.95 && NumConst>=2;
-    return (eta_l_2p4 && fabs(eta)<2.4) || (fabs(eta)>=2.4 && eta_geq_2p4);   
+    return (eta_l_2p4 && eta<2.4) || (eta>=2.4 && eta_geq_2p4);   
   }
 
-  double NHFCut, NEMFCut, NumConstCut, CHFCut, CHMCut, CEMFCut, NEMFCut_HF, NumNeuCut;
-  switch(cut){
-  case kTight:
-    NHFCut      = 0.9;
-    NEMFCut     = 0.9;
-    NumConstCut = 1;
-
-    CHFCut      = 0;
-    CHMCut      = 0;
-    CEMFCut     = 0.99;
-
-    NEMFCut_HF  = 0.9;
-    NumNeuCut   = 10;
-    break;
-  case kLoose:
-  default:
-    NHFCut      = 0.99;
-    NEMFCut     = 0.99;
-    NumConstCut = 1;
-
-    CHFCut      = 0;
-    CHMCut      = 0;
-    CEMFCut     = 0.99;
-
-    NEMFCut_HF  = 0.9;
-    NumNeuCut   = 10;
-    break;
+  bool passJetID = true;
+  if (eta<=2.7) {
+    if (cut==kLoose) passJetID = NHF<0.99 && NEMF<0.99 && NumConst>1;
+    if (cut==kTight) passJetID = NHF<0.90 && NEMF<0.90 && NumConst>1;
+    if (eta<=2.4){
+      passJetID = passJetID && CHF>0 && CHM>0 && CEMF<0.99;
+    }
+  } else if (eta<=3.0) {
+    passJetID = NHF<0.98 && NEMF>0.01 && NumNeutralParticles>2;
+  } else {
+    passJetID = NEMF<0.90 && NumNeutralParticles>10;
   }
-    
-  bool eta_leq_3 = (NHF<NHFCut && NEMF<NEMFCut && NumConst>NumConstCut) && 
-    ((fabs(eta)<=2.4 && CHF>CHFCut && CHM>CHMCut && CEMF<CEMFCut) || fabs(eta)>2.4);
-  bool eta_g_3 = NEMF<NEMFCut_HF && NumNeutralParticles>NumNeuCut;
-
-  return  (eta_leq_3 && fabs(eta)<=3.) || (eta_g_3 && fabs(eta)>3.);  // Official recommendation
+  return passJetID;
 }
 
 

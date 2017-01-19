@@ -179,6 +179,7 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
       bool cluster_leps = false;
       baby.sys_mj14_nolep().push_back(jetTool->getSysMJ(1.4, sys_jets[isys], baby.jets_islep(), jetTool->JetPtCut, cluster_leps));
       cluster_leps = true;
+      baby.sys_mj12().push_back(jetTool->getSysMJ(1.2, sys_jets[isys], baby.jets_islep(), jetTool->JetPtCut, cluster_leps));
       baby.sys_mj14().push_back(jetTool->getSysMJ(1.4, sys_jets[isys], baby.jets_islep(), jetTool->JetPtCut, cluster_leps));
     }
   }
@@ -1734,6 +1735,9 @@ void bmaker_full::writeWeights(const vCands &sig_leps, edm::Handle<GenEventInfoP
   baby.sys_muf().push_back(weightTool->theoryWeight(weight_tools::muFdown));
   baby.sys_murf().push_back(weightTool->theoryWeight(weight_tools::muRup_muFup));
   baby.sys_murf().push_back(weightTool->theoryWeight(weight_tools::muRdown_muFdown));
+  // PDF variations
+  weightTool->getPDFWeights(baby.sys_pdf(), baby.w_pdf());
+
 
   //// Applying ISR weights only to ttbar and strong SUSY
   baby.w_isr() = 1.; baby.sys_isr().resize(2,1.);

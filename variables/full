@@ -373,6 +373,7 @@ float w_toppt
 float w_isr
 float w_lep
 float w_fs_lep
+std::vector<float> w_pdf
 float eff_trig
 float eff_jetid
 
@@ -384,6 +385,7 @@ std::vector<int>   sys_njets
 std::vector<int>   sys_nbm
 std::vector<bool>  sys_pass
 std::vector<float> sys_mj14_nolep
+std::vector<float> sys_mj12
 std::vector<float> sys_mj14
 std::vector<float> sys_met
 std::vector<float> sys_mt
@@ -392,6 +394,7 @@ std::vector<float> sys_mt
 std::vector<float> sys_mur
 std::vector<float> sys_muf
 std::vector<float> sys_murf
+std::vector<float> sys_pdf
 std::vector<float> sys_bctag
 std::vector<float> sys_udsgtag
 std::vector<float> sys_bctag_loose

@@ -858,16 +858,22 @@ jet_met_tools::jet_met_tools(TString ijecName, bool doSys, bool fastSim):
   }
 }
 
-// from 8TeV dijet measurement with an extra 50% 
-// https://twiki.cern.ch/twiki/bin/view/CMS/JetResolution#2012
+// 2016 PromptReco Data/MC SFs
+// https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetResolution#JER_Scaling_factors_and_Uncertai
 float jet_met_tools::getJetResolutionSF(float jet_eta){
   double abseta = fabs(jet_eta);
-  if (abseta < 0.5) return (1. + 1.5*0.079);
-  else if (abseta < 1.1) return (1. + 1.5*0.099);
-  else if (abseta < 1.7) return (1. + 1.5*0.121);
-  else if (abseta < 2.3) return (1. + 1.5*0.208);
-  else if (abseta < 2.8) return (1. + 1.5*0.254);
-  else if (abseta < 3.2) return (1. + 1.5*0.395);
-  else if (abseta < 5.0) return (1. + 1.5*0.056);
+  if (abseta < 0.5) return 1.109;
+  else if (abseta < 0.8) return 1.138;
+  else if (abseta < 1.1) return 1.114;
+  else if (abseta < 1.3) return 1.123;
+  else if (abseta < 1.7) return 1.084;
+  else if (abseta < 1.9) return 1.082;
+  else if (abseta < 2.1) return 1.140;
+  else if (abseta < 2.3) return 1.067;
+  else if (abseta < 2.5) return 1.177;
+  else if (abseta < 2.8) return 1.364;
+  else if (abseta < 3.0) return 1.857;
+  else if (abseta < 3.2) return 1.328;
+  else if (abseta < 5.0) return 1.160;
   else return 1.;
 }

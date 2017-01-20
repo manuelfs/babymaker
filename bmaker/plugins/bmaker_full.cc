@@ -780,15 +780,27 @@ vCands bmaker_full::writeMuons(edm::Handle<pat::MuonCollection> muons,
   vCands sig_mus; 
   veto_mus.clear(); all_mus.clear();
   baby.nmus() = 0; baby.nvmus() = 0;
-  for (size_t ilep(0); ilep < muons->size(); ilep++) {
+
+  set<unsigned> badmu_idx = lepTool->badGlobalMuonSelector(vtx, muons, false);
+  set<unsigned> badmu_dupl_idx = lepTool->badGlobalMuonSelector(vtx, muons, true);
+
+  for (unsigned ilep(0); ilep < muons->size(); ilep++) {
     const pat::Muon &lep = (*muons)[ilep];    
-    if(!lepTool->isVetoMuon(lep, vtx, -99.)) continue; // Storing leptons that pass all veto cuts except for iso
+
+    bool foundBadMu(false), foundBadDuplMu(false);
+    if (badmu_idx.find(ilep)!=badmu_idx.end()) foundBadMu = true;
+    if (badmu_dupl_idx.find(ilep)!=badmu_dupl_idx.end()) foundBadDuplMu = true;
+
+    // Storing leptons that pass all veto cuts except for iso
+    if(!lepTool->isVetoMuon(lep, vtx, -99.) && !foundBadMu && !foundBadDuplMu) continue;
 
     double lep_iso(lepTool->getPFIsolation(pfcands, dynamic_cast<const reco::Candidate *>(&lep), 0.05, 0.2, 10., rhoEventCentral, false));
     double lep_reliso(lepTool->getRelIsolation(lep, rhoEventCentral));
     double dz(0.), d0(0.);
     lepTool->vertexMuon(lep, vtx, dz, d0); // Calculating dz and d0
 
+    baby.mus_bad().push_back(foundBadMu);
+    baby.mus_bad_dupl().push_back(foundBadDuplMu);
     baby.mus_pt().push_back(lep.pt());
     baby.mus_eta().push_back(lep.eta());
     baby.mus_phi().push_back(lep.phi());

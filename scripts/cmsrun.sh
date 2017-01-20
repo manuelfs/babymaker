@@ -41,13 +41,13 @@ outName="fullbaby_SMS-TChiHH_HToBB_HToBB_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_
 inFile=/home/users/ana/data/TTJets_SingleLeptFromT_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISummer16MiniAODv2.root
 outName="fullbaby_TTJets_SingleLeptFromT_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISummer16MiniAODv2.root"
 
-# inFile=/home/users/ana/data/Run2016E_MET_23Sep2016-v1.root
-# outName="fullbaby_Run2016E_MET_23Sep2016-v1.root"
+inFile=/home/users/ana/data/Run2016E_SingleMuon_23Sep2016-v1.root
+outName="fullbaby_Run2016E_SingleMuon_23Sep2016-v1.root"
 
 # inFile=/home/users/ana/data/TTJets_HT-2500toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISummer16MiniAODv2.root
 # outName="fullbaby_TTJets_HT-2500toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISummer16MiniAODv2.root"
 
-nEvents="1000"
+nEvents="-1"
 
 json=do_not_want_json # If it can't find the file, it doesn't pre-apply the JSON
 # json="babymaker/data/json/golden_Cert_271036-275125_13TeV_PromptReco_Collisions16.json"

@@ -14,6 +14,7 @@
 #include "DataFormats/PatCandidates/interface/Muon.h"
 #include "DataFormats/PatCandidates/interface/Electron.h"
 #include "DataFormats/PatCandidates/interface/PackedCandidate.h"
+#include "DataFormats/MuonReco/interface/Muon.h"
 
 #include "babymaker/bmaker/interface/utilities.hh"
 
@@ -79,6 +80,14 @@ public:
   vCands getIsoTracks(edm::Handle<pat::PackedCandidateCollection> pfcands, double met, double met_phi);
   vCands getRA4IsoTracks(edm::Handle<pat::PackedCandidateCollection> pfcands, double met, double met_phi,double rhoEventCentral,std::vector<float> &isos,  std::vector<float> &relisos, int primary_pdg);
 
+  bool outInOnly(const reco::Muon &mu) const;
+  bool preselection(const reco::Muon &mu, bool selectClones) const; 
+  bool tighterId(const reco::Muon &mu) const; 
+  bool tightGlobal(const reco::Muon &mu) const;
+  bool safeId(const reco::Muon &mu) const; 
+  bool partnerId(const reco::Muon &mu) const;
+  std::set<unsigned> badGlobalMuonSelector(edm::Handle<reco::VertexCollection> vtx, 
+                                         edm::Handle<pat::MuonCollection> muons, bool selectClones);
 private:
   static const TH2F sf_full_muon_medium, sf_full_muon_iso, sf_full_electron_medium, sf_full_electron_iso, sf_full_electron_tracking;
   static const TH2D sf_full_muon_tracking, sf_fast_muon_medium, sf_fast_muon_iso, sf_fast_electron_mediumiso;

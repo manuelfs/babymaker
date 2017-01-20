@@ -137,6 +137,8 @@ std::vector<float> leps_id
 
 int nmus
 int nvmus
+std::vector<bool> mus_bad
+std::vector<bool> mus_bad_dupl
 std::vector<float> mus_pt
 std::vector<float> mus_eta
 std::vector<float> mus_phi

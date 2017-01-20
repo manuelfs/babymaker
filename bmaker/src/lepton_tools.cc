@@ -636,6 +636,85 @@ vCands lepton_tools::getRA4IsoTracks(edm::Handle<pat::PackedCandidateCollection>
   return tks;
 }
 
+// Bad Global Muon filter
+bool lepton_tools::outInOnly(const reco::Muon &mu) const {
+  const reco::Track &tk = *mu.innerTrack();
+  return tk.algoMask().count() == 1 && tk.isAlgoInMask(reco::Track::muonSeededStepOutIn);
+}
+bool lepton_tools::preselection(const reco::Muon &mu, bool selectClones) const { 
+  return mu.isGlobalMuon() && (!selectClones || outInOnly(mu));
+}
+bool lepton_tools::tighterId(const reco::Muon &mu) const { 
+  return muon::isMediumMuon(mu) && mu.numberOfMatchedStations() >= 2; 
+}
+bool lepton_tools::tightGlobal(const reco::Muon &mu) const {
+  return (mu.globalTrack()->hitPattern().muonStationsWithValidHits() >= 3 && mu.globalTrack()->normalizedChi2() <= 20);
+}
+bool lepton_tools::safeId(const reco::Muon &mu) const { 
+  if (mu.muonBestTrack()->ptError() > 0.2 * mu.muonBestTrack()->pt()) { return false; }
+  return mu.numberOfMatchedStations() >= 1 || tightGlobal(mu);
+}
+bool lepton_tools::partnerId(const reco::Muon &mu) const {
+  return mu.pt() >= 10 && mu.numberOfMatchedStations() >= 1;
+}
+
+set<unsigned> lepton_tools::badGlobalMuonSelector(edm::Handle<reco::VertexCollection> vtx, 
+                                         edm::Handle<pat::MuonCollection> muptr, bool selectClones) {
+    using namespace edm;
+    float ptCut_ = VetoLeptonPtCut;
+    bool verbose_ = false;
+    assert(vtx->size() >= 1);
+    const auto &PV = vtx->front().position();
+
+    set<unsigned> badmus; 
+    std::vector<int> goodMuon;
+    const pat::MuonCollection &muons = *muptr;
+    for (auto & mu : muons) {
+        if (!mu.isPFMuon() || mu.innerTrack().isNull()) {
+            goodMuon.push_back(-1); // bad but we don't care
+            continue;
+        } 
+        if (preselection(mu, selectClones)) {
+            float dxypv = std::abs(mu.innerTrack()->dxy(PV));
+            float dzpv  = std::abs(mu.innerTrack()->dz(PV));
+            if (tighterId(mu)) {
+                bool ipLoose = ((dxypv < 0.5 && dzpv < 2.0) || mu.innerTrack()->hitPattern().pixelLayersWithMeasurement() >= 2);
+                goodMuon.push_back(ipLoose || (!selectClones && tightGlobal(mu)));
+            } else if (safeId(mu)) {
+                bool ipTight = (dxypv < 0.2 && dzpv < 0.5);
+                goodMuon.push_back(ipTight);
+           } else {
+                goodMuon.push_back(0);
+            }
+        } else {
+            goodMuon.push_back(3); // maybe good, maybe bad, but we don't care
+        }
+    }
+
+    for (unsigned int i = 0, n = muons.size(); i < n; ++i) {
+        if (muons[i].pt() < ptCut_ || goodMuon[i] != 0) continue;
+        if (verbose_) printf("potentially bad muon %d of pt %.1f eta %+.3f phi %+.3f\n", int(i+1), muons[i].pt(), muons[i].eta(), muons[i].phi());
+        bool bad = true;
+        if (selectClones) {
+            bad = false; // unless proven otherwise
+            unsigned int n1 = muons[i].numberOfMatches(reco::Muon::SegmentArbitration);
+            for (unsigned int j = 0; j < n; ++j) {
+                if (j == i || goodMuon[j] <= 0 || !partnerId(muons[j])) continue;
+                unsigned int n2 = muons[j].numberOfMatches(reco::Muon::SegmentArbitration);
+                if (deltaR2(muons[i],muons[j]) < 0.16 || (n1 > 0 && n2 > 0 && muon::sharedSegments(muons[i],muons[j]) >= 0.5*std::min(n1,n2))) {
+                    if (verbose_) printf("     tagged as clone of muon %d of pt %.1f eta %+.3f phi %+.3f\n", int(j+1), muons[j].pt(), muons[j].eta(), muons[j].phi());
+                    bad = true;
+                    break;
+                } 
+            }
+        }
+        if (bad) badmus.insert(i);
+    }
+
+    return badmus;
+}
+
+
 lepton_tools::lepton_tools(){
 }
 

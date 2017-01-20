@@ -44,6 +44,10 @@ public:
   float CSVMedium = 999;
   float CSVTight  = 999;
 
+  float DeepCSVLoose  = 999;
+  float DeepCSVMedium = 999;
+  float DeepCSVTight  = 999;
+
   const float sizeJet = 0.4;
 
   enum CutLevel{kLoose, kTight, kPBNR};
@@ -72,6 +76,12 @@ public:
   std::map<BTagEntry::OperatingPoint, std::unique_ptr<BTagCalibrationReader> > readers_fast_;
   std::vector<const TH3D*> btag_efficiencies_;
 
+  std::unique_ptr<BTagCalibration> calib_deep_full_;
+  std::unique_ptr<BTagCalibration> calib_deep_fast_;
+  std::map<BTagEntry::OperatingPoint, std::unique_ptr<BTagCalibrationReader> > readers_deep_full_;
+  std::map<BTagEntry::OperatingPoint, std::unique_ptr<BTagCalibrationReader> > readers_deep_fast_;
+  std::vector<const TH3D*> btag_efficiencies_deep_;
+
   bool leptonInJet(const pat::Jet &jet, vCands leptons);
   bool jetMatched(const pat::Jet &jet, vCands objects);
   bool idJet(const pat::Jet &jet, CutLevel cut);
@@ -87,13 +97,16 @@ public:
   void setJetUncertainties(edm::Handle<edm::View <reco::GenJet> > genjets);
 
   float getJetResolutionSF(float jet_eta);
-  float jetBTagWeight(const pat::Jet &jet, const LVector &jetp4, bool isBTagged,
-		      BTagEntry::OperatingPoint op,
-		      const std::string &bc_full_syst, const std::string &udsg_full_syst) const;
-  float jetBTagWeight(const pat::Jet &jet, const LVector &jetp4, bool isBTagged,
-		      BTagEntry::OperatingPoint op,
+  float jetBTagWeight(const pat::Jet &jet, const LVector &jetp4, BTagEntry::OperatingPoint op,
+          const std::string &bc_full_syst, const std::string &udsg_full_syst,
+          const std::string &bc_fast_syst, const std::string &udsg_fast_syst, bool doDeepCSV) const;
+  float jetBTagWeight(const pat::Jet &jet, const LVector &jetp4, BTagEntry::OperatingPoint op,
+		      const std::string &bc_full_syst, const std::string &udsg_full_syst, bool doDeepCSV) const;
+  float jetBTagWeight(const pat::Jet &jet, const LVector &jetp4, const std::vector<BTagEntry::OperatingPoint> &ops,
+          const std::string &bc_full_syst, const std::string &udsg_full_syst, bool doDeepCSV) const;
+  float jetBTagWeight(const pat::Jet &jet, const LVector &jetp4, const std::vector<BTagEntry::OperatingPoint> &ops,
 		      const std::string &bc_full_syst, const std::string &udsg_full_syst,
-		      const std::string &bc_fast_syst, const std::string &udsg_fast_syst) const;
+		      const std::string &bc_fast_syst, const std::string &udsg_fast_syst, bool doDeepCSV) const;
   void fillDeltaRbb(std::vector<float> & deltaRbb, std::vector<float> & bb_pt, std::vector<float> & bb_m, std::vector<int> & bb_jet_idx1, std::vector<int> & bb_jet_idx2, std::vector<int> & bb_gs_idx, std::vector<int> & bb_gs_flavor, const std::vector<LVector> &jets, const std::vector<float> &jets_csv, const std::vector<bool> &jets_islep, const std::vector<float> &jets_pt, const std::vector<size_t> &brank,int & highcsv_index);
   static std::vector<size_t> getBRanking(const std::vector<LVector> &momentum, const std::vector<float> &csv,
 					 const std::vector<bool> &is_lep);

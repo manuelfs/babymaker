@@ -107,7 +107,7 @@ public:
   float jetBTagWeight(const pat::Jet &jet, const LVector &jetp4, const std::vector<BTagEntry::OperatingPoint> &ops,
 		      const std::string &bc_full_syst, const std::string &udsg_full_syst,
 		      const std::string &bc_fast_syst, const std::string &udsg_fast_syst, bool doDeepCSV) const;
-  void fillDeltaRbb(std::vector<float> & deltaRbb, std::vector<float> & bb_pt, std::vector<float> & bb_m, std::vector<int> & bb_jet_idx1, std::vector<int> & bb_jet_idx2, std::vector<int> & bb_gs_idx, std::vector<int> & bb_gs_flavor, const std::vector<LVector> &jets, const std::vector<float> &jets_csv, const std::vector<bool> &jets_islep, const std::vector<float> &jets_pt, const std::vector<size_t> &brank,int & highcsv_index);
+  void fillDeltaRbb(std::vector<float> & deltaRbb, std::vector<float> & bb_pt, std::vector<float> & bb_m, std::vector<int> & bb_jet_idx1, std::vector<int> & bb_jet_idx2, std::vector<int> & bb_gs_idx, std::vector<int> & bb_gs_flavor, const std::vector<LVector> &jets, const std::vector<float> &jets_csv, const std::vector<bool> &jets_islep, const std::vector<float> &jets_pt, const std::vector<size_t> &brank,int & highcsv_index, bool deep = false);
   static std::vector<size_t> getBRanking(const std::vector<LVector> &momentum, const std::vector<float> &csv,
 					 const std::vector<bool> &is_lep);
   static float getDeltaRbbHighCSV(const std::vector<LVector> &momentum, const std::vector<size_t> &brank, size_t nb);

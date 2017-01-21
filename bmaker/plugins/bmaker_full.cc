@@ -350,6 +350,7 @@ vector<LVector> bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
   vCands jets_ra2;
   LVector jetsys_p4, jetsys_nob_p4;
   baby.njets() = 0; baby.nbl() = 0; baby.nbm() = 0;  baby.nbt() = 0;
+  baby.nbld() = 0; baby.nbmd() = 0;  baby.nbtd() = 0;
   baby.ht() = 0.; baby.st() = 0.; baby.ht_hlt() = 0.;
   baby.njets_ra2() = 0; baby.njets_clean() = 0; baby.nbm_ra2() = 0; baby.ht_ra2() = 0.; baby.ht_clean() = 0.; 
   baby.pass_jets() = true; baby.pass_jets_nohf() = true; baby.pass_jets_tight() = true; 
@@ -411,6 +412,10 @@ vector<LVector> bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
 	if(csv > jetTool->CSVMedium) baby.nbm()++;
 	else jetsys_nob_p4 += jet.p4();
 	if(csv > jetTool->CSVTight)  baby.nbt()++;
+	
+	if(csvd > jetTool->DeepCSVLoose)  baby.nbld()++;
+        if(csvd > jetTool->DeepCSVMedium) baby.nbmd()++;
+	if(csvd > jetTool->DeepCSVTight)  baby.nbtd()++;
       }
     } 
     
@@ -723,6 +728,10 @@ void bmaker_full::writeBBVars(std::vector<reco::Candidate::LorentzVector>  &all_
   baby.bb_highcsv_idx() = -1;
   jetTool->fillDeltaRbb(baby.dr_bb(),baby.bb_pt(),baby.bb_m(),baby.bb_jet_idx1(),baby.bb_jet_idx2(),  baby.bb_gs_idx(), baby.bb_gs_flavor(),all_baby_jets, baby.jets_csv(), baby.jets_islep(),baby.jets_pt(),branks,baby.bb_highcsv_idx());
  
+  vector<size_t> deepbranks = jet_met_tools::getBRanking(all_baby_jets, baby.jets_csvd(), baby.jets_islep());
+  baby.bb_highcsv_idx_deep() = -1;
+  jetTool->fillDeltaRbb(baby.dr_bb_deep(),baby.bb_pt_deep(),baby.bb_m_deep(),baby.bb_jet_idx1_deep(),baby.bb_jet_idx2_deep(),  baby.bb_gs_idx_deep(), baby.bb_gs_flavor_deep(),all_baby_jets, baby.jets_csvd(), baby.jets_islep(),baby.jets_pt(),deepbranks,baby.bb_highcsv_idx_deep(),true);
+
   if(baby.nbm() >= 2 && sig_leps.size()>0){
     const auto &jet1 = all_baby_jets.at(branks.at(0));
     const auto &jet2 = all_baby_jets.at(branks.at(1));
@@ -1656,6 +1665,15 @@ void bmaker_full::writeMC(edm::Handle<reco::GenParticleCollection> genParticles,
 	  baby.bb_gs_idx()[indbb]=ind; //using gluon index
 	  baby.bb_gs_flavor()[indbb]=baby.mc_id()[q_pair_idx[0]];
 	}	
+      }
+
+      //loop over deep bb pairs, to fill truth info
+      for(size_t indbb(0);indbb<baby.dr_bb_deep().size();indbb++){
+	//if quark1 matches jet1 and q2 matches jet2, or vice versa, fill bb_idx and bb_gs_flavor
+        if(((baby.mc_jetidx()[q_pair_idx[0]]==baby.bb_jet_idx1_deep()[indbb]) && (baby.mc_jetidx()[q_pair_idx[1]]==baby.bb_jet_idx2_deep()[indbb])) ||((baby.mc_jetidx()[q_pair_idx[0]]==baby.bb_jet_idx2_deep()[indbb]) && (baby.mc_jetidx()[q_pair_idx[1]]==baby.bb_jet_idx1_deep()[indbb]))){
+          baby.bb_gs_idx_deep()[indbb]=ind; //using gluon index
+          baby.bb_gs_flavor_deep()[indbb]=baby.mc_id()[q_pair_idx[0]];
+	}
       }
     }
   }

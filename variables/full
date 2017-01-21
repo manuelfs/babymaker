@@ -78,6 +78,9 @@ int njets
 int nbl
 int nbm
 int nbt
+int nbld
+int nbmd
+int nbtd
 
 int njets_ra2
 int njets_clean
@@ -125,6 +128,16 @@ std::vector<int> bb_jet_idx1
 std::vector<int> bb_jet_idx2
 std::vector<int> bb_gs_idx
 std::vector<int> bb_gs_flavor
+
+std::vector<float> dr_bb_deep
+std::vector<float> bb_pt_deep
+std::vector<float> bb_m_deep
+int bb_highcsv_idx_deep
+std::vector<int> bb_jet_idx1_deep
+std::vector<int> bb_jet_idx2_deep
+std::vector<int> bb_gs_idx_deep
+std::vector<int> bb_gs_flavor_deep
+
 
 ##################   Leptons   ################
 int nleps

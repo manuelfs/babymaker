@@ -370,12 +370,13 @@ float jet_met_tools::getMCTagEfficiency(int pdgId, float pT, float eta, BTagEntr
 }
 
 // get deltaR between two b-tagged CSVM jets
-void jet_met_tools::fillDeltaRbb(vector<float> & deltaRbb, vector<float> & bb_pt,vector<float> & bb_m,vector<int> & bb_jet_idx1, vector<int> & bb_jet_idx2,vector<int> & bb_gs_idx,vector<int> & bb_gs_flavor, const vector<LVector> &jets, const vector<float> &jets_csv, const vector<bool> &jets_islep, const vector<float> &jets_pt, const vector<size_t> &branks, int & highcsv_index)
+void jet_met_tools::fillDeltaRbb(vector<float> & deltaRbb, vector<float> & bb_pt,vector<float> & bb_m,vector<int> & bb_jet_idx1, vector<int> & bb_jet_idx2,vector<int> & bb_gs_idx,vector<int> & bb_gs_flavor, const vector<LVector> &jets, const vector<float> &jets_csv, const vector<bool> &jets_islep, const vector<float> &jets_pt, const vector<size_t> &branks, int & highcsv_index, bool deep)
 {
   for(size_t ijet(0); ijet<jets.size(); ijet++) {
     for(size_t jjet=ijet+1; jjet<jets.size(); jjet++) {
       if(jets_pt[ijet]<JetPtCut || jets_pt[jjet]<JetPtCut) continue;
-      if(jets_csv[ijet]<CSVMedium || jets_csv[jjet]<CSVMedium) continue;
+      if(!deep) {if(jets_csv[ijet]<CSVMedium || jets_csv[jjet]<CSVMedium) continue;}
+      else {if(jets_csv[ijet]<DeepCSVMedium || jets_csv[jjet]<DeepCSVMedium) continue;} //Note here that jets_csv is not baby.jets_csv(), but is whatever is fed when function is called (csv or csvd)
       if(jets_islep[ijet] || jets_islep[jjet]) continue;
       deltaRbb.push_back(deltaR(jets.at(ijet), jets.at(jjet)));
       bb_pt.push_back(sumPt(jets.at(ijet), jets.at(jjet)));

@@ -65,6 +65,9 @@ namespace xsec{
     if(file.Contains("TTJets_SingleLept")) xsec = 178.7; //(1- ((1-3*0.108)^2+(3*0.108)^2))*815.96*0.5 per half
     if(file.Contains("TTToSemiLeptonic")) xsec = 357.4;
     
+    if(file.Contains("TTJets_DiLept_genMET-150")) xsec = 0.06392*85.66; // filter_eff*(3*0.108)^2*815.96
+    if(file.Contains("TTJets_SingleLept") && file.Contains("genMET-150")) xsec = 0.05217*178.7; //filter_eff*(1- ((1-3*0.108)^2+(3*0.108)^2))*815.96*0.5 per half
+
     // cross sections from mcm
     if(file.Contains("TTG")) xsec = 3.697;                
     if(file.Contains("TTTT_TuneCUETP8M1_13TeV-amcatnlo")) xsec = 0.009103;
@@ -96,6 +99,7 @@ namespace xsec{
     if(file.Contains("QCD_HT-500To1000_13TeV-madgraph")) xsec = 26740.0;
     if(file.Contains("QCD_HT_1000ToInf_13TeV-madgraph")) xsec = 769.7;
 
+    if(file.Contains("QCD_HT50to100_TuneCUETP8M1_13TeV-madgraphMLM-pythia8")) xsec = 1; // not in MCM, need to derive
     if(file.Contains("QCD_HT100to200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8")) xsec = 27540000;
     if(file.Contains("QCD_HT200to300_TuneCUETP8M1_13TeV-madgraphMLM-pythia8"))   xsec = 1735000;
     if(file.Contains("QCD_HT300to500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8"))   xsec = 366800;
@@ -151,14 +155,17 @@ namespace xsec{
     if (file.Contains("ST_s-channel_4f_leptonDecays_13TeV-amcatnlo-pythia8"))     xsec = 3.34;
     if (file.Contains("ST_t-channel_antitop_4f_leptonDecays_13TeV-powheg-pythia8")) xsec = 26.23;
     if (file.Contains("ST_t-channel_top_4f_leptonDecays_13TeV-powheg-pythia8"))     xsec = 44.07;
-    if (file.Contains("ST_tW_antitop_5f_inclusiveDecays_13TeV-powheg-pythia8"))     xsec = 35.8;
-    if (file.Contains("ST_tW_top_5f_inclusiveDecays_13TeV-powheg-pythia8"))     xsec = 35.8; 
-    if (file.Contains("ST_tW_antitop_5f_NoFullyHadronicDecays_13TeV-powheg"))     xsec = 35.8*0.438;
-    if (file.Contains("ST_tW_top_5f_NoFullyHadronicDecays_13TeV-powheg"))     xsec = 35.8*0.438; 
+    if (file.Contains("ST_t-channel_antitop_4f_inclusiveDecays_TuneCUETP8M2T4_13TeV-powhegV2")) xsec = 80.95;
+    if (file.Contains("ST_t-channel_top_4f_inclusiveDecays_TuneCUETP8M2T4_13TeV-powhegV2")) xsec = 136.02;
+    if (file.Contains("ST_tW_antitop_5f_inclusiveDecays_13TeV-powheg-pythia8"))     xsec = 35.85;
+    if (file.Contains("ST_tW_top_5f_inclusiveDecays_13TeV-powheg-pythia8"))     xsec = 35.85; 
+    if (file.Contains("ST_tW_antitop_5f_NoFullyHadronicDecays_13TeV-powheg"))     xsec = 35.85*0.543;
+    if (file.Contains("ST_tW_top_5f_NoFullyHadronicDecays_13TeV-powheg"))     xsec = 35.85*0.543; 
 
     if(file.Contains("DYJetsToLL_M-10to50_TuneCUETP8M1_13TeV")) xsec = 18610*1.23;
     if(file.Contains("DYJetsToLL_M-50_TuneCUETP8M1_13TeV"))     xsec = 4895*1.23;
 
+    if(file.Contains("DYJetsToLL_M-50_HT-70to100"))    xsec = 175.3*1.23;
     if(file.Contains("DYJetsToLL_M-50_HT-100to200"))    xsec = 139.4*1.23;
     if(file.Contains("DYJetsToLL_M-50_HT-200to400"))    xsec = 42.75*1.23;
     if(file.Contains("DYJetsToLL_M-50_HT-400to600"))    xsec = 5.497*1.23;

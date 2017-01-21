@@ -47,7 +47,7 @@ outName="fullbaby_Run2016E_SingleMuon_23Sep2016-v1.root"
 # inFile=/home/users/ana/data/TTJets_HT-2500toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISummer16MiniAODv2.root
 # outName="fullbaby_TTJets_HT-2500toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISummer16MiniAODv2.root"
 
-nEvents="-1"
+nEvents="100"
 
 json=do_not_want_json # If it can't find the file, it doesn't pre-apply the JSON
 # json="babymaker/data/json/golden_Cert_271036-275125_13TeV_PromptReco_Collisions16.json"

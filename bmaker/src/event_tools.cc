@@ -126,7 +126,9 @@ int event_tools::type(const string &name){
   }else if((contains(name, "TTJets") || contains(name, "TT_")) && !contains(name, "TTTT_")){ sample = 1;
     if(contains(name, "TTJets_Tune")){ category = 0; bin = 0;
     }else if(contains(name, "SingleLept")){ category = 1; bin = 0;
+      if(contains(name, "genMET-150")) bin = 1;
     }else if(contains(name, "DiLept")){ category = 2; bin = 0;
+      if(contains(name, "genMET-150")) bin = 1;
     }else if(contains(name, "TTJets_HT")){ category = 3;
       if(contains(name, "HT-600to800")){ bin = 0;
       }else if(contains(name, "HT-800to1200")){ bin = 1;
@@ -139,13 +141,14 @@ int event_tools::type(const string &name){
   }else if(contains(name, "WJets") && !contains(name, "TTWJets")){ sample = 2;
     if(contains(name, "WJetsToLNu_Tune")){ category = 0; bin = 0;
     }else if(contains(name, "WJetsToLNu_HT")){ category = 1;
-      if(contains(name, "HT-100To200")){ bin = 0;
-      }else if(contains(name, "HT-200To400")){ bin = 1;
-      }else if(contains(name, "HT-400To600")){ bin = 2;
-      }else if(contains(name, "HT-600To800")){ bin = 3;
-      }else if(contains(name, "HT-800To1200")){ bin = 4;
-      }else if(contains(name, "HT-1200To2500")){ bin = 5;
-      }else if(contains(name, "HT-2500ToInf")){ bin = 6;
+      if(contains(name, "HT-70To100")){ bin = 0;
+      }else if(contains(name, "HT-100To200")){ bin = 1;
+      }else if(contains(name, "HT-200To400")){ bin = 2;
+      }else if(contains(name, "HT-400To600")){ bin = 3;
+      }else if(contains(name, "HT-600To800")){ bin = 4;
+      }else if(contains(name, "HT-800To1200")){ bin = 5;
+      }else if(contains(name, "HT-1200To2500")){ bin = 6;
+      }else if(contains(name, "HT-2500ToInf")){ bin = 7;
       }else if(contains(name, "HT-600ToInf")){ bin = 10;
       }
     }else if(contains(name, "WJetsToQQ_HT")){ category = 2;
@@ -170,22 +173,28 @@ int event_tools::type(const string &name){
   }else if(contains(name, "DYJetsToLL")){ sample = 6;
     if(contains(name, "DYJetsToLL_M-50_Tune")){ category = 0; bin = 0;
     }else if(contains(name, "DYJetsToLL_M-50_HT")){ category = 1;
-      if(contains(name, "HT-100to200")){ bin = 0;
-      }else if(contains(name, "HT-200to400")){ bin = 1;
-      }else if(contains(name, "HT-400to600")){ bin = 2;
-      }else if(contains(name, "HT-600toInf")){ bin = 3;
+      if(contains(name, "HT-70to100")){ bin = 0;
+      }else if(contains(name, "HT-100to200")){ bin = 1;
+      }else if(contains(name, "HT-200to400")){ bin = 2;
+      }else if(contains(name, "HT-400to600")){ bin = 3;
+      }else if(contains(name, "HT-600to800")){ bin = 4;
+      }else if(contains(name, "HT-800to1200")){ bin = 5;
+      }else if(contains(name, "HT-1200to2500")){ bin = 6;
+      }else if(contains(name, "HT-2500toInf")){ bin = 7;
+      }else if(contains(name, "HT-600toInf")){ bin = 10;
       }
     }
   }else if(contains(name, "QCD")){ sample = 7;
     if(contains(name, "QCD_HT")){ category = 0;
-      if(contains(name, "HT100to200")){ bin = 0;
-      }else if(contains(name, "HT200to300")){ bin = 1;
-      }else if(contains(name, "HT300to500")){ bin = 2;
-      }else if(contains(name, "HT500to700")){ bin = 3;
-      }else if(contains(name, "HT700to1000")){ bin = 4;
-      }else if(contains(name, "HT1000to1500")){ bin = 5;
-      }else if(contains(name, "HT1500to2000")){ bin = 6;
-      }else if(contains(name, "HT2000toInf")){ bin = 7;
+      if(contains(name, "HT50to100")){ bin = 0;
+      }else if(contains(name, "HT100to200")){ bin = 1;
+      }else if(contains(name, "HT200to300")){ bin = 2;
+      }else if(contains(name, "HT300to500")){ bin = 3;
+      }else if(contains(name, "HT500to700")){ bin = 4;
+      }else if(contains(name, "HT700to1000")){ bin = 5;
+      }else if(contains(name, "HT1000to1500")){ bin = 6;
+      }else if(contains(name, "HT1500to2000")){ bin = 7;
+      }else if(contains(name, "HT2000toInf")){ bin = 8;
       }
     }else if(contains(name, "QCD_Pt")){ category = 1;
       if(contains(name, "5to10")){ bin = 0;
@@ -209,10 +218,15 @@ int event_tools::type(const string &name){
     }
   }else if(contains(name, "ZJets")){ sample = 8;
     if(contains(name, "ZJetsToNuNu")){ category = 0;
-      if(contains(name, "HT-100To200")){ bin = 0;
-      }else if(contains(name, "HT-200To400")){ bin = 1;
-      }else if(contains(name, "HT-400To600")){ bin = 2;
-      }else if(contains(name, "HT-600ToInf")){ bin = 3;
+      if(contains(name, "HT-70To100")){ bin = 0;
+      }else if(contains(name, "HT-100To200")){ bin = 1;
+      }else if(contains(name, "HT-200To400")){ bin = 2;
+      }else if(contains(name, "HT-400To600")){ bin = 3;
+      }else if(contains(name, "HT-600To800")){ bin = 4;
+      }else if(contains(name, "HT-800To1200")){ bin = 5;
+      }else if(contains(name, "HT-1200To2500")){ bin = 6;
+      }else if(contains(name, "HT-2500ToInf")){ bin = 7;
+      }else if(contains(name, "HT-600ToInf")){ bin = 10;
       }
     }else if(contains(name, "ZJetsToQQ")){ category = 1;
       if(contains(name, "HT600toInf")){ bin = 0;

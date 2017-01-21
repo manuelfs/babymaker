@@ -121,6 +121,10 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   veto_leps = veto_mus;
   veto_leps.insert(veto_leps.end(), veto_els.begin(), veto_els.end());
 
+  // bool keep_event = false;
+  // if (baby.nleps()==2&&((baby.elel_m()>80&&baby.elel_m()<100)||(baby.mumu_m()>80&&baby.mumu_m()<100)))
+  //   keep_event = true;
+
   ///////////////////////////////// Photons ////////////////////////////////
   if (debug) cout<<"INFO: Writing photons..."<<endl;
   vCands photons;
@@ -169,6 +173,8 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   vector<double> jetsMuonEnergyFrac;
   vector<vector<LVector> > sys_jets;
   all_baby_jets = writeJets(alljets, all_baby_jets_idx, genjets, sig_leps, veto_leps, photons, tks, sys_jets, jetsMuonEnergyFrac);
+  // if (baby.njets()>=4) keep_event = true;
+  // if (!keep_event && isData) return;
   if (addBTagWeights) writeBTagWeights(alljets, all_baby_jets, all_baby_jets_idx);
   writeHiggVars(all_baby_jets);
   writeBBVars(all_baby_jets, sig_leps);

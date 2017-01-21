@@ -73,8 +73,6 @@ elif "RunIISpring16MiniAOD" in outName:
 elif "RunIISummer16MiniAOD" in outName:
     jecLabel = 'Summer16_23Sep2016V2_MC'
 
-print "BABYMAKER: Applying JECs with jecLabel:", jecLabel
-
 if "FSPremix" in outName or "Fast" in outName: fastsim = True
 else: fastsim = False
 
@@ -162,7 +160,7 @@ if doJEC:
     process.load("CondCore.DBCommon.CondDBCommon_cfi")
     from CondCore.DBCommon.CondDBSetup_cfi import CondDBSetup
     process.jec = cms.ESSource("PoolDBESSource",CondDBSetup,
-                               connect = cms.string('sqlite_file:data/jec/'+jecLabel+'.db'),
+                               connect = cms.string('sqlite_fip:babymaker/data/jec/'+jecLabel+'.db'),
                                toGet   = cms.VPSet(
                                    cms.PSet(
                                        record = cms.string("JetCorrectionsRecord"),

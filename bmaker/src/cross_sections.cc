@@ -83,7 +83,8 @@ namespace xsec{
     if(file.Contains("WJetsToLNu_TuneCUET")) xsec=61526.7; //NNLO from Lesya's summary table 
 
     //cross-section per slice changed due to change in genHT definition
-    if(file.Contains("WJetsToLNu_HT-100To200"))  xsec = 1347.*1.21; //updated based on MCM
+    if(file.Contains("WJetsToLNu_HT-70To100"))  xsec = 1372.*1.21; 
+    if(file.Contains("WJetsToLNu_HT-100To200"))  xsec = 1347.*1.21; 
     if(file.Contains("WJetsToLNu_HT-200To400"))  xsec = 360.*1.21;
     if(file.Contains("WJetsToLNu_HT-400To600"))  xsec = 48.98*1.21;
     if(file.Contains("WJetsToLNu_HT-600ToInf"))  xsec = 18.77*1.21;

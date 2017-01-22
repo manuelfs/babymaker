@@ -4,34 +4,18 @@ import argparse
 import ROOT
 import array
 
-def ParameterizeEfficiency(out_file_path, ttbar_only, no_cuts):
+def ParameterizeEfficiency(out_file_path, no_cuts):
     ROOT.TH1.SetDefaultSumw2()
     c = ROOT.TChain("tree", "tree")
-    subdir = ("unskimmed" if no_cuts else "merged_stdnj5")
-    if ttbar_only:
-        c.Add("/net/cms2/cms2r0/babymaker/babies/2016_06_14/mc/"+subdir+"/*_TTJets_Tune*.root")
-    else:
-        c.Add("/net/cms2/cms2r0/babymaker/babies/2016_06_14/mc/"+subdir+"/*_TTJets*Lept*.root")
-        c.Add("/net/cms2/cms2r0/babymaker/babies/2016_06_14/mc/"+subdir+"/*_TTJets_HT*.root")
-        c.Add("/net/cms2/cms2r0/babymaker/babies/2016_06_14/mc/"+subdir+"/*_WJetsToLNu*.root")
-        c.Add("/net/cms2/cms2r0/babymaker/babies/2016_06_14/mc/"+subdir+"/*_ST_*.root")
-        c.Add("/net/cms2/cms2r0/babymaker/babies/2016_06_14/mc/"+subdir+"/*_TTWJets*.root")
-        c.Add("/net/cms2/cms2r0/babymaker/babies/2016_06_14/mc/"+subdir+"/*_TTZ*.root")
-        c.Add("/net/cms2/cms2r0/babymaker/babies/2016_06_14/mc/"+subdir+"/*DYJetsToLL*.root")
-        c.Add("/net/cms2/cms2r0/babymaker/babies/2016_06_14/mc/"+subdir+"/*QCD_HT*.root")
-        c.Add("/net/cms2/cms2r0/babymaker/babies/2016_06_14/mc/"+subdir+"/*_ZJet*.root")
-        c.Add("/net/cms2/cms2r0/babymaker/babies/2016_06_14/mc/"+subdir+"/*_ttHJetTobb*.root")
-        c.Add("/net/cms2/cms2r0/babymaker/babies/2016_06_14/mc/"+subdir+"/*_TTGJets*.root")
-        c.Add("/net/cms2/cms2r0/babymaker/babies/2016_06_14/mc/"+subdir+"/*_TTTT*.root")
-        c.Add("/net/cms2/cms2r0/babymaker/babies/2016_06_14/mc/"+subdir+"/*_WH_HToBB*.root")
-        c.Add("/net/cms2/cms2r0/babymaker/babies/2016_06_14/mc/"+subdir+"/*_ZH_HToBB*.root")
-        c.Add("/net/cms2/cms2r0/babymaker/babies/2016_06_14/mc/"+subdir+"/*_WWTo*.root")
-        c.Add("/net/cms2/cms2r0/babymaker/babies/2016_06_14/mc/"+subdir+"/*_WZ*.root")
-        c.Add("/net/cms2/cms2r0/babymaker/babies/2016_06_14/mc/"+subdir+"/*_ZZ_*.root")
+    c.Add("/net/cms2/cms2r0/babymaker/babies/2017_01_21/mc/unprocessed/*_TTJets_*.root")
 
-    btags = [("loose", 0.460),
-             ("medium", 0.800),
-             ("tight", 0.935)]
+    btags = [("loose", 0.5426),
+             ("medium", 0.8484),
+             ("tight", 0.9535)]
+
+    btags_deep = [("loose", 0.2219),
+                  ("medium", 0.6324),
+                  ("tight", 0.8958)]
 
     eta_cuts = [0., 1.2, 2.4]
     pt_cuts = [30., 50., 70., 100., 140., 200., 300., 670., 1.e4]
@@ -42,48 +26,66 @@ def ParameterizeEfficiency(out_file_path, ttbar_only, no_cuts):
                             len(pt_cuts)-1, array.array('d', pt_cuts),
                             len(flavor_cuts)-1, array.array('d', flavor_cuts))
                   for btag in btags]
+    numerators_deep = [ROOT.TH3D("btagEfficiency_deep_"+btag[0], "btagEfficiency_deep_"+btag[0],
+                            len(eta_cuts)-1, array.array('d', eta_cuts),
+                            len(pt_cuts)-1, array.array('d', pt_cuts),
+                            len(flavor_cuts)-1, array.array('d', flavor_cuts))
+                  for btag in btags_deep]
+
     denominator = numerators[0].Clone("btagEfficiency_denominator")
 
     entry = 0
     num_entries = c.GetEntries()
     for event in c:
-        if entry % 1000 == 0:
-            print str(100.*entry/num_entries)+"%"
+        if entry % 10000 == 0:
+            print "Completed", '{:.2f}'.format(100.*entry/num_entries)+"%"
         entry = entry + 1
-        if not (c.stitch and getattr(c,"pass")): continue
-        pass_cut = (True if no_cuts else (c.nleps>=1 and c.ht>500. and c.met>200. and c.njets>=5))
+        # if not (c.stitch and getattr(c,"pass")): continue # if using HT bins
+        if not (getattr(c,"pass")): continue
+        pass_cut = (True if no_cuts else (c.nleps>=1 and c.st>500. and c.met>200. and c.njets>=5))
         if not pass_cut: continue
         for ijet in xrange(len(c.jets_csv)):
+            if (c.jets_islep[ijet]): continue
             flavor = abs(c.jets_hflavor[ijet])
             pt = c.jets_pt[ijet]
             eta = abs(c.jets_eta[ijet])
-            weight = c.weight
             csv = c.jets_csv[ijet]
+            csvd = c.jets_csvd[ijet]
 
-            denominator.Fill(eta, pt, flavor, weight)
+            denominator.Fill(eta, pt, flavor)
             for inum in xrange(len(btags)):
                 if csv > btags[inum][1]:
-                    numerators[inum].Fill(eta, pt, flavor, weight)
+                    numerators[inum].Fill(eta, pt, flavor)
+            for inum in xrange(len(btags_deep)):
+                if csvd > btags_deep[inum][1]:
+                    numerators_deep[inum].Fill(eta, pt, flavor)
 
     for n in numerators:
+        n.Divide(denominator)
+    for n in numerators_deep:
         n.Divide(denominator)
                 
     out_file = ROOT.TFile(out_file_path, "recreate")
     for n in numerators:
         n.Write()
-    doc = ROOT.TNamed("Documentation: this file contains a parameterization in (eta, pt, flavor)", "")
+    doc = ROOT.TNamed("Documentation: this file contains a parameterization in (eta, pt, flavor) for CSVv2 b-tagger", "")
+    doc.Write()
+    out_file.Close()
+
+    out_file = ROOT.TFile(out_file_path.replace(".root","_deep.root"), "recreate")
+    for n in numerators_deep:
+        n.Write()
+    doc = ROOT.TNamed("Documentation: this file contains a parameterization in (eta, pt, flavor) for the deep CSV b-tagger", "")
     doc.Write()
     out_file.Close()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Computes b-tagging efficiency as a function of pT, eta, and flavor",
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument("-t", "--ttbar_only", action="store_true",
-                        help="Compute efficiency using only inclusive ttbar")
-    parser.add_argument("-o", "--out_file", metavar="OUT_FILE", default="bmaker/data/btagEfficiency.root",
+    parser.add_argument("-o", "--out_file", metavar="OUT_FILE", default="btagEfficiency.root",
                         help="Save efficiences to %(metavar)s")
-    parser.add_argument("-i", "--inclusive", action="store_true",
+    parser.add_argument("-i", "--inclusive", action="store_true", 
                         help="Use all available events, applying only basic filters")
     args = parser.parse_args()
 
-    ParameterizeEfficiency(args.out_file, args.ttbar_only, args.inclusive)
+    ParameterizeEfficiency(args.out_file, args.inclusive)

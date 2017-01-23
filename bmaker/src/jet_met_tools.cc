@@ -921,16 +921,16 @@ jet_met_tools::jet_met_tools(TString ijecName, bool doSys, bool fastSim):
   }
 
   string filename_deep(getenv("CMSSW_BASE"));
-  filename_deep+="/src/babymaker/bmaker/data/btagEfficiency.root";
+  filename_deep+="/src/babymaker/bmaker/data/btagEfficiency_deep.root";
   TFile *efficiencyFile_deep = TFile::Open(filename_deep.c_str());
   if(efficiencyFile_deep->IsOpen()) {
     for(size_t i = 0; i < op_pts_.size(); ++i){
       string hist_name;
       switch(op_pts_.at(i)){
-      case BTagEntry::OP_LOOSE: hist_name = "btagEfficiency_loose"; break;
-      case BTagEntry::OP_MEDIUM: hist_name = "btagEfficiency_medium"; break;
-      case BTagEntry::OP_TIGHT: hist_name = "btagEfficiency_tight"; break;
-      case BTagEntry::OP_RESHAPING: hist_name = "btagEfficiency_reshaping"; break;
+      case BTagEntry::OP_LOOSE: hist_name = "btagEfficiency_deep_loose"; break;
+      case BTagEntry::OP_MEDIUM: hist_name = "btagEfficiency_deep_medium"; break;
+      case BTagEntry::OP_TIGHT: hist_name = "btagEfficiency_deep_tight"; break;
+      case BTagEntry::OP_RESHAPING: hist_name = "btagEfficiency_deep_reshaping"; break;
       default: hist_name = "btagEfficiency"; break;
       }
       btag_efficiencies_deep_.at(i) = static_cast<const TH3D*>(efficiencyFile_deep->Get(hist_name.c_str()));

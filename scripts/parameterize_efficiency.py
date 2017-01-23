@@ -4,7 +4,7 @@ import argparse
 import ROOT
 import array
 
-def ParameterizeEfficiency(out_file_path, no_cuts):
+def ParameterizeEfficiency(out_file_path, docuts):
     ROOT.TH1.SetDefaultSumw2()
     c = ROOT.TChain("tree", "tree")
     c.Add("/net/cms2/cms2r0/babymaker/babies/2017_01_21/mc/unprocessed/*_TTJets_*.root")
@@ -42,8 +42,9 @@ def ParameterizeEfficiency(out_file_path, no_cuts):
         entry = entry + 1
         # if not (c.stitch and getattr(c,"pass")): continue # if using HT bins
         if not (getattr(c,"pass")): continue
-        pass_cut = (True if no_cuts else (c.nleps>=1 and c.st>500. and c.met>200. and c.njets>=5))
-        if not pass_cut: continue
+        if docuts:
+            if (c.nleps<1 or c.st<=500. or c.met<=200. or c.njets<5): 
+                continue
         for ijet in xrange(len(c.jets_csv)):
             if (c.jets_islep[ijet]): continue
             flavor = abs(c.jets_hflavor[ijet])
@@ -84,8 +85,8 @@ if __name__ == "__main__":
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument("-o", "--out_file", metavar="OUT_FILE", default="btagEfficiency.root",
                         help="Save efficiences to %(metavar)s")
-    parser.add_argument("-i", "--inclusive", action="store_true", 
+    parser.add_argument("-c", "--docuts", action="store_true", 
                         help="Use all available events, applying only basic filters")
     args = parser.parse_args()
 
-    ParameterizeEfficiency(args.out_file, args.inclusive)
+    ParameterizeEfficiency(args.out_file, args.docuts)

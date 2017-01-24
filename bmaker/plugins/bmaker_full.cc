@@ -803,20 +803,29 @@ vCands bmaker_full::writeMuons(edm::Handle<pat::MuonCollection> muons,
   for (unsigned ilep(0); ilep < muons->size(); ilep++) {
     const pat::Muon &lep = (*muons)[ilep];    
 
-    bool foundBadMu(false), foundBadDuplMu(false);
-    if (badmu_idx.find(ilep)!=badmu_idx.end()) foundBadMu = true;
-    if (badmu_dupl_idx.find(ilep)!=badmu_dupl_idx.end()) foundBadDuplMu = true;
+    bool isBadMu(false), isBadDuplMu(false);
+    if (badmu_idx.find(ilep)!=badmu_idx.end()) isBadMu = true;
+    if (badmu_dupl_idx.find(ilep)!=badmu_dupl_idx.end()) isBadDuplMu = true;
+    bool isBadTrkMuLoose(false), isBadTrkMuTight(false);
+    if (!(lep.isTrackerMuon() && lep.numberOfMatchedStations()>0)) isBadTrkMuLoose = true;
+    if (lep.innerTrack().isNonnull()) {
+      bool goodQualityTrack = (lep.innerTrack()->numberOfValidHits()>=10||(lep.innerTrack()->numberOfValidHits()>=7 && lep.innerTrack()->numberOfLostHits()==0));
+      if (isBadTrkMuLoose || !goodQualityTrack) isBadTrkMuTight = true;
+    }
 
     // Storing leptons that pass all veto cuts except for iso
-    if(!lepTool->isVetoMuon(lep, vtx, -99.) && !foundBadMu && !foundBadDuplMu) continue;
+    bool save_mu = lepTool->isVetoMuon(lep, vtx, -99.) || isBadMu || isBadDuplMu || isBadTrkMuLoose || isBadTrkMuTight;
+    if(!save_mu) continue;
 
     double lep_iso(lepTool->getPFIsolation(pfcands, dynamic_cast<const reco::Candidate *>(&lep), 0.05, 0.2, 10., rhoEventCentral, false));
     double lep_reliso(lepTool->getRelIsolation(lep, rhoEventCentral));
     double dz(0.), d0(0.);
     lepTool->vertexMuon(lep, vtx, dz, d0); // Calculating dz and d0
 
-    baby.mus_bad().push_back(foundBadMu);
-    baby.mus_bad_dupl().push_back(foundBadDuplMu);
+    baby.mus_bad().push_back(isBadMu);
+    baby.mus_bad_dupl().push_back(isBadDuplMu);
+    baby.mus_bad_trk_loose().push_back(isBadTrkMuLoose);
+    baby.mus_bad_trk_tight().push_back(isBadTrkMuTight);
     baby.mus_pt().push_back(lep.pt());
     baby.mus_eta().push_back(lep.eta());
     baby.mus_phi().push_back(lep.phi());

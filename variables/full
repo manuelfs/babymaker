@@ -154,6 +154,8 @@ int nmus
 int nvmus
 std::vector<bool> mus_bad
 std::vector<bool> mus_bad_dupl
+std::vector<bool> mus_bad_trk_loose
+std::vector<bool> mus_bad_trk_tight
 std::vector<float> mus_pt
 std::vector<float> mus_eta
 std::vector<float> mus_phi

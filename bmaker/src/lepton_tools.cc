@@ -642,13 +642,13 @@ bool lepton_tools::outInOnly(const reco::Muon &mu) const {
   return tk.algoMask().count() == 1 && tk.isAlgoInMask(reco::Track::muonSeededStepOutIn);
 }
 bool lepton_tools::preselection(const reco::Muon &mu, bool selectClones) const { 
-  return mu.isGlobalMuon() && (!selectClones || outInOnly(mu));
+  return (!selectClones || outInOnly(mu));
 }
 bool lepton_tools::tighterId(const reco::Muon &mu) const { 
   return muon::isMediumMuon(mu) && mu.numberOfMatchedStations() >= 2; 
 }
 bool lepton_tools::tightGlobal(const reco::Muon &mu) const {
-  return (mu.globalTrack()->hitPattern().muonStationsWithValidHits() >= 3 && mu.globalTrack()->normalizedChi2() <= 20);
+  return mu.isGlobalMuon() && (mu.globalTrack()->hitPattern().muonStationsWithValidHits() >= 3 && mu.globalTrack()->normalizedChi2() <= 20);
 }
 bool lepton_tools::safeId(const reco::Muon &mu) const { 
   if (mu.muonBestTrack()->ptError() > 0.2 * mu.muonBestTrack()->pt()) { return false; }

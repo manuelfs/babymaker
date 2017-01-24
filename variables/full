@@ -38,6 +38,7 @@ float mt_rebal
 float mt2
 float mt2_0mass
 float mct
+float mctd
 float dphi_wlep
 bool jetmismeas
 
@@ -63,24 +64,19 @@ int   hig_bin
 float hig_dm
 float hig_am
 float hig_drmax
-float hig_dphi
-float hig1_pt
-float hig1_eta
-float hig1_phi
-float hig1_m
-float hig2_pt
-float hig2_eta
-float hig2_phi
-float hig2_m
+int   higd_bin
+float higd_dm
+float higd_am
+float higd_drmax
 
 ###################   Jets   ##################
 int njets
 int nbl
 int nbm
 int nbt
-int nbld
-int nbmd
-int nbtd
+int nbdl
+int nbdm
+int nbdt
 
 int njets_ra2
 int njets_clean
@@ -98,6 +94,10 @@ float jetsys_nob_pt
 float jetsys_nob_eta
 float jetsys_nob_phi
 float jetsys_nob_m
+float jetsys_nobd_pt
+float jetsys_nobd_eta
+float jetsys_nobd_phi
+float jetsys_nobd_m
 
 std::vector<float> jets_pt
 std::vector<float> jets_eta
@@ -117,7 +117,9 @@ std::vector<int>   jets_fjet12_index
 std::vector<int>   jets_fjet14_index
 std::vector<int>   jets_hflavor
 std::vector<bool>  jets_h1
+std::vector<bool>  jets_h1d
 std::vector<bool>  jets_h2
+std::vector<bool>  jets_h2d
 
 ######### b-jet pairs ###########
 std::vector<float> dr_bb
@@ -403,6 +405,7 @@ std::vector<float> sys_ht
 std::vector<float> sys_st
 std::vector<int>   sys_njets
 std::vector<int>   sys_nbm
+std::vector<int>   sys_nbdm
 std::vector<bool>  sys_pass
 std::vector<float> sys_mj14_nolep
 std::vector<float> sys_mj12

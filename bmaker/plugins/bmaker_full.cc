@@ -176,7 +176,12 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   // if (baby.njets()>=4) keep_event = true;
   // if (!keep_event && isData) return;
   if (addBTagWeights) writeBTagWeights(alljets, all_baby_jets, all_baby_jets_idx);
-  writeHiggVars(all_baby_jets);
+  writeHiggVars(all_baby_jets, baby.jets_csv(), baby.jets_h1(), baby.jets_h2(), 
+                baby.jets_islep(), baby.nbl(), baby.nbm(), baby.nbt(),
+                baby.hig_am(), baby.hig_dm(), baby.hig_drmax(), baby.hig_bin(), baby.mct());
+  writeHiggVars(all_baby_jets, baby.jets_csvd(), baby.jets_h1d(), baby.jets_h2d(), 
+                baby.jets_islep(), baby.nbdl(), baby.nbdm(), baby.nbdt(),
+                baby.higd_am(), baby.higd_dm(), baby.higd_drmax(), baby.higd_bin(), baby.mctd());
   writeBBVars(all_baby_jets, sig_leps);
   writeFatJets();
   
@@ -354,15 +359,15 @@ vector<LVector> bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
                             vector<double> &jetsMuonEnergyFrac){
   vector<LVector> all_baby_jets;
   vCands jets_ra2;
-  LVector jetsys_p4, jetsys_nob_p4;
+  LVector jetsys_p4, jetsys_nob_p4, jetsys_nobd_p4;
   baby.njets() = 0; baby.nbl() = 0; baby.nbm() = 0;  baby.nbt() = 0;
-  baby.nbld() = 0; baby.nbmd() = 0;  baby.nbtd() = 0;
+  baby.nbdl() = 0; baby.nbdm() = 0;  baby.nbdt() = 0;
   baby.ht() = 0.; baby.st() = 0.; baby.ht_hlt() = 0.;
   baby.njets_ra2() = 0; baby.njets_clean() = 0; baby.nbm_ra2() = 0; baby.ht_ra2() = 0.; baby.ht_clean() = 0.; 
   baby.pass_jets() = true; baby.pass_jets_nohf() = true; baby.pass_jets_tight() = true; 
   baby.pass_jets_ra2() = true; baby.pass_jets_tight_ra2() = true; 
   if (doSystematics) {
-    baby.sys_njets().resize(kSysLast, 0); baby.sys_nbm().resize(kSysLast, 0); 
+    baby.sys_njets().resize(kSysLast, 0); baby.sys_nbm().resize(kSysLast, 0); baby.sys_nbdm().resize(kSysLast, 0); 
     baby.sys_pass().resize(kSysLast, true); baby.sys_ht().resize(kSysLast, 0.); 
     baby.sys_st().resize(kSysLast, 0); 
     sys_jets.resize(kSysLast, vector<LVector>());
@@ -410,18 +415,19 @@ vector<LVector> bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
       baby.jets_csvd().push_back(csvd);
  
       if(!isLep && goodPtEta){
-	jetsys_p4 += jet.p4();
-	baby.njets()++;
-	baby.ht() += jetp4.pt();
-	baby.st() += jetp4.pt();
-	if(csv > jetTool->CSVLoose)  baby.nbl()++;
-	if(csv > jetTool->CSVMedium) baby.nbm()++;
-	else jetsys_nob_p4 += jet.p4();
-	if(csv > jetTool->CSVTight)  baby.nbt()++;
-	
-	if(csvd > jetTool->DeepCSVLoose)  baby.nbld()++;
-        if(csvd > jetTool->DeepCSVMedium) baby.nbmd()++;
-	if(csvd > jetTool->DeepCSVTight)  baby.nbtd()++;
+        jetsys_p4 += jet.p4();
+        baby.njets()++;
+        baby.ht() += jetp4.pt();
+        baby.st() += jetp4.pt();
+        if(csv > jetTool->CSVLoose)  baby.nbl()++;
+        if(csv > jetTool->CSVMedium) baby.nbm()++;
+        else jetsys_nob_p4 += jet.p4();
+        if(csv > jetTool->CSVTight)  baby.nbt()++;
+
+        if(csvd > jetTool->DeepCSVLoose)  baby.nbdl()++;
+        if(csvd > jetTool->DeepCSVMedium) baby.nbdm()++;
+        else jetsys_nobd_p4 += jet.p4();
+        if(csvd > jetTool->DeepCSVTight)  baby.nbdt()++;
       }
     } 
     
@@ -483,6 +489,7 @@ vector<LVector> bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
             baby.sys_ht()[isys] += jetp4.pt();
             baby.sys_st()[isys] += jetp4.pt();
             if(csv > jetTool->CSVMedium) baby.sys_nbm()[isys]++;
+            if(csvd > jetTool->DeepCSVMedium) baby.sys_nbdm()[isys]++;
           }
         }
       } // loop over systematics
@@ -514,6 +521,10 @@ vector<LVector> bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
   baby.jetsys_nob_eta() = jetsys_nob_p4.eta();
   baby.jetsys_nob_phi() = jetsys_nob_p4.phi();
   baby.jetsys_nob_m()   = jetsys_nob_p4.mass();
+  baby.jetsys_nobd_pt()  = jetsys_nobd_p4.pt();
+  baby.jetsys_nobd_eta() = jetsys_nobd_p4.eta();
+  baby.jetsys_nobd_phi() = jetsys_nobd_p4.phi();
+  baby.jetsys_nobd_m()   = jetsys_nobd_p4.mass();
 
   if(isFastSim) baby.pass_fsmet() = eventTool->passFSMET(alljets, genjets);
   else baby.pass_fsmet() = true;  
@@ -619,28 +630,28 @@ void bmaker_full::writeBTagWeights(edm::Handle<pat::JetCollection> alljets,
   }
 }
 
-void bmaker_full::writeHiggVars(vector<LVector> &all_baby_jets){
+void bmaker_full::writeHiggVars(vector<LVector> &baby_jets_p4, vector<float> &baby_jets_csv, 
+                                vector<bool> &baby_jets_h1, vector<bool> &baby_jets_h2, 
+                                vector<bool> &baby_jets_islep, int &baby_nbl, int &baby_nbm, int &baby_nbt,
+                                float &baby_hig_am, float &baby_hig_dm, float &baby_hig_drmax, 
+                                int &baby_hig_bin, float &baby_mct){
   vector<int> hi_csv(5,-1); // Indices of the 5 jets with highest CSV
-  baby.hig_dphi() = 9999.;
-
-  for (size_t ijet(0); ijet < baby.jets_pt().size(); ijet++) {
-    baby.jets_h1().push_back(false);
-    baby.jets_h2().push_back(false);
+  for (size_t ijet(0); ijet < baby_jets_csv.size(); ijet++) {
+      baby_jets_h1.push_back(false);
+      baby_jets_h2.push_back(false);
 
     //matters for WH to not work with lepton jets
-    if (baby.jets_islep()[ijet]) continue;
+    if (baby_jets_islep[ijet]) continue;
         
-    float dphi = reco::deltaPhi(baby.jets_phi()[ijet], baby.met_phi());
-    if(dphi < baby.hig_dphi()) baby.hig_dphi() = dphi;
-
     // Finding the N jets with highest CSV values
-    float csv(baby.jets_csv()[ijet]);
+    float csv = baby_jets_csv[ijet];
     for(size_t ind(0); ind<hi_csv.size(); ind++){
-      int icsv = hi_csv[ind];
-      if(icsv==-1 || csv > baby.jets_csv()[icsv]){
-	for(size_t ind2(hi_csv.size()-1); ind2>=ind+1; ind2--) hi_csv[ind2] = hi_csv[ind2-1];
-	hi_csv[ind] = ijet;
-	break;
+      float icsv(-99999);
+      if(hi_csv[ind]>=0) icsv = baby_jets_csv[hi_csv[ind]];
+      if(hi_csv[ind]==-1 || csv > icsv){
+        for(size_t ind2(hi_csv.size()-1); ind2>=ind+1; ind2--) hi_csv[ind2] = hi_csv[ind2-1];
+        hi_csv[ind] = ijet;
+        break;
       }
     } // Loop over highest CSV jets
   } // Loop over jets  
@@ -648,11 +659,13 @@ void bmaker_full::writeHiggVars(vector<LVector> &all_baby_jets){
   //// Variables for the Higgsino analysis
   if(hi_csv[3]>=0){
     // hig_p4 has the p4 of the jet if row==col, and if not the sum of the p4 for the row-th and col-th jets 
+    unsigned hi_csv_size = 4;
+    if (hi_csv[4]>=0) hi_csv_size = 5;
     vector<vector<LVector> > hig_p4;
-    for(size_t row=0; row<hi_csv.size(); row++){
+    for(size_t row=0; row<hi_csv_size; row++){
       hig_p4.push_back(vector<LVector>());
       for(size_t col=0; col<=row; col++){
-        LVector jetp4(all_baby_jets[hi_csv[row]]);
+        LVector jetp4(baby_jets_p4[hi_csv[row]]);
         hig_p4.back().push_back(jetp4);
         if(row!=col) hig_p4.back().back() += hig_p4[col][col];
       } // Loop over columns in hig_p4
@@ -678,51 +691,39 @@ void bmaker_full::writeHiggVars(vector<LVector> &all_baby_jets){
       } // ind1
     } // ind0
 
-    baby.jets_h1()[hi_csv[hig_ind[0]]] = true; baby.jets_h1()[hi_csv[hig_ind[1]]] = true; 
-    baby.jets_h2()[hi_csv[hig_ind[2]]] = true; baby.jets_h2()[hi_csv[hig_ind[3]]] = true; 
+    baby_jets_h1[hi_csv[hig_ind[0]]] = true; baby_jets_h1[hi_csv[hig_ind[1]]] = true; 
+    baby_jets_h2[hi_csv[hig_ind[2]]] = true; baby_jets_h2[hi_csv[hig_ind[3]]] = true; 
 
     LVector hig1 = hig_p4[hig_ind[0]][hig_ind[1]], hig2 = hig_p4[hig_ind[2]][hig_ind[3]];
-    baby.hig_dm()   = fabs(hig1.mass() - hig2.mass());
-    baby.hig_am()   = (hig1.mass() + hig2.mass())/2.;
-    baby.hig_drmax() = max(deltaR(all_baby_jets[hi_csv[hig_ind[0]]], all_baby_jets[hi_csv[hig_ind[1]]]),
-                           deltaR(all_baby_jets[hi_csv[hig_ind[2]]], all_baby_jets[hi_csv[hig_ind[3]]]));
-
-    baby.hig1_pt()  = hig1.pt();
-    baby.hig1_eta() = hig1.eta();
-    baby.hig1_phi() = hig1.phi();
-    baby.hig1_m()   = hig1.mass();
-    baby.hig2_pt()  = hig2.pt();
-    baby.hig2_eta() = hig2.eta();
-    baby.hig2_phi() = hig2.phi();
-    baby.hig2_m()   = hig2.mass();
+    baby_hig_dm   = fabs(hig1.mass() - hig2.mass());
+    baby_hig_am   = (hig1.mass() + hig2.mass())/2.;
+    baby_hig_drmax = max(deltaR(baby_jets_p4[hi_csv[hig_ind[0]]], baby_jets_p4[hi_csv[hig_ind[1]]]),
+                           deltaR(baby_jets_p4[hi_csv[hig_ind[2]]], baby_jets_p4[hi_csv[hig_ind[3]]]));
 
     // Setting up the ABCD bin: 
     // 2 -> SIG, 1 -> SB, 0 -> in between, not used
-    if(baby.hig_dm()<=40) {
-      if (baby.hig_am()>100 && baby.hig_am()<140) baby.hig_bin() = 2;
-      else  baby.hig_bin() = 1;
-    } else baby.hig_bin() = 0;
+    if(baby_hig_dm<=40) {
+      if (baby_hig_am>100 && baby_hig_am<140) baby_hig_bin = 2;
+      else if (baby_hig_am<=200) baby_hig_bin = 1;
+      else baby_hig_bin = 0;
+    } else baby_hig_bin = 0;
     // 20 -> 2b, 30 -> 3b, 40 -> 4b
-    if(baby.nbt()>=2) {
-      baby.hig_bin() += 20;
-      if(baby.nbm()>=3) {
-        baby.hig_bin() += 10;
-        if(baby.nbl()>=4) baby.hig_bin() += 10;
+    if(baby_nbt>=2) {
+      baby_hig_bin += 20;
+      if(baby_nbm>=3) {
+        baby_hig_bin += 10;
+        if(baby_nbl>=4) baby_hig_bin += 10;
       }
     }
   } // if njets >= 4
   else if (hi_csv[1]>=0){ // Checking that at least 2 jets exist (important for WH analysis)
-    LVector pb1 = all_baby_jets[hi_csv[0]], pb2 = all_baby_jets[hi_csv[1]];
-    LVector hig = pb1+pb2;
-    baby.hig1_pt()  = hig.pt();
-    baby.hig1_eta() = hig.eta();
-    baby.hig1_phi() = hig.phi();
-    baby.hig1_m()   = hig.mass();
+    baby_jets_h1[hi_csv[0]] = true; 
+    baby_jets_h1[hi_csv[1]] = true; 
   }
 
   if (hi_csv[1]>=0){
-    LVector pb1 = all_baby_jets[hi_csv[0]], pb2 = all_baby_jets[hi_csv[1]];
-    baby.mct() = sqrt(2*pb1.pt()*pb2.pt() * (1+cos(deltaPhi(pb1.phi(), pb2.phi()))) );
+    LVector pb1 = baby_jets_p4[hi_csv[0]], pb2 = baby_jets_p4[hi_csv[1]];
+    baby_mct = sqrt(2*pb1.pt()*pb2.pt() * (1+cos(deltaPhi(pb1.phi(), pb2.phi()))) );
   }
 
   return;
@@ -1302,40 +1303,40 @@ void bmaker_full::writeVertices(edm::Handle<reco::VertexCollection> vtx,
 
 void bmaker_full::writeGenInfo(edm::Handle<LHEEventProduct> lhe_info){
   baby.nisr_me()=0; baby.ht_isr_me()=0.; 
-  for ( unsigned int icount = 0 ; icount < (unsigned int)lhe_info->hepeup().NUP; icount++ ) {
-    unsigned int pdgid = abs(lhe_info->hepeup().IDUP[icount]);
-    int status = lhe_info->hepeup().ISTUP[icount];
-    int mom1id = abs(lhe_info->hepeup().IDUP[lhe_info->hepeup().MOTHUP[icount].first-1]);
-    int mom2id = abs(lhe_info->hepeup().IDUP[lhe_info->hepeup().MOTHUP[icount].second-1]);
-    float px = (lhe_info->hepeup().PUP[icount])[0];
-    float py = (lhe_info->hepeup().PUP[icount])[1];
-    float pt = sqrt(px*px+py*py);
+  // for ( unsigned int icount = 0 ; icount < (unsigned int)lhe_info->hepeup().NUP; icount++ ) {
+  //   unsigned int pdgid = abs(lhe_info->hepeup().IDUP[icount]);
+  //   int status = lhe_info->hepeup().ISTUP[icount];
+  //   int mom1id = abs(lhe_info->hepeup().IDUP[lhe_info->hepeup().MOTHUP[icount].first-1]);
+  //   int mom2id = abs(lhe_info->hepeup().IDUP[lhe_info->hepeup().MOTHUP[icount].second-1]);
+  //   float px = (lhe_info->hepeup().PUP[icount])[0];
+  //   float py = (lhe_info->hepeup().PUP[icount])[1];
+  //   float pt = sqrt(px*px+py*py);
 
-    if(status==1 && (pdgid<6 || pdgid==21) && mom1id!=6 && mom2id!=6 && mom1id!=24 && mom2id!=24 
-       && mom1id!=23 && mom2id!=23 && mom1id!=25 && mom2id!=25) {
-      baby.nisr_me()++;
-      baby.ht_isr_me() += pt;
-    }
+  //   if(status==1 && (pdgid<6 || pdgid==21) && mom1id!=6 && mom2id!=6 && mom1id!=24 && mom2id!=24 
+  //      && mom1id!=23 && mom2id!=23 && mom1id!=25 && mom2id!=25) {
+  //     baby.nisr_me()++;
+  //     baby.ht_isr_me() += pt;
+  //   }
 
-  } // Loop over generator particles
+  // } // Loop over generator particles
   
-  if(outname.Contains("SMS")){ //Get mgluino and mlsp
+  // if(outname.Contains("SMS")){ //Get mgluino and mlsp
     
-    typedef std::vector<std::string>::const_iterator comments_const_iterator;
+  //   typedef std::vector<std::string>::const_iterator comments_const_iterator;
     
-    comments_const_iterator c_begin = lhe_info->comments_begin();
-    comments_const_iterator c_end = lhe_info->comments_end();
+  //   comments_const_iterator c_begin = lhe_info->comments_begin();
+  //   comments_const_iterator c_end = lhe_info->comments_end();
     
-    TString model_params;
-    for(comments_const_iterator cit=c_begin; cit!=c_end; ++cit) {
-      size_t found = (*cit).find("model");
-      if(found != std::string::npos)   {
-        //    std::cout <<"BABYMAKER: "<< *cit <<"end"<< std::endl;  
-        model_params = *cit;
-      }
-    }
-    mcTool->getMassPoints(model_params,baby.mgluino(),baby.mlsp());
-  }
+  //   TString model_params;
+  //   for(comments_const_iterator cit=c_begin; cit!=c_end; ++cit) {
+  //     size_t found = (*cit).find("model");
+  //     if(found != std::string::npos)   {
+  //       //    std::cout <<"BABYMAKER: "<< *cit <<"end"<< std::endl;  
+  //       model_params = *cit;
+  //     }
+  //   }
+  //   mcTool->getMassPoints(model_params,baby.mgluino(),baby.mlsp());
+  // }
 } // writeGenInfo
 
 void bmaker_full::writeIFSR(edm::Handle<reco::GenParticleCollection> genParticles, 

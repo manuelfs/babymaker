@@ -85,7 +85,11 @@ public:
   void writeBTagWeights(edm::Handle<pat::JetCollection> alljets,
 			std::vector<reco::Candidate::LorentzVector>  &all_baby_jets,
 			std::vector<unsigned> &all_baby_jet_idx);
-  void writeHiggVars(std::vector<reco::Candidate::LorentzVector> &all_baby_jets);
+  void writeHiggVars(std::vector<LVector> &baby_jets_p4, std::vector<float> &baby_jets_csv, 
+                     std::vector<bool> &baby_jets_h1, std::vector<bool> &baby_jets_h2, 
+                     std::vector<bool> &baby_jets_islep, int &baby_nbl, int &baby_nbm, int &baby_nbt,
+                     float &baby_hig_am, float &baby_hig_dm, float &baby_hig_drmax, 
+                     int &baby_hig_bin, float &baby_mct);
   void writeBBVars(std::vector<reco::Candidate::LorentzVector>  &all_baby_jets, vCands &sig_leps);
 
   void writeFatJets();

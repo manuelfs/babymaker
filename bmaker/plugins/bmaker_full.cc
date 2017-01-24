@@ -223,11 +223,11 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   if (debug) cout<<"INFO: Writing filters..."<<endl; 
   edm::Handle<bool> ifilterbadChCand;
   iEvent.getByToken(tok_badChCandFilter_, ifilterbadChCand);
-  baby.pass_badchhad() = ifilterbadChCand.isValid() ? (*ifilterbadChCand): true;
+  baby.pass_badchhad() = (*ifilterbadChCand);
 
   edm::Handle<bool> ifilterbadPFMuon;
   iEvent.getByToken(tok_badPFMuonFilter_, ifilterbadPFMuon);
-  baby.pass_badpfmu() = ifilterbadPFMuon.isValid() ? (*ifilterbadPFMuon): true;
+  baby.pass_badpfmu() = (*ifilterbadPFMuon);
 
   edm::Handle<edm::TriggerResults> filterBits;
   if(isData) iEvent.getByToken(tok_trigResults_reco_,filterBits);  
@@ -1312,40 +1312,42 @@ void bmaker_full::writeVertices(edm::Handle<reco::VertexCollection> vtx,
 
 void bmaker_full::writeGenInfo(edm::Handle<LHEEventProduct> lhe_info){
   baby.nisr_me()=0; baby.ht_isr_me()=0.; 
-  // for ( unsigned int icount = 0 ; icount < (unsigned int)lhe_info->hepeup().NUP; icount++ ) {
-  //   unsigned int pdgid = abs(lhe_info->hepeup().IDUP[icount]);
-  //   int status = lhe_info->hepeup().ISTUP[icount];
-  //   int mom1id = abs(lhe_info->hepeup().IDUP[lhe_info->hepeup().MOTHUP[icount].first-1]);
-  //   int mom2id = abs(lhe_info->hepeup().IDUP[lhe_info->hepeup().MOTHUP[icount].second-1]);
-  //   float px = (lhe_info->hepeup().PUP[icount])[0];
-  //   float py = (lhe_info->hepeup().PUP[icount])[1];
-  //   float pt = sqrt(px*px+py*py);
+  for ( unsigned int icount = 0 ; icount < (unsigned int)lhe_info->hepeup().NUP; icount++ ) {
+    unsigned int pdgid = abs(lhe_info->hepeup().IDUP[icount]);
+    int status = lhe_info->hepeup().ISTUP[icount];
+    int mom1_idx = lhe_info->hepeup().MOTHUP[icount].first;
+    int mom2_idx = lhe_info->hepeup().MOTHUP[icount].second;
+    int mom1id = mom1_idx==0 ? 0 : abs(lhe_info->hepeup().IDUP[mom1_idx-1]);
+    int mom2id = mom2_idx==0 ? 0 : abs(lhe_info->hepeup().IDUP[mom2_idx-1]);
+    float px = (lhe_info->hepeup().PUP[icount])[0];
+    float py = (lhe_info->hepeup().PUP[icount])[1];
+    float pt = sqrt(px*px+py*py);
 
-  //   if(status==1 && (pdgid<6 || pdgid==21) && mom1id!=6 && mom2id!=6 && mom1id!=24 && mom2id!=24 
-  //      && mom1id!=23 && mom2id!=23 && mom1id!=25 && mom2id!=25) {
-  //     baby.nisr_me()++;
-  //     baby.ht_isr_me() += pt;
-  //   }
+    if(status==1 && (pdgid<6 || pdgid==21) && mom1id!=6 && mom2id!=6 && mom1id!=24 && mom2id!=24 
+       && mom1id!=23 && mom2id!=23 && mom1id!=25 && mom2id!=25) {
+      baby.nisr_me()++;
+      baby.ht_isr_me() += pt;
+    }
 
-  // } // Loop over generator particles
+  } // Loop over generator particles
   
-  // if(outname.Contains("SMS")){ //Get mgluino and mlsp
+  if(outname.Contains("SMS")){ //Get mgluino and mlsp
     
-  //   typedef std::vector<std::string>::const_iterator comments_const_iterator;
+    typedef std::vector<std::string>::const_iterator comments_const_iterator;
     
-  //   comments_const_iterator c_begin = lhe_info->comments_begin();
-  //   comments_const_iterator c_end = lhe_info->comments_end();
+    comments_const_iterator c_begin = lhe_info->comments_begin();
+    comments_const_iterator c_end = lhe_info->comments_end();
     
-  //   TString model_params;
-  //   for(comments_const_iterator cit=c_begin; cit!=c_end; ++cit) {
-  //     size_t found = (*cit).find("model");
-  //     if(found != std::string::npos)   {
-  //       //    std::cout <<"BABYMAKER: "<< *cit <<"end"<< std::endl;  
-  //       model_params = *cit;
-  //     }
-  //   }
-  //   mcTool->getMassPoints(model_params,baby.mgluino(),baby.mlsp());
-  // }
+    TString model_params;
+    for(comments_const_iterator cit=c_begin; cit!=c_end; ++cit) {
+      size_t found = (*cit).find("model");
+      if(found != std::string::npos)   {
+        //    std::cout <<"BABYMAKER: "<< *cit <<"end"<< std::endl;  
+        model_params = *cit;
+      }
+    }
+    mcTool->getMassPoints(model_params,baby.mgluino(),baby.mlsp());
+  }
 } // writeGenInfo
 
 void bmaker_full::writeIFSR(edm::Handle<reco::GenParticleCollection> genParticles, 

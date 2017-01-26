@@ -28,7 +28,7 @@
 
 class jet_met_tools{
 private:
-  float getMCTagEfficiency(int pdgId, float pT, float eta, BTagEntry::OperatingPoint op) const;
+  float getMCTagEfficiency(int pdgId, float pT, float eta, BTagEntry::OperatingPoint op, bool doDeepCSV, bool doByProc) const;
   
 public:
 
@@ -75,12 +75,14 @@ public:
   std::map<BTagEntry::OperatingPoint, std::unique_ptr<BTagCalibrationReader> > readers_full_;
   std::map<BTagEntry::OperatingPoint, std::unique_ptr<BTagCalibrationReader> > readers_fast_;
   std::vector<const TH3D*> btag_efficiencies_;
+  std::vector<const TH3D*> btag_efficiencies_proc_;
 
   std::unique_ptr<BTagCalibration> calib_deep_full_;
   std::unique_ptr<BTagCalibration> calib_deep_fast_;
   std::map<BTagEntry::OperatingPoint, std::unique_ptr<BTagCalibrationReader> > readers_deep_full_;
   std::map<BTagEntry::OperatingPoint, std::unique_ptr<BTagCalibrationReader> > readers_deep_fast_;
   std::vector<const TH3D*> btag_efficiencies_deep_;
+  std::vector<const TH3D*> btag_efficiencies_deep_proc_;
 
   bool leptonInJet(const pat::Jet &jet, vCands leptons);
   bool jetMatched(const pat::Jet &jet, vCands objects);
@@ -99,14 +101,14 @@ public:
   float getJetResolutionSF(float jet_eta);
   float jetBTagWeight(const pat::Jet &jet, const LVector &jetp4, BTagEntry::OperatingPoint op,
           const std::string &bc_full_syst, const std::string &udsg_full_syst,
-          const std::string &bc_fast_syst, const std::string &udsg_fast_syst, bool doDeepCSV) const;
+		      const std::string &bc_fast_syst, const std::string &udsg_fast_syst, bool doDeepCSV, bool doByProc = false) const;
   float jetBTagWeight(const pat::Jet &jet, const LVector &jetp4, BTagEntry::OperatingPoint op,
-		      const std::string &bc_full_syst, const std::string &udsg_full_syst, bool doDeepCSV) const;
+		      const std::string &bc_full_syst, const std::string &udsg_full_syst, bool doDeepCSV, bool doByProc = false) const;
   float jetBTagWeight(const pat::Jet &jet, const LVector &jetp4, const std::vector<BTagEntry::OperatingPoint> &ops,
-          const std::string &bc_full_syst, const std::string &udsg_full_syst, bool doDeepCSV) const;
+          const std::string &bc_full_syst, const std::string &udsg_full_syst, bool doDeepCSV, bool doByProc = false) const;
   float jetBTagWeight(const pat::Jet &jet, const LVector &jetp4, const std::vector<BTagEntry::OperatingPoint> &ops,
 		      const std::string &bc_full_syst, const std::string &udsg_full_syst,
-		      const std::string &bc_fast_syst, const std::string &udsg_fast_syst, bool doDeepCSV) const;
+		      const std::string &bc_fast_syst, const std::string &udsg_fast_syst, bool doDeepCSV, bool doByProc = false) const;
   void fillDeltaRbb(std::vector<float> & deltaRbb, std::vector<float> & bb_pt, std::vector<float> & bb_m, std::vector<int> & bb_jet_idx1, std::vector<int> & bb_jet_idx2, std::vector<int> & bb_gs_idx, std::vector<int> & bb_gs_flavor, const std::vector<LVector> &jets, const std::vector<float> &jets_csv, const std::vector<bool> &jets_islep, const std::vector<float> &jets_pt, const std::vector<size_t> &brank,int & highcsv_index, bool deep = false);
   static std::vector<size_t> getBRanking(const std::vector<LVector> &momentum, const std::vector<float> &csv,
 					 const std::vector<bool> &is_lep);
@@ -181,7 +183,7 @@ public:
                   std::vector<bool> &jets_islep, double min_jets_pt,
                   bool cluster_leps);  
 
-  jet_met_tools(TString ijecName, bool doSys, bool isFastSim);
+  jet_met_tools(TString ijecName, bool doSys, bool isFastSim, TString outname);
   ~jet_met_tools() = default;
 };
 

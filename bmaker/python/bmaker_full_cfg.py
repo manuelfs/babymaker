@@ -44,9 +44,6 @@ if outName == "output.root": # output filename not set
     outName = "fullbaby_"+rootfile.replace("file:","")
 
 doSystematics = True
-cmsswRel = environ["CMSSW_BASE"]
-if "RunIISpring15DR74" in outName or "RunIISpring15FSPremix" in outName: 
-    if cmsswRel.find("CMSSW_7_4_6") == -1: sys.exit("ERROR: Trying to run miniAOD V1 in a new release. Exiting")
 
 ## JECs must be undone and reapplied when rerunning b-tagging
 ## => if doJEC = False, DeepCSV discriminator will not be included
@@ -58,20 +55,20 @@ else: jets_label = "slimmedJets"
 # prefix jecLabel with "onthefly_", e.g. onthefly_Spring16_25nsV6_MC
 # systematics will also be calculated using this tag, even if JECs are not re-applied
 # N.B. JECs change in the middle of RunF, thereby the Run2016F1 vs Run2016F2 distinction
-jecLabel = 'onthefly_Spring16_25nsV6_MC'
+jecLabel = 'onthefly_Spring16_23Sep2016V2_MC'
 if ("Run2016B" in outName) or ("Run2016C" in outName) or ("Run2016D" in outName): 
-  jecLabel = 'Summer16_23Sep2016BCDV2_DATA'
+  jecLabel = 'Summer16_23Sep2016BCDV3_DATA'
 elif ("Run2016E" in outName) or ("Run2016F1" in outName):
-  jecLabel = 'Summer16_23Sep2016EFV2_DATA'
+  jecLabel = 'Summer16_23Sep2016EFV3_DATA'
 elif ("Run2016F2" in outName) or ("Run2016G" in outName):
-  jecLabel = 'Summer16_23Sep2016GV2_DATA'
+  jecLabel = 'Summer16_23Sep2016GV3_DATA'
 elif ("Run2016H" in outName): 
-  jecLabel = 'Summer16_23Sep2016HV2_DATA'
+  jecLabel = 'Summer16_23Sep2016HV3_DATA'
 elif "RunIISpring16MiniAOD" in outName:
     if "Fast" in outName or "FSPremix" in outName: jecLabel = 'onthefly_Spring16_FastSimV1_MC'
     else: jecLabel = 'Spring16_23Sep2016V2_MC' # for ICHEP MC against re-reco data
 elif "RunIISummer16MiniAOD" in outName:
-    jecLabel = 'Summer16_23Sep2016V2_MC'
+    jecLabel = 'Summer16_23Sep2016V3_MC'
 
 if "FSPremix" in outName or "Fast" in outName: fastsim = True
 else: fastsim = False
@@ -184,9 +181,6 @@ if doJEC:
                             "deepFlavourJetTags:probbb", 
                             "deepFlavourJetTags:probcc"]
     )
-    process.options.allowUnscheduled = cms.untracked.bool(True)
-
-    process.content = cms.EDAnalyzer("EventContentAnalyzer")
 
     ###### Apply new JECs to MET
     ## From https://twiki.cern.ch/twiki/bin/view/CMS/MissingETUncertaintyPrescription
@@ -196,5 +190,8 @@ if doJEC:
                                isData = isData,
     )
 
-###### Path
-process.p = cms.Path(process.baby_full)
+    process.p = cms.Path(process.baby_full)
+else:
+    process.p = cms.Path(process.BadPFMuonFilter*
+                         process.BadChargedCandidateFilter*
+                         process.baby_full)

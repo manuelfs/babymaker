@@ -968,7 +968,7 @@ jet_met_tools::jet_met_tools(TString ijecName, bool doSys, bool fastSim, TString
 
   string filename_proc(getenv("CMSSW_BASE"));
   if(outname.Contains("QCD")) filename_proc+="/src/babymaker/bmaker/data/btagEfficiencies/btagEfficiency_qcd.root";
-  else if(outname.Contains("WJets")) filename_proc+="/src/babymaker/bmaker/data/btagEfficiencies/btagEfficiency_wjets.root";
+  else if(outname.Contains("WJets") && !outname.Contains("TTWJets")) filename_proc+="/src/babymaker/bmaker/data/btagEfficiencies/btagEfficiency_wjets.root";
   else filename_proc+="/src/babymaker/bmaker/data/btagEfficiencies/btagEfficiency_tt.root";
   TFile *efficiencyFile_proc = TFile::Open(filename_proc.c_str());
   if(efficiencyFile_proc->IsOpen()) {
@@ -992,7 +992,7 @@ jet_met_tools::jet_met_tools(TString ijecName, bool doSys, bool fastSim, TString
 
   string filename_deep_proc(getenv("CMSSW_BASE"));
   if(outname.Contains("QCD")) filename_deep_proc+="/src/babymaker/bmaker/data/btagEfficiencies/btagEfficiency_deep_qcd.root";
-  else if(outname.Contains("WJets")) filename_deep_proc+="/src/babymaker/bmaker/data/btagEfficiencies/btagEfficiency_deep_wjets.root";
+  else if(outname.Contains("WJets") && !outname.Contains("TTWJets")) filename_deep_proc+="/src/babymaker/bmaker/data/btagEfficiencies/btagEfficiency_deep_wjets.root";
   else filename_deep_proc+="/src/babymaker/bmaker/data/btagEfficiencies/btagEfficiency_deep_tt.root";
   TFile *efficiencyFile_deep_proc = TFile::Open(filename_deep_proc.c_str());
   if(efficiencyFile_deep_proc->IsOpen()) {

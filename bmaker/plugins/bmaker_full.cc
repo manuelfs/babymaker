@@ -50,13 +50,10 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   // We are applying the golden JSON with lumisToProcess in bmaker_full_cfg.py
   if(isData){
     if (debug) cout<<"INFO: Checking JSON..."<<endl;
-    baby.nonblind() = baby.run() <= 274240;
-    baby.json2p6()  = baby.run() <= 274443;
     baby.json4p0()  = baby.run() <= 275125;
-    baby.json7p65()  = baby.run() <= 276097;
     baby.json12p9() = baby.run() <= 276811;
   } else {
-    baby.nonblind() = baby.json2p6() = baby.json4p0() = baby.json7p65() = baby.json12p9() = true;
+    baby.json4p0() = baby.json12p9() = true;
   }
   baby.type() = event_tools::type(outname.Data());
 
@@ -280,8 +277,7 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   ///////////////////// MC hard scatter info ///////////////////////
   if (debug) cout<<"INFO: Retrieving hard scatter info..."<<endl;
   edm::Handle<LHEEventProduct> lhe_info;
-  baby.stitch() = true;
-  baby.stitch_ht() = true;
+  baby.stitch() = baby.stitch_ht() = baby.stitch_met() = true;
   if (outname.Contains("SMS-") && outname.Contains("PUSpring16Fast")) {
     baby.mgluino() = mprod_;
     baby.mlsp() = mlsp_;
@@ -289,14 +285,29 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
     iEvent.getByToken(tok_extLHEProducer_, lhe_info);
     if(!lhe_info.isValid()) iEvent.getByToken(tok_source_, lhe_info);
     if(lhe_info.isValid()) writeGenInfo(lhe_info);
-    if((outname.Contains("TTJets") && outname.Contains("Lept") && outname.Contains("madgraphMLM") && baby.ht_isr_me()>600)
-       || (outname.Contains("DYJetsToLL_M-50_TuneCUETP8M")  && baby.ht_isr_me()>100)
-       || (outname.Contains("WJetsToLNu_TuneCUETP8M1")  && baby.ht_isr_me()>100)){
+    if((outname.Contains("TTJets_SingleLeptFromT_Tune") || 
+        outname.Contains("TTJets_SingleLeptFromTbar_Tune") || 
+        outname.Contains("TTJets_DiLept_Tune"))
+        && outname.Contains("madgraphMLM")) {
+      if (baby.ht_isr_me()>600) {
+        baby.stitch() = false;
+        baby.stitch_ht() = false;
+      }
+      if (baby.met_tru()>150) {
+        baby.stitch_met() = false;
+      }      
+    }
+    if((outname.Contains("DYJetsToLL_M-50_TuneCUETP8M")  && baby.ht_isr_me()>70)
+       || (outname.Contains("WJetsToLNu_TuneCUETP8M1")  && baby.ht_isr_me()>70)){
       baby.stitch() = false;
       baby.stitch_ht() = false;
+      baby.stitch_met() = false;
     }
     if(outname.Contains("TTJets_Tune") && outname.Contains("madgraphMLM")){
-      if(baby.ntruleps()!=0) baby.stitch()=false;
+      if(baby.ntruleps()!=0) {
+        baby.stitch()=false;
+        baby.stitch_met()=false;
+      }
       if(baby.ht_isr_me()>600) baby.stitch_ht()=false;
     }
   } // if it is not data
@@ -806,15 +817,19 @@ vCands bmaker_full::writeMuons(edm::Handle<pat::MuonCollection> muons,
     bool isBadMu(false), isBadDuplMu(false);
     if (badmu_idx.find(ilep)!=badmu_idx.end()) isBadMu = true;
     if (badmu_dupl_idx.find(ilep)!=badmu_dupl_idx.end()) isBadDuplMu = true;
-    bool isBadTrkMuLoose(false), isBadTrkMuTight(false);
-    if (!(lep.isTrackerMuon() && lep.numberOfMatchedStations()>0)) isBadTrkMuLoose = true;
-    if (lep.innerTrack().isNonnull()) {
-      bool goodQualityTrack = (lep.innerTrack()->numberOfValidHits()>=10||(lep.innerTrack()->numberOfValidHits()>=7 && lep.innerTrack()->numberOfLostHits()==0));
-      if (isBadTrkMuLoose || !goodQualityTrack) isBadTrkMuTight = true;
+
+    bool isBadTrackerMuon(false);
+    if (lep.pt()>10 && lep.isPFMuon() && lep.isTrackerMuon() && lep.numberOfMatchedStations()>0) {
+      if (lep.innerTrack().isNonnull()) {
+        bool goodQualityTrack = (lep.innerTrack()->numberOfValidHits()>=10) || (lep.innerTrack()->numberOfValidHits()>=7 && lep.innerTrack()->numberOfLostHits()==0);
+        if (!goodQualityTrack) isBadTrackerMuon = true;
+      } else{
+        isBadTrackerMuon = true;
+      }
     }
 
     // Storing leptons that pass all veto cuts except for iso
-    bool save_mu = lepTool->isVetoMuon(lep, vtx, -99.) || isBadMu || isBadDuplMu || isBadTrkMuLoose || isBadTrkMuTight;
+    bool save_mu = lepTool->isVetoMuon(lep, vtx, -99.) || isBadMu || isBadDuplMu || isBadTrackerMuon;
     if(!save_mu) continue;
 
     double lep_iso(lepTool->getPFIsolation(pfcands, dynamic_cast<const reco::Candidate *>(&lep), 0.05, 0.2, 10., rhoEventCentral, false));
@@ -824,15 +839,14 @@ vCands bmaker_full::writeMuons(edm::Handle<pat::MuonCollection> muons,
 
     baby.mus_bad().push_back(isBadMu);
     baby.mus_bad_dupl().push_back(isBadDuplMu);
-    baby.mus_bad_trk_loose().push_back(isBadTrkMuLoose);
-    baby.mus_bad_trk_tight().push_back(isBadTrkMuTight);
+    baby.mus_bad_trkmu().push_back(isBadTrackerMuon);
     baby.mus_pt().push_back(lep.pt());
     baby.mus_eta().push_back(lep.eta());
     baby.mus_phi().push_back(lep.phi());
     baby.mus_dz().push_back(dz);
     baby.mus_d0().push_back(d0);
     baby.mus_charge().push_back(lep.charge());
-    baby.mus_sigid().push_back(lepTool->idMuon(lep, vtx, lepTool->kMediumICHEP));
+    baby.mus_sigid().push_back(lepTool->idMuon(lep, vtx, lepTool->kMedium));
     baby.mus_tight().push_back(lepTool->idMuon(lep, vtx, lepTool->kTight));
     baby.mus_miniso().push_back(lep_iso);
     baby.mus_reliso().push_back(lep_reliso);
@@ -892,7 +906,8 @@ vCands bmaker_full::writeElectrons(edm::Handle<pat::ElectronCollection> electron
     lepTool->vertexElectron(lep, vtx, dz, d0); // Calculating dz and d0
 
     baby.els_pt().push_back(lep.pt());
-    baby.els_sceta().push_back(lep.superCluster()->position().eta());
+    baby.els_scpt().push_back(lep.superCluster()->energy()*sin(lep.superClusterPosition().theta()));
+    baby.els_sceta().push_back(lep.superCluster()->eta());
     baby.els_eta().push_back(lep.eta());
     baby.els_phi().push_back(lep.phi());
     baby.els_dz().push_back(dz);

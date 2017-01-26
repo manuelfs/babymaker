@@ -661,7 +661,7 @@ bool lepton_tools::partnerId(const reco::Muon &mu) const {
 set<unsigned> lepton_tools::badGlobalMuonSelector(edm::Handle<reco::VertexCollection> vtx, 
                                          edm::Handle<pat::MuonCollection> muptr, bool selectClones) {
     using namespace edm;
-    float ptCut_ = VetoLeptonPtCut;
+    float ptCut_ = 20.;
     bool verbose_ = false;
     assert(vtx->size() >= 1);
     const auto &PV = vtx->front().position();

@@ -4,13 +4,11 @@ int run
 int lumiblock
 Long64_t event
 int type
-bool nonblind
-bool json2p6
 bool json4p0
-bool json7p65
 bool json12p9
 ## stitch is used to stitch an MC sample with its corresponding HT-bin sample
 bool stitch
+bool stitch_met
 ## stitch_ht = stitch, but also adds an ht_me_isr<=600 cut on the inc. TTJets sample (*TTJets_Tune*)
 bool stitch_ht
 
@@ -154,8 +152,7 @@ int nmus
 int nvmus
 std::vector<bool> mus_bad
 std::vector<bool> mus_bad_dupl
-std::vector<bool> mus_bad_trk_loose
-std::vector<bool> mus_bad_trk_tight
+std::vector<bool> mus_bad_trkmu
 std::vector<float> mus_pt
 std::vector<float> mus_eta
 std::vector<float> mus_phi
@@ -186,6 +183,7 @@ int nels
 int nvels
 std::vector<float> els_pt
 std::vector<float> els_eta
+std::vector<float> els_scpt
 std::vector<float> els_sceta
 std::vector<float> els_phi
 std::vector<float> els_miniso

@@ -859,22 +859,22 @@ jet_met_tools::jet_met_tools(TString ijecName, bool doSys, bool fastSim):
 
   // only add b-tagging weights if requested
   string scaleFactorFile(getenv("CMSSW_BASE"));
-  scaleFactorFile+="/src/babymaker/bmaker/data/CSVv2Moriond17_mujets.csv";
+  scaleFactorFile+="/src/babymaker/bmaker/data/CSVv2.csv";//CSVv2Moriond17_comb.csv";
   calib_full_.reset(new BTagCalibration("csvv2", scaleFactorFile));
   for(const auto &op: op_pts_){
     readers_full_[op] = MakeUnique<BTagCalibrationReader>(op, "central", vector<string>{"up", "down"});
-    readers_full_.at(op)->load(*calib_full_, BTagEntry::FLAV_UDSG, "mujets");//"incl");
-    readers_full_.at(op)->load(*calib_full_, BTagEntry::FLAV_C, "mujets");//"comb");
-    readers_full_.at(op)->load(*calib_full_, BTagEntry::FLAV_B, "mujets");//"comb");
+    readers_full_.at(op)->load(*calib_full_, BTagEntry::FLAV_UDSG, "incl");
+    readers_full_.at(op)->load(*calib_full_, BTagEntry::FLAV_C, "comb");
+    readers_full_.at(op)->load(*calib_full_, BTagEntry::FLAV_B, "comb");
   }
   string scaleFactorFile_deep(getenv("CMSSW_BASE"));
-  scaleFactorFile_deep+="/src/babymaker/bmaker/data/DeepCSVMoriond17_mujets.csv";
+  scaleFactorFile_deep+="/src/babymaker/bmaker/data/CSVv2.csv";//DeepCSVMoriond17_comb.csv";
   calib_deep_full_.reset(new BTagCalibration("csvv2_deep", scaleFactorFile_deep));
   for(const auto &op: op_pts_){
     readers_deep_full_[op] = MakeUnique<BTagCalibrationReader>(op, "central", vector<string>{"up", "down"});
-    readers_deep_full_.at(op)->load(*calib_deep_full_, BTagEntry::FLAV_UDSG, "mujets");//"incl");
-    readers_deep_full_.at(op)->load(*calib_deep_full_, BTagEntry::FLAV_C, "mujets");//"comb");
-    readers_deep_full_.at(op)->load(*calib_deep_full_, BTagEntry::FLAV_B, "mujets");//"comb");
+    readers_deep_full_.at(op)->load(*calib_deep_full_, BTagEntry::FLAV_UDSG, "incl");
+    readers_deep_full_.at(op)->load(*calib_deep_full_, BTagEntry::FLAV_C, "comb");
+    readers_deep_full_.at(op)->load(*calib_deep_full_, BTagEntry::FLAV_B, "comb");
   }
 
   if (isFastSim){

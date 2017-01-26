@@ -56,57 +56,49 @@ doManuel = False
 doRyan = False
 doRohan = False
 
-doMC = False
-
+doFastSimScans = False
 
 datasets = [[]]
 
-datasets.append(["/MET/Run2016B-23Sep2016-v3/MINIAOD"])
-datasets.append(["/MET/Run2016C-23Sep2016-v1/MINIAOD"])
-datasets.append(["/MET/Run2016D-23Sep2016-v1/MINIAOD"])
-datasets.append(["/MET/Run2016E-23Sep2016-v1/MINIAOD"])
-datasets.append(["/MET/Run2016F-23Sep2016-v1/MINIAOD"])
-datasets.append(["/MET/Run2016G-23Sep2016-v1/MINIAOD"])
-datasets.append(["/MET/Run2016H-PromptReco-v2/MINIAOD"])
-datasets.append(["/MET/Run2016H-PromptReco-v3/MINIAOD"])
+if doManuel:
+  datasets.append(["/MET/Run2016B-23Sep2016-v3/MINIAOD"])
+  datasets.append(["/MET/Run2016C-23Sep2016-v1/MINIAOD"])
+  datasets.append(["/MET/Run2016D-23Sep2016-v1/MINIAOD"])
+  datasets.append(["/MET/Run2016E-23Sep2016-v1/MINIAOD"])
+  datasets.append(["/MET/Run2016F-23Sep2016-v1/MINIAOD"])
+  datasets.append(["/MET/Run2016G-23Sep2016-v1/MINIAOD"])
+  datasets.append(["/MET/Run2016H-PromptReco-v2/MINIAOD"])
+  datasets.append(["/MET/Run2016H-PromptReco-v3/MINIAOD"])
 
-datasets.append(["/SingleElectron/Run2016B-23Sep2016-v3/MINIAOD"])
-datasets.append(["/SingleElectron/Run2016C-23Sep2016-v1/MINIAOD"])
-datasets.append(["/SingleElectron/Run2016D-23Sep2016-v1/MINIAOD"])
-datasets.append(["/SingleElectron/Run2016E-23Sep2016-v1/MINIAOD"])
-datasets.append(["/SingleElectron/Run2016F-23Sep2016-v1/MINIAOD"])
-datasets.append(["/SingleElectron/Run2016G-23Sep2016-v1/MINIAOD"])
-datasets.append(["/SingleElectron/Run2016H-PromptReco-v2/MINIAOD"])
-datasets.append(["/SingleElectron/Run2016H-PromptReco-v3/MINIAOD"])
+  datasets.append(["/SingleElectron/Run2016B-23Sep2016-v3/MINIAOD"])
+  datasets.append(["/SingleElectron/Run2016C-23Sep2016-v1/MINIAOD"])
+  datasets.append(["/SingleElectron/Run2016D-23Sep2016-v1/MINIAOD"])
+  datasets.append(["/SingleElectron/Run2016E-23Sep2016-v1/MINIAOD"])
+  datasets.append(["/SingleElectron/Run2016F-23Sep2016-v1/MINIAOD"])
+  datasets.append(["/SingleElectron/Run2016G-23Sep2016-v1/MINIAOD"])
+  datasets.append(["/SingleElectron/Run2016H-PromptReco-v2/MINIAOD"])
+  datasets.append(["/SingleElectron/Run2016H-PromptReco-v3/MINIAOD"])
 
-datasets.append(["/SingleMuon/Run2016B-23Sep2016-v3/MINIAOD"])
-datasets.append(["/SingleMuon/Run2016C-23Sep2016-v1/MINIAOD"])
-datasets.append(["/SingleMuon/Run2016D-23Sep2016-v1/MINIAOD"])
-datasets.append(["/SingleMuon/Run2016E-23Sep2016-v1/MINIAOD"])
-datasets.append(["/SingleMuon/Run2016F-23Sep2016-v1/MINIAOD"])
-datasets.append(["/SingleMuon/Run2016G-23Sep2016-v1/MINIAOD"])
-datasets.append(["/SingleMuon/Run2016H-PromptReco-v2/MINIAOD"])
-datasets.append(["/SingleMuon/Run2016H-PromptReco-v3/MINIAOD"])
+if doAna:
+  datasets.append(["/SingleMuon/Run2016B-23Sep2016-v3/MINIAOD"])
+  datasets.append(["/SingleMuon/Run2016C-23Sep2016-v1/MINIAOD"])
+  datasets.append(["/SingleMuon/Run2016D-23Sep2016-v1/MINIAOD"])
+  datasets.append(["/SingleMuon/Run2016E-23Sep2016-v1/MINIAOD"])
+  datasets.append(["/SingleMuon/Run2016F-23Sep2016-v1/MINIAOD"])
+  datasets.append(["/SingleMuon/Run2016G-23Sep2016-v1/MINIAOD"])
+  datasets.append(["/SingleMuon/Run2016H-PromptReco-v2/MINIAOD"])
+  datasets.append(["/SingleMuon/Run2016H-PromptReco-v3/MINIAOD"])
 
-datasets.append(["/JetHT/Run2016B-23Sep2016-v3/MINIAOD"])
-datasets.append(["/JetHT/Run2016C-23Sep2016-v1/MINIAOD"])
-datasets.append(["/JetHT/Run2016D-23Sep2016-v1/MINIAOD"])
-datasets.append(["/JetHT/Run2016E-23Sep2016-v1/MINIAOD"])
-datasets.append(["/JetHT/Run2016F-23Sep2016-v1/MINIAOD"])
-datasets.append(["/JetHT/Run2016G-23Sep2016-v1/MINIAOD"])
-datasets.append(["/JetHT/Run2016H-PromptReco-v2/MINIAOD"])
-datasets.append(["/JetHT/Run2016H-PromptReco-v3/MINIAOD"])
+  datasets.append(["/JetHT/Run2016B-23Sep2016-v3/MINIAOD"])
+  datasets.append(["/JetHT/Run2016C-23Sep2016-v1/MINIAOD"])
+  datasets.append(["/JetHT/Run2016D-23Sep2016-v1/MINIAOD"])
+  datasets.append(["/JetHT/Run2016E-23Sep2016-v1/MINIAOD"])
+  datasets.append(["/JetHT/Run2016F-23Sep2016-v1/MINIAOD"])
+  datasets.append(["/JetHT/Run2016G-23Sep2016-v1/MINIAOD"])
+  datasets.append(["/JetHT/Run2016H-PromptReco-v2/MINIAOD"])
+  datasets.append(["/JetHT/Run2016H-PromptReco-v3/MINIAOD"])
 
-datasets.append(["/HTMHT/Run2016B-23Sep2016-v3/MINIAOD"])
-datasets.append(["/HTMHT/Run2016C-23Sep2016-v1/MINIAOD"])
-datasets.append(["/HTMHT/Run2016D-23Sep2016-v1/MINIAOD"])
-datasets.append(["/HTMHT/Run2016E-23Sep2016-v1/MINIAOD"])
-datasets.append(["/HTMHT/Run2016F-23Sep2016-v1/MINIAOD"])
-datasets.append(["/HTMHT/Run2016G-23Sep2016-v2/MINIAOD"])
-datasets.append(["/HTMHT/Run2016H-PromptReco-v2/MINIAOD"])
-datasets.append(["/HTMHT/Run2016H-PromptReco-v3/MINIAOD"])
-
-if doMC:
+if doAdam:
   # missing
   # datasets.append(["/TTJets_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM"])
 
@@ -126,9 +118,7 @@ if doMC:
 
   datasets.append(["/ST_s-channel_4f_leptonDecays_13TeV-amcatnlo-pythia8_TuneCUETP8M1/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM"])
   datasets.append(["/ST_t-channel_top_4f_inclusiveDecays_TuneCUETP8M2T4_13TeV-powhegV2-madspin/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM"]) # 6M
-    #/ST_t-channel_top_4f_inclusiveDecays_13TeV-powhegV2-madspin-pythia8_TuneCUETP8M1/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM # 67M if needed
   datasets.append(["/ST_t-channel_antitop_4f_inclusiveDecays_TuneCUETP8M2T4_13TeV-powhegV2-madspin/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM"]) # 4M
-    #/ST_t-channel_antitop_4f_inclusiveDecays_13TeV-powhegV2-madspin-pythia8_TuneCUETP8M1/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM # 38M if needed
   datasets.append(["/ST_tW_top_5f_NoFullyHadronicDecays_13TeV-powheg_TuneCUETP8M1/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v1/MINIAODSIM",
                    "/ST_tW_top_5f_NoFullyHadronicDecays_13TeV-powheg_TuneCUETP8M1/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM",
                    "/ST_tW_top_5f_NoFullyHadronicDecays_13TeV-powheg_TuneCUETP8M1/RunIISummer16MiniAODv2-80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext2-v2/MINIAODSIM"])
@@ -136,6 +126,7 @@ if doMC:
                    "/ST_tW_antitop_5f_NoFullyHadronicDecays_13TeV-powheg_TuneCUETP8M1/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM",
                    "/ST_tW_antitop_5f_NoFullyHadronicDecays_13TeV-powheg_TuneCUETP8M1/RunIISummer16MiniAODv2-80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext2-v1/MINIAODSIM"])
 
+if doJae:
   datasets.append(["/WJetsToLNu_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext2-v1/MINIAODSIM"]) # 57M
   datasets.append(["/WJetsToLNu_HT-70To100_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM"])
   datasets.append(["/WJetsToLNu_HT-100To200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM",
@@ -156,6 +147,20 @@ if doMC:
                    "/WJetsToLNu_HT-2500ToInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM"])
   datasets.append(["/WJetsToQQ_HT-600ToInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM"])
 
+  datasets.append(["/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v2/MINIAODSIM"])
+  datasets.append(["/DYJetsToLL_M-50_HT-70to100_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM"])
+  datasets.append(["/DYJetsToLL_M-50_HT-100to200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM",
+                   "/DYJetsToLL_M-50_HT-100to200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v1/MINIAODSIM"])
+  datasets.append(["/DYJetsToLL_M-50_HT-200to400_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v1/MINIAODSIM",
+                   "/DYJetsToLL_M-50_HT-200to400_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM"])
+  datasets.append(["/DYJetsToLL_M-50_HT-400to600_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v1/MINIAODSIM",
+                   "/DYJetsToLL_M-50_HT-400to600_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM"])
+  datasets.append(["/DYJetsToLL_M-50_HT-600to800_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v2/MINIAODSIM"])
+  datasets.append(["/DYJetsToLL_M-50_HT-800to1200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM"])
+  datasets.append(["/DYJetsToLL_M-50_HT-1200to2500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM"])
+  datasets.append(["/DYJetsToLL_M-50_HT-2500toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM"])
+
+if doRohan:  
   datasets.append(["/QCD_HT50to100_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM"])
   datasets.append(["/QCD_HT100to200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM"])
   datasets.append(["/QCD_HT200to300_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM",
@@ -173,32 +178,6 @@ if doMC:
   datasets.append(["/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM",
                    "/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v1/MINIAODSIM"])
 
-  # full scans
-  datasets.append(["/SMS-T1tttt_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring16MiniAODv2-PUSpring16Fast_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM"])
-  datasets.append(["/SMS-TChiWH_WToLNu_HToBB_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring16MiniAODv2-PUSpring16Fast_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM"])
-
-  datasets.append(["/SMS-T1tttt_mGluino-1200_mLSP-800_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM"])
-  datasets.append(["/SMS-T1tttt_mGluino-1500_mLSP-100_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM"])
-  datasets.append(["/SMS-T1tttt_mGluino-2000_mLSP-100_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM"])
-  datasets.append(["/SMS-T1qqqq_mGluino-1000_mLSP-800_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM"])
-  datasets.append(["/SMS-T1qqqq_mGluino-1400_mLSP-100_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM"])
-  datasets.append(["/SMS-T2tt_mStop-425_mLSP-325_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM"])
-  datasets.append(["/SMS-T2tt_mStop-225_mLSP-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM"])
-  datasets.append(["/SMS-T2tt_mStop-850_mLSP-100_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM"])
-
-  datasets.append(["/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v2/MINIAODSIM"])
-  datasets.append(["/DYJetsToLL_M-50_HT-70to100_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM"])
-  datasets.append(["/DYJetsToLL_M-50_HT-100to200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM",
-                   "/DYJetsToLL_M-50_HT-100to200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v1/MINIAODSIM"])
-  datasets.append(["/DYJetsToLL_M-50_HT-200to400_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v1/MINIAODSIM",
-                   "/DYJetsToLL_M-50_HT-200to400_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM"])
-  datasets.append(["/DYJetsToLL_M-50_HT-400to600_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v1/MINIAODSIM",
-                   "/DYJetsToLL_M-50_HT-400to600_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM"])
-  datasets.append(["/DYJetsToLL_M-50_HT-600to800_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v2/MINIAODSIM"])
-  datasets.append(["/DYJetsToLL_M-50_HT-800to1200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM"])
-  datasets.append(["/DYJetsToLL_M-50_HT-1200to2500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM"])
-  datasets.append(["/DYJetsToLL_M-50_HT-2500toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM"])
-
   datasets.append(["/ZJetsToNuNu_HT-100To200_13TeV-madgraph/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v1/MINIAODSIM",
                    "/ZJetsToNuNu_HT-100To200_13TeV-madgraph/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM"])
   datasets.append(["/ZJetsToNuNu_HT-200To400_13TeV-madgraph/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM",
@@ -213,7 +192,7 @@ if doMC:
 
   # missing
   # datasets.append(["/ZJetsToQQ_HT600toInf_13TeV-madgraph/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM"])
-
+if doRyan:
   datasets.append(["/TTGJets_TuneCUETP8M1_13TeV-amcatnloFXFX-madspin-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM",
                    "/TTGJets_TuneCUETP8M1_13TeV-amcatnloFXFX-madspin-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v1/MINIAODSIM"])
   datasets.append(["/TTZToQQ_TuneCUETP8M1_13TeV-amcatnlo-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM"])
@@ -233,6 +212,18 @@ if doMC:
   datasets.append(["/WH_HToBB_WToLNu_M125_13TeV_amcatnloFXFX_madspin_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM"])
   datasets.append(["/ZH_HToBB_ZToNuNu_M125_13TeV_amcatnloFXFX_madspin_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM"])
 
+  datasets.append(["/SMS-T1tttt_mGluino-1200_mLSP-800_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM"])
+  datasets.append(["/SMS-T1tttt_mGluino-1500_mLSP-100_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM"])
+  datasets.append(["/SMS-T1tttt_mGluino-2000_mLSP-100_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM"])
+  datasets.append(["/SMS-T1qqqq_mGluino-1000_mLSP-800_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM"])
+  datasets.append(["/SMS-T1qqqq_mGluino-1400_mLSP-100_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM"])
+  datasets.append(["/SMS-T2tt_mStop-425_mLSP-325_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM"])
+  datasets.append(["/SMS-T2tt_mStop-225_mLSP-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM"])
+  datasets.append(["/SMS-T2tt_mStop-850_mLSP-100_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM"])
+
+if doFastSimScans:
+  datasets.append(["/SMS-T1tttt_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring16MiniAODv2-PUSpring16Fast_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM"])
+  datasets.append(["/SMS-TChiWH_WToLNu_HToBB_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring16MiniAODv2-PUSpring16Fast_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM"])
 
 for ilist in datasets:
   nevents=0

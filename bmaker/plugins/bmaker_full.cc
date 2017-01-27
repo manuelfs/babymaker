@@ -1402,8 +1402,7 @@ void bmaker_full::writeGenInfo(edm::Handle<LHEEventProduct> lhe_info){
 
   } // Loop over generator particles
   
-  if(outname.Contains("SMS")){ //Get mgluino and mlsp
-    
+  if (outname.Contains("SMS-") && outname.Contains("PUSpring16Fast")){ //Get mgluino and mlsp
     typedef std::vector<std::string>::const_iterator comments_const_iterator;
     
     comments_const_iterator c_begin = lhe_info->comments_begin();
@@ -1413,10 +1412,11 @@ void bmaker_full::writeGenInfo(edm::Handle<LHEEventProduct> lhe_info){
     for(comments_const_iterator cit=c_begin; cit!=c_end; ++cit) {
       size_t found = (*cit).find("model");
       if(found != std::string::npos)   {
-        //    std::cout <<"BABYMAKER: "<< *cit <<"end"<< std::endl;  
+	//        std::cout <<"BABYMAKER: "<< *cit <<"end"<< std::endl;  
         model_params = *cit;
       }
     }
+
     mcTool->getMassPoints(model_params,baby.mgluino(),baby.mlsp());
   }
 } // writeGenInfo

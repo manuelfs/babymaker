@@ -883,7 +883,7 @@ jet_met_tools::jet_met_tools(TString ijecName, bool doSys, bool fastSim, TString
 
   // only add b-tagging weights if requested
   string scaleFactorFile(getenv("CMSSW_BASE"));
-  scaleFactorFile+="/src/babymaker/bmaker/data/CSVv2.csv";//CSVv2Moriond17_comb.csv";
+  scaleFactorFile+="/src/babymaker/bmaker/data/CSVv2Moriond17_2017_1_26_BtoH.csv";//CSVv2Moriond17_comb.csv";
   calib_full_.reset(new BTagCalibration("csvv2", scaleFactorFile));
   for(const auto &op: op_pts_){
     readers_full_[op] = MakeUnique<BTagCalibrationReader>(op, "central", vector<string>{"up", "down"});
@@ -892,7 +892,7 @@ jet_met_tools::jet_met_tools(TString ijecName, bool doSys, bool fastSim, TString
     readers_full_.at(op)->load(*calib_full_, BTagEntry::FLAV_B, "comb");
   }
   string scaleFactorFile_deep(getenv("CMSSW_BASE"));
-  scaleFactorFile_deep+="/src/babymaker/bmaker/data/CSVv2.csv";//DeepCSVMoriond17_comb.csv";
+  scaleFactorFile_deep+="/src/babymaker/bmaker/data/CSVv2Moriond17_2017_1_26_BtoH.csv";//DeepCSVMoriond17_comb.csv";
   calib_deep_full_.reset(new BTagCalibration("csvv2_deep", scaleFactorFile_deep));
   for(const auto &op: op_pts_){
     readers_deep_full_[op] = MakeUnique<BTagCalibrationReader>(op, "central", vector<string>{"up", "down"});

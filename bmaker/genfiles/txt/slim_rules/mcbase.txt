@@ -4,6 +4,8 @@ drop *
 keep npv
 keep pass
 keep pass_ra2_badmu
+keep pass_badpfmu
+keep pass_badchhad
 keep event
 keep type
 
@@ -17,6 +19,7 @@ keep met_calo
 keep met_calo_phi
 keep njets
 keep nbm
+keep nbdm
 keep mj14
 keep ht40
 keep st40
@@ -38,6 +41,7 @@ keep mt
 
 ## MC
 keep stitch
+keep stitch_met
 keep mgluino
 keep mlsp
 keep mc_*
@@ -59,6 +63,13 @@ drop jets_fjet*_index
 keep *fjet14*
 keep *fjets14*
 drop *_nolep*
+drop jets_h1
+drop jets_h1d
+drop jets_h2
+drop jets_h2d
+drop jets_gs_index
+drop jets_ntrub
+drop jets_ntruc
 
 ## Dileptons
 keep elel_m
@@ -72,6 +83,7 @@ keep els_miniso
 keep els_reliso
 keep els_sigid
 keep els_tight
+keep els_scpt
 
 ## Muons
 keep mus_pt
@@ -81,6 +93,9 @@ keep mus_miniso
 keep mus_reliso
 keep mus_sigid
 keep mus_tight
+keep mus_bad
+keep mus_bad_dupl
+keep mus_bad_trkmu
 
 ## Clean up
 drop *vvvl*

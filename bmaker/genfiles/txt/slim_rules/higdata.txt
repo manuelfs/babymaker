@@ -4,11 +4,12 @@ drop *
 keep npv
 keep pass
 keep pass_ra2_badmu
+keep pass_badpfmu
+keep pass_badchhad
 keep run
 keep lumiblock
 keep event
 keep type
-keep nonblind
 keep json*
 
 ## Higgsino specific
@@ -23,9 +24,8 @@ keep met_phi
 keep met_calo
 keep met_calo_phi
 keep njets
-keep nbl
-keep nbm
-keep nbt
+keep nb*
+drop nbm_ra2
 keep nisr
 keep dphi1
 keep dphi2
@@ -57,10 +57,11 @@ keep eff_*
 ## Jets
 keep jets_*
 drop *fjet*
-drop jets_islep
+drop jets_pt_res
+drop jets_gs_index
+drop jets_ntrub
+drop jets_ntruc
 
 ## Triggers
 keep trig*
-keep *vvvl*
-keep on*
 

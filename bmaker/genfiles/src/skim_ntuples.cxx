@@ -48,7 +48,7 @@ int main(int argc, char *argv[]){
 
   TString tag = cuts; // Using tag to avoid file names too long for TFile
   if(cuts=="standard") cuts="nleps>=1&&st>500&&met>100";
-  if(cuts=="met150") cuts="nleps>=1&&st>500&&met>150&&met<=200&&njets>=5";
+  if(cuts=="stdnj5") cuts="nleps>=1 && st>500 && met>100 && njets>=5";
   if(cuts=="abcd") cuts="nleps==1&&st>500&&met>200&&njets>=6&&nbm>=1&&mj14>250&&nveto==0";
   if(cuts=="baseline") cuts="nleps==1&&st>500&&met>200&&njets>=6&&nbm>=1";
   if(cuts=="sys_abcd") 

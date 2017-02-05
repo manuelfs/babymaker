@@ -53,18 +53,16 @@ int main(int argc, char *argv[]){
   if(cuts=="baseline") cuts="nleps==1&&st>500&&met>200&&njets>=6&&nbm>=1";
   if(cuts=="sys_abcd") 
     cuts = "nleps==1&&max(st,Max$(sys_st))>500&&max(met,Max$(sys_met))>200&&max(njets,Max$(sys_njets))>=6&&max(nbm,Max$(sys_nbm))>=1&&max(mj14,Max$(sys_mj14))>250";
-  if(cuts=="zisr")
-    cuts = "nleps==2&&Max$(leps_pt)>30&&((elel_m>80&&elel_m<100)||(mumu_m>80&&mumu_m<100))";
   if(cuts=="zcand")
-    cuts = "nleps==2&&((elel_m>80&&elel_m<100)||(mumu_m>80&&mumu_m<100))";
+    cuts = "nleps==2&&Max$(leps_pt)>40&&((elel_m>80&&elel_m<100)||(mumu_m>80&&mumu_m<100))";
   if(cuts=="dy_ht300")
     cuts = "nvleps==2&&nleps>=1&&Max$(leps_pt)>30&&((elelv_m>80&&elelv_m<100)||(mumuv_m>80&&mumuv_m<100))&&ht>300";
   if(cuts=="ttisr")
-    cuts = "nvleps==2&&nleps>=1&&max(Max$(mus_pt*(mus_tight&&mus_reliso<.1)),Max$(els_pt*(els_tight&&els_reliso<.1)))>30&&nbm==2";
+    cuts = "nleps==2&&Max$(leps_pt)>40&&nbm==2";
   if(cuts=="wisr")
-    cuts = "met>100&&max(Max$(mus_pt*(mus_tight&&mus_reliso<.1)),Max$(els_pt*(els_tight&&els_reliso<.1)))>30&&nbl==0";
+    cuts = "met>100&&Max$(leps_pt)>40&&nbl==0";
   if(cuts=="wisrht200")
-    cuts = "ht>200&&met>100&&max(Max$(mus_pt*(mus_tight&&mus_reliso<.1)),Max$(els_pt*(els_tight&&els_reliso<.1)))>30&&nbl==0";
+    cuts = "ht>200&&met>100&&Max$(leps_pt)>40&&nbl==0";
   if(cuts=="ttdilep_ht300")
     cuts = "nels==1&&nmus==1&&Max$(leps_pt)>30&&ht>300&&met>100&&nbm>=1";
   if(cuts=="qcd")

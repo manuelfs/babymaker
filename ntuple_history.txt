@@ -1,5 +1,34 @@
 // Brief descriptions of the various baby productions
 
+2017_01_27 (Bear: ReReco Data and Summer 16 MC)
+  * Babymaker general maintenance
+     --update json to ReReco version
+     --fix type() for high ht zjets and dyjets
+     --updates list of MC samples for Summer16 MC
+     --modified stitch so that DYJet70-100 and WJets 70-100 are taken into account
+     --added stitch_met for use with TTJets_*Lept*genMET-150
+     --cross-sections for new samples
+     --fix genHT and higVars code to prevent segfaults
+  * Muons
+     --switch to standard MediumID
+     --additional bad muon filters by Giovanni in mus_bad and mus_bad_dupl
+  * Electrons
+     --roll back to Spring15 ID
+  * Jets
+     --update high-eta jet ID
+     --apply JECs via official tools to jets and MET
+     --updated to Summer16_23Sep2016*V3* JECs for data and MC
+  * B-tagging
+     --implemented deepCSV w/ prob_b+prob_bb
+     --updated b-tag working points
+     --TTML SFs
+     --b-tag efficiency root files - update with new MC
+     --added process dependent efficiencies
+  * MET
+     --updated MET filters, now as part of pass (not pre-applied as in Capy)
+  * Pile-up weights
+     --rederive based on rereco and Moriond MC -> no good agreement with data NPV, removed from weight @ renormalization for now
+
 2016_11_08 (ReReco Data)
 -- 36.2 ifb of total data
   -- 27.7 ifb of 23Sep ReReco data (Run2016B-G)

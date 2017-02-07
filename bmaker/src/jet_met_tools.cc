@@ -79,6 +79,18 @@ float jet_met_tools::getGenPt(const pat::Jet &jet, edm::Handle<edm::View <reco::
   return -99999.;    
 }
 
+bool jet_met_tools::matchesGenJet(const pat::Jet &jet, edm::Handle<edm::View <reco::GenJet> > genjets){
+  if(!genjets.isValid()) return false;
+  for (size_t ijet(0); ijet < genjets->size(); ijet++) {
+    const reco::GenJet &genjet = (*genjets)[ijet];
+    double dr(deltaR(jet, genjet));
+    if(dr < 0.3) return true;
+  }
+  return false;    
+}
+
+
+
 bool jet_met_tools::isLowDphi(vCands jets, float mht_phi, float &dphi1, float &dphi2, float &dphi3, float &dphi4){
   dphi1 = 10.; dphi2 = 10.; dphi3 = 10.; dphi4 = 10.; 
   float *dphi[] = {&dphi1, &dphi2, &dphi3, &dphi4}; 
@@ -883,7 +895,7 @@ jet_met_tools::jet_met_tools(TString ijecName, bool doSys, bool fastSim, TString
 
   // only add b-tagging weights if requested
   string scaleFactorFile(getenv("CMSSW_BASE"));
-  scaleFactorFile+="/src/babymaker/bmaker/data/CSVv2Moriond17_2017_1_26_BtoH.csv";//CSVv2Moriond17_comb.csv";
+  scaleFactorFile+="/src/babymaker/bmaker/data/CSVv2_Moriond17_B_H.csv";//CSVv2Moriond17_2017_1_26_BtoH.csv";//CSVv2Moriond17_comb.csv";
   calib_full_.reset(new BTagCalibration("csvv2", scaleFactorFile));
   for(const auto &op: op_pts_){
     readers_full_[op] = MakeUnique<BTagCalibrationReader>(op, "central", vector<string>{"up", "down"});
@@ -892,7 +904,7 @@ jet_met_tools::jet_met_tools(TString ijecName, bool doSys, bool fastSim, TString
     readers_full_.at(op)->load(*calib_full_, BTagEntry::FLAV_B, "comb");
   }
   string scaleFactorFile_deep(getenv("CMSSW_BASE"));
-  scaleFactorFile_deep+="/src/babymaker/bmaker/data/CSVv2Moriond17_2017_1_26_BtoH.csv";//DeepCSVMoriond17_comb.csv";
+  scaleFactorFile_deep+="/src/babymaker/bmaker/data/DeepCSV_Moriond17_B_H.csv";//CSVv2Moriond17_2017_1_26_BtoH.csv";//DeepCSVMoriond17_comb.csv";
   calib_deep_full_.reset(new BTagCalibration("csvv2_deep", scaleFactorFile_deep));
   for(const auto &op: op_pts_){
     readers_deep_full_[op] = MakeUnique<BTagCalibrationReader>(op, "central", vector<string>{"up", "down"});
@@ -903,7 +915,7 @@ jet_met_tools::jet_met_tools(TString ijecName, bool doSys, bool fastSim, TString
 
   if (isFastSim){
     string scaleFactorFileFastSim(getenv("CMSSW_BASE"));
-    scaleFactorFileFastSim+="/src/babymaker/bmaker/data/CSV_13TEV_Combined_14_7_2016.csv";
+    scaleFactorFileFastSim+="/src/babymaker/bmaker/data/fastsim_csvv2_ttbar_26_1_2017.csv";//CSV_13TEV_Combined_14_7_2016.csv";
     calib_fast_.reset(new BTagCalibration("csvv2", scaleFactorFileFastSim));
     for(const auto &op: op_pts_){
       readers_fast_[op] = MakeUnique<BTagCalibrationReader>(op, "central", vector<string>{"up", "down"});
@@ -912,7 +924,7 @@ jet_met_tools::jet_met_tools(TString ijecName, bool doSys, bool fastSim, TString
       readers_fast_.at(op)->load(*calib_fast_, BTagEntry::FLAV_B, "fastsim");
     }
     string scaleFactorFileFastSim_deep(getenv("CMSSW_BASE"));
-    scaleFactorFileFastSim_deep+="/src/babymaker/bmaker/data/CSV_13TEV_Combined_14_7_2016.csv";
+    scaleFactorFileFastSim_deep+="/src/babymaker/bmaker/data/fastsim_deepcsv_ttbar_26_1_2017.csv";//CSV_13TEV_Combined_14_7_2016.csv";
     calib_deep_fast_.reset(new BTagCalibration("csvv2", scaleFactorFileFastSim_deep));
     for(const auto &op: op_pts_){
       readers_deep_fast_[op] = MakeUnique<BTagCalibrationReader>(op, "central", vector<string>{"up", "down"});

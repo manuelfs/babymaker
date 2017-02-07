@@ -44,10 +44,15 @@ if outName == "output.root": # output filename not set
     outName = "fullbaby_"+rootfile.replace("file:","")
 
 doSystematics = True
+if "FSPremix" in outName or "Fast" in outName: fastsim = True
+else: fastsim = False
 
+    
 ## JECs must be undone and reapplied when rerunning b-tagging
 ## => if doJEC = False, DeepCSV discriminator will not be included
-doJEC = True  
+doJEC = True
+if fastsim: doJEC = False
+    
 if doJEC: jets_label = "updatedPatJetsTransientCorrectedUpdatedJEC"
 else: jets_label = "slimmedJets"
 
@@ -70,8 +75,6 @@ elif "RunIISpring16MiniAOD" in outName:
 elif "RunIISummer16MiniAOD" in outName:
     jecLabel = 'Summer16_23Sep2016V3_MC'
 
-if "FSPremix" in outName or "Fast" in outName: fastsim = True
-else: fastsim = False
 
 if "Run2016" in outName:
     isData = True
@@ -190,8 +193,6 @@ if doJEC:
                                isData = isData,
     )
 
-    process.p = cms.Path(process.baby_full)
-else:
-    process.p = cms.Path(process.BadPFMuonFilter*
-                         process.BadChargedCandidateFilter*
-                         process.baby_full)
+
+process.p = cms.Path(process.baby_full)
+

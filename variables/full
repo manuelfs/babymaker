@@ -317,6 +317,7 @@ bool pass_cschalo;
 bool pass_eebadsc;
 bool pass_ecaldeadcell;
 bool pass_fsmet;
+bool pass_fsjets;
 bool pass_badpfmu;
 bool pass_badchhad;
 bool pass;

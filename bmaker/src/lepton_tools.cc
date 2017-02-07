@@ -153,18 +153,30 @@ namespace{
 }
 
 //////////////////// Scale Factor loading
-const TH2F lepton_tools::sf_full_muon_medium = GetSF<TH2F>("sf_full_muon_medium.root",
-                                                           "pt_abseta_PLOT_pair_probeMultiplicity_bin0");
-const TH2F lepton_tools::sf_full_muon_iso = GetSF<TH2F>("sf_full_muon_iso.root",
-                                                        "pt_abseta_PLOT_pair_probeMultiplicity_bin0_&_Medium2016_pass");
-const TH2D lepton_tools::sf_full_muon_tracking = GraphToHist(GetSF<TGraphAsymmErrors>("sf_full_muon_tracking.root",
-                                                                                      "ratio_eta"));
-const TH2F lepton_tools::sf_full_electron_medium = GetSF<TH2F>("sf_full_electron_idiso.root",
-                                                               "GsfElectronToMedium");
-const TH2F lepton_tools::sf_full_electron_iso = GetSF<TH2F>("sf_full_electron_idiso.root",
+
+//https://twiki.cern.ch/twiki/bin/view/CMS/SUSLeptonSF#Muons_AN1
+const TH2F lepton_tools::sf_full_muon_medium = GetSF<TH2F>("TnP_NUM_MediumID_DENOM_generalTracks_VAR_map_pt_eta.root",
+                                                           "SF");
+const TH2F lepton_tools::sf_full_muon_iso = GetSF<TH2F>("TnP_NUM_MiniIsoTight_DENOM_MediumID_VAR_map_pt_eta.root",
+                                                        "SF");
+
+const TH2F lepton_tools::sf_full_muon_vtx = GetSF<TH2F>("TnP_NUM_MediumIP2D_DENOM_LooseID_VAR_map_pt_eta.root",
+                                                        "SF");
+
+
+//Need to add muon tracking SF if it becomes available
+//const TH2D lepton_tools::sf_full_muon_tracking = GraphToHist(GetSF<TGraphAsymmErrors>("sf_full_muon_tracking.root",
+//                                                                                  "ratio_eta"));
+
+//https://twiki.cern.ch/twiki/bin/view/CMS/SUSLeptonSF#Electrons_AN1
+const TH2F lepton_tools::sf_full_electron_medium = GetSF<TH2F>("sf_full_electron_ID_and_iso_25_01_2017.root",
+                                                               "GsfElectronToCutBasedSpring15M");
+const TH2F lepton_tools::sf_full_electron_iso = GetSF<TH2F>("sf_full_electron_ID_and_iso_25_01_2017.root",
                                                             "MVAVLooseElectronToMini");
-const TH2F lepton_tools::sf_full_electron_tracking = GetSF<TH2F>("sf_full_electron_tracking.root",
+const TH2F lepton_tools::sf_full_electron_tracking = GetSF<TH2F>("egammaEffi_EGM2D.root",
                                                                  "EGamma_SF2D");
+
+
 const TH2D lepton_tools::sf_fast_muon_medium = GetSF<TH2D>("sf_fast_muon_medium.root",
                                                            "histo2D");
 const TH2D lepton_tools::sf_fast_muon_iso = GetSF<TH2D>("sf_fast_muon_iso.root",
@@ -436,7 +448,9 @@ pair<double, double> lepton_tools::getScaleFactor(const reco::Muon &lep){
       make_pair(1., 0.03),//Systematic uncertainty
       GetSF(sf_full_muon_iso, pt, abseta, false),
       make_pair(1., 0.03),//Systematic uncertainty
-      GetSF(sf_full_muon_tracking, pt, eta)//Asymmetric in eta
+      GetSF(sf_full_muon_vtx, pt, abseta, false),
+      make_pair(1., 0.03)//Systematic uncertainty
+      //GetSF(sf_full_muon_tracking, pt, eta)//Asymmetric in eta
       };
   return accumulate(sfs.cbegin(), sfs.cend(), make_pair(1., 0.), MergeSF);
 }
@@ -454,7 +468,8 @@ pair<double, double> lepton_tools::getScaleFactor(const pat::Electron &lep){
     GetSF(sf_full_electron_medium, pt, abseta),
       GetSF(sf_full_electron_iso, pt, abseta),
       GetSF(sf_full_electron_tracking, eta, pt),//Axes swapped, asymmetric in eta
-      make_pair(1., pt<20. ? 0.03 : 0.)//Systematic uncertainty
+      //make_pair(1., pt<20. ? 0.03 : 0.)//Systematic uncertainty
+      make_pair(1., pt<20. || pt >80. ? 0.01 : 0.)//Systematic uncertainty
       };
   return accumulate(sfs.cbegin(), sfs.cend(), make_pair(1., 0.), MergeSF);
 }

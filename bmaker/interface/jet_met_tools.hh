@@ -90,6 +90,7 @@ public:
   bool isLowDphi(vCands jets, float mht_phi, float &dphi1, float &dphi2, float &dphi3, float &dphi4);
 
   float getGenPt(const pat::Jet &jet, edm::Handle<edm::View <reco::GenJet> > genjets);
+  bool  matchesGenJet(const pat::Jet &jet, edm::Handle<edm::View <reco::GenJet> > genjets);
   float trueHT(edm::Handle<edm::View <reco::GenJet> > genjets);
 
   void getMETRaw(edm::Handle<pat::METCollection> mets, float &metRaw, float &metRawPhi);

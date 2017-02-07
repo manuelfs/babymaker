@@ -218,14 +218,19 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 
   ///////////////////// Filters ///////////////////////
   if (debug) cout<<"INFO: Writing filters..."<<endl; 
-  edm::Handle<bool> ifilterbadChCand;
-  iEvent.getByToken(tok_badChCandFilter_, ifilterbadChCand);
-  baby.pass_badchhad() = (*ifilterbadChCand);
+  if(!isFastSim){
+    edm::Handle<bool> ifilterbadChCand;
+    iEvent.getByToken(tok_badChCandFilter_, ifilterbadChCand);
+    baby.pass_badchhad() = (*ifilterbadChCand);
 
-  edm::Handle<bool> ifilterbadPFMuon;
-  iEvent.getByToken(tok_badPFMuonFilter_, ifilterbadPFMuon);
-  baby.pass_badpfmu() = (*ifilterbadPFMuon);
-
+    edm::Handle<bool> ifilterbadPFMuon;
+    iEvent.getByToken(tok_badPFMuonFilter_, ifilterbadPFMuon);
+    baby.pass_badpfmu() = (*ifilterbadPFMuon);
+  }
+  else{ 
+    baby.pass_badchhad()=true;
+    baby.pass_badpfmu()=true;
+  }
   edm::Handle<edm::TriggerResults> filterBits;
   if(isData) iEvent.getByToken(tok_trigResults_reco_,filterBits);  
   else iEvent.getByToken(tok_trigResults_pat_,filterBits);  
@@ -376,7 +381,7 @@ vector<LVector> bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
   baby.ht() = 0.; baby.st() = 0.; baby.ht_hlt() = 0.;
   baby.njets_ra2() = 0; baby.njets_clean() = 0; baby.nbm_ra2() = 0; baby.ht_ra2() = 0.; baby.ht_clean() = 0.; 
   baby.pass_jets() = true; baby.pass_jets_nohf() = true; baby.pass_jets_tight() = true; 
-  baby.pass_jets_ra2() = true; baby.pass_jets_tight_ra2() = true; 
+  baby.pass_jets_ra2() = true; baby.pass_jets_tight_ra2() = true; baby.pass_fsjets()=true;
   if (doSystematics) {
     baby.sys_njets().resize(kSysLast, 0); baby.sys_nbm().resize(kSysLast, 0); baby.sys_nbdm().resize(kSysLast, 0); 
     baby.sys_pass().resize(kSysLast, true); baby.sys_ht().resize(kSysLast, 0.); 
@@ -396,6 +401,9 @@ vector<LVector> bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
     bool looseID = jetTool->idJet(jet, jetTool->kLoose);
     bool tightID = jetTool->idJet(jet, jetTool->kTight);
     bool goodPtEta = jetp4.pt() > jetTool->JetPtCut && fabs(jet.eta()) <= jetTool->JetEtaCut;
+    if(isFastSim){
+      if(jetp4.pt() > 20. && fabs(jet.eta()) < 2.5 && !jetTool->matchesGenJet(jet,genjets) && jet.chargedHadronEnergyFraction() < 0.1) baby.pass_fsjets()=false;
+    }
     
     //   RA4 Jet Quality filters
     //--------------------------------
@@ -1338,17 +1346,17 @@ void bmaker_full::writeFilters(const edm::TriggerNames &fnames,
                 baby.pass_cschalo() && baby.pass_hbhe() && 
                 baby.pass_hbheiso() && baby.pass_ecaldeadcell() && 
                 baby.pass_badpfmu() && baby.pass_badchhad() && // these two are prefilled in analyze()
-                baby.pass_jets() && baby.pass_fsmet();
+                baby.pass_jets() && baby.pass_fsmet() && baby.pass_fsjets();
   baby.pass_ra2() = baby.pass_goodv() && baby.pass_eebadsc() && 
                 baby.pass_cschalo() && baby.pass_hbhe() && 
                 baby.pass_hbheiso() && baby.pass_ecaldeadcell() &&
                 baby.pass_badpfmu() && baby.pass_badchhad() && // these two are prefilled in analyze()
-                baby.pass_jets_ra2() && baby.pass_fsmet();
+                baby.pass_jets_ra2() && baby.pass_fsmet() && baby.pass_fsjets();
   baby.pass_nohf() = baby.pass_goodv() && baby.pass_eebadsc() && 
                 baby.pass_cschalo() && baby.pass_hbhe() && 
                 baby.pass_hbheiso() && baby.pass_ecaldeadcell() && 
                 baby.pass_badpfmu() && baby.pass_badchhad() && // these two are prefilled in analyze()
-                baby.pass_jets_nohf() && baby.pass_fsmet();
+                baby.pass_jets_nohf() && baby.pass_fsmet() && baby.pass_fsjets();
 
   for (size_t ijet(0); ijet < baby.jets_pt().size(); ijet++){
     if (abs(baby.jets_eta()[ijet])>2.4 || baby.jets_pt()[ijet]<200.) continue;

@@ -367,9 +367,17 @@ void bmaker_full::writeMET(edm::Handle<pat::METCollection> mets, edm::Handle<pat
   jetTool->getMETWithJEC(mets, baby.met(), baby.met_phi(), kSysLast);
   jetTool->getMETRaw(mets, baby.met_raw(), baby.met_raw_phi());
 
-  jetTool->getMETWithJEC(mets_uncorr, baby.met_uncorr(), baby.met_phi_uncorr(), kSysLast);
-  jetTool->getMETWithJEC(mets_egclean, baby.met_egclean(), baby.met_phi_egclean(), kSysLast);
-  jetTool->getMETWithJEC(mets_muclean, baby.met_muclean(), baby.met_phi_muclean(), kSysLast);
+  //Avoid overwriting systematics, don't call getMETwithJEC
+  // jetTool->getMETWithJEC(mets_uncorr, baby.met_uncorr(), baby.met_phi_uncorr(), kSysLast);
+  // jetTool->getMETWithJEC(mets_egclean, baby.met_egclean(), baby.met_phi_egclean(), kSysLast);
+  // jetTool->getMETWithJEC(mets_muclean, baby.met_muclean(), baby.met_phi_muclean(), kSysLast);
+
+  baby.met_uncorr() = mets_uncorr->at(0).pt();
+  baby.met_phi_uncorr() = mets_uncorr->at(0).phi();
+  baby.met_egclean() = mets_egclean->at(0).pt();
+  baby.met_phi_egclean() = mets_egclean->at(0).phi();
+  baby.met_muclean() = mets_muclean->at(0).pt();
+  baby.met_phi_muclean() = mets_muclean->at(0).phi();
 
   baby.met_mini() = mets->at(0).pt();
   baby.met_mini_phi() = mets->at(0).phi();
@@ -638,7 +646,7 @@ void bmaker_full::writeBTagWeights(edm::Handle<pat::JetCollection> alljets,
       baby.w_bhig_deep_proc() *= jetTool->jetBTagWeight(jet, jetp4, all_ops, ctr, ctr, true, true);
       if (doSystematics){
         // now, vary only the full sim scale factor, regardless of whether we run on Fast or Full sim
-        // this is necessary since uncertainties for FastSim and FullSim are uncorrelated 
+        // this is necessary since uncertainties for FastSim and FullSim uncorrelated 
         baby.sys_bctag()[0]   *= jetTool->jetBTagWeight(jet, jetp4, BTagEntry::OP_MEDIUM, vup, ctr, false);
         baby.sys_bctag()[1]   *= jetTool->jetBTagWeight(jet, jetp4, BTagEntry::OP_MEDIUM, vdn, ctr, false);
         baby.sys_udsgtag()[0] *= jetTool->jetBTagWeight(jet, jetp4, BTagEntry::OP_MEDIUM, ctr, vup, false);

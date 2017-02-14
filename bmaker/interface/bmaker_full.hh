@@ -74,7 +74,7 @@ public:
   weight_tools *weightTool;
 
   // Functions that do the branch writing
-  void writeMET(edm::Handle<pat::METCollection> mets, edm::Handle<pat::METCollection> mets_nohf);
+  void writeMET(edm::Handle<pat::METCollection> mets, edm::Handle<pat::METCollection> mets_nohf, edm::Handle<pat::METCollection> mets_uncorr, edm::Handle<pat::METCollection> mets_egclean, edm::Handle<pat::METCollection> mets_muclean);
   std::vector<reco::Candidate::LorentzVector> writeJets(edm::Handle<pat::JetCollection> alljets,
 							std::vector<unsigned> &all_baby_jets_idx,
                  edm::Handle<edm::View <reco::GenJet> > genjets, 
@@ -98,6 +98,7 @@ public:
 		    edm::Handle<reco::VertexCollection> vtx,
 		    vCands &veto_mus, vCands &all_mus, double rhoEventCentral);
   vCands writeElectrons(edm::Handle<pat::ElectronCollection> electrons, 
+			edm::Handle<pat::ElectronCollection> electrons_pre_gs_fix,
 			edm::Handle<pat::PackedCandidateCollection> pfcands, 
 			edm::Handle<reco::VertexCollection> vtx,
 			vCands &veto_els, vCands &all_els, double rhoEventCentral);
@@ -110,7 +111,7 @@ public:
 		   baby_float ll_w);
   void writeLeptons(vCands &leptons); 
   void writeTks(edm::Handle<pat::PackedCandidateCollection> pfcands,edm::Handle<reco::VertexCollection> vtx, double rhoEventCentral);
-  vCands writePhotons(edm::Handle<pat::PhotonCollection> allphotons, edm::Handle<std::vector<pat::Electron> > &electrons,
+  vCands writePhotons(edm::Handle<pat::PhotonCollection> allphotons,edm::Handle<pat::PhotonCollection> allphotons_pre_gs_fix, edm::Handle<std::vector<pat::Electron> > &electrons,
 		      edm::Handle<reco::ConversionCollection> &conversions, edm::Handle<reco::BeamSpot> &beamspot, double rho);
 
   bool writeTriggers(const edm::TriggerNames &names, 
@@ -180,14 +181,19 @@ private:
   edm::EDGetTokenT<double> tok_rhoFastJet_centralNeutral_;
   edm::EDGetTokenT<pat::MuonCollection> tok_muons_;
   edm::EDGetTokenT<pat::ElectronCollection> tok_electrons_;
+  edm::EDGetTokenT<pat::ElectronCollection> tok_electrons_before_gsfix_;
   edm::EDGetTokenT<double> tok_rhoFastJet_all_;
   edm::EDGetTokenT<reco::BeamSpot> tok_offBeamSpot_;
   edm::EDGetTokenT<pat::PhotonCollection> tok_photons_;
+  edm::EDGetTokenT<pat::PhotonCollection> tok_photons_before_gsfix_;
   edm::EDGetTokenT<std::vector<reco::Conversion> > tok_reducedEgamma_conver_;
   edm::EDGetTokenT<pat::JetCollection> tok_jets_;
   edm::EDGetTokenT<edm::View<reco::GenJet> > tok_genJets_;
   edm::EDGetTokenT<pat::METCollection> tok_met_;
   edm::EDGetTokenT<pat::METCollection> tok_met_noHF_;
+  edm::EDGetTokenT<pat::METCollection> tok_met_uncorr_;
+  edm::EDGetTokenT<pat::METCollection> tok_met_MuEGClean_;
+  edm::EDGetTokenT<pat::METCollection> tok_met_EGClean_;
   edm::EDGetTokenT<bool> tok_HBHENoiseFilter_;
   edm::EDGetTokenT<bool> tok_HBHEIsoNoiseFilter_;
   edm::EDGetTokenT<edm::TriggerResults> tok_trigResults_reco_;

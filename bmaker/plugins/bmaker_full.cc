@@ -106,7 +106,10 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   sig_mus = writeMuons(allmuons, pfcands, vtx, veto_mus, all_mus, rhoEventCentral);
   edm::Handle<pat::ElectronCollection> allelectrons;
   iEvent.getByToken(tok_electrons_, allelectrons);
-  sig_els = writeElectrons(allelectrons, pfcands, vtx, veto_els, all_els, rhoEventCentral);
+  edm::Handle<pat::ElectronCollection> allelectrons_pre_gs;
+  iEvent.getByToken(tok_electrons_before_gsfix_, allelectrons_pre_gs);
+ 
+  sig_els = writeElectrons(allelectrons, allelectrons_pre_gs, pfcands, vtx, veto_els, all_els, rhoEventCentral);
   
   writeDiLep(sig_mus, sig_els, veto_mus, veto_els);
 
@@ -133,7 +136,9 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   iEvent.getByToken(tok_photons_, allphotons);
   edm::Handle<vector<reco::Conversion> > conversions;
   iEvent.getByToken(tok_reducedEgamma_conver_, conversions);
-  photons = writePhotons(allphotons, allelectrons, conversions, beamspot, *rhoEvent_h);
+  edm::Handle<pat::PhotonCollection> allphotons_pre_gs;
+  iEvent.getByToken(tok_photons_before_gsfix_, allphotons_pre_gs);
+  photons = writePhotons(allphotons, allphotons_pre_gs, allelectrons, conversions, beamspot, *rhoEvent_h);
 
   //////////////////////////// MET/JETs with JECs ///////////////////////////
   if (debug) cout<<"INFO: Applying JECs..."<<endl;
@@ -146,10 +151,23 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   /// MET
   if (debug) cout<<"INFO: Writing MET..."<<endl;
   edm::Handle<pat::METCollection> mets;
-  iEvent.getByToken(tok_met_, mets);
+  // iEvent.getByToken(tok_met_, mets); // using MuEGClean for default, for now
+  iEvent.getByToken(tok_met_MuEGClean_, mets);
   edm::Handle<pat::METCollection> mets_nohf;
   iEvent.getByToken(tok_met_noHF_, mets_nohf);
-  writeMET(mets, mets_nohf);
+  edm::Handle<pat::METCollection> mets_uncorr;
+  iEvent.getByToken(tok_met_uncorr_, mets_uncorr);
+  edm::Handle<pat::METCollection> mets_egclean;
+  iEvent.getByToken(tok_met_EGClean_, mets_egclean);
+  edm::Handle<pat::METCollection> mets_muclean; 
+  iEvent.getByToken(tok_met_, mets_muclean); //The collection called "slimmedMETs" is corrected for muons but not EG 
+  
+
+  //Saving these lines here in case we decide to switch to a different default
+  // edm::Handle<pat::METCollection> mets_muegclean;
+  //iEvent.getByToken(tok_met_MuEGClean_, mets_muegclean);
+
+  writeMET(mets, mets_nohf, mets_uncorr,  mets_egclean,  mets_muclean);
 
   /// isolated tracks need to be after MET calculation and before jets cleaning
   if (debug) cout<<"INFO: Calculating track veto..."<<endl;
@@ -345,9 +363,14 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 */
 
 // Requires having called jetTool->getJetCorrections(alljets, rhoEvent_) beforehand
-void bmaker_full::writeMET(edm::Handle<pat::METCollection> mets, edm::Handle<pat::METCollection> mets_nohf){
+void bmaker_full::writeMET(edm::Handle<pat::METCollection> mets, edm::Handle<pat::METCollection> mets_nohf, edm::Handle<pat::METCollection> mets_uncorr, edm::Handle<pat::METCollection> mets_egclean, edm::Handle<pat::METCollection> mets_muclean){
   jetTool->getMETWithJEC(mets, baby.met(), baby.met_phi(), kSysLast);
   jetTool->getMETRaw(mets, baby.met_raw(), baby.met_raw_phi());
+
+  jetTool->getMETWithJEC(mets_uncorr, baby.met_uncorr(), baby.met_phi_uncorr(), kSysLast);
+  jetTool->getMETWithJEC(mets_egclean, baby.met_egclean(), baby.met_phi_egclean(), kSysLast);
+  jetTool->getMETWithJEC(mets_muclean, baby.met_muclean(), baby.met_phi_muclean(), kSysLast);
+
   baby.met_mini() = mets->at(0).pt();
   baby.met_mini_phi() = mets->at(0).phi();
   baby.met_calo() = mets->at(0).caloMETPt();
@@ -954,6 +977,7 @@ vCands bmaker_full::writeMuons(edm::Handle<pat::MuonCollection> muons,
 
 
 vCands bmaker_full::writeElectrons(edm::Handle<pat::ElectronCollection> electrons, 
+				   edm::Handle<pat::ElectronCollection> electrons_pre_gs_fix, 
                                    edm::Handle<pat::PackedCandidateCollection> pfcands, 
                                    edm::Handle<reco::VertexCollection> vtx,
                                    vCands &veto_els, vCands &all_els, double rhoEventCentral){
@@ -970,6 +994,12 @@ vCands bmaker_full::writeElectrons(edm::Handle<pat::ElectronCollection> electron
     lepTool->vertexElectron(lep, vtx, dz, d0); // Calculating dz and d0
 
     baby.els_pt().push_back(lep.pt());
+    if (lep.userInt("hasGainSwitchFlag") == 1) {
+      const pat::Electron &lep_pre_gs = (*electrons_pre_gs_fix)[ilep];
+      baby.els_dpt_gs().push_back(lep.pt()-lep_pre_gs.pt());
+    }
+    else baby.els_dpt_gs().push_back(0.);
+
     baby.els_scpt().push_back(lep.superCluster()->energy()*sin(lep.superClusterPosition().theta()));
     baby.els_sceta().push_back(lep.superCluster()->eta());
     baby.els_eta().push_back(lep.eta());
@@ -1136,7 +1166,8 @@ void bmaker_full::setElMuMass(vCands leptons1, vCands leptons2, baby_float ll_m,
 }
 
 
-vCands bmaker_full::writePhotons(edm::Handle<pat::PhotonCollection> allphotons, 
+vCands bmaker_full::writePhotons(edm::Handle<pat::PhotonCollection> allphotons,
+				 edm::Handle<pat::PhotonCollection> allphotons_pre_gs,
                                  edm::Handle<std::vector<pat::Electron> > &electrons,
                                  edm::Handle<reco::ConversionCollection> &conversions,
                                  edm::Handle<reco::BeamSpot> &beamspot, double rho){
@@ -1148,7 +1179,11 @@ vCands bmaker_full::writePhotons(edm::Handle<pat::PhotonCollection> allphotons,
 
     if(photon.pt() < 50) continue;
     if(!photonTool->idPhoton(photon, electrons, conversions, beamspot, rho)) continue;
-
+    if(photon.userInt("hasGainSwitchFlag") == 1){
+      const pat::Photon &photon_pre_gs = (*allphotons_pre_gs)[ind];
+      baby.ph_dpt_gs().push_back(photon.pt()-photon_pre_gs.pt());
+    }
+    else baby.ph_dpt_gs().push_back(0.);
     if(photon.pt() > photonTool->PhotonPtCut) baby.nph()++;
     baby.ph_pt().push_back(photon.pt());
     baby.ph_eta().push_back(photon.eta());
@@ -1326,6 +1361,7 @@ void bmaker_full::writeFilters(const edm::TriggerNames &fnames,
   baby.pass_goodv() = true; baby.pass_cschalo() = true; baby.pass_eebadsc() = true;
   baby.pass_ecaldeadcell() = true; baby.pass_hbhe() = true; baby.pass_hbheiso() = true;
   baby.pass_ra2_badmu() = true;
+  baby.pass_badmus()=true; baby.pass_dupmus()=true;
   for (size_t i(0); i < filterBits->size(); ++i) {
     string name = fnames.triggerName(i);
     bool pass = static_cast<bool>(filterBits->accept(i));
@@ -1337,26 +1373,45 @@ void bmaker_full::writeFilters(const edm::TriggerNames &fnames,
     else if (name=="Flag_EcalDeadCellTriggerPrimitiveFilter") baby.pass_ecaldeadcell() = pass;
     else if (name=="Flag_HBHENoiseFilter") baby.pass_hbhe() = pass; 
     else if (name=="Flag_HBHENoiseIsoFilter") baby.pass_hbheiso() = pass; 
+    //These are defined as "has bad muon", so must be inverted
+    else if (name=="Flag_badMuons") baby.pass_badmus() = !pass; 
+    else if (name=="Flag_duplicateMuons") baby.pass_dupmus() = !pass; 
+   
   }
 
   //baby.pass_goodv() &= eventTool->hasGoodPV(vtx); // We needed to re-run it for Run2015B
   //baby.pass_cschalo() = eventTool->passBeamHalo(baby.run(), baby.event()); // now taken from miniAOD
 
-  baby.pass() = baby.pass_goodv() && baby.pass_eebadsc() && 
-                baby.pass_cschalo() && baby.pass_hbhe() && 
-                baby.pass_hbheiso() && baby.pass_ecaldeadcell() && 
-                baby.pass_badpfmu() && baby.pass_badchhad() && // these two are prefilled in analyze()
+  baby.pass() = baby.pass_goodv() && baby.pass_ecaldeadcell() && 
+                baby.pass_hbhe() && baby.pass_hbheiso() &&
+            //  baby.pass_badpfmu() && baby.pass_badchhad() && // these two are prefilled in analyze()
                 baby.pass_jets() && baby.pass_fsmet() && baby.pass_fsjets();
-  baby.pass_ra2() = baby.pass_goodv() && baby.pass_eebadsc() && 
-                baby.pass_cschalo() && baby.pass_hbhe() && 
-                baby.pass_hbheiso() && baby.pass_ecaldeadcell() &&
-                baby.pass_badpfmu() && baby.pass_badchhad() && // these two are prefilled in analyze()
+
+  baby.pass_ra2() = baby.pass_goodv() &&  baby.pass_ecaldeadcell() &&
+                baby.pass_hbhe() &&  baby.pass_hbheiso() &&     
+             // baby.pass_badpfmu() && baby.pass_badchhad() && // these two are prefilled in analyze()
                 baby.pass_jets_ra2() && baby.pass_fsmet() && baby.pass_fsjets();
-  baby.pass_nohf() = baby.pass_goodv() && baby.pass_eebadsc() && 
-                baby.pass_cschalo() && baby.pass_hbhe() && 
-                baby.pass_hbheiso() && baby.pass_ecaldeadcell() && 
-                baby.pass_badpfmu() && baby.pass_badchhad() && // these two are prefilled in analyze()
+
+  baby.pass_nohf() = baby.pass_goodv() && baby.pass_ecaldeadcell() && 
+                baby.pass_hbhe() && baby.pass_hbheiso() &&
+             // baby.pass_badpfmu() && baby.pass_badchhad() && // these two are prefilled in analyze()
                 baby.pass_jets_nohf() && baby.pass_fsmet() && baby.pass_fsjets();
+
+
+  //Some filters not recommended for MC
+  //https://twiki.cern.ch/twiki/bin/view/CMS/MissingETOptionalFiltersRun2#Moriond_2017
+
+  if(isData){ baby.pass() = baby.pass() && baby.pass_eebadsc();
+              baby.pass_ra2() = baby.pass_ra2() && baby.pass_eebadsc();
+              baby.pass_nohf() = baby.pass_nohf() && baby.pass_eebadsc();
+  }
+  
+  // Suggested only for Data and Fullsim
+  if(!isFastSim){ baby.pass() = baby.pass() && baby.pass_cschalo();
+                  baby.pass_ra2() = baby.pass_ra2() && baby.pass_cschalo();
+                  baby.pass_nohf() = baby.pass_nohf() && baby.pass_cschalo();
+  }
+
 
   for (size_t ijet(0); ijet < baby.jets_pt().size(); ijet++){
     if (abs(baby.jets_eta()[ijet])>2.4 || baby.jets_pt()[ijet]<200.) continue;
@@ -1967,14 +2022,19 @@ bmaker_full::bmaker_full(const edm::ParameterSet& iConfig):
   tok_rhoFastJet_centralNeutral_(consumes<double>(edm::InputTag("fixedGridRhoFastjetCentralNeutral"))),
   tok_muons_(consumes<pat::MuonCollection>(edm::InputTag("slimmedMuons"))),
   tok_electrons_(consumes<pat::ElectronCollection>(edm::InputTag("slimmedElectrons"))),
+  tok_electrons_before_gsfix_(consumes<pat::ElectronCollection>(edm::InputTag("slimmedElectronsBeforeGSFix"))),
   tok_rhoFastJet_all_(consumes<double>(edm::InputTag("fixedGridRhoFastjetAll"))),
   tok_offBeamSpot_(consumes<reco::BeamSpot>(edm::InputTag("offlineBeamSpot"))),
   tok_photons_(consumes<pat::PhotonCollection>(edm::InputTag("slimmedPhotons"))),
+  tok_photons_before_gsfix_(consumes<pat::PhotonCollection>(edm::InputTag("slimmedPhotonsBeforeGSFix"))),
   tok_reducedEgamma_conver_(consumes<vector<reco::Conversion> >(edm::InputTag("reducedEgamma","reducedConversions"))),
   tok_jets_(consumes<pat::JetCollection>(jets_label)),
   tok_genJets_(consumes<edm::View<reco::GenJet> >(edm::InputTag("slimmedGenJets"))),
   tok_met_(consumes<pat::METCollection>(met_label)),
   tok_met_noHF_(consumes<pat::METCollection>(met_nohf_label)),
+  tok_met_uncorr_(consumes<pat::METCollection>(edm::InputTag("slimmedMETsUncorrected"))),
+  tok_met_MuEGClean_(consumes<pat::METCollection>(edm::InputTag("slimmedMETsMuEGClean"))),
+  tok_met_EGClean_(consumes<pat::METCollection>(edm::InputTag("slimmedMETsEGClean"))),
   tok_HBHENoiseFilter_(consumes<bool>(edm::InputTag("HBHENoiseFilterResultProducer","HBHENoiseFilterResult"))),
   tok_HBHEIsoNoiseFilter_(consumes<bool>(edm::InputTag("HBHENoiseFilterResultProducer","HBHEIsoNoiseFilterResult"))),
   tok_trigResults_reco_(consumes<edm::TriggerResults>(edm::InputTag("TriggerResults","","RECO"))),

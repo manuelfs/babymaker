@@ -250,17 +250,17 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
     baby.pass_badpfmu()=true;
   }
   edm::Handle<edm::TriggerResults> filterBits;
-  if(isData) iEvent.getByToken(tok_trigResults_reco_,filterBits);  
-  else iEvent.getByToken(tok_trigResults_pat_,filterBits);  
-  // re-recoed data will have the process label "PAT" rather than "RECO";
-  // if the attempt to find data with "RECO" process fails, try "PAT"
+  iEvent.getByToken(tok_trigResults_pat_,filterBits);    
+  //Giovanni filters in reminiaod only available in "PAT"
+  //Try reco if fails..
   if(!filterBits.isValid() && isData) 
-    iEvent.getByToken(tok_trigResults_pat_,filterBits);  
+    iEvent.getByToken(tok_trigResults_reco_,filterBits);  
   if(filterBits.isValid()){
     const edm::TriggerNames &fnames = iEvent.triggerNames(*filterBits);
     //this method uses baby.pass_jets(), so call only after writeJets()!!
     writeFilters(fnames, filterBits, vtx, jetsMuonEnergyFrac);
   }
+  
 
   //////////////// HLT objects //////////////////
   if (debug) cout<<"INFO: Writing HLT objects..."<<endl;
@@ -909,6 +909,11 @@ vCands bmaker_full::writeMuons(edm::Handle<pat::MuonCollection> muons,
   for (unsigned ilep(0); ilep < muons->size(); ilep++) {
     const pat::Muon &lep = (*muons)[ilep];    
 
+    //Save muons that were demoted from isPF in 8_0_26_patch1 in order to debug Giovanni badMuon flags
+    bool demoted(false);
+    //userInt has old value of isPFMuon()
+    if(!lep.isPFMuon() && lep.userInt("muonsCleaned:oldPF")) demoted = true;
+
     bool isBadMu(false), isBadDuplMu(false);
     if (badmu_idx.find(ilep)!=badmu_idx.end()) isBadMu = true;
     if (badmu_dupl_idx.find(ilep)!=badmu_dupl_idx.end()) isBadDuplMu = true;
@@ -924,7 +929,7 @@ vCands bmaker_full::writeMuons(edm::Handle<pat::MuonCollection> muons,
     }
 
     // Storing leptons that pass all veto cuts except for iso
-    bool save_mu = lepTool->isVetoMuon(lep, vtx, -99.) || isBadMu || isBadDuplMu || isBadTrackerMuon;
+    bool save_mu = lepTool->isVetoMuon(lep, vtx, -99.) || isBadMu || isBadDuplMu || isBadTrackerMuon || demoted;
     if(!save_mu) continue;
 
     double lep_iso(lepTool->getPFIsolation(pfcands, dynamic_cast<const reco::Candidate *>(&lep), 0.05, 0.2, 10., rhoEventCentral, false));
@@ -935,6 +940,7 @@ vCands bmaker_full::writeMuons(edm::Handle<pat::MuonCollection> muons,
     baby.mus_bad().push_back(isBadMu);
     baby.mus_bad_dupl().push_back(isBadDuplMu);
     baby.mus_bad_trkmu().push_back(isBadTrackerMuon);
+    baby.mus_demoted().push_back(demoted);
     baby.mus_pt().push_back(lep.pt());
     baby.mus_eta().push_back(lep.eta());
     baby.mus_phi().push_back(lep.phi());
@@ -1384,6 +1390,7 @@ void bmaker_full::writeFilters(const edm::TriggerNames &fnames,
     //These are defined as "has bad muon", so must be inverted
     else if (name=="Flag_badMuons") baby.pass_badmus() = !pass; 
     else if (name=="Flag_duplicateMuons") baby.pass_dupmus() = !pass; 
+   
    
   }
 

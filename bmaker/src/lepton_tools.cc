@@ -685,7 +685,7 @@ set<unsigned> lepton_tools::badGlobalMuonSelector(edm::Handle<reco::VertexCollec
     std::vector<int> goodMuon;
     const pat::MuonCollection &muons = *muptr;
     for (auto & mu : muons) {
-        if (!mu.isPFMuon() || mu.innerTrack().isNull()) {
+      if (!mu.userInt("muonsCleaned:oldPF") || mu.innerTrack().isNull()) {
             goodMuon.push_back(-1); // bad but we don't care
             continue;
         } 

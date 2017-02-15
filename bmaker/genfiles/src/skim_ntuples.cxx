@@ -75,8 +75,8 @@ int main(int argc, char *argv[]){
 	 cuts="Sum$(mm_nleps>=1&&mm_st>500&&mm_met>200&&mm_njets>=5&&mm_mj14_lep>250)>0||Sum$(mm_nleps>=1&&mm_st>500&&mm_met>200&&mm_njets>=5&&mm_mj14_nolep>250)>0";
   if(cuts=="rpvfit")
     cuts = "max(st,Max$(sys_st))>1200&&max(njets,Max$(sys_njets))>=4&&max(nbm,Max$(sys_nbm))>=1&&(max(mj14,Max$(sys_mj14))>500||mj12>500)";
-  if(cuts=="st1200")
-    cuts = "max(st,Max$(sys_st))>1200";
+  if(cuts=="st1000")
+    cuts = "max(st,Max$(sys_st))>1000";
   if(cuts=="llm60nj2")
     cuts = "(mumuv_m>60||elelv_m>60)&&njets>=2";
   if(cuts=="httrig") // Prescaled HT triggers for fake MET trigger efficiency measurement

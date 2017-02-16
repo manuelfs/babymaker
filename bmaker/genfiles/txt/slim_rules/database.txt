@@ -2,10 +2,7 @@ drop *
 
 ## General
 keep npv
-keep pass
-keep pass_ra2_badmu
-keep pass_badpfmu
-keep pass_badchhad
+keep pass*
 keep run
 keep lumiblock
 keep event
@@ -19,10 +16,7 @@ keep st
 keep htx
 keep mht
 keep low_dphi
-keep met
-keep met_phi
-keep met_calo
-keep met_calo_phi
+keep met*
 keep njets
 keep nbm
 keep nbdm
@@ -78,6 +72,7 @@ keep mumu*
 
 ## Electrons
 keep els_pt
+keep els_dpt_gs
 keep els_sceta
 keep els_phi
 keep els_miniso
@@ -85,11 +80,14 @@ keep els_reliso
 keep els_sigid
 keep els_tight
 
+keep ph_dpt_gs
+
 ## Muons
 keep mus_pt
 keep mus_eta
 keep mus_phi
 keep mus_miniso
+keep mus_demoted
 keep mus_reliso
 keep mus_sigid
 keep mus_tight

@@ -2,10 +2,7 @@ drop *
 
 ## General
 keep npv
-keep pass
-keep pass_ra2_badmu
-keep pass_badpfmu
-keep pass_badchhad
+keep pass*
 keep run
 keep lumiblock
 keep event
@@ -19,10 +16,7 @@ keep hig*
 keep ht
 keep mht
 keep mht_phi
-keep met
-keep met_phi
-keep met_calo
-keep met_calo_phi
+keep met*
 keep njets
 keep nb*
 drop nbm_ra2
@@ -50,8 +44,12 @@ keep leps_id
 
 ## Weights
 keep weight
-keep w_*
-drop w_pdf
+keep w_lumi
+keep w_pu
+keep w_bhig*
+keep w_isr
+keep w_lep
+keep w_fs_lep
 keep eff_*
 
 ## Jets

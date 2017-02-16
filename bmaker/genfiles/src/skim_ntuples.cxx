@@ -86,9 +86,9 @@ int main(int argc, char *argv[]){
   
   //// Higgsino skims
   TString njcut = "njets>=4&&njets<=5";
-  TString nbcut = "&&nbt>=2";
+  TString nbcut = "&&(nbt>=2||nbdt>=2)";
   TString zcand = "&&(mumu_m*(mumu_m>0)+elel_m*(elel_m>0))>80&&(mumu_m*(mumu_m>0)+elel_m*(elel_m>0))<100";
-  TString higtrim = "&&hig_drmax<2.2&&hig_dm<=40&&hig_am<=200";
+  TString higtrim = "&&higd_drmax<2.2&&higd_dm<=40&&higd_am<=200";
   if(cuts=="higqcd")   cuts = njcut      +"&& met>150 && nvleps==0";
   if(cuts=="higloose") cuts = njcut+nbcut+"&& met>150 && nvleps==0";
   if(cuts=="higtight") cuts = njcut+nbcut+"&& met>150 && nvleps==0 && ntks==0&&!low_dphi"+higtrim;

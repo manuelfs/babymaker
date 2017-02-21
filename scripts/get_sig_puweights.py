@@ -77,8 +77,8 @@ for imb in mbxsec_dict:
     print "Weighted centers of signal tru npv bins:"
     hmc.SetAxisRange(0,20)
     print "0 to 20: %.3f" % hmc.GetMean()
-    hmc.SetAxisRange(20,100)
-    print "20+: %.3f" % hmc.GetMean()
+    hmc.SetAxisRange(21,100)
+    print "21+: %.3f" % hmc.GetMean()
     
 
 

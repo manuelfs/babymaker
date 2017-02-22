@@ -20,7 +20,7 @@ def expandCut(cut):
     elif cut=="higtight":
         return "met>200&&nvleps==0&&njets>=4&&njets<=5&&nbt>=2&&!low_dphi&&hig_drmax<2.2"
     elif cut=="abcd":
-        return "nleps==1&&st>500&&min(met,met_tru)>200&&njets>=6&&nbm>=1&&mj14>250&&nveto==0"
+        return "nleps==1&&st>500&&max(met,met_tru)>200&&njets>=6&&nbm>=1&&mj14>250&&nveto==0"
     elif cut=="baseline":
         return "nleps==1&&st>500&&met>200&&njets>=6&&nbm>=1"
     elif cut=="sys_abcd":

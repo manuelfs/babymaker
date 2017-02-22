@@ -26,6 +26,15 @@ def passRules(branch, rules):
     matched_rules =  [ rule for rule in rules if fnmatch.fnmatch(branch, rule[1]) ]
     return len(matched_rules)==0 or matched_rules[-1][0] == "keep"
 
+def sortInputFilesBySize(input_file_names):
+    input_file_names = [ (f, os.path.getsize(f)) for f in input_file_names ]
+
+    input_file_names.sort(key=lambda f: f[1], reverse=True)
+
+    input_file_names = [ f[0] for f in input_file_names ]
+
+    return input_file_names
+
 def slimNtuple(slim_file_name, output_file_name, input_file_names, keep_existing, test_mode):
     print("     INPUT FILES:",input_file_names,"\n")
     print("     OUTPUT FILE:",output_file_name,"\n")
@@ -36,6 +45,9 @@ def slimNtuple(slim_file_name, output_file_name, input_file_names, keep_existing
         return
 
     in_tree = ROOT.TChain("tree", "tree")
+
+    input_file_names = sortInputFilesBySize(input_file_names)
+
     for input_file_name in input_file_names:
         in_tree.Add(input_file_name)
 

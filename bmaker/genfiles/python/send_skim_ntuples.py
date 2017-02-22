@@ -35,7 +35,7 @@ def getSkimName(cut):
 def splitJobs(files, num_jobs):
     return [ a.tolist() for a in numpy.array_split(numpy.array(files), num_jobs) if len(a.tolist()) > 0 ]
 
-def sendSkimJob(in_files, out_files, cut, overwrite, exe_name):
+def sendSkimJob(in_files, out_files, cut, overwrite, cache, exe_name):
     python_dir = utilities.fullPath(os.path.dirname(__file__))
     run_dir = os.path.join(os.path.dirname(out_files[0]), "run")
     utilities.ensureDir(run_dir)
@@ -45,19 +45,24 @@ def sendSkimJob(in_files, out_files, cut, overwrite, exe_name):
         f.write('#! /usr/bin/env python\n')
         f.write('import sys\n')
         f.write('sys.path.append("'+python_dir+'")\n')
+        f.write('import subprocess\n')
         f.write('import cache\n')
         for in_file, out_file in itertools.izip(in_files, out_files):
             if os.path.exists(out_file) and not overwrite:
                 continue
-            f.write('cache.cacheRun(["'+out_file+'","'+in_file+'"],["'
-                    +os.path.join(python_dir,'skim_ntuple.py')
-                    +'","'+cut+'","'+out_file+'","'+in_file
-                    +'"],False,10000000000,0.5,False)\n')
+            if cache:
+                f.write('cache.cacheRun(["'+out_file+'","'+in_file+'"],["'
+                        +os.path.join(python_dir,'skim_ntuple.py')
+                        +'","'+cut+'","'+out_file+'","'+in_file
+                        +'"],False,10000000000,0.5,False)\n')
+            else:
+                f.write('subprocess.call(["'+os.path.join(python_dir,'skim_ntuple.py')
+                        +'","'+cut+'","'+out_file+'","'+in_file+'"])\n')
     os.chmod(run_file, 0755)
 
     subprocess.call(["JobSubmit.csh","run/wrapper.sh",run_file])
 
-def sendSkims(in_dir, num_jobs, cut, out_parent, file_tag, overwrite):
+def sendSkims(in_dir, num_jobs, cut, out_parent, file_tag, overwrite, cache):
     in_dir = utilities.fullPath(in_dir)
     skim_name = getSkimName(cut)
 
@@ -77,10 +82,11 @@ def sendSkims(in_dir, num_jobs, cut, out_parent, file_tag, overwrite):
     total_jobs = 0
     for ijob in xrange(len(in_files)):
         total_jobs += 1
-        sendSkimJob(in_files[ijob], out_files[ijob], cut, overwrite,
+        sendSkimJob(in_files[ijob], out_files[ijob], cut, overwrite, cache,
                     skim_name+"_"+file_tag+"_"+str(ijob)+"_of_"+str(num_jobs)+".py")
 
     print("Submitted "+str(total_jobs)+" jobs.")
+    print("Output sent to {}".format(out_dir))
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Submits jobs to skim non-SMS ntuples.",
@@ -95,6 +101,8 @@ if __name__ == "__main__":
                         help="Only skim files matching %(metavar)s. Matches all files if blank.")
     parser.add_argument("-o","--overwrite", action="store_true",
                         help="Remake skimmed output file even if it already exists.")
+    parser.add_argument("--cache", action="store_true",
+                        help="Enable use of file caching system")
     args = parser.parse_args()
 
-    sendSkims(args.in_dir, args.num_jobs, args.cut, args.out_dir, args.file_tag, args.overwrite)
+    sendSkims(args.in_dir, args.num_jobs, args.cut, args.out_dir, args.file_tag, args.overwrite, args.cache)

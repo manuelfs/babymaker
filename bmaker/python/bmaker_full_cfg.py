@@ -51,8 +51,7 @@ else: fastsim = False
 ## JECs must be undone and reapplied when rerunning b-tagging
 ## => if doJEC = False, DeepCSV discriminator will not be included
 doJEC = True
-if fastsim: doJEC = False
-    
+
 if doJEC: jets_label = "updatedPatJetsTransientCorrectedUpdatedJEC"
 else: jets_label = "slimmedJets"
 
@@ -70,10 +69,18 @@ elif ("Run2016F2" in outName) or ("Run2016G" in outName):
 elif ("Run2016H" in outName): 
   jecLabel = 'Summer16_23Sep2016HV3_DATA'
 elif "RunIISpring16MiniAOD" in outName:
-    if "Fast" in outName or "FSPremix" in outName: jecLabel = 'onthefly_Spring16_FastSimV1_MC'
-    else: jecLabel = 'Spring16_23Sep2016V2_MC' # for ICHEP MC against re-reco data
+  jecLabel = 'Spring16_23Sep2016V2_MC' # for ICHEP MC against re-reco data
 elif "RunIISummer16MiniAOD" in outName:
-    jecLabel = 'Summer16_23Sep2016V3_MC'
+  jecLabel = 'Summer16_23Sep2016V3_MC'
+
+# because FastSim naming for JECs variables inside db and txt files is really truly messed up...
+if fastsim: jecLabel = 'Spring16_25nsFastSimV1_MC'
+jecCorrLabel = jecLabel
+if fastsim: jecCorrLabel = 'Spring16_25nsFastSimMC_V1'
+jecBabyLabel = jecLabel
+if fastsim: 
+  if (doJEC): jecBabyLabel = 'Spring16_FastSimV1_MC'
+  else: jecBabyLabel = 'onthefly_Spring16_FastSimV1_MC'
 
 
 if "Run2016" in outName:
@@ -115,7 +122,7 @@ process.baby_full = cms.EDAnalyzer('bmaker_full',
                                     outputFile = cms.string(outName),
                                     inputFiles = cms.vstring(options.inputFiles),
                                     json = cms.string(options.json),
-                                    jec = cms.string(jecLabel),
+                                    jec = cms.string(jecBabyLabel),
                                     met = cms.InputTag("slimmedMETs"),
                                     met_nohf = cms.InputTag("slimmedMETsNoHF"),
                                     jets = cms.InputTag(jets_label),
@@ -164,7 +171,7 @@ if doJEC:
                                toGet   = cms.VPSet(
                                    cms.PSet(
                                        record = cms.string("JetCorrectionsRecord"),
-                                       tag    = cms.string("JetCorrectorParametersCollection_"+jecLabel+"_AK4PFchs"),
+                                       tag    = cms.string("JetCorrectorParametersCollection_"+jecCorrLabel+"_AK4PFchs"),
                                        label  = cms.untracked.string("AK4PFchs")
                                    )
                 )

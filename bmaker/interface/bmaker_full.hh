@@ -89,7 +89,7 @@ public:
                      std::vector<bool> &baby_jets_h1, std::vector<bool> &baby_jets_h2, 
                      std::vector<bool> &baby_jets_islep, int &baby_nbl, int &baby_nbm, int &baby_nbt,
                      float &baby_hig_am, float &baby_hig_dm, float &baby_hig_drmax, 
-                     int &baby_hig_bin, float &baby_mct);
+                     int &baby_hig_bin, float &baby_mct, bool isSystemtatic = false);
   void writeBBVars(std::vector<reco::Candidate::LorentzVector>  &all_baby_jets, vCands &sig_leps);
 
   void writeFatJets();

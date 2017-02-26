@@ -426,13 +426,18 @@ std::vector<float> sys_ht
 std::vector<float> sys_st
 std::vector<int>   sys_njets
 std::vector<int>   sys_nbm
+std::vector<int>   sys_nbdl
 std::vector<int>   sys_nbdm
+std::vector<int>   sys_nbdt
 std::vector<bool>  sys_pass
 std::vector<float> sys_mj14_nolep
 std::vector<float> sys_mj12
 std::vector<float> sys_mj14
 std::vector<float> sys_met
 std::vector<float> sys_mt
+std::vector<float> sys_higd_am
+std::vector<float> sys_higd_dm
+std::vector<float> sys_higd_drmax
 
 # +/- variations are index 0 and 1
 std::vector<float> sys_mur

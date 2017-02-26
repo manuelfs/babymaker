@@ -38,11 +38,11 @@ outName="fullbaby_SingleElectron_Run2016C_23Sep2016-v1.root"
 inFile=/home/users/ana/data/SMS-TChiHH_HToBB_HToBB_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv2_PUSpring16Fast_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1.root
 outName="fullbaby_SMS-TChiHH_HToBB_HToBB_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv2_PUSpring16Fast_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1.root"
 
-# inFile=/home/users/ana/data/TTJets_SingleLeptFromT_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISummer16MiniAODv2.root
-# outName="fullbaby_TTJets_SingleLeptFromT_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISummer16MiniAODv2.root"
+inFile=/home/users/ana/data/TTJets_SingleLeptFromT_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISummer16MiniAODv2.root
+outName="fullbaby_TTJets_SingleLeptFromT_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISummer16MiniAODv2.root"
 
-inFile=/hadoop/cms/phedex/store/data/Run2016D/SingleMuon/MINIAOD/23Sep2016-v1/90000/362A5E66-D590-E611-8A8E-20CF3027A5AF.root
-outName="fullbaby_Run2016D_SingleMuon_23Sep2016-v1.root"
+inFile=/home/users/ana/data/Run2016H_MET_03Feb2017_ver3-v1.root
+outName="fullbaby_Run2016H_MET_03Feb2017_ver3-v1.root"
 
 # inFile=/home/users/ana/data/TTJets_HT-2500toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISummer16MiniAODv2.root
 # outName="fullbaby_TTJets_HT-2500toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISummer16MiniAODv2.root"
@@ -50,7 +50,7 @@ outName="fullbaby_Run2016D_SingleMuon_23Sep2016-v1.root"
 # inFile=/home/users/ana/data/TTJets_SingleLeptFromT_genMET-150_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISummer16MiniAODv2.root
 # outName="TTJets_SingleLeptFromT_genMET-150_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISummer16MiniAODv2.root"
 
-nEvents="10000"
+nEvents="1000"
 
 json=do_not_want_json # If it can't find the file, it doesn't pre-apply the JSON
 # json="babymaker/data/json/golden_Cert_271036-275125_13TeV_PromptReco_Collisions16.json"

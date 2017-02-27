@@ -46,7 +46,7 @@ int main(int argc, char *argv[]){
   TString filetag="";
   if(argc >= 7) filetag = argv[6];
 
-  TString tag = cuts; // Using tag to avoid file names too long for TFile
+  TString tag = cuts; // Using tag to avoid file names too long for TFile  
   if(cuts=="standard") cuts="nleps>=1&&st>500&&met>100";
   if(cuts=="stdnj5") cuts="nleps>=1 && st>500 && met>100 && njets>=5";
   if(cuts=="abcd") cuts="nleps==1&&st>500&&met>200&&njets>=6&&nbm>=1&&mj14>250&&nveto==0";
@@ -75,6 +75,8 @@ int main(int argc, char *argv[]){
 	 cuts="Sum$(mm_nleps>=1&&mm_st>500&&mm_met>200&&mm_njets>=5&&mm_mj14_lep>250)>0||Sum$(mm_nleps>=1&&mm_st>500&&mm_met>200&&mm_njets>=5&&mm_mj14_nolep>250)>0";
   if(cuts=="rpvfit")
     cuts = "max(st,Max$(sys_st))>1200&&max(njets,Max$(sys_njets))>=4&&max(nbm,Max$(sys_nbm))>=1&&(max(mj12,Max$(sys_mj12))>500)";
+  if(cuts=="rpvregion")
+    cuts = "((nleps==0&&ht>1500)||(nleps==1&&ht>1200))&&njets>=4&&mj12>=300&&(nbm>=1||nbdm>=1)";
   if(cuts=="st1000")
     cuts = "max(st,Max$(sys_st))>1000";
   if(cuts=="llm60nj2")

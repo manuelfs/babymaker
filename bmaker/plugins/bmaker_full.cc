@@ -470,8 +470,8 @@ vector<LVector> bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
       baby.jets_m().push_back(jetp4.mass());
       baby.jets_islep().push_back(isLep);
       jetsMuonEnergyFrac.push_back(jet.muonEnergyFraction());
-      if(!isData && jetTool->genJetPt[ijet]>0.) baby.jets_pt_res().push_back(jetp4.pt()/jetTool->genJetPt[ijet]);
-      else baby.jets_pt_res().push_back(-99999.);
+      baby.jets_gen_pt().push_back(isData ? 0. : jetTool->genJetPt[ijet]);
+      baby.jets_pflavor().push_back(jet.partonFlavour());
       baby.jets_hflavor().push_back(jet.hadronFlavour());
       baby.jets_ntrub().push_back(0); //filled in writeMC
       baby.jets_ntruc().push_back(0); //filled in writeMC

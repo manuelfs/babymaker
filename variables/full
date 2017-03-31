@@ -109,7 +109,7 @@ std::vector<float> jets_phi
 std::vector<float> jets_m
 std::vector<float> jets_csv
 std::vector<float> jets_csvd
-std::vector<float> jets_pt_res
+std::vector<float> jets_gen_pt
 std::vector<bool>  jets_islep
 std::vector<bool>  jets_isisr
 std::vector<int>   jets_gs_index
@@ -120,6 +120,7 @@ std::vector<int>   jets_fjet08_index
 std::vector<int>   jets_fjet12_index
 std::vector<int>   jets_fjet14_index
 std::vector<int>   jets_hflavor
+std::vector<int>   jets_pflavor
 std::vector<bool>  jets_h1
 std::vector<bool>  jets_h1d
 std::vector<bool>  jets_h2

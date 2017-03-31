@@ -97,6 +97,11 @@ int main(int argc, char *argv[]){
   if(cuts=="higlep1")  cuts = njcut+nbcut+"&& nleps==1 && Max$(leps_pt)>30";
   if(cuts=="higlep2")  cuts = njcut+zcand+"&& nleps==2 && Max$(leps_pt)>40";
 
+  if(cuts.Contains("mchi")){
+    cuts.ReplaceAll("mchi","");
+    cuts = "Sum$(mc_id==1000023&&mc_mass=="+cuts+")>0";
+  }
+
   //// RA2/b skims
   TString pass="globalTightHalo2016Filter==1&&HBHENoiseFilter==1&&HBHEIsoNoiseFilter==1&&eeBadScFilter==1";
   pass += "&&EcalDeadCellTriggerPrimitiveFilter==1&&BadChargedCandidateFilter&&BadPFMuonFilter&&NVtx>0&&JetID";

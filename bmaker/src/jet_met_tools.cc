@@ -71,12 +71,19 @@ bool jet_met_tools::jetMatched(const pat::Jet &jet, vCands objects){
 
 float jet_met_tools::getGenPt(const pat::Jet &jet, edm::Handle<edm::View <reco::GenJet> > genjets){
   if(!genjets.isValid()) return -99999.;
+  
+  float genjetpt = -99999.;
+  float mindr = 999;
   for (size_t ijet(0); ijet < genjets->size(); ijet++) {
     const reco::GenJet &genjet = (*genjets)[ijet];
     double dr(deltaR(jet, genjet));
-    if(dr < 0.2) return genjet.pt();
+    if(dr < mindr) {
+      mindr = dr;
+      genjetpt = genjet.pt();
+    }
   }
-  return -99999.;    
+  if (mindr<0.3) return genjetpt;
+  else return -99999.;    
 }
 
 bool jet_met_tools::matchesGenJet(const pat::Jet &jet, edm::Handle<edm::View <reco::GenJet> > genjets){

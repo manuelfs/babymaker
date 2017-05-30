@@ -171,7 +171,7 @@ int event_tools::type(const string &name){
     }else if(contains(name, "TTZToQQ")){ category = 1; bin = 0;
     }
   }else if(contains(name, "DYJetsToLL")){ sample = 6;
-    if(contains(name, "DYJetsToLL_M-50_Tune")){ category = 0; bin = 0;
+    if(contains(name, "DYJetsToLL_M-50_Tune") && contains(name, "madgraphMLM")){ category = 0; bin = 0;
     }else if(contains(name, "DYJetsToLL_M-50_HT")){ category = 1;
       if(contains(name, "HT-70to100")){ bin = 0;
       }else if(contains(name, "HT-100to200")){ bin = 1;
@@ -183,7 +183,16 @@ int event_tools::type(const string &name){
       }else if(contains(name, "HT-2500toInf")){ bin = 7;
       }else if(contains(name, "HT-600toInf")){ bin = 10;
       }
+    } else if(contains(name, "DYJetsToLL") && contains(name, "amcatnloFXFX")){ category = 2; 
+      if(contains(name, "M-50_Tune")){ bin = 0;
+      }else if(contains(name, "Pt-50To100")){ bin = 1;
+      }else if(contains(name, "Pt-100To250")){ bin = 2;
+      }else if(contains(name, "Pt-250To400")){ bin = 3;
+      }else if(contains(name, "Pt-400To650")){ bin = 4;
+      }else if(contains(name, "Pt-650ToInf")){ bin = 5;
+      }
     }
+
   }else if(contains(name, "QCD")){ sample = 7;
     if(contains(name, "QCD_HT")){ category = 0;
       if(contains(name, "HT50to100")){ bin = 0;

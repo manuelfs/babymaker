@@ -362,6 +362,7 @@ std::vector<int> fjets08_nconst
 ################  Truth   ##################
 int nisr_me
 float ht_isr_me
+float ptll_me
 std::vector<float> mc_pt
 std::vector<float> mc_eta
 std::vector<float> mc_phi

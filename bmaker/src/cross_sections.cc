@@ -163,7 +163,7 @@ namespace xsec{
     if (file.Contains("ST_tW_antitop_5f_NoFullyHadronicDecays_13TeV-powheg"))     xsec = 35.85*0.543;
     if (file.Contains("ST_tW_top_5f_NoFullyHadronicDecays_13TeV-powheg"))     xsec = 35.85*0.543; 
 
-    if(file.Contains("DYJetsToLL_M-10to50_TuneCUETP8M1_13TeV")) xsec = 18610*1.23;
+    if(file.Contains("DYJetsToLL_M-10to50_Tune")) xsec = 18610*1.23;
     if(file.Contains("DYJetsToLL_M-50_TuneCUETP8M1_13TeV"))     xsec = 4895*1.23;
 
     if(file.Contains("DYJetsToLL_M-50_HT-70to100"))    xsec = 175.3*1.23;
@@ -175,6 +175,12 @@ namespace xsec{
     if(file.Contains("DYJetsToLL_M-50_HT-1200to2500"))    xsec = 0.116*1.23;
     if(file.Contains("DYJetsToLL_M-50_HT-2500toInf"))    xsec = 0.002592*1.23;
     if(file.Contains("DYJetsToLL_M-50_HT-600toInf"))    xsec = 2.21*1.23;
+
+    if(file.Contains("DYJetsToLL_Pt-50To100")) xsec = 354.3;
+    if(file.Contains("DYJetsToLL_Pt-100To250")) xsec = 83.12;
+    if(file.Contains("DYJetsToLL_Pt-250To400")) xsec = 3.047;
+    if(file.Contains("DYJetsToLL_Pt-400To650")) xsec = 0.3921;
+    if(file.Contains("DYJetsToLL_Pt-650ToInf")) xsec = 0.03636;
 
     if(file.Contains("ZJetsToNuNu_HT-100To200_"))  xsec = 280.35*1.27;
     if(file.Contains("ZJetsToNuNu_HT-200To400_"))  xsec = 77.67*1.27;

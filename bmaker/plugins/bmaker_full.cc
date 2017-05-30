@@ -345,6 +345,11 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
       }
       if(baby.ht_isr_me()>600) baby.stitch_ht()=false;
     }
+    if(outname.Contains("DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX")){
+      if (baby.ptll_me()>50) {
+        baby.stitch()=false;
+      }
+    }
   } // if it is not data
          
   //////////////// Weights and systematics //////////////////
@@ -1487,7 +1492,9 @@ void bmaker_full::writeVertices(edm::Handle<reco::VertexCollection> vtx,
 }
 
 void bmaker_full::writeGenInfo(edm::Handle<LHEEventProduct> lhe_info){
-  baby.nisr_me()=0; baby.ht_isr_me()=0.; 
+  baby.nisr_me()=0; baby.ht_isr_me()=0.; baby.ptll_me()=0.;
+  float px1(0.), px2(0.), py1(0.), py2(0.);
+  unsigned nme_leps(0);
   for ( unsigned int icount = 0 ; icount < (unsigned int)lhe_info->hepeup().NUP; icount++ ) {
     unsigned int pdgid = abs(lhe_info->hepeup().IDUP[icount]);
     int status = lhe_info->hepeup().ISTUP[icount];
@@ -1499,14 +1506,26 @@ void bmaker_full::writeGenInfo(edm::Handle<LHEEventProduct> lhe_info){
     float py = (lhe_info->hepeup().PUP[icount])[1];
     float pt = sqrt(px*px+py*py);
 
+
     if(status==1 && (pdgid<6 || pdgid==21) && mom1id!=6 && mom2id!=6 && mom1id!=24 && mom2id!=24 
        && mom1id!=23 && mom2id!=23 && mom1id!=25 && mom2id!=25) {
       baby.nisr_me()++;
       baby.ht_isr_me() += pt;
     }
 
+    if(status==1 && (pdgid==11 || pdgid==13 || pdgid==15)) {
+      if (nme_leps==0){
+        px1 = px; py1 = py;
+      } else if (nme_leps==1){
+        px2 = px; py2 = py;
+      } else cout<<"Found more than two leptons in ME"<<endl;
+      nme_leps++;
+    }
   } // Loop over generator particles
-  
+  if (nme_leps==2) {
+    baby.ptll_me() = sqrt(pow(px1+px2,2)+pow(py1+py2,2));
+  }
+
   if (outname.Contains("SMS-") && outname.Contains("PUSpring16Fast")){ //Get mgluino and mlsp
     typedef std::vector<std::string>::const_iterator comments_const_iterator;
     

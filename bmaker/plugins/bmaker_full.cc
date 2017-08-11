@@ -933,7 +933,7 @@ vCands bmaker_full::writeMuons(edm::Handle<pat::MuonCollection> muons,
   baby.nmus() = 0; baby.nvmus() = 0;
 
   set<unsigned> badmu_idx, badmu_dupl_idx;
-  if (isData) {
+  if (isData && !outname.Contains("Run2017")) {
     badmu_idx = lepTool->badGlobalMuonSelector(vtx, muons, false);
     badmu_dupl_idx = lepTool->badGlobalMuonSelector(vtx, muons, true);
   }
@@ -944,7 +944,8 @@ vCands bmaker_full::writeMuons(edm::Handle<pat::MuonCollection> muons,
     //Save muons that were demoted from isPF in 8_0_26_patch1 in order to debug Giovanni badMuon flags
     bool demoted(false);
     //userInt has old value of isPFMuon()
-    if(isData && !lep.isPFMuon() && lep.userInt("muonsCleaned:oldPF")) demoted = true;
+    if(!outname.Contains("Run2017"))
+    	if(isData && !lep.isPFMuon() && lep.userInt("muonsCleaned:oldPF")) demoted = true;
 
     bool isBadMu(false), isBadDuplMu(false);
     if (badmu_idx.find(ilep)!=badmu_idx.end()) isBadMu = true;
@@ -2392,7 +2393,7 @@ void bmaker_full::beginLuminosityBlock(edm::LuminosityBlock const& iLumi, edm::E
 #ifdef POST_7_4
   if (outname.Contains("PUSpring16Fast") && outname.Contains("SMS-")){
     edm::Handle<GenLumiInfoHeader> gen_header;
-    iLumi.getByToken(tok_genlumiheader_, gen_header);  
+//    iLumi.getByToken(tok_genlumiheader_, gen_header);  
     string model = gen_header->configDescription();
     mcTool->getMassPoints(model, mprod_, mlsp_);
   }

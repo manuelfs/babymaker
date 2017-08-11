@@ -14,7 +14,7 @@ then
 	    printf "#define POST_7_4_12\n\n" > bmaker/interface/release.hh
 	fi
     else
-	printf "#define POST_7_4\n\n" > bmaker/interface/release.hh
+	printf "#define CMSSW_9_2\n\n" > bmaker/interface/release.hh
     fi
 fi
 

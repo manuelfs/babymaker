@@ -52,7 +52,8 @@ else: fastsim = False
 ## => if doJEC = False, DeepCSV discriminator will not be included
 doJEC = True
 
-if doJEC: jets_label = "updatedPatJetsTransientCorrectedUpdatedJEC"
+#if doJEC: jets_label = "updatedPatJetsTransientCorrectedUpdatedJEC"
+if doJEC: jets_label = "updatedPatJetsTransientCorrectedDeepFlavour"
 else: jets_label = "slimmedJets"
 
 # to apply JECs with txt files in babymaker, 
@@ -72,6 +73,8 @@ elif "RunIISpring16MiniAOD" in outName:
   jecLabel = 'Spring16_23Sep2016V2_MC' # for ICHEP MC against re-reco data
 elif "RunIISummer16MiniAOD" in outName:
   jecLabel = 'Summer16_23Sep2016V3_MC'
+elif "Run2017" in outName:
+  jecLabel = 'Summer16_23Sep2016HV3_DATA'
 
 # because FastSim naming for JECs variables inside db and txt files is really truly messed up...
 if fastsim: jecLabel = 'Spring16_25nsFastSimV1_MC'
@@ -185,11 +188,11 @@ if doJEC:
       jetSource = cms.InputTag('slimmedJets'),
       labelName = 'UpdatedJEC',
       jetCorrections = ('AK4PFchs', cms.vstring(jecLevels), 'None'),
-      btagDiscriminators = ["deepFlavourJetTags:probudsg", 
-                            "deepFlavourJetTags:probb", 
-                            "deepFlavourJetTags:probc", 
-                            "deepFlavourJetTags:probbb", 
-                            "deepFlavourJetTags:probcc"]
+      btagDiscriminators = ["pfDeepCSVJetTags:probudsg", 
+                            "pfDeepCSVJetTags:probb", 
+                            "pfDeepCSVJetTags:probc", 
+                            "pfDeepCSVJetTags:probbb", 
+                            "pfDeepCSVJetTags:probcc"]
     )
 
     ###### Apply new JECs to MET
@@ -200,6 +203,6 @@ if doJEC:
                                isData = isData,
     )
 
-
-process.p = cms.Path(process.baby_full)
+process.dump=cms.EDAnalyzer('EventContentAnalyzer')
+process.p = cms.Path(process.baby_full*process.dump)
 

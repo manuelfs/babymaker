@@ -2154,7 +2154,65 @@ bmaker_full::bmaker_full(const edm::ParameterSet& iConfig):
 
   trig_name = vector<TString>();
   if(outname.Contains("Run201")){ // Would like to define isData, but need iEvent?
-    if(outname.Contains("Run2016")){
+    if(outname.Contains("Run2017")){
+      trig_name.push_back("HLT_PFHT500_PFMET100_PFMHT100_IDTight_v");                  // 0 
+      trig_name.push_back("HLT_Mu15_IsoVVVL_PFHT450_PFMET50_v");                       // 1 
+      trig_name.push_back("HLT_Mu15_IsoVVVL_PFHT600_v");                               // 2
+      trig_name.push_back("HLT_Mu15_IsoVVVL_PFHT450_v");                               // 3
+      trig_name.push_back("HLT_Mu15_IsoVVVL_PFHT450_CaloBTagCSV_4p5_v");               // 4 
+      trig_name.push_back("HLT_Ele15_IsoVVVL_PFHT450_PFMET50_v");                      // 5 
+      trig_name.push_back("HLT_Ele15_IsoVVVL_PFHT600_v");                              // 6
+      trig_name.push_back("HLT_Ele15_IsoVVVL_PFHT450_v");                              // 7
+      trig_name.push_back("HLT_Ele15_IsoVVVL_PFHT450_CaloBTagCSV_4p5_v");              // 8 
+      trig_name.push_back("HLT_PFMET120_PFMHT120_IDTight_v");                          // 9
+      trig_name.push_back("HLT_PFMET120_PFMHT120_IDTight_PFHT60_v");                   // 10
+
+      trig_name.push_back("HLT_PFMET120_PFMHT120_IDTight_HFCleaned_v");                // 11
+      trig_name.push_back("HLT_PFMET120_PFMHT120_IDTight_PFHT60_HFCleaned_v");         // 12
+      trig_name.push_back("HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60_v");           // 13
+      trig_name.push_back("HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_HFCleaned_v");        // 14
+      trig_name.push_back("HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_v");                  // 15
+      trig_name.push_back("HLT_PFHT700_PFMET85_PFMHT85_IDTight_v");                    // 16
+      trig_name.push_back("HLT_PFHT800_PFMET75_PFMHT75_IDTight_v");                    // 17
+      trig_name.push_back("HLT_PFHT1050_v");                                           // 18
+      trig_name.push_back("HLT_IsoMu24_v");                                            // 19
+      trig_name.push_back("HLT_IsoMu27_v");                                            // 20
+
+      trig_name.push_back("HLT_Mu50_v");                                               // 21
+      trig_name.push_back("HLT_Mu50_IsoVVVL_PFHT450_v");                               // 22
+      trig_name.push_back("HLT_Ele35_WPTight_Gsf_v");                                  // 23
+      trig_name.push_back("HLT_Ele115_CaloIdVT_GsfTrkIdT_v");                          // 24
+      trig_name.push_back("HLT_Ele300_CaloIdVT_GsfTrkIdT_v");                          // 25
+      trig_name.push_back("HLT_Ele27_WPTight_Gsf_v");				       // 26
+      trig_name.push_back("HLT_Ele28_eta2p1_WPTight_Gsf_HT150_v");                     // 27
+      trig_name.push_back("HLT_Ele30_eta2p1_WPTight_Gsf_CentralPFJet35_EleCleaned_v"); // 28
+      trig_name.push_back("HLT_Ele38_WPTight_Gsf_v");                                  // 29
+      trig_name.push_back("HLT_Ele50_IsoVVVL_PFHT450_v");                              // 30
+
+      trig_name.push_back("HLT_Photon200_v");                                          // 31
+      trig_name.push_back("HLT_Photon300_NoHE_v");				       // 32
+      trig_name.push_back("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8_v");            // 33
+      trig_name.push_back("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v");              // 34
+      trig_name.push_back("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v");                 // 35
+      trig_name.push_back("HLT_DoubleEle33_CaloIdL_MW_v");                             // 36
+      trig_name.push_back("HLT_DoubleEle8_CaloIdM_TrackIdM_Mass8_DZ_PFHT350_v");       // 37
+      trig_name.push_back("HLT_DoubleEle8_CaloIdM_TrackIdM_Mass8_PFHT350_v");          // 38 
+      trig_name.push_back("HLT_PFHT180_v");                                            // 39
+      trig_name.push_back("HLT_PFHT250_v");                                            // 40
+
+      trig_name.push_back("HLT_PFHT350_v");                                            // 41
+      trig_name.push_back("HLT_PFHT510_v");                                            // 42
+      trig_name.push_back("HLT_PFHT680_v");                                            // 43 
+      trig_name.push_back("HLT_PFHT890_v");                                            // 44
+      trig_name.push_back("HLT_PFJet40_v");                                            // 45
+      trig_name.push_back("HLT_PFJet140_v");                                           // 46
+      trig_name.push_back("HLT_PFJet260_v");                                           // 47
+      trig_name.push_back("HLT_PFJet500_v");                                           // 48
+      trig_name.push_back("HLT_AK8PFJet500_v");                                        // 49
+      trig_name.push_back("HLT_AK8PFJet360_TrimMass30_v");			       // 50
+
+      trig_name.push_back("HLT_PFMET250_HBHECleaned_v");			       // 51
+    } else if(outname.Contains("Run2016")){
       trig_name.push_back("HLT_PFHT300_PFMET100_v");                            // 0 
       trig_name.push_back("HLT_Mu15_IsoVVVL_PFHT350_PFMET50_v");                // 1 
       trig_name.push_back("HLT_Mu15_IsoVVVL_PFHT600_v");                        // 2

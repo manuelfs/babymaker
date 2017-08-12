@@ -50,7 +50,7 @@ else: fastsim = False
     
 ## JECs must be undone and reapplied when rerunning b-tagging
 ## => if doJEC = False, DeepCSV discriminator will not be included
-doJEC = True
+doJEC = False
 
 #if doJEC: jets_label = "updatedPatJetsTransientCorrectedUpdatedJEC"
 if doJEC: jets_label = "updatedPatJetsTransientCorrectedDeepFlavour"
@@ -74,7 +74,7 @@ elif "RunIISpring16MiniAOD" in outName:
 elif "RunIISummer16MiniAOD" in outName:
   jecLabel = 'Summer16_23Sep2016V3_MC'
 elif "Run2017" in outName:
-  jecLabel = 'Summer16_23Sep2016HV3_DATA'
+  jecLabel = 'Summer16_23Sep2016GV3_DATA'
 
 # because FastSim naming for JECs variables inside db and txt files is really truly messed up...
 if fastsim: jecLabel = 'Spring16_25nsFastSimV1_MC'
@@ -86,7 +86,7 @@ if fastsim:
   else: jecBabyLabel = 'onthefly_Spring16_FastSimV1_MC'
 
 
-if "Run2016" in outName:
+if "Run201" in outName:
     isData = True
     # These only used for the official application of JECs
     globalTag = "80X_dataRun2_2016SeptRepro_v6"
@@ -204,5 +204,5 @@ if doJEC:
     )
 
 process.dump=cms.EDAnalyzer('EventContentAnalyzer')
-process.p = cms.Path(process.baby_full*process.dump)
+process.p = cms.Path(process.baby_full)
 

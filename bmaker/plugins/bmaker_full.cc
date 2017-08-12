@@ -106,10 +106,8 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   sig_mus = writeMuons(allmuons, pfcands, vtx, veto_mus, all_mus, rhoEventCentral);
   edm::Handle<pat::ElectronCollection> allelectrons;
   iEvent.getByToken(tok_electrons_, allelectrons);
-  edm::Handle<pat::ElectronCollection> allelectrons_pre_gs;
-  iEvent.getByToken(tok_electrons_before_gsfix_, allelectrons_pre_gs);
  
-  sig_els = writeElectrons(allelectrons, allelectrons_pre_gs, pfcands, vtx, veto_els, all_els, rhoEventCentral);
+  sig_els = writeElectrons(allelectrons, pfcands, vtx, veto_els, all_els, rhoEventCentral);
   
   writeDiLep(sig_mus, sig_els, veto_mus, veto_els);
 
@@ -136,9 +134,7 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   iEvent.getByToken(tok_photons_, allphotons);
   edm::Handle<vector<reco::Conversion> > conversions;
   iEvent.getByToken(tok_reducedEgamma_conver_, conversions);
-  edm::Handle<pat::PhotonCollection> allphotons_pre_gs;
-  iEvent.getByToken(tok_photons_before_gsfix_, allphotons_pre_gs);
-  photons = writePhotons(allphotons, allphotons_pre_gs, allelectrons, conversions, beamspot, *rhoEvent_h);
+  photons = writePhotons(allphotons, allelectrons, conversions, beamspot, *rhoEvent_h);
 
   //////////////////////////// MET/JETs with JECs ///////////////////////////
   if (debug) cout<<"INFO: Applying JECs..."<<endl;
@@ -152,25 +148,21 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   if (debug) cout<<"INFO: Writing MET..."<<endl;
   edm::Handle<pat::METCollection> mets;
   edm::Handle<pat::METCollection> mets_nohf;
-  edm::Handle<pat::METCollection> mets_uncorr;
-  edm::Handle<pat::METCollection> mets_egclean;
-  edm::Handle<pat::METCollection> mets_muclean; 
+  edm::Handle<pat::METCollection> mets_puppi;
 
   iEvent.getByToken(tok_met_noHF_, mets_nohf);
   if (!isData) { 
     iEvent.getByToken(tok_met_, mets); // using MuEGClean for default, for now
   } else {
-    iEvent.getByToken(tok_met_MuEGClean_, mets);
-    iEvent.getByToken(tok_met_uncorr_, mets_uncorr);
-    iEvent.getByToken(tok_met_EGClean_, mets_egclean);
-    iEvent.getByToken(tok_met_, mets_muclean); //The collection called "slimmedMETs" is corrected for muons but not EG 
+    iEvent.getByToken(tok_met_Puppi_, mets_puppi);
+    iEvent.getByToken(tok_met_, mets); //The collection called "slimmedMETs" is corrected for muons but not EG 
   }
 
   //Saving these lines here in case we decide to switch to a different default
   // edm::Handle<pat::METCollection> mets_muegclean;
-  //iEvent.getByToken(tok_met_MuEGClean_, mets_muegclean);
 
-  writeMET(mets, mets_nohf, mets_uncorr,  mets_egclean,  mets_muclean);
+
+  writeMET(mets, mets_nohf, mets_puppi);
 
   /// isolated tracks need to be after MET calculation and before jets cleaning
   if (debug) cout<<"INFO: Calculating track veto..."<<endl;
@@ -248,19 +240,19 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 
   ///////////////////// Filters ///////////////////////
   if (debug) cout<<"INFO: Writing filters..."<<endl; 
-  if(!isFastSim){
-    edm::Handle<bool> ifilterbadChCand;
-    iEvent.getByToken(tok_badChCandFilter_, ifilterbadChCand);
-    baby.pass_badchhad() = (*ifilterbadChCand);
+  // if(!isFastSim){
+  //   edm::Handle<bool> ifilterbadChCand;
+  //   iEvent.getByToken(tok_badChCandFilter_, ifilterbadChCand);
+  //   baby.pass_badchhad() = (*ifilterbadChCand);
 
-    edm::Handle<bool> ifilterbadPFMuon;
-    iEvent.getByToken(tok_badPFMuonFilter_, ifilterbadPFMuon);
-    baby.pass_badpfmu() = (*ifilterbadPFMuon);
-  }
-  else{ 
+  //   edm::Handle<bool> ifilterbadPFMuon;
+  //   iEvent.getByToken(tok_badPFMuonFilter_, ifilterbadPFMuon);
+  //   baby.pass_badpfmu() = (*ifilterbadPFMuon);
+  // }
+  // else{ 
     baby.pass_badchhad()=true;
     baby.pass_badpfmu()=true;
-  }
+  // }
   edm::Handle<edm::TriggerResults> filterBits;
   iEvent.getByToken(tok_trigResults_pat_,filterBits);    
   //Giovanni filters in reminiaod only available in "PAT"
@@ -281,7 +273,7 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   // Requires having called writeMuons and writeElectrons for truth-matching
   if(triggerBits.isValid() && triggerPrescales.isValid()){
     const edm::TriggerNames &names = iEvent.triggerNames(*triggerBits);
-    writeHLTObjects(names, triggerObjects, all_mus, all_els, photons);
+    writeHLTObjects(names, triggerObjects, all_mus, all_els, photons, iEvent);
   }
 
   ////////////////// MC particles and Truth-matching //////////////////
@@ -380,7 +372,7 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 */
 
 // Requires having called jetTool->getJetCorrections(alljets, rhoEvent_) beforehand
-void bmaker_full::writeMET(edm::Handle<pat::METCollection> mets, edm::Handle<pat::METCollection> mets_nohf, edm::Handle<pat::METCollection> mets_uncorr, edm::Handle<pat::METCollection> mets_egclean, edm::Handle<pat::METCollection> mets_muclean){
+void bmaker_full::writeMET(edm::Handle<pat::METCollection> mets, edm::Handle<pat::METCollection> mets_nohf, edm::Handle<pat::METCollection> mets_puppi){
   jetTool->getMETWithJEC(mets, baby.met(), baby.met_phi(), kSysLast);
   jetTool->getMETRaw(mets, baby.met_raw(), baby.met_raw_phi());
 
@@ -390,12 +382,8 @@ void bmaker_full::writeMET(edm::Handle<pat::METCollection> mets, edm::Handle<pat
   // jetTool->getMETWithJEC(mets_muclean, baby.met_muclean(), baby.met_phi_muclean(), kSysLast);
 
   if (isData) {
-    baby.met_uncorr() = mets_uncorr->at(0).pt();
-    baby.met_phi_uncorr() = mets_uncorr->at(0).phi();
-    baby.met_egclean() = mets_egclean->at(0).pt();
-    baby.met_phi_egclean() = mets_egclean->at(0).phi();
-    baby.met_muclean() = mets_muclean->at(0).pt();
-    baby.met_phi_muclean() = mets_muclean->at(0).phi();
+    baby.met_puppi() = mets_puppi->at(0).pt();
+    baby.met_phi_puppi() = mets_puppi->at(0).phi();
   }
 
   baby.met_mini() = mets->at(0).pt();
@@ -1024,7 +1012,6 @@ vCands bmaker_full::writeMuons(edm::Handle<pat::MuonCollection> muons,
 
 
 vCands bmaker_full::writeElectrons(edm::Handle<pat::ElectronCollection> electrons, 
-				   edm::Handle<pat::ElectronCollection> electrons_pre_gs_fix, 
                                    edm::Handle<pat::PackedCandidateCollection> pfcands, 
                                    edm::Handle<reco::VertexCollection> vtx,
                                    vCands &veto_els, vCands &all_els, double rhoEventCentral){
@@ -1041,11 +1028,6 @@ vCands bmaker_full::writeElectrons(edm::Handle<pat::ElectronCollection> electron
     lepTool->vertexElectron(lep, vtx, dz, d0); // Calculating dz and d0
 
     baby.els_pt().push_back(lep.pt());
-    if (isData && lep.userInt("hasGainSwitchFlag") == 1) {
-      const pat::Electron &lep_pre_gs = (*electrons_pre_gs_fix)[ilep];
-      baby.els_dpt_gs().push_back(lep.pt()-lep_pre_gs.pt());
-    }
-    else baby.els_dpt_gs().push_back(0.);
 
     baby.els_scpt().push_back(lep.superCluster()->energy()*sin(lep.superClusterPosition().theta()));
     baby.els_sceta().push_back(lep.superCluster()->eta());
@@ -1214,7 +1196,6 @@ void bmaker_full::setElMuMass(vCands leptons1, vCands leptons2, baby_float ll_m,
 
 
 vCands bmaker_full::writePhotons(edm::Handle<pat::PhotonCollection> allphotons,
-				 edm::Handle<pat::PhotonCollection> allphotons_pre_gs,
                                  edm::Handle<std::vector<pat::Electron> > &electrons,
                                  edm::Handle<reco::ConversionCollection> &conversions,
                                  edm::Handle<reco::BeamSpot> &beamspot, double rho){
@@ -1226,11 +1207,6 @@ vCands bmaker_full::writePhotons(edm::Handle<pat::PhotonCollection> allphotons,
 
     if(photon.pt() < 50) continue;
     if(!photonTool->idPhoton(photon, electrons, conversions, beamspot, rho)) continue;
-    if(isData && photon.userInt("hasGainSwitchFlag") == 1){
-      const pat::Photon &photon_pre_gs = (*allphotons_pre_gs)[ind];
-      baby.ph_dpt_gs().push_back(photon.pt()-photon_pre_gs.pt());
-    }
-    else baby.ph_dpt_gs().push_back(0.);
     if(photon.pt() > photonTool->PhotonPtCut) baby.nph()++;
     baby.ph_pt().push_back(photon.pt());
     baby.ph_eta().push_back(photon.eta());
@@ -1295,11 +1271,14 @@ bool bmaker_full::writeTriggers(const edm::TriggerNames &names,
 
 void bmaker_full::writeHLTObjects(const edm::TriggerNames &names, 
                                   edm::Handle<pat::TriggerObjectStandAloneCollection> triggerObjects, 
-                                  vCands &all_mus, vCands &all_els, vCands &photons){
+                                  vCands &all_mus, vCands &all_els, vCands &photons, const edm::Event& iEvent){
   baby.nmus_vvvl() = 0; baby.nmus_isomu18() = 0; 
   baby.nels_vvvl() = 0; baby.nels_ele23() = 0; 
   const float relptThreshold(1), drThreshold(0.3);      
+  edm::Handle<edm::TriggerResults> triggerBits;
+  iEvent.getByToken(tok_trigResults_hlt_,triggerBits);  
   for (pat::TriggerObjectStandAlone obj : *triggerObjects) {
+    obj.unpackFilterLabels(iEvent, *triggerBits);
     obj.unpackPathNames(names);
     TString name(obj.collection());
     float objpt(obj.pt());
@@ -2102,24 +2081,20 @@ bmaker_full::bmaker_full(const edm::ParameterSet& iConfig):
   tok_rhoFastJet_centralNeutral_(consumes<double>(edm::InputTag("fixedGridRhoFastjetCentralNeutral"))),
   tok_muons_(consumes<pat::MuonCollection>(edm::InputTag("slimmedMuons"))),
   tok_electrons_(consumes<pat::ElectronCollection>(edm::InputTag("slimmedElectrons"))),
-  tok_electrons_before_gsfix_(consumes<pat::ElectronCollection>(edm::InputTag("slimmedElectronsBeforeGSFix"))),
   tok_rhoFastJet_all_(consumes<double>(edm::InputTag("fixedGridRhoFastjetAll"))),
   tok_offBeamSpot_(consumes<reco::BeamSpot>(edm::InputTag("offlineBeamSpot"))),
   tok_photons_(consumes<pat::PhotonCollection>(edm::InputTag("slimmedPhotons"))),
-  tok_photons_before_gsfix_(consumes<pat::PhotonCollection>(edm::InputTag("slimmedPhotonsBeforeGSFix"))),
   tok_reducedEgamma_conver_(consumes<vector<reco::Conversion> >(edm::InputTag("reducedEgamma","reducedConversions"))),
   tok_jets_(consumes<pat::JetCollection>(jets_label)),
   tok_genJets_(consumes<edm::View<reco::GenJet> >(edm::InputTag("slimmedGenJets"))),
   tok_met_(consumes<pat::METCollection>(met_label)),
   tok_met_noHF_(consumes<pat::METCollection>(met_nohf_label)),
-  tok_met_uncorr_(consumes<pat::METCollection>(edm::InputTag("slimmedMETsUncorrected"))),
-  tok_met_MuEGClean_(consumes<pat::METCollection>(edm::InputTag("slimmedMETsMuEGClean"))),
-  tok_met_EGClean_(consumes<pat::METCollection>(edm::InputTag("slimmedMETsEGClean"))),
+  tok_met_Puppi_(consumes<pat::METCollection>(edm::InputTag("slimmedMETsPuppi"))),
   tok_HBHENoiseFilter_(consumes<bool>(edm::InputTag("HBHENoiseFilterResultProducer","HBHENoiseFilterResult"))),
   tok_HBHEIsoNoiseFilter_(consumes<bool>(edm::InputTag("HBHENoiseFilterResultProducer","HBHEIsoNoiseFilterResult"))),
   tok_trigResults_reco_(consumes<edm::TriggerResults>(edm::InputTag("TriggerResults","","RECO"))),
   tok_trigResults_pat_(consumes<edm::TriggerResults>(edm::InputTag("TriggerResults","","PAT"))),
-  tok_selectedPatTrig_(consumes<pat::TriggerObjectStandAloneCollection>(edm::InputTag("selectedPatTrigger"))),
+  tok_selectedPatTrig_(consumes<pat::TriggerObjectStandAloneCollection>(edm::InputTag("slimmedPatTrigger"))),
   tok_pruneGenPart_(consumes<reco::GenParticleCollection>(edm::InputTag("prunedGenParticles"))),
   tok_extLHEProducer_(consumes<LHEEventProduct>(edm::InputTag("externalLHEProducer"))),
   tok_source_(consumes<LHEEventProduct>(edm::InputTag("source"))),

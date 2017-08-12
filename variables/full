@@ -43,12 +43,8 @@ bool jetmismeas
 ###################   MET   ##################
 float met
 float met_phi
-float met_uncorr
-float met_phi_uncorr
-float met_egclean
-float met_phi_egclean
-float met_muclean
-float met_phi_muclean
+float met_puppi
+float met_phi_puppi
 float met_calo
 float met_calo_phi
 float met_raw
@@ -190,7 +186,6 @@ std::vector<float> mus_had_e
 int nels
 int nvels
 std::vector<float> els_pt
-std::vector<float> els_dpt_gs
 std::vector<float> els_eta
 std::vector<float> els_scpt
 std::vector<float> els_sceta
@@ -263,7 +258,6 @@ float mumuv_w
 ##################   Photons   ###################
 int nph
 std::vector<float> ph_pt
-std::vector<float> ph_dpt_gs
 std::vector<float> ph_eta
 std::vector<float> ph_phi
 std::vector<bool>  ph_tm

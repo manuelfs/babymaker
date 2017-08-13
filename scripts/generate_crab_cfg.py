@@ -49,14 +49,29 @@ def getNumberOfEvents(dataset):
       sumevents+=idata.get('result').get('value')
     return sumevents
 
-doMC = False 
-doData = False 
+doMC = True 
+doData = True 
+doData2016 = False 
 doFastSimScans = False
 doMiscellaneous = False
 
 datasets = [[]]
 
 if doData:
+    datasets.append(["/MET/Run2017B-PromptReco-v1/MINIAOD"])
+    datasets.append(["/MET/Run2017B-PromptReco-v2/MINIAOD"])
+    datasets.append(["/MET/Run2017C-PromptReco-v1/MINIAOD"])
+    datasets.append(["/SingleElectron/Run2017B-PromptReco-v1/MINIAOD"])
+    datasets.append(["/SingleElectron/Run2017B-PromptReco-v2/MINIAOD"])
+    datasets.append(["/SingleElectron/Run2017C-PromptReco-v1/MINIAOD"])
+    datasets.append(["/SingleMuon/Run2017B-PromptReco-v1/MINIAOD"])
+    datasets.append(["/SingleMuon/Run2017B-PromptReco-v2/MINIAOD"])
+    datasets.append(["/SingleMuon/Run2017C-PromptReco-v1/MINIAOD"])
+    datasets.append(["/JetHT/Run2017B-PromptReco-v1/MINIAOD"])
+    datasets.append(["/JetHT/Run2017B-PromptReco-v2/MINIAOD"])
+    datasets.append(["/JetHT/Run2017C-PromptReco-v1/MINIAOD"])
+
+if doData2016:
     datasets.append(["/MET/Run2016B-03Feb2017_ver2-v2/MINIAOD"])
     datasets.append(["/MET/Run2016C-03Feb2017-v1/MINIAOD"])
     datasets.append(["/MET/Run2016D-03Feb2017-v1/MINIAOD"])

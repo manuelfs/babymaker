@@ -899,6 +899,14 @@ jet_met_tools::jet_met_tools(TString ijecName, bool doSys, bool fastSim, TString
     DeepCSVMedium = 0.6324;
     DeepCSVTight  = 0.8958;
   }
+  else if(cmssw.Contains("CMSSW_9_2")){
+    CSVLoose  = 0.5426;
+    CSVMedium = 0.8484;
+    CSVTight  = 0.9535;
+    DeepCSVLoose  = 0.2219;
+    DeepCSVMedium = 0.6324;
+    DeepCSVTight  = 0.8958;
+  }
 
   // only add b-tagging weights if requested
   string scaleFactorFile(getenv("CMSSW_BASE"));

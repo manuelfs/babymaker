@@ -15,7 +15,8 @@
 #include "DataFormats/PatCandidates/interface/Electron.h"
 #include "DataFormats/PatCandidates/interface/PackedCandidate.h"
 #include "DataFormats/MuonReco/interface/Muon.h"
-
+#include "DataFormats/PatCandidates/interface/Lepton.h"
+#include "DataFormats/PatCandidates/interface/PFIsolation.h"
 #include "babymaker/bmaker/interface/utilities.hh"
 
 class lepton_tools{
@@ -58,6 +59,8 @@ public:
   bool vertexMuon(const pat::Muon &lep, edm::Handle<reco::VertexCollection> vtx, double &dz, double &d0);
   double getEffAreaMuon(double eta);
   double getRelIsolation(const pat::Muon &lep, double rho);
+//  double getMinIsolation(const pat::PFIsolation &lepiso, double rho) const;
+//  double getMinIsolation(const reco::Candidate* lep, double rho);
 
   bool isVetoElectron(const pat::Electron &lep, edm::Handle<reco::VertexCollection> vtx, double lepIso);
   bool isSignalElectron(const pat::Electron &lep, edm::Handle<reco::VertexCollection> vtx, double lepIso);
@@ -65,6 +68,7 @@ public:
   bool vertexElectron(const pat::Electron &lep, edm::Handle<reco::VertexCollection> vtx, double &dz, double &d0);
   double getEffAreaElectron(double eta);
   double getRelIsolation(const pat::Electron &lep, double rho);
+//  double getMinIsolation(const pat::PFIsolation &lepiso, double rho);
 
   static std::pair<double, double> getScaleFactor(const reco::Candidate &cand);
   static std::pair<double, double> getScaleFactor(const vCands &sig_leps);

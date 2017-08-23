@@ -21,6 +21,8 @@
 // User include files
 #include "babymaker/bmaker/interface/lepton_tools.hh"
 
+#include "DataFormats/PatCandidates/interface/PFIsolation.h"
+
 using namespace std;
 using namespace utilities;
 
@@ -264,6 +266,14 @@ double lepton_tools::getRelIsolation(const pat::Muon &lep, double rho){
   return (ch_iso + neu_iso) / lep.pt();
 }
 
+/*
+double lepton_tools::getMinIsolation(const reco::Candidate* lep, double rho){
+  double ch_iso(lep->miniPFIsolation()->chargedHadronIso());
+  double neu_iso(lep->miniPFIsolation()->neutralHadronIso() + lep->miniPFIsolation()->photonIso());
+
+  return (ch_iso + neu_iso);
+}
+*/
 //////////////////// Electrons
 bool lepton_tools::isSignalElectron(const pat::Electron &lep, edm::Handle<reco::VertexCollection> vtx, double lepIso){
   // pT, eta cuts
@@ -397,7 +407,13 @@ double lepton_tools::getRelIsolation(const pat::Electron &lep, double rho){
 
   return (ch_iso + neu_iso) / lep.pt();
 }
-
+/*
+double lepton_tools::getMinIsolation(const pat::PFIsolation &lepiso, double rho) const{
+  double ch_iso(lepiso.chargedHadronIso());
+  double neu_iso(lepiso.neutralHadronIso() + lepiso.photonIso());
+  return (ch_iso+neu_iso);
+}
+*/
 pair<double, double> lepton_tools::getScaleFactor(const reco::Candidate &cand){
   if(const pat::Electron * ele_ptr = dynamic_cast<const pat::Electron*>(&cand)){
     return getScaleFactor(*ele_ptr);

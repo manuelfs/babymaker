@@ -29,6 +29,8 @@
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "DataFormats/TrackReco/interface/Track.h"
 
+#include "DataFormats/PatCandidates/interface/PFIsolation.h"
+
 // ROOT include files
 #include "TFile.h"
 #include "TROOT.h"
@@ -928,7 +930,6 @@ vCands bmaker_full::writeMuons(edm::Handle<pat::MuonCollection> muons,
 
   for (unsigned ilep(0); ilep < muons->size(); ilep++) {
     const pat::Muon &lep = (*muons)[ilep];    
-
     //Save muons that were demoted from isPF in 8_0_26_patch1 in order to debug Giovanni badMuon flags
     bool demoted(false);
     //userInt has old value of isPFMuon()
@@ -952,6 +953,11 @@ vCands bmaker_full::writeMuons(edm::Handle<pat::MuonCollection> muons,
     // Storing leptons that pass all veto cuts except for iso
     bool save_mu = lepTool->isVetoMuon(lep, vtx, -99.) || isBadMu || isBadDuplMu || isBadTrackerMuon || demoted;
     if(!save_mu) continue;
+
+//    double lep_iso(lepTool->getMinIsolation(dynamic_cast<const reco::Candidate *>(&lep), rhoEventCentral));
+//    double lep_iso(lepTool->getMinIsolation(lepiso, rhoEventCentral));
+//    const pat::PFIsolation lepiso = lep.miniPFIsolation();
+//    double lep_iso = lepiso.chargedHadronIso() + lepiso.neutralHadronIso() + lepiso.photonIso();
 
     double lep_iso(lepTool->getPFIsolation(pfcands, dynamic_cast<const reco::Candidate *>(&lep), 0.05, 0.2, 10., rhoEventCentral, false));
     double lep_reliso(lepTool->getRelIsolation(lep, rhoEventCentral));
@@ -1021,6 +1027,11 @@ vCands bmaker_full::writeElectrons(edm::Handle<pat::ElectronCollection> electron
   for (size_t ilep(0); ilep < electrons->size(); ilep++) {
     const pat::Electron &lep = (*electrons)[ilep];    
     if(!lepTool->isVetoElectron(lep, vtx, -99.)) continue; // Storing leptons that pass all veto cuts except for iso
+
+//    double lep_iso(lepTool->getMinIsolation(dynamic_cast<const reco::Candidate *>(&lep), rhoEventCentral));
+//    double lep_iso(lepTool->getMinIsolation(lepiso, rhoEventCentral));
+//    const PFIsolation lepiso = lep.miniPFIsolation();
+//    const double lep_iso = lepiso.chargedHadronIso() + lepiso.neutralHadronIso() + lepiso.photonIso();
 
     double lep_iso(lepTool->getPFIsolation(pfcands, dynamic_cast<const reco::Candidate *>(&lep), 0.05, 0.2, 10., rhoEventCentral, false));
     double lep_reliso(lepTool->getRelIsolation(lep, rhoEventCentral));
@@ -1236,22 +1247,16 @@ bool bmaker_full::writeTriggers(const edm::TriggerNames &names,
     }
   }
   // OR-ing triggers used in RA4
-  vector<TString> trigs_ra4({"HLT_PFMET100_PFMHT100_IDTight_v", "HLT_PFMETNoMu100_PFMHTNoMu100_IDTight_v",
-	"HLT_PFMET110_PFMHT110_IDTight_v", "HLT_PFMETNoMu110_PFMHTNoMu110_IDTight_v",
-	"HLT_PFMET120_PFMHT120_IDTight_v", "HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_v",
-	"HLT_Mu15_IsoVVVL_PFHT350_v", "HLT_Mu15_IsoVVVL_PFHT400_v", "HLT_Mu50_IsoVVVL_PFHT400_v", 
-	"HLT_Ele15_IsoVVVL_PFHT350_v", "HLT_Ele15_IsoVVVL_PFHT400_v", "HLT_Ele50_IsoVVVL_PFHT400_v", 
-	"HLT_IsoMu22_eta2p1_v", "HLT_IsoMu24_v", "HLT_IsoTkMu24_v", "HLT_Mu50_v",
-	"HLT_Ele25_eta2p1_WPTight_Gsf_v", "HLT_Ele27_eta2p1_WPLoose_Gsf_v", "HLT_Ele27_WPTight_Gsf_v", 
-	"HLT_Ele105_CaloIdVT_GsfTrkIdT_v", "HLT_Ele115_CaloIdVT_GsfTrkIdT_v"});
-  vector<TString> trigs_met({"HLT_PFMET100_PFMHT100_IDTight_v", "HLT_PFMETNoMu100_PFMHTNoMu100_IDTight_v",
-	"HLT_PFMET110_PFMHT110_IDTight_v", "HLT_PFMETNoMu110_PFMHTNoMu110_IDTight_v",
-	"HLT_PFMET120_PFMHT120_IDTight_v", "HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_v"});
+  vector<TString> trigs_ra4({"HLT_PFHT500_PFMET100_PFMHT100_IDTight_v","HLT_Mu15_IsoVVVL_PFHT450_v",
+			     "HLT_Ele15_IsoVVVL_PFHT450_v","HLT_PFMET120_PFMHT120_IDTight_v",
+                             "HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_v","HLT_IsoMu24_v","HLT_Mu50_v",
+                             "HLT_Ele115_CaloIdVT_GsfTrkIdT_v","HLT_Ele27_WPTight_Gsf_v",
+                             "HLT_Ele28_eta2p1_WPTight_Gsf_HT150_v"});
+  vector<TString> trigs_met({"HLT_PFHT500_PFMET100_PFMHT100_IDTight_v","HLT_PFMET120_PFMHT120_IDTight_v",
+		             "HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_v"});
   vector<TString> trigs_vvvl({"HLT_Mu15_IsoVVVL_PFHT350_v", "HLT_Mu15_IsoVVVL_PFHT400_v", "HLT_Mu50_IsoVVVL_PFHT400_v", 
   "HLT_Ele15_IsoVVVL_PFHT350_v", "HLT_Ele15_IsoVVVL_PFHT400_v", "HLT_Ele50_IsoVVVL_PFHT400_v"});
-  vector<TString> trigs_lep({"HLT_IsoMu22_eta2p1_v", "HLT_IsoMu24_v", "HLT_Mu50_v",
-  "HLT_Ele25_eta2p1_WPTight_Gsf_v", "HLT_Ele27_eta2p1_WPLoose_Gsf_v", "HLT_Ele105_CaloIdVT_GsfTrkIdT_v",
-  "HLT_Ele115_CaloIdVT_GsfTrkIdT_v"});
+  vector<TString> trigs_lep({"HLT_IsoMu24_v","HLT_Mu50_v","HLT_Ele115_CaloIdVT_GsfTrkIdT_v","HLT_Ele28_eta2p1_WPTight_Gsf_HT150_v"});
   baby.trig_ra4() = false;
   baby.trig_met() = false;
   baby.trig_vvvl() = false;
@@ -1394,7 +1399,7 @@ void bmaker_full::writeFilters(const edm::TriggerNames &fnames,
     if (name=="Flag_goodVertices") baby.pass_goodv() = pass;
     //else if (name=="Flag_CSCTightHaloFilter") baby.pass_cschalo() = pass; // Requires reading it from txt file
     //else if (name=="Flag_CSCTightHalo2015Filter") baby.pass_cschalo() = pass; 
-    else if (name=="Flag_globalTightHalo2016Filter")  baby.pass_cschalo() = pass; //recommendation since apr 27, updated nov 8
+    else if (name=="Flag_globalSuperTightHalo2016Filter")  baby.pass_cschalo() = pass; //recommendation since apr 27, updated nov 8
     else if (name=="Flag_eeBadScFilter") baby.pass_eebadsc() = pass;
     else if (name=="Flag_EcalDeadCellTriggerPrimitiveFilter") baby.pass_ecaldeadcell() = pass;
     else if (name=="Flag_HBHENoiseFilter") baby.pass_hbhe() = pass; 

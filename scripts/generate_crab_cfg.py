@@ -49,7 +49,7 @@ def getNumberOfEvents(dataset):
       sumevents+=idata.get('result').get('value')
     return sumevents
 
-doMC = True 
+doMC = False 
 doData = True 
 doData2016 = False 
 doFastSimScans = False
@@ -61,15 +61,34 @@ if doData:
     datasets.append(["/MET/Run2017B-PromptReco-v1/MINIAOD"])
     datasets.append(["/MET/Run2017B-PromptReco-v2/MINIAOD"])
     datasets.append(["/MET/Run2017C-PromptReco-v1/MINIAOD"])
+    datasets.append(["/MET/Run2017C-PromptReco-v2/MINIAOD"])
+    datasets.append(["/MET/Run2017C-PromptReco-v3/MINIAOD"])
+    datasets.append(["/MET/Run2017D-PromptReco-v1/MINIAOD"])
+    #datasets.append(["/MET/Run2017E-PromptReco-v1/MINIAOD"])
+
     datasets.append(["/SingleElectron/Run2017B-PromptReco-v1/MINIAOD"])
     datasets.append(["/SingleElectron/Run2017B-PromptReco-v2/MINIAOD"])
     datasets.append(["/SingleElectron/Run2017C-PromptReco-v1/MINIAOD"])
+    datasets.append(["/SingleElectron/Run2017C-PromptReco-v2/MINIAOD"])
+    datasets.append(["/SingleElectron/Run2017C-PromptReco-v3/MINIAOD"])
+    datasets.append(["/SingleElectron/Run2017D-PromptReco-v1/MINIAOD"])
+    datasets.append(["/SingleElectron/Run2017E-PromptReco-v1/MINIAOD"])
+
     datasets.append(["/SingleMuon/Run2017B-PromptReco-v1/MINIAOD"])
     datasets.append(["/SingleMuon/Run2017B-PromptReco-v2/MINIAOD"])
     datasets.append(["/SingleMuon/Run2017C-PromptReco-v1/MINIAOD"])
+    datasets.append(["/SingleMuon/Run2017C-PromptReco-v2/MINIAOD"])
+    datasets.append(["/SingleMuon/Run2017C-PromptReco-v3/MINIAOD"])
+    datasets.append(["/SingleMuon/Run2017D-PromptReco-v1/MINIAOD"])
+    datasets.append(["/SingleMuon/Run2017E-PromptReco-v1/MINIAOD"])
+
     datasets.append(["/JetHT/Run2017B-PromptReco-v1/MINIAOD"])
     datasets.append(["/JetHT/Run2017B-PromptReco-v2/MINIAOD"])
     datasets.append(["/JetHT/Run2017C-PromptReco-v1/MINIAOD"])
+    datasets.append(["/JetHT/Run2017C-PromptReco-v2/MINIAOD"])
+    datasets.append(["/JetHT/Run2017C-PromptReco-v3/MINIAOD"])
+    datasets.append(["/JetHT/Run2017D-PromptReco-v1/MINIAOD"])
+    datasets.append(["/JetHT/Run2017E-PromptReco-v1/MINIAOD"])
 
 if doData2016:
     datasets.append(["/MET/Run2016B-03Feb2017_ver2-v2/MINIAOD"])

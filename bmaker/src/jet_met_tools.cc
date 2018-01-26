@@ -225,14 +225,8 @@ void jet_met_tools::setJetUncertainties(edm::Handle<edm::View <reco::GenJet> > g
 }
 
 void jet_met_tools::getMETRaw(edm::Handle<pat::METCollection> mets, float &metRaw, float &metRawPhi){
-#ifdef PRE_7_4_12
-  metRaw = mets->at(0).uncorrectedPt();
-  metRawPhi = mets->at(0).uncorrectedPhi();
-#else
   metRaw = mets->at(0).uncorPt();
   metRawPhi = mets->at(0).uncorPhi();
-#endif
-
 }
 
 void jet_met_tools::getMETWithJEC(edm::Handle<pat::METCollection> mets, float &met, float &metPhi, unsigned isys){

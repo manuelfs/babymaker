@@ -35,10 +35,10 @@ automatically generates the tree structure (see below), and then issues `scram b
 in the `babymaker` folder. 
 
 #### CMSSW 9 Update
-Currently, the code can only be compiled (not run yet). To set this up, issue the following commands on lxplus:
+Setup for running on 2017 re-reco data with tag 17Nov2017:
 
-    cmsrel CMSSW_9_2_7_patch1
-    cd CMSSW_9_2_7_patch1/src
+    cmsrel CMSSW_9_4_0
+    cd CMSSW_9_4_0/src
     cmsenv
     git clone git@github.com:manuelfs/babymaker
     cd babymaker

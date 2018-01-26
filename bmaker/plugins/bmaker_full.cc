@@ -23,9 +23,7 @@
 
 // FW physics include files
 #include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
-#ifdef POST_7_4
-  #include "SimDataFormats/GeneratorProducts/interface/GenLumiInfoHeader.h"
-#endif
+#include "SimDataFormats/GeneratorProducts/interface/GenLumiInfoHeader.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "DataFormats/TrackReco/interface/Track.h"
 
@@ -436,7 +434,12 @@ vector<LVector> bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
 
     LVector jetp4(jetTool->corrJet[ijet]);
     float csv(jet.bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags"));
-    float csvd(jet.bDiscriminator("deepFlavourJetTags:probb")+jet.bDiscriminator("deepFlavourJetTags:probbb"));
+    float csvd(-999.);
+    TString cmssw_rel = getenv("CMSSW_BASE");
+    if (cmssw_rel.Contains("CMSSW_8"))
+      csvd = jet.bDiscriminator("deepFlavourJetTags:probb")+jet.bDiscriminator("deepFlavourJetTags:probbb");
+    else
+      csvd = jet.bDiscriminator("pfDeepCSVJetTags:probb")+jet.bDiscriminator("pfDeepCSVJetTags:probbb");
 
     bool isLep = jetTool->leptonInJet(jet, sig_leps);
     bool looseID = jetTool->idJet(jet, jetTool->kLoose);
@@ -2105,11 +2108,8 @@ bmaker_full::bmaker_full(const edm::ParameterSet& iConfig):
   tok_source_(consumes<LHEEventProduct>(edm::InputTag("source"))),
   tok_generator_(consumes<GenEventInfoProduct>(edm::InputTag("generator"))),
   tok_badChCandFilter_(consumes<bool>(edm::InputTag("BadChargedCandidateFilter"))),
-  tok_badPFMuonFilter_(consumes<bool>(edm::InputTag("BadPFMuonFilter")))
-  #ifdef POST_7_4
-  ,
-    tok_genlumiheader_(consumes<GenLumiInfoHeader,edm::InLumi>(edm::InputTag("generator")))
-  #endif
+  tok_badPFMuonFilter_(consumes<bool>(edm::InputTag("BadPFMuonFilter"))),
+  tok_genlumiheader_(consumes<GenLumiInfoHeader,edm::InLumi>(edm::InputTag("generator")))
 {
   time(&startTime);
 
@@ -2428,14 +2428,12 @@ void bmaker_full::endJob() {
 // ------------ method called when starting to processes a luminosity block  ------------
 
 void bmaker_full::beginLuminosityBlock(edm::LuminosityBlock const& iLumi, edm::EventSetup const& iEvent){
-#ifdef POST_7_4
   if (outname.Contains("PUSpring16Fast") && outname.Contains("SMS-")){
     edm::Handle<GenLumiInfoHeader> gen_header;
 //    iLumi.getByToken(tok_genlumiheader_, gen_header);  
     string model = gen_header->configDescription();
     mcTool->getMassPoints(model, mprod_, mlsp_);
   }
-#endif
 }
 
 

@@ -32,9 +32,7 @@
 #include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h" 
 #include "SimDataFormats/GeneratorProducts/interface/LHEEventProduct.h"
 #include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
-#ifdef POST_7_4
-  #include "SimDataFormats/GeneratorProducts/interface/GenLumiInfoHeader.h"
-#endif
+#include "SimDataFormats/GeneratorProducts/interface/GenLumiInfoHeader.h"
 
 // User include files
 #include "babymaker/bmaker/interface/baby_full.hh"
@@ -202,9 +200,7 @@ private:
   edm::EDGetTokenT<GenEventInfoProduct> tok_generator_;
   edm::EDGetTokenT<bool> tok_badChCandFilter_;
   edm::EDGetTokenT<bool> tok_badPFMuonFilter_;
-  #ifdef POST_7_4
-    edm::EDGetTokenT<GenLumiInfoHeader> tok_genlumiheader_;
-  #endif
+  edm::EDGetTokenT<GenLumiInfoHeader> tok_genlumiheader_;
 
   virtual void beginJob() override;
   virtual void analyze(const edm::Event&, const edm::EventSetup&) override;

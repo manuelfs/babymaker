@@ -58,14 +58,38 @@ doMiscellaneous = False
 datasets = [[]]
 
 if doData:
+    datasets.append(["/JetHT/Run2017B-17Nov2017-v1/MINIAOD"])
+    datasets.append(["/JetHT/Run2017C-17Nov2017-v1/MINIAOD"])
+    datasets.append(["/JetHT/Run2017D-17Nov2017-v1/MINIAOD"])
+    datasets.append(["/JetHT/Run2017E-17Nov2017-v1/MINIAOD"])
+    datasets.append(["/JetHT/Run2017F-17Nov2017-v1/MINIAOD"])
+
+    datasets.append(["/MET/Run2017B-17Nov2017-v1/MINIAOD"])
+    datasets.append(["/MET/Run2017C-17Nov2017-v1/MINIAOD"])
+    datasets.append(["/MET/Run2017D-17Nov2017-v1/MINIAOD"])
+    datasets.append(["/MET/Run2017E-17Nov2017-v1/MINIAOD"])
+    datasets.append(["/MET/Run2017F-17Nov2017-v1/MINIAOD"])
+    
+    datasets.append(["/SingleElectron/Run2017B-17Nov2017-v1/MINIAOD"])
+    datasets.append(["/SingleElectron/Run2017C-17Nov2017-v1/MINIAOD"])
+    datasets.append(["/SingleElectron/Run2017D-17Nov2017-v1/MINIAOD"])
+    datasets.append(["/SingleElectron/Run2017E-17Nov2017-v1/MINIAOD"])
+    datasets.append(["/SingleElectron/Run2017F-17Nov2017-v1/MINIAOD"])
+    
+    datasets.append(["/SingleMuon/Run2017B-17Nov2017-v1/MINIAOD"])
+    datasets.append(["/SingleMuon/Run2017C-17Nov2017-v1/MINIAOD"])
+    datasets.append(["/SingleMuon/Run2017D-17Nov2017-v1/MINIAOD"])
+    datasets.append(["/SingleMuon/Run2017E-17Nov2017-v1/MINIAOD"])
+    datasets.append(["/SingleMuon/Run2017F-17Nov2017-v1/MINIAOD"])
+
     #datasets.append(["/MET/Run2017B-PromptReco-v1/MINIAOD"])
     #datasets.append(["/MET/Run2017B-PromptReco-v2/MINIAOD"])
     #datasets.append(["/MET/Run2017C-PromptReco-v1/MINIAOD"])
     #datasets.append(["/MET/Run2017C-PromptReco-v2/MINIAOD"])
     #datasets.append(["/MET/Run2017C-PromptReco-v3/MINIAOD"])
     #datasets.append(["/MET/Run2017D-PromptReco-v1/MINIAOD"])
-    datasets.append(["/MET/Run2017E-PromptReco-v1/MINIAOD"])
-    datasets.append(["/MET/Run2017F-PromptReco-v1/MINIAOD"])
+    # datasets.append(["/MET/Run2017E-PromptReco-v1/MINIAOD"])
+    # datasets.append(["/MET/Run2017F-PromptReco-v1/MINIAOD"])
 
     #datasets.append(["/SingleElectron/Run2017B-PromptReco-v1/MINIAOD"])
     #datasets.append(["/SingleElectron/Run2017B-PromptReco-v2/MINIAOD"])
@@ -73,8 +97,8 @@ if doData:
     #datasets.append(["/SingleElectron/Run2017C-PromptReco-v2/MINIAOD"])
     #datasets.append(["/SingleElectron/Run2017C-PromptReco-v3/MINIAOD"])
     #datasets.append(["/SingleElectron/Run2017D-PromptReco-v1/MINIAOD"])
-    datasets.append(["/SingleElectron/Run2017E-PromptReco-v1/MINIAOD"])
-    datasets.append(["/SingleElectron/Run2017F-PromptReco-v1/MINIAOD"])
+    # datasets.append(["/SingleElectron/Run2017E-PromptReco-v1/MINIAOD"])
+    # datasets.append(["/SingleElectron/Run2017F-PromptReco-v1/MINIAOD"])
 
     #datasets.append(["/SingleMuon/Run2017B-PromptReco-v1/MINIAOD"])
     #datasets.append(["/SingleMuon/Run2017B-PromptReco-v2/MINIAOD"])
@@ -82,8 +106,8 @@ if doData:
     #datasets.append(["/SingleMuon/Run2017C-PromptReco-v2/MINIAOD"])
     #datasets.append(["/SingleMuon/Run2017C-PromptReco-v3/MINIAOD"])
     #datasets.append(["/SingleMuon/Run2017D-PromptReco-v1/MINIAOD"])
-    datasets.append(["/SingleMuon/Run2017E-PromptReco-v1/MINIAOD"])
-    datasets.append(["/SingleMuon/Run2017F-PromptReco-v1/MINIAOD"])
+    # datasets.append(["/SingleMuon/Run2017E-PromptReco-v1/MINIAOD"])
+    # datasets.append(["/SingleMuon/Run2017F-PromptReco-v1/MINIAOD"])
 
     #datasets.append(["/JetHT/Run2017B-PromptReco-v1/MINIAOD"])
     #datasets.append(["/JetHT/Run2017B-PromptReco-v2/MINIAOD"])
@@ -91,8 +115,8 @@ if doData:
     #datasets.append(["/JetHT/Run2017C-PromptReco-v2/MINIAOD"])
     #datasets.append(["/JetHT/Run2017C-PromptReco-v3/MINIAOD"])
     #datasets.append(["/JetHT/Run2017D-PromptReco-v1/MINIAOD"])
-    datasets.append(["/JetHT/Run2017E-PromptReco-v1/MINIAOD"])
-    datasets.append(["/JetHT/Run2017F-PromptReco-v1/MINIAOD"])
+    # datasets.append(["/JetHT/Run2017E-PromptReco-v1/MINIAOD"])
+    # datasets.append(["/JetHT/Run2017F-PromptReco-v1/MINIAOD"])
 
 if doData2016:
     datasets.append(["/MET/Run2016B-03Feb2017_ver2-v2/MINIAOD"])

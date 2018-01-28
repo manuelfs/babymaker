@@ -885,15 +885,7 @@ jet_met_tools::jet_met_tools(TString ijecName, bool doSys, bool fastSim, TString
     CSVMedium = 0.890;
     CSVTight  = 0.970;
   }
-  else if(cmssw.Contains("CMSSW_8_0")){
-    CSVLoose  = 0.5426;
-    CSVMedium = 0.8484;
-    CSVTight  = 0.9535;
-    DeepCSVLoose  = 0.2219;
-    DeepCSVMedium = 0.6324;
-    DeepCSVTight  = 0.8958;
-  }
-  else if(cmssw.Contains("CMSSW_9_2")){
+  else {
     CSVLoose  = 0.5426;
     CSVMedium = 0.8484;
     CSVTight  = 0.9535;

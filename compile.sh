@@ -1,18 +1,14 @@
 #! /bin/bash
 
 ## Writing a tag because different code is need in 7.4.12 and before
-if [ ! -e bmaker/interface/release.hh ]
+if [[ $CMSSW_BASE == *"CMSSW_8"* ]] || [[ $CMSSW_BASE == *"CMSSW_9_2"* ]]
 then
+    printf "#define PRE_CMSSW_9_4\n\n" > bmaker/interface/release.hh
+fi
 
-    if [[ $CMSSW_BASE == *"CMSSW_8"* ]] || [[ $CMSSW_BASE == *"CMSSW_9_2"* ]]
-    then
-        printf "#define PRE_CMSSW_9_4\n\n" > bmaker/interface/release.hh
-    fi
-
-    if [[ $CMSSW_BASE == *"CMSSW_9_4"* ]]
-    then 
-        printf "#define CMSSW_9_4\n\n" > bmaker/interface/release.hh
-    fi
+if [[ $CMSSW_BASE == *"CMSSW_9_4"* ]]
+then 
+    printf "#define CMSSW_9_4\n\n" > bmaker/interface/release.hh
 fi
 
 # ## Checking if the event filter list file exist, and if not, download it

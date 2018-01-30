@@ -240,19 +240,6 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 
   ///////////////////// Filters ///////////////////////
   if (debug) cout<<"INFO: Writing filters..."<<endl; 
-  // if(!isFastSim){
-  //   edm::Handle<bool> ifilterbadChCand;
-  //   iEvent.getByToken(tok_badChCandFilter_, ifilterbadChCand);
-  //   baby.pass_badchhad() = (*ifilterbadChCand);
-
-  //   edm::Handle<bool> ifilterbadPFMuon;
-  //   iEvent.getByToken(tok_badPFMuonFilter_, ifilterbadPFMuon);
-  //   baby.pass_badpfmu() = (*ifilterbadPFMuon);
-  // }
-  // else{ 
-    baby.pass_badchhad()=true;
-    baby.pass_badpfmu()=true;
-  // }
   edm::Handle<edm::TriggerResults> filterBits;
   iEvent.getByToken(tok_trigResults_pat_,filterBits);    
   //Giovanni filters in reminiaod only available in "PAT"
@@ -1388,48 +1375,43 @@ void bmaker_full::writeHLTObjects(const edm::TriggerNames &names,
 }
 
 // From https://twiki.cern.ch/twiki/bin/viewauth/CMS/MissingETOptionalFiltersRun2
+// Last updated on Jan 29, 2018
 void bmaker_full::writeFilters(const edm::TriggerNames &fnames,
                                edm::Handle<edm::TriggerResults> filterBits,
                                edm::Handle<reco::VertexCollection> vtx,
                                vector<double> jetsMuonEnergyFrac){
   baby.pass_goodv() = true; baby.pass_cschalo() = true; baby.pass_eebadsc() = true;
-  baby.pass_ecaldeadcell() = true; baby.pass_hbhe() = true; baby.pass_hbheiso() = true;
+  baby.pass_hbhe() = true; baby.pass_hbheiso() = true; baby.pass_ecaldeadcell() = true; 
+  baby.pass_badpfmu() = true; baby.pass_badchhad() = true; baby.pass_badcalib() = true;
   baby.pass_ra2_badmu() = true;
-  baby.pass_badmus()=true; baby.pass_dupmus()=true;
   for (size_t i(0); i < filterBits->size(); ++i) {
     string name = fnames.triggerName(i);
     bool pass = static_cast<bool>(filterBits->accept(i));
     if (name=="Flag_goodVertices") baby.pass_goodv() = pass;
-    //else if (name=="Flag_CSCTightHaloFilter") baby.pass_cschalo() = pass; // Requires reading it from txt file
-    //else if (name=="Flag_CSCTightHalo2015Filter") baby.pass_cschalo() = pass; 
-    else if (name=="Flag_globalSuperTightHalo2016Filter")  baby.pass_cschalo() = pass; //recommendation since apr 27, updated nov 8
-    else if (name=="Flag_eeBadScFilter") baby.pass_eebadsc() = pass;
-    else if (name=="Flag_EcalDeadCellTriggerPrimitiveFilter") baby.pass_ecaldeadcell() = pass;
+    else if (name=="Flag_globalTightHalo2016Filter")  baby.pass_cschalo() = pass;
     else if (name=="Flag_HBHENoiseFilter") baby.pass_hbhe() = pass; 
     else if (name=="Flag_HBHENoiseIsoFilter") baby.pass_hbheiso() = pass; 
-    //These are defined as "has bad muon", so must be inverted
-    else if (name=="Flag_badMuons") baby.pass_badmus() = !pass; 
-    else if (name=="Flag_duplicateMuons") baby.pass_dupmus() = !pass; 
-   
-   
+    else if (name=="Flag_EcalDeadCellTriggerPrimitiveFilter") baby.pass_ecaldeadcell() = pass;
+    //These filter bad events and must be inverted
+    else if (name=="Flag_BadPFMuonFilter") baby.pass_badpfmu() = pass;     
+    else if (name=="BadChargedCandidateFilter") baby.pass_badchhad() = !pass;
+    //    else if (name=="Flag_eeBadScFilter") baby.pass_eebadsc() = pass; // Not recommended
+    else if (name=="Flag_ecalBadCalibFilter") baby.pass_badcalib() = pass;    
   }
-
-  //baby.pass_goodv() &= eventTool->hasGoodPV(vtx); // We needed to re-run it for Run2015B
-  //baby.pass_cschalo() = eventTool->passBeamHalo(baby.run(), baby.event()); // now taken from miniAOD
 
   baby.pass() = baby.pass_goodv() && baby.pass_ecaldeadcell() && 
                 baby.pass_hbhe() && baby.pass_hbheiso() &&
-            //  baby.pass_badpfmu() && baby.pass_badchhad() && // these two are prefilled in analyze()
+                baby.pass_badpfmu() && baby.pass_badchhad() && baby.pass_badcalib() &&
                 baby.pass_jets() && baby.pass_fsmet() && baby.pass_fsjets();
 
   baby.pass_ra2() = baby.pass_goodv() &&  baby.pass_ecaldeadcell() &&
                 baby.pass_hbhe() &&  baby.pass_hbheiso() &&     
-             // baby.pass_badpfmu() && baby.pass_badchhad() && // these two are prefilled in analyze()
+                baby.pass_badpfmu() && baby.pass_badchhad() && baby.pass_badcalib() &&
                 baby.pass_jets_ra2() && baby.pass_fsmet() && baby.pass_fsjets();
 
   baby.pass_nohf() = baby.pass_goodv() && baby.pass_ecaldeadcell() && 
                 baby.pass_hbhe() && baby.pass_hbheiso() &&
-             // baby.pass_badpfmu() && baby.pass_badchhad() && // these two are prefilled in analyze()
+                baby.pass_badpfmu() && baby.pass_badchhad() && baby.pass_badcalib() &&
                 baby.pass_jets_nohf() && baby.pass_fsmet() && baby.pass_fsjets();
 
 
@@ -2107,8 +2089,6 @@ bmaker_full::bmaker_full(const edm::ParameterSet& iConfig):
   tok_extLHEProducer_(consumes<LHEEventProduct>(edm::InputTag("externalLHEProducer"))),
   tok_source_(consumes<LHEEventProduct>(edm::InputTag("source"))),
   tok_generator_(consumes<GenEventInfoProduct>(edm::InputTag("generator"))),
-  tok_badChCandFilter_(consumes<bool>(edm::InputTag("BadChargedCandidateFilter"))),
-  tok_badPFMuonFilter_(consumes<bool>(edm::InputTag("BadPFMuonFilter"))),
   tok_genlumiheader_(consumes<GenLumiInfoHeader,edm::InLumi>(edm::InputTag("generator")))
 {
   time(&startTime);

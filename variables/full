@@ -328,8 +328,7 @@ bool pass;
 bool pass_ra2;
 bool pass_nohf;
 bool pass_ra2_badmu;
-bool pass_badmus;
-bool pass_dupmus;
+bool pass_badcalib;
 
 
 ################  Fat Jets   ##################

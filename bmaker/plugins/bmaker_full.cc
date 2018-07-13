@@ -29,6 +29,15 @@
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "DataFormats/TrackReco/interface/Track.h"
 
+// AK8
+#include "FWCore/ServiceRegistry/interface/Service.h"
+#include "FWCore/Framework/interface/one/EDAnalyzer.h"
+#include "CommonTools/UtilAlgos/interface/TFileService.h"
+#include "DataFormats/PatCandidates/interface/Jet.h"
+
+using namespace deepntuples;
+/////////////////
+
 // ROOT include files
 #include "TFile.h"
 #include "TROOT.h"
@@ -202,7 +211,78 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
                 baby.higd_am(), baby.higd_dm(), baby.higd_drmax(), baby.higd_bin(), baby.mctd());
   writeBBVars(all_baby_jets, sig_leps);
   writeFatJets();
-  
+  ///////////////////////////////////////////
+  // AK8 //////////////////////////////////// 
+  ///////////////////////////////////////////
+
+  // need to access event info
+  fatjetNN_->readEvent(iEvent, iSetup);
+  decorrNN_->readEvent(iEvent, iSetup);
+
+  // loop over the jets
+  edm::Handle<edm::View<pat::Jet>> akjets;
+  iEvent.getByToken(jetToken_, akjets);
+
+  edm::Handle<pat::JetCollection> sdjetsHandle;
+  if (useReclusteredJets_) iEvent.getByToken(sdjetToken_, sdjetsHandle);
+//   cout << "Entering ak8 Jet loop (debug)" << endl;
+  baby.nakjets08() = 0;
+  for (unsigned idx=0; idx<akjets->size(); ++idx){
+    const auto &jet = akjets->at(idx);
+//     cout << "In ak8 jet loop, jet # (debug) "<< idx << endl;
+    JetHelper jet_helper(&jet);
+    // reclustered fatjets do not have subjets linked to them, so need to be set manually
+    if (useReclusteredJets_) jet_helper.setSubjets(*sdjetsHandle, jetR_);
+//	bool looseID = jetTool->idJet(jet, jetTool->kLoose);
+	bool goodPtEta = jet.pt() > jetTool->JetPtCut && fabs(jet.eta()) <= jetTool->JetEtaCut;
+	if(goodPtEta) {
+		baby.nakjets08()++;
+		baby.akjets08_pt().push_back(jet.pt());
+		baby.akjets08_eta().push_back(jet.eta());
+		baby.akjets08_phi().push_back(jet.phi());
+		baby.akjets08_m().push_back(jet.mass());
+		// jet score prediction
+			// Nominal
+	    const auto& nnpreds = fatjetNN_->predict(jet_helper);
+	    FatJetNNHelper nn(nnpreds);
+				// binarized score (normalized by qcd)
+	    baby.akjets08_deep_nominal_bin_top().push_back(nn.get_binarized_score_top());
+		baby.akjets08_deep_nominal_bin_w().push_back(nn.get_binarized_score_w());
+		baby.akjets08_deep_nominal_bin_z().push_back(nn.get_binarized_score_z());
+		baby.akjets08_deep_nominal_bin_zbb().push_back(nn.get_binarized_score_zbb());
+		baby.akjets08_deep_nominal_bin_hbb().push_back(nn.get_binarized_score_hbb());
+		baby.akjets08_deep_nominal_bin_h4q().push_back(nn.get_binarized_score_h4q());
+				// raw score
+		baby.akjets08_deep_nominal_raw_top().push_back(nn.get_raw_score_top());
+		baby.akjets08_deep_nominal_raw_w().push_back(nn.get_raw_score_w());
+		baby.akjets08_deep_nominal_raw_z().push_back(nn.get_raw_score_z());
+		baby.akjets08_deep_nominal_raw_zbb().push_back(nn.get_raw_score_zbb());
+		baby.akjets08_deep_nominal_raw_hbb().push_back(nn.get_raw_score_hbb());
+		baby.akjets08_deep_nominal_raw_h4q().push_back(nn.get_raw_score_h4q());
+		baby.akjets08_deep_nominal_raw_qcd().push_back(nn.get_raw_score_qcd());
+			// Decorrelated
+		const auto& mdpreds = decorrNN_->predict(jet_helper);
+		FatJetNNHelper md(mdpreds);
+				// binarized score (normalized by qcd)
+	    baby.akjets08_deep_decor_bin_top().push_back(nn.get_binarized_score_top());
+		baby.akjets08_deep_decor_bin_w().push_back(nn.get_binarized_score_w());
+		baby.akjets08_deep_decor_bin_z().push_back(nn.get_binarized_score_z());
+		baby.akjets08_deep_decor_bin_zbb().push_back(nn.get_binarized_score_zbb());
+		baby.akjets08_deep_decor_bin_hbb().push_back(nn.get_binarized_score_hbb());
+		baby.akjets08_deep_decor_bin_h4q().push_back(nn.get_binarized_score_h4q());
+				// raw score
+		baby.akjets08_deep_decor_raw_top().push_back(nn.get_raw_score_top());
+		baby.akjets08_deep_decor_raw_w().push_back(nn.get_raw_score_w());
+		baby.akjets08_deep_decor_raw_z().push_back(nn.get_raw_score_z());
+		baby.akjets08_deep_decor_raw_zbb().push_back(nn.get_raw_score_zbb());
+		baby.akjets08_deep_decor_raw_hbb().push_back(nn.get_raw_score_hbb());
+		baby.akjets08_deep_decor_raw_h4q().push_back(nn.get_raw_score_h4q());
+		baby.akjets08_deep_decor_raw_qcd().push_back(nn.get_raw_score_qcd());
+	}
+  }
+  ///////////////////////////////////////////
+  ///////////////////////////////////////////
+  ///////////////////////////////////////////
   if (doSystematics) {
     for (unsigned isys(0); isys<kSysLast; isys++){
       bool cluster_leps = false;
@@ -944,7 +1024,7 @@ vCands bmaker_full::writeMuons(edm::Handle<pat::MuonCollection> muons,
     //Save muons that were demoted from isPF in 8_0_26_patch1 in order to debug Giovanni badMuon flags
     bool demoted(false);
     //userInt has old value of isPFMuon()
-    if(isData && !lep.isPFMuon() && lep.userInt("muonsCleaned:oldPF")) demoted = true;
+//     if(isData && !lep.isPFMuon() && lep.userInt("muonsCleaned:oldPF")) demoted = true;
 
     bool isBadMu(false), isBadDuplMu(false);
     if (badmu_idx.find(ilep)!=badmu_idx.end()) isBadMu = true;
@@ -2124,7 +2204,16 @@ bmaker_full::bmaker_full(const edm::ParameterSet& iConfig):
   tok_source_(consumes<LHEEventProduct>(edm::InputTag("source"))),
   tok_generator_(consumes<GenEventInfoProduct>(edm::InputTag("generator"))),
   tok_badChCandFilter_(consumes<bool>(edm::InputTag("BadChargedCandidateFilter"))),
-  tok_badPFMuonFilter_(consumes<bool>(edm::InputTag("BadPFMuonFilter")))
+  tok_badPFMuonFilter_(consumes<bool>(edm::InputTag("BadPFMuonFilter"))),
+  // AK8
+  jetToken_(consumes<edm::View<pat::Jet>>(iConfig.getUntrackedParameter<edm::InputTag>("akjets", edm::InputTag("slimmedJetsAK8")))),
+  sdjetToken_(consumes<pat::JetCollection>(iConfig.getUntrackedParameter<edm::InputTag>("subjets", edm::InputTag("slimmedJetsAK8PFPuppiSoftDropPacked")))),
+  jetR_(iConfig.getUntrackedParameter<double>("jetR", 0.8)),
+  useReclusteredJets_(iConfig.getUntrackedParameter<bool>("useReclusteredJets", true)),
+  datapath_(iConfig.getUntrackedParameter<std::string>("datapath", "NNKit/data/ak8")),
+  output_(iConfig.getUntrackedParameter<std::string>("output", "output.txt")),
+  decorrMode(iConfig.getUntrackedParameter<int>("decorrMode", 0)) 
+  ////////
   #ifdef POST_7_4
   ,
     tok_genlumiheader_(consumes<GenLumiInfoHeader,edm::InLumi>(edm::InputTag("generator")))
@@ -2140,6 +2229,24 @@ bmaker_full::bmaker_full(const edm::ParameterSet& iConfig):
   weightTool = new weight_tools();
   eventTool  = new event_tools(outname);
   
+  // AK8
+  	// initialize the FatJetNN class in the constructor
+  auto cc = consumesCollector();
+  fatjetNN_ = new FatJetNN(iConfig, cc, jetR_);
+	// load json for input variable transformation
+  fatjetNN_->FatJetNN::load_json(edm::FileInPath(datapath_+"/full/preprocessing.json").fullPath());
+	// load DNN model and parameter files
+  fatjetNN_->load_model(edm::FileInPath(datapath_+"/full/resnet-symbol.json").fullPath(),
+  edm::FileInPath(datapath_+"/full/resnet.params").fullPath());
+
+  decorrNN_ = new FatJetNN(iConfig, cc, jetR_);
+  // load json for input variable transformation
+  decorrNN_->load_json(edm::FileInPath(datapath_+"/decorrelated/preprocessing.json").fullPath());
+  // load DNN model and parameter files
+  decorrNN_->load_model(edm::FileInPath(datapath_+"/decorrelated/resnet-symbol.json").fullPath(),
+        edm::FileInPath(datapath_+"/decorrelated/resnet.params").fullPath());
+///////////////////////////////////////////////
+
 
   outfile = new TFile(outname, "recreate");
   outfile->cd();
@@ -2392,7 +2499,7 @@ void bmaker_full::beginLuminosityBlock(edm::LuminosityBlock const& iLumi, edm::E
 #ifdef POST_7_4
   if (outname.Contains("PUSpring16Fast") && outname.Contains("SMS-")){
     edm::Handle<GenLumiInfoHeader> gen_header;
-    iLumi.getByToken(tok_genlumiheader_, gen_header);  
+//     iLumi.getByToken(tok_genlumiheader_, gen_header);  
     string model = gen_header->configDescription();
     mcTool->getMassPoints(model, mprod_, mlsp_);
   }

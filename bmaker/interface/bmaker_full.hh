@@ -36,6 +36,26 @@
   #include "SimDataFormats/GeneratorProducts/interface/GenLumiInfoHeader.h"
 #endif
 
+// AK8
+#include "FWCore/ServiceRegistry/interface/Service.h"
+#include "FWCore/Framework/interface/one/EDAnalyzer.h"
+#include "CommonTools/UtilAlgos/interface/TFileService.h"
+#include "DataFormats/PatCandidates/interface/Jet.h"
+
+#include <fstream>
+#include "NNKit/FatJetNN/interface/FatJetNN.h"
+#include "NNKit/FatJetNN/interface/FatJetNNDecorrelator.h"
+#include "NNKit/FatJetNN/interface/FatJetNNHelper.h"
+#include "NNKit/CommonTools/interface/InfinityCatcher.h"
+#include "NNKit/CommonTools/interface/JetHelper.h"
+#include "NNKit/CommonTools/interface/NNPredictor.h"
+#include "NNKit/CommonTools/interface/NtupleBase.h"
+#include "NNKit/CommonTools/interface/TreeData.h"
+#include "NNKit/CommonTools/interface/json.hpp"
+#include "NNKit/CommonTools/interface/mxnet_predict_api.h"
+using namespace deepntuples;
+/////////////////
+
 // User include files
 #include "babymaker/bmaker/interface/baby_full.hh"
 #include "babymaker/bmaker/interface/lepton_tools.hh"
@@ -205,6 +225,18 @@ private:
   edm::EDGetTokenT<GenEventInfoProduct> tok_generator_;
   edm::EDGetTokenT<bool> tok_badChCandFilter_;
   edm::EDGetTokenT<bool> tok_badPFMuonFilter_;
+  // AK8
+  edm::EDGetTokenT<edm::View<pat::Jet>> jetToken_;
+  edm::EDGetTokenT<pat::JetCollection>  sdjetToken_;
+  double jetR_;
+  bool useReclusteredJets_;
+  std::string datapath_;
+  std::string output_;
+  int decorrMode;
+  FatJetNN *fatjetNN_ = nullptr;
+  FatJetNN *decorrNN_ = nullptr;
+  //////////////////////////////
+
   #ifdef POST_7_4
     edm::EDGetTokenT<GenLumiInfoHeader> tok_genlumiheader_;
   #endif

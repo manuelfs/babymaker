@@ -3,7 +3,7 @@
 #include <cmath>
 #include <iostream>
 #include "babymaker/bmaker/interface/utilities.hh"
-#include "babymaker/bmaker/interface/lester_mt2_bisect.h"
+#include "babymaker/bmaker/interface/lester_mt2_bisect.hh"
 #include "TMath.h"
 
 using namespace std;

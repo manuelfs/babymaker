@@ -13,6 +13,8 @@
 <use name="RecoEgamma/EgammaTools"/>
 <use name="fastjet"/>
 <use name="fastjet-contrib"/>
+<use name="NNKit/FatJetNN"/>
+<use name="NNKit/CommonTools"/>
 <export>
   <lib   name="1"/>
 </export>

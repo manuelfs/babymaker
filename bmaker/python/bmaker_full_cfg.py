@@ -117,6 +117,18 @@ process.load('Configuration.StandardSequences.Services_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 process.GlobalTag.globaltag = globalTag
 
+# AK8
+bTagDiscriminators = [
+    'pfCombinedInclusiveSecondaryVertexV2BJetTags',
+	    'pfBoostedDoubleSecondaryVertexAK8BJetTags'
+		]
+JETCorrLevels = ['L2Relative', 'L3Absolute']
+from JMEAnalysis.JetToolbox.jetToolbox_cff import jetToolbox
+jetToolbox(process, 'ak8', 'jetSequence', 'out', PUMethod='Puppi', JETCorrPayload='AK8PFPuppi', JETCorrLevels=JETCorrLevels, miniAOD=True, runOnMC=True,
+			Cut='pt > 150.0 && abs(eta()) < 2.4', addNsub=True, maxTau=3,
+			addSoftDrop=True, addSoftDropSubjets=True, subJETCorrPayload='AK4PFPuppi', subJETCorrLevels=JETCorrLevels,
+			bTagDiscriminators=bTagDiscriminators)
+#######################
 process.baby_full = cms.EDAnalyzer('bmaker_full',
                                     condor_subtime = cms.string(options.condorSubTime),
                                     outputFile = cms.string(outName),
@@ -131,13 +143,15 @@ process.baby_full = cms.EDAnalyzer('bmaker_full',
                                     doSystematics = cms.bool(doSystematics),
                                     addBTagWeights = cms.bool(True),
                                     isFastSim = cms.bool(fastsim),
-                                    debugMode = cms.bool(False)
+                                    debugMode = cms.bool(False),
+									akjets = cms.untracked.InputTag('selectedPatJetsAK8PFPuppi'),
+									subjets = cms.untracked.InputTag('selectedPatJetsAK8PFPuppiSoftDropPacked')
 )
 
 ###### Setting up number of events, and reporing frequency 
 process.load("FWCore.MessageService.MessageLogger_cfi")
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(options.nEvents) )
-process.MessageLogger.cerr.FwkReport.reportEvery = 100000
+process.MessageLogger.cerr.FwkReport.reportEvery = 200
 
 
 if not fastsim:

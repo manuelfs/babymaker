@@ -40,6 +40,9 @@ config.JobType.psetName = 'babymaker/bmaker/python/bmaker_full_cfg.py'
 config.JobType.disableAutomaticOutputCollection = True
 config.JobType.outputFiles = ['fullbaby_' + datasetID + '.root']
 config.JobType.pyCfgParams = ['nEventsSample=' + str(nevents), 'outputFile=fullbaby_' + datasetID + '.root']
+# AK8
+config.JobType.sendExternalFolder = True # command for crab
+#########################
 
 config.section_("Data")
 config.Data.inputDataset = dataset

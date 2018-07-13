@@ -359,6 +359,42 @@ std::vector<float> fjets08_phi
 std::vector<float> fjets08_m
 std::vector<int> fjets08_nconst
 
+################  AK8 Jets   ##################
+
+int nakjets08
+std::vector<float> akjets08_pt
+std::vector<float> akjets08_eta
+std::vector<float> akjets08_phi
+std::vector<float> akjets08_m
+
+std::vector<float> akjets08_deep_nominal_bin_top
+std::vector<float> akjets08_deep_nominal_bin_w
+std::vector<float> akjets08_deep_nominal_bin_z
+std::vector<float> akjets08_deep_nominal_bin_zbb
+std::vector<float> akjets08_deep_nominal_bin_hbb
+std::vector<float> akjets08_deep_nominal_bin_h4q
+std::vector<float> akjets08_deep_nominal_raw_top
+std::vector<float> akjets08_deep_nominal_raw_w
+std::vector<float> akjets08_deep_nominal_raw_z
+std::vector<float> akjets08_deep_nominal_raw_zbb
+std::vector<float> akjets08_deep_nominal_raw_hbb
+std::vector<float> akjets08_deep_nominal_raw_h4q
+std::vector<float> akjets08_deep_nominal_raw_qcd
+
+std::vector<float> akjets08_deep_decor_bin_top
+std::vector<float> akjets08_deep_decor_bin_w
+std::vector<float> akjets08_deep_decor_bin_z
+std::vector<float> akjets08_deep_decor_bin_zbb
+std::vector<float> akjets08_deep_decor_bin_hbb
+std::vector<float> akjets08_deep_decor_bin_h4q
+std::vector<float> akjets08_deep_decor_raw_top
+std::vector<float> akjets08_deep_decor_raw_w
+std::vector<float> akjets08_deep_decor_raw_z
+std::vector<float> akjets08_deep_decor_raw_zbb
+std::vector<float> akjets08_deep_decor_raw_hbb
+std::vector<float> akjets08_deep_decor_raw_h4q
+std::vector<float> akjets08_deep_decor_raw_qcd
+
 ################  Truth   ##################
 int nisr_me
 float ht_isr_me

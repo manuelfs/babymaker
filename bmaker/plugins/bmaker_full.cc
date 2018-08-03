@@ -970,6 +970,11 @@ void bmaker_full::writeAk8Jets(edm::Handle<edm::View<pat::Jet>> &ak8jets){
       baby.ak8jets_decor_raw_hbb().push_back(md.get_raw_score_hbb());
       baby.ak8jets_decor_raw_h4q().push_back(md.get_raw_score_h4q());
       baby.ak8jets_decor_raw_qcd().push_back(md.get_raw_score_qcd());
+      // flavor tagger
+      baby.ak8jets_decor_flav_bb().push_back(md.get_flavor_score_bb());   // H->bb + Z->bb + gluon->bb
+      baby.ak8jets_decor_flav_cc().push_back(md.get_flavor_score_cc());   // H->cc + Z->cc + gluon->cc
+      baby.ak8jets_decor_flav_bb_noglu().push_back(md.get_flavor_score_bb_no_gluon());  // H->bb + Z->bb
+      baby.ak8jets_decor_flav_cc_noglu().push_back(md.get_flavor_score_cc_no_gluon());  // H->cc + Z->cc
     }
   }
 }
@@ -2202,7 +2207,7 @@ bmaker_full::bmaker_full(const edm::ParameterSet& iConfig):
 
   trig_name = vector<TString>();
   if(outname.Contains("Run201")){ // Would like to define isData, but need iEvent?
-    if(outname.Contains("Run2017")){
+    if(outname.Contains("Run2017") || outname.Contains("Run2018")){
       trig_name.push_back("HLT_PFHT500_PFMET100_PFMHT100_IDTight_v");                  // 0 
       trig_name.push_back("HLT_Mu15_IsoVVVL_PFHT450_PFMET50_v");                       // 1 
       trig_name.push_back("HLT_Mu15_IsoVVVL_PFHT600_v");                               // 2

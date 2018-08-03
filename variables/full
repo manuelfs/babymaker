@@ -161,6 +161,11 @@ std::vector<float> ak8jets_decor_raw_hbb
 std::vector<float> ak8jets_decor_raw_h4q
 std::vector<float> ak8jets_decor_raw_qcd
 
+std::vector<float> ak8jets_decor_flav_bb
+std::vector<float> ak8jets_decor_flav_cc
+std::vector<float> ak8jets_decor_flav_bb_noglu
+std::vector<float> ak8jets_decor_flav_cc_noglu
+
 ######### b-jet pairs ###########
 std::vector<float> dr_bb
 std::vector<float> bb_pt

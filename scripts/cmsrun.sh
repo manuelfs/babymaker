@@ -47,6 +47,12 @@ outName="fullbaby_Run2016H_MET_03Feb2017_ver3-v1.root"
 inFile=/hadoop/cms/phedex/store/data/Run2017D/MET/MINIAOD/17Nov2017-v1/50000/06B11CC2-F9EA-E711-826C-A4BF0101202F.root
 outName="fullbaby_Run2017D_MET_17Nov2017-v1.root"
 
+inFile=/eos/cms/store/data/Run2018B/MET/MINIAOD/PromptReco-v1/000/317/320/00000/A2062E5A-0968-E811-8E97-02163E01A0B3.root
+outName="fullbaby_Run2018B_MET_PromptReco-v1.root"
+
+inFile=ZprimeToWWToWlepWhad_narrow_M-3000_TuneCP5_13TeV-madgraph_RunIIFall17MiniAOD_94X_mc2017_realistic_v10-v1.root
+outName="fullbaby_TTJets_TuneCP5_13TeV-madgraph_RunIIFall17MiniAOD.root"
+
 # inFile=/home/users/ana/data/TTJets_HT-2500toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISummer16MiniAODv2.root
 # outName="fullbaby_TTJets_HT-2500toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISummer16MiniAODv2.root"
 
@@ -76,11 +82,5 @@ then
     outName="outputFile="$outName
 fi
    
-if [[ ($inFile == *"store"*) && ($inFile != *"hadoop"*) ]]
-then
-    echo "cmsRun bmaker/python/bmaker_full_cfg.py inputFiles=$inFile nEvents=$nEvents json=$json $outName 2>&1 | tee logout.log"
-    cmsRun bmaker/python/bmaker_full_cfg.py inputFiles=$inFile nEvents=$nEvents json=$json $outName 2>&1 | tee logout.log
-else 
-    cmsRun bmaker/python/bmaker_full_cfg.py inputFiles=file:$inFile nEvents=$nEvents json=$json $outName 2>&1 | tee logout.log
-fi
+cmsRun bmaker/python/bmaker_full_cfg.py inputFiles=file:$inFile nEvents=$nEvents json=$json $outName 2>&1 | tee logout.log
 

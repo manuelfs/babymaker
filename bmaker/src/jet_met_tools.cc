@@ -885,13 +885,24 @@ jet_met_tools::jet_met_tools(TString ijecName, bool doSys, bool fastSim, TString
     CSVMedium = 0.890;
     CSVTight  = 0.970;
   }
-  else {
+  else if (cmssw.Contains("CMSSW_8")){
     CSVLoose  = 0.5426;
     CSVMedium = 0.8484;
     CSVTight  = 0.9535;
     DeepCSVLoose  = 0.2219;
     DeepCSVMedium = 0.6324;
     DeepCSVTight  = 0.8958;
+  }
+  else if (cmssw.Contains("CMSSW_9") || cmssw.Contains("CMSSW_10")){
+    CSVLoose  = 0.5803;
+    CSVMedium = 0.8838;
+    CSVTight  = 0.9693;
+    DeepCSVLoose  = 0.1522;
+    DeepCSVMedium = 0.4941;
+    DeepCSVTight  = 0.8001;
+    DeepFlavourLoose  = 0.0574;
+    DeepFlavourMedium = 0.4318;
+    DeepFlavourTight  = 0.9068;
   }
 
   // only add b-tagging weights if requested

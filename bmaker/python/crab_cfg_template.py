@@ -38,6 +38,7 @@ config.section_("JobType")
 config.JobType.pluginName = 'Analysis'
 config.JobType.psetName = 'babymaker/bmaker/python/bmaker_full_cfg.py'
 config.JobType.disableAutomaticOutputCollection = True
+config.JobType.sendExternalFolder = True
 config.JobType.outputFiles = ['fullbaby_' + datasetID + '.root']
 config.JobType.pyCfgParams = ['nEventsSample=' + str(nevents), 'outputFile=fullbaby_' + datasetID + '.root']
 
@@ -48,7 +49,7 @@ config.Data.ignoreLocality = True
 if "Run201" in taskname:
     config.Data.splitting = 'LumiBased'
     config.Data.unitsPerJob = 75
-    config.Data.lumiMask = 'babymaker/data/json/golden_Cert_294927-306462_13TeV_PromptReco_Collisions17.json' 
+    config.Data.lumiMask = 'babymaker/data/json/golden_Cert_314472-319851_13TeV_PromptReco_Collisions18.json' 
     # split due to JECs: https://hypernews.cern.ch/HyperNews/CMS/get/jes/642.html
     if ("Run2016F1" in taskname): config.Data.runRange = '277772-278801'
     elif ("Run2016F2" in taskname): config.Data.runRange = '278802-278808'

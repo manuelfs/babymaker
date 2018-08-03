@@ -48,6 +48,10 @@ public:
   float DeepCSVMedium = 999;
   float DeepCSVTight  = 999;
 
+  float DeepFlavourLoose  = 999;
+  float DeepFlavourMedium = 999;
+  float DeepFlavourTight  = 999;
+
   const float sizeJet = 0.4;
 
   enum CutLevel{kLoose, kTight, kPBNR};

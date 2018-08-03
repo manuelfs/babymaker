@@ -44,6 +44,11 @@
 #include "babymaker/bmaker/interface/weight_tools.hh"
 #include "babymaker/bmaker/interface/utilities.hh"
 
+#include "NNKit/FatJetNN/interface/FatJetNN.h"
+#include "NNKit/FatJetNN/interface/FatJetNNDecorrelator.h"
+#include "NNKit/FatJetNN/interface/FatJetNNHelper.h"
+using namespace deepntuples;
+
 // ROOT include files
 #include "TTree.h"
 #include "TString.h"
@@ -91,6 +96,7 @@ public:
   void writeBBVars(std::vector<reco::Candidate::LorentzVector>  &all_baby_jets, vCands &sig_leps);
 
   void writeFatJets();
+  void writeAk8Jets(edm::Handle<edm::View<pat::Jet>> &ak8jets);
   vCands writeMuons(edm::Handle<pat::MuonCollection> muons, 
 		    edm::Handle<pat::PackedCandidateCollection> pfcands, 
 		    edm::Handle<reco::VertexCollection> vtx,
@@ -201,6 +207,11 @@ private:
   edm::EDGetTokenT<bool> tok_badChCandFilter_;
   edm::EDGetTokenT<bool> tok_badPFMuonFilter_;
   edm::EDGetTokenT<GenLumiInfoHeader> tok_genlumiheader_;
+
+  edm::EDGetTokenT<edm::View<pat::Jet>> tok_deepJetToken_;
+  std::unique_ptr<FatJetNN> fatjetNN_;
+  std::unique_ptr<FatJetNN> decorrNN_;
+  double deepJetR;
 
   virtual void beginJob() override;
   virtual void analyze(const edm::Event&, const edm::EventSetup&) override;

@@ -195,6 +195,13 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   writeBBVars(all_baby_jets, sig_leps);
   writeFatJets();
   
+  // DeepAk8
+  fatjetNN_->readEvent(iEvent, iSetup);
+  decorrNN_->readEvent(iEvent, iSetup);
+  edm::Handle<edm::View<pat::Jet>> ak8jets;
+  iEvent.getByToken(tok_deepJetToken_, ak8jets);
+  writeAk8Jets(ak8jets);
+
   if (doSystematics) {
     for (unsigned isys(0); isys<kSysLast; isys++){
       bool cluster_leps = false;
@@ -403,6 +410,7 @@ vector<LVector> bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
   LVector jetsys_p4, jetsys_nob_p4, jetsys_nobd_p4;
   baby.njets() = 0; baby.nbl() = 0; baby.nbm() = 0;  baby.nbt() = 0;
   baby.nbdl() = 0; baby.nbdm() = 0;  baby.nbdt() = 0;
+  baby.nbdfl() = 0; baby.nbdfm() = 0;  baby.nbdft() = 0;
   baby.ht() = 0.; baby.st() = 0.; baby.ht_hlt() = 0.;
   baby.njets_ra2() = 0; baby.njets_clean() = 0; baby.nbm_ra2() = 0; baby.ht_ra2() = 0.; baby.ht_clean() = 0.; 
   baby.pass_jets() = true; baby.pass_jets_nohf() = true; baby.pass_jets_tight() = true; 
@@ -421,12 +429,15 @@ vector<LVector> bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
 
     LVector jetp4(jetTool->corrJet[ijet]);
     float csv(jet.bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags"));
-    float csvd(-999.);
+    float csvd(-999.), csvdf(-999.);
     TString cmssw_rel = getenv("CMSSW_BASE");
     if (cmssw_rel.Contains("CMSSW_8"))
       csvd = jet.bDiscriminator("deepFlavourJetTags:probb")+jet.bDiscriminator("deepFlavourJetTags:probbb");
-    else
+    else {
       csvd = jet.bDiscriminator("pfDeepCSVJetTags:probb")+jet.bDiscriminator("pfDeepCSVJetTags:probbb");
+      csvdf = jet.bDiscriminator("pfDeepFlavourJetTags:probb")+jet.bDiscriminator("pfDeepFlavourJetTags:problepb")
+             +jet.bDiscriminator("pfDeepFlavourJetTags:probbb");
+    }
 
     bool isLep = jetTool->leptonInJet(jet, sig_leps);
     bool looseID = jetTool->idJet(jet, jetTool->kLoose);
@@ -463,6 +474,7 @@ vector<LVector> bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
       baby.jets_gs_index().push_back(-1);  //filled in writeMC
       baby.jets_csv().push_back(csv);
       baby.jets_csvd().push_back(csvd);
+      baby.jets_csvdf().push_back(csvdf);
  
       if(!isLep && goodPtEta){
         jetsys_p4 += jet.p4();
@@ -478,6 +490,10 @@ vector<LVector> bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
         if(csvd > jetTool->DeepCSVMedium) baby.nbdm()++;
         else jetsys_nobd_p4 += jet.p4();
         if(csvd > jetTool->DeepCSVTight)  baby.nbdt()++;
+
+        if(csvdf > jetTool->DeepFlavourLoose)  baby.nbdfl()++;
+        if(csvdf > jetTool->DeepFlavourMedium) baby.nbdfm()++;
+        if(csvdf > jetTool->DeepFlavourTight)  baby.nbdft()++;
       }
     } 
     
@@ -904,6 +920,60 @@ void bmaker_full::writeFatJets(){
 
 }
 
+void bmaker_full::writeAk8Jets(edm::Handle<edm::View<pat::Jet>> &ak8jets){
+
+  baby.nak8jets() = 0;
+  for (unsigned idx=0; idx<ak8jets->size(); ++idx){
+    const auto &jet = ak8jets->at(idx);
+    JetHelper jet_helper(&jet);
+    bool goodPtEta = jet.pt() > jetTool->JetPtCut && fabs(jet.eta()) <= jetTool->JetEtaCut;
+    if(goodPtEta) {
+      baby.nak8jets()++;
+      baby.ak8jets_pt().push_back(jet.pt());
+      baby.ak8jets_eta().push_back(jet.eta());
+      baby.ak8jets_phi().push_back(jet.phi());
+      baby.ak8jets_m().push_back(jet.mass());
+      // jet score prediction
+      // Nominal
+      const auto& nnpreds = fatjetNN_->predict(jet_helper);
+      FatJetNNHelper nn(nnpreds);
+      // binarized score (normalized by qcd)
+      baby.ak8jets_nom_bin_top().push_back(nn.get_binarized_score_top());
+      baby.ak8jets_nom_bin_w().push_back(nn.get_binarized_score_w());
+      baby.ak8jets_nom_bin_z().push_back(nn.get_binarized_score_z());
+      baby.ak8jets_nom_bin_zbb().push_back(nn.get_binarized_score_zbb());
+      baby.ak8jets_nom_bin_hbb().push_back(nn.get_binarized_score_hbb());
+      baby.ak8jets_nom_bin_h4q().push_back(nn.get_binarized_score_h4q());
+      // raw score
+      baby.ak8jets_nom_raw_top().push_back(nn.get_raw_score_top());
+      baby.ak8jets_nom_raw_w().push_back(nn.get_raw_score_w());
+      baby.ak8jets_nom_raw_z().push_back(nn.get_raw_score_z());
+      baby.ak8jets_nom_raw_zbb().push_back(nn.get_raw_score_zbb());
+      baby.ak8jets_nom_raw_hbb().push_back(nn.get_raw_score_hbb());
+      baby.ak8jets_nom_raw_h4q().push_back(nn.get_raw_score_h4q());
+      baby.ak8jets_nom_raw_qcd().push_back(nn.get_raw_score_qcd());
+      // Decorrelated
+      const auto& mdpreds = decorrNN_->predict(jet_helper);
+      FatJetNNHelper md(mdpreds);
+      // binarized score (normalized by qcd)
+      baby.ak8jets_decor_bin_top().push_back(md.get_binarized_score_top());
+      baby.ak8jets_decor_bin_w().push_back(md.get_binarized_score_w());
+      baby.ak8jets_decor_bin_z().push_back(md.get_binarized_score_z());
+      baby.ak8jets_decor_bin_zbb().push_back(md.get_binarized_score_zbb());
+      baby.ak8jets_decor_bin_hbb().push_back(md.get_binarized_score_hbb());
+      baby.ak8jets_decor_bin_h4q().push_back(md.get_binarized_score_h4q());
+      // raw score
+      baby.ak8jets_decor_raw_top().push_back(md.get_raw_score_top());
+      baby.ak8jets_decor_raw_w().push_back(md.get_raw_score_w());
+      baby.ak8jets_decor_raw_z().push_back(md.get_raw_score_z());
+      baby.ak8jets_decor_raw_zbb().push_back(md.get_raw_score_zbb());
+      baby.ak8jets_decor_raw_hbb().push_back(md.get_raw_score_hbb());
+      baby.ak8jets_decor_raw_h4q().push_back(md.get_raw_score_h4q());
+      baby.ak8jets_decor_raw_qcd().push_back(md.get_raw_score_qcd());
+    }
+  }
+}
+
 vCands bmaker_full::writeMuons(edm::Handle<pat::MuonCollection> muons, 
                                edm::Handle<pat::PackedCandidateCollection> pfcands, 
                                edm::Handle<reco::VertexCollection> vtx,
@@ -913,7 +983,7 @@ vCands bmaker_full::writeMuons(edm::Handle<pat::MuonCollection> muons,
   baby.nmus() = 0; baby.nvmus() = 0;
 
   set<unsigned> badmu_idx, badmu_dupl_idx;
-  if (isData && !outname.Contains("Run2017")) {
+  if (isData && !outname.Contains("Run2017") && !outname.Contains("Run2018")) {
     badmu_idx = lepTool->badGlobalMuonSelector(vtx, muons, false);
     badmu_dupl_idx = lepTool->badGlobalMuonSelector(vtx, muons, true);
   }
@@ -923,7 +993,8 @@ vCands bmaker_full::writeMuons(edm::Handle<pat::MuonCollection> muons,
     //Save muons that were demoted from isPF in 8_0_26_patch1 in order to debug Giovanni badMuon flags
     bool demoted(false);
     //userInt has old value of isPFMuon()
-    if(!outname.Contains("Run2017"))
+
+    if(!outname.Contains("Run2017") && !outname.Contains("Run2018"))
     	if(isData && !lep.isPFMuon() && lep.userInt("muonsCleaned:oldPF")) demoted = true;
 
     bool isBadMu(false), isBadDuplMu(false);
@@ -2089,7 +2160,8 @@ bmaker_full::bmaker_full(const edm::ParameterSet& iConfig):
   tok_extLHEProducer_(consumes<LHEEventProduct>(edm::InputTag("externalLHEProducer"))),
   tok_source_(consumes<LHEEventProduct>(edm::InputTag("source"))),
   tok_generator_(consumes<GenEventInfoProduct>(edm::InputTag("generator"))),
-  tok_genlumiheader_(consumes<GenLumiInfoHeader,edm::InLumi>(edm::InputTag("generator")))
+  tok_genlumiheader_(consumes<GenLumiInfoHeader,edm::InLumi>(edm::InputTag("generator"))),
+  tok_deepJetToken_(consumes<edm::View<pat::Jet> >(edm::InputTag("slimmedJetsAK8")))
 {
   time(&startTime);
 
@@ -2101,6 +2173,22 @@ bmaker_full::bmaker_full(const edm::ParameterSet& iConfig):
   weightTool = new weight_tools();
   eventTool  = new event_tools(outname);
   
+  string deepJetDataPath = "NNKit/data/ak8";
+  deepJetR = 0.8;
+  auto cc = consumesCollector();
+  fatjetNN_ = std::make_unique<FatJetNN>(iConfig, cc, deepJetR);
+  // load json for input variable transformation
+  fatjetNN_->load_json(edm::FileInPath(deepJetDataPath+"/full/preprocessing.json").fullPath());
+  // load DNN model and parameter files
+  fatjetNN_->load_model(edm::FileInPath(deepJetDataPath+"/full/resnet-symbol.json").fullPath(),
+      edm::FileInPath(deepJetDataPath+"/full/resnet.params").fullPath());
+
+  decorrNN_ = std::make_unique<FatJetNN>(iConfig, cc, deepJetR);
+  // load json for input variable transformation
+  decorrNN_->load_json(edm::FileInPath(deepJetDataPath+"/decorrelated/preprocessing.json").fullPath());
+  // load DNN model and parameter files
+  decorrNN_->load_model(edm::FileInPath(deepJetDataPath+"/decorrelated/resnet-symbol.json").fullPath(),
+      edm::FileInPath(deepJetDataPath+"/decorrelated/resnet.params").fullPath());
 
   outfile = new TFile(outname, "recreate");
   outfile->cd();

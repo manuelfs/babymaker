@@ -6,9 +6,9 @@ then
     printf "#define PRE_CMSSW_9_4\n\n" > bmaker/interface/release.hh
 fi
 
-if [[ $CMSSW_BASE == *"CMSSW_9_4"* ]]
+if [[ $CMSSW_BASE == *"CMSSW_9_4"* ]] || [[ $CMSSW_BASE == *"CMSSW_10"* ]]
 then 
-    printf "#define CMSSW_9_4\n\n" > bmaker/interface/release.hh
+    printf "#define POST_CMSSW_9_4\n\n" > bmaker/interface/release.hh
 fi
 
 # ## Checking if the event filter list file exist, and if not, download it

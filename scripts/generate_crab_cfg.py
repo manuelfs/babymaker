@@ -52,12 +52,51 @@ def getNumberOfEvents(dataset):
 doMC = False 
 doData = True 
 doData2016 = False 
+doData2017 = False 
 doFastSimScans = False
 doMiscellaneous = False
 
 datasets = [[]]
 
 if doData:
+
+    datasets.append(["/MET/Run2018A-PromptReco-v1/MINIAOD"])
+    datasets.append(["/MET/Run2018A-PromptReco-v2/MINIAOD"])
+    datasets.append(["/MET/Run2018A-PromptReco-v3/MINIAOD"])
+    datasets.append(["/MET/Run2018B-PromptReco-v1/MINIAOD"])
+    datasets.append(["/MET/Run2018B-PromptReco-v2/MINIAOD"])
+    datasets.append(["/MET/Run2018C-PromptReco-v1/MINIAOD"])
+    datasets.append(["/MET/Run2018C-PromptReco-v2/MINIAOD"])
+    datasets.append(["/MET/Run2018C-PromptReco-v3/MINIAOD"])
+
+    datasets.append(["/EGamma/Run2018A-PromptReco-v1/MINIAOD"])
+    datasets.append(["/EGamma/Run2018A-PromptReco-v2/MINIAOD"])
+    datasets.append(["/EGamma/Run2018A-PromptReco-v3/MINIAOD"])
+    datasets.append(["/EGamma/Run2018B-PromptReco-v1/MINIAOD"])
+    datasets.append(["/EGamma/Run2018B-PromptReco-v2/MINIAOD"])
+    datasets.append(["/EGamma/Run2018C-PromptReco-v1/MINIAOD"])
+    datasets.append(["/EGamma/Run2018C-PromptReco-v2/MINIAOD"])
+    datasets.append(["/EGamma/Run2018C-PromptReco-v3/MINIAOD"])
+
+    datasets.append(["/SingleMuon/Run2018A-PromptReco-v1/MINIAOD"])
+    datasets.append(["/SingleMuon/Run2018A-PromptReco-v2/MINIAOD"])
+    datasets.append(["/SingleMuon/Run2018A-PromptReco-v3/MINIAOD"])
+    datasets.append(["/SingleMuon/Run2018B-PromptReco-v1/MINIAOD"])
+    datasets.append(["/SingleMuon/Run2018B-PromptReco-v2/MINIAOD"])
+    datasets.append(["/SingleMuon/Run2018C-PromptReco-v1/MINIAOD"])
+    datasets.append(["/SingleMuon/Run2018C-PromptReco-v2/MINIAOD"])
+    datasets.append(["/SingleMuon/Run2018C-PromptReco-v3/MINIAOD"])
+
+    datasets.append(["/JetHT/Run2018A-PromptReco-v1/MINIAOD"])
+    datasets.append(["/JetHT/Run2018A-PromptReco-v2/MINIAOD"])
+    datasets.append(["/JetHT/Run2018A-PromptReco-v3/MINIAOD"])
+    datasets.append(["/JetHT/Run2018B-PromptReco-v1/MINIAOD"])
+    datasets.append(["/JetHT/Run2018B-PromptReco-v2/MINIAOD"])
+    datasets.append(["/JetHT/Run2018C-PromptReco-v1/MINIAOD"])
+    datasets.append(["/JetHT/Run2018C-PromptReco-v2/MINIAOD"])
+    datasets.append(["/JetHT/Run2018C-PromptReco-v3/MINIAOD"])
+
+if doData2017:
     datasets.append(["/JetHT/Run2017B-17Nov2017-v1/MINIAOD"])
     datasets.append(["/JetHT/Run2017C-17Nov2017-v1/MINIAOD"])
     datasets.append(["/JetHT/Run2017D-17Nov2017-v1/MINIAOD"])
@@ -81,42 +120,6 @@ if doData:
     datasets.append(["/SingleMuon/Run2017D-17Nov2017-v1/MINIAOD"])
     datasets.append(["/SingleMuon/Run2017E-17Nov2017-v1/MINIAOD"])
     datasets.append(["/SingleMuon/Run2017F-17Nov2017-v1/MINIAOD"])
-
-    #datasets.append(["/MET/Run2017B-PromptReco-v1/MINIAOD"])
-    #datasets.append(["/MET/Run2017B-PromptReco-v2/MINIAOD"])
-    #datasets.append(["/MET/Run2017C-PromptReco-v1/MINIAOD"])
-    #datasets.append(["/MET/Run2017C-PromptReco-v2/MINIAOD"])
-    #datasets.append(["/MET/Run2017C-PromptReco-v3/MINIAOD"])
-    #datasets.append(["/MET/Run2017D-PromptReco-v1/MINIAOD"])
-    # datasets.append(["/MET/Run2017E-PromptReco-v1/MINIAOD"])
-    # datasets.append(["/MET/Run2017F-PromptReco-v1/MINIAOD"])
-
-    #datasets.append(["/SingleElectron/Run2017B-PromptReco-v1/MINIAOD"])
-    #datasets.append(["/SingleElectron/Run2017B-PromptReco-v2/MINIAOD"])
-    #datasets.append(["/SingleElectron/Run2017C-PromptReco-v1/MINIAOD"])
-    #datasets.append(["/SingleElectron/Run2017C-PromptReco-v2/MINIAOD"])
-    #datasets.append(["/SingleElectron/Run2017C-PromptReco-v3/MINIAOD"])
-    #datasets.append(["/SingleElectron/Run2017D-PromptReco-v1/MINIAOD"])
-    # datasets.append(["/SingleElectron/Run2017E-PromptReco-v1/MINIAOD"])
-    # datasets.append(["/SingleElectron/Run2017F-PromptReco-v1/MINIAOD"])
-
-    #datasets.append(["/SingleMuon/Run2017B-PromptReco-v1/MINIAOD"])
-    #datasets.append(["/SingleMuon/Run2017B-PromptReco-v2/MINIAOD"])
-    #datasets.append(["/SingleMuon/Run2017C-PromptReco-v1/MINIAOD"])
-    #datasets.append(["/SingleMuon/Run2017C-PromptReco-v2/MINIAOD"])
-    #datasets.append(["/SingleMuon/Run2017C-PromptReco-v3/MINIAOD"])
-    #datasets.append(["/SingleMuon/Run2017D-PromptReco-v1/MINIAOD"])
-    # datasets.append(["/SingleMuon/Run2017E-PromptReco-v1/MINIAOD"])
-    # datasets.append(["/SingleMuon/Run2017F-PromptReco-v1/MINIAOD"])
-
-    #datasets.append(["/JetHT/Run2017B-PromptReco-v1/MINIAOD"])
-    #datasets.append(["/JetHT/Run2017B-PromptReco-v2/MINIAOD"])
-    #datasets.append(["/JetHT/Run2017C-PromptReco-v1/MINIAOD"])
-    #datasets.append(["/JetHT/Run2017C-PromptReco-v2/MINIAOD"])
-    #datasets.append(["/JetHT/Run2017C-PromptReco-v3/MINIAOD"])
-    #datasets.append(["/JetHT/Run2017D-PromptReco-v1/MINIAOD"])
-    # datasets.append(["/JetHT/Run2017E-PromptReco-v1/MINIAOD"])
-    # datasets.append(["/JetHT/Run2017F-PromptReco-v1/MINIAOD"])
 
 if doData2016:
     datasets.append(["/MET/Run2016B-03Feb2017_ver2-v2/MINIAOD"])

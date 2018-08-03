@@ -61,7 +61,7 @@ bool photon_tools::electronMatch(const reco::SuperClusterRef &sc, const edm::Han
     //match electron to supercluster
     if (it->superCluster()!=sc) continue;
     //check expected inner hits
-#ifdef CMSSW_9_4
+#ifdef POST_CMSSW_9_4
     if (it->gsfTrack()->hitPattern().numberOfAllHits(reco::HitPattern::MISSING_INNER_HITS) > 0) continue;
 #else 
     if (it->gsfTrack()->hitPattern().numberOfHits(reco::HitPattern::MISSING_INNER_HITS) > 0) continue;

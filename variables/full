@@ -77,6 +77,9 @@ int nbt
 int nbdl
 int nbdm
 int nbdt
+int nbdfl
+int nbdfm
+int nbdft
 
 int njets_ra2
 int njets_clean
@@ -105,6 +108,7 @@ std::vector<float> jets_phi
 std::vector<float> jets_m
 std::vector<float> jets_csv
 std::vector<float> jets_csvd
+std::vector<float> jets_csvdf
 std::vector<float> jets_gen_pt
 std::vector<bool>  jets_islep
 std::vector<bool>  jets_isisr
@@ -121,6 +125,41 @@ std::vector<bool>  jets_h1
 std::vector<bool>  jets_h1d
 std::vector<bool>  jets_h2
 std::vector<bool>  jets_h2d
+
+
+int nak8jets
+std::vector<float> ak8jets_pt
+std::vector<float> ak8jets_eta
+std::vector<float> ak8jets_phi
+std::vector<float> ak8jets_m
+
+std::vector<float> ak8jets_nom_bin_top
+std::vector<float> ak8jets_nom_bin_w
+std::vector<float> ak8jets_nom_bin_z
+std::vector<float> ak8jets_nom_bin_zbb
+std::vector<float> ak8jets_nom_bin_hbb
+std::vector<float> ak8jets_nom_bin_h4q
+std::vector<float> ak8jets_nom_raw_top
+std::vector<float> ak8jets_nom_raw_w
+std::vector<float> ak8jets_nom_raw_z
+std::vector<float> ak8jets_nom_raw_zbb
+std::vector<float> ak8jets_nom_raw_hbb
+std::vector<float> ak8jets_nom_raw_h4q
+std::vector<float> ak8jets_nom_raw_qcd
+
+std::vector<float> ak8jets_decor_bin_top
+std::vector<float> ak8jets_decor_bin_w
+std::vector<float> ak8jets_decor_bin_z
+std::vector<float> ak8jets_decor_bin_zbb
+std::vector<float> ak8jets_decor_bin_hbb
+std::vector<float> ak8jets_decor_bin_h4q
+std::vector<float> ak8jets_decor_raw_top
+std::vector<float> ak8jets_decor_raw_w
+std::vector<float> ak8jets_decor_raw_z
+std::vector<float> ak8jets_decor_raw_zbb
+std::vector<float> ak8jets_decor_raw_hbb
+std::vector<float> ak8jets_decor_raw_h4q
+std::vector<float> ak8jets_decor_raw_qcd
 
 ######### b-jet pairs ###########
 std::vector<float> dr_bb

@@ -17,14 +17,14 @@ on lxplus:
     cmsrel CMSSW_8_0_26_patch1
     cd CMSSW_8_0_26_patch1/src
     cmsenv
-    git cms-init
-    git cms-merge-topic -u cms-met:METRecipe_8020
-    git cms-merge-topic -u cms-met:fromCMSSW_8_0_20_postICHEPfilter
-    git cms-merge-topic -u mverzett:DeepFlavour-from-CMSSW_8_0_21
-    mkdir RecoBTag/DeepFlavour/data/
-    cd RecoBTag/DeepFlavour/data/
-    wget http://home.fnal.gov/~verzetti//DeepFlavour/training/DeepFlavourNoSL.json
-    cd -
+	git clone git@github.com:cms-jet/JetToolbox.git JMEAnalysis/JetToolbox -b jetToolbox_80X_V3
+	git clone ssh://git@gitlab.cern.ch:7999/DeepAK8/NNKit.git
+	cp NNKit/misc/*.xml $CMSSW_BASE/config/toolbox/$SCRAM_ARCH/tools/selected
+	scram setup openblas
+	scram setup mxnet_predict
+	rm $CMSSW_BASE/external/$SCRAM_ARCH/lib/libmxnet_predict.so
+	cp NNKit/misc/lib/libmxnet_predict.so $CMSSW_BASE/external/$SCRAM_ARCH/lib/libmxnet_predict.so
+	scram b -j16
     git clone git@github.com:manuelfs/babymaker
     cd babymaker
     ./compile.sh

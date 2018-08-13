@@ -144,7 +144,7 @@ process.baby_full = cms.EDAnalyzer('bmaker_full',
                                     addBTagWeights = cms.bool(True),
                                     isFastSim = cms.bool(fastsim),
                                     debugMode = cms.bool(False),
-									akjets = cms.untracked.InputTag('selectedPatJetsAK8PFPuppi'),
+									ak8jets = cms.untracked.InputTag('selectedPatJetsAK8PFPuppi'),
 									subjets = cms.untracked.InputTag('selectedPatJetsAK8PFPuppiSoftDropPacked')
 )
 

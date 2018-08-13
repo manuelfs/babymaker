@@ -93,3 +93,6 @@ keep mus_bad_trkmu
 
 ## Clean up
 drop *vvvl*
+
+## Deep AK8 Branches
+keep *ak8*

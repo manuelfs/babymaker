@@ -57,7 +57,7 @@ if "Run201" in taskname:
     elif ("Run2016F2" in taskname): config.Data.runRange = '278802-278808'
 else:
     config.Data.splitting = 'FileBased'
-    config.Data.unitsPerJob = 4
+    config.Data.unitsPerJob = 2
 
 config.Data.publication = False # used to be True for cfA production
 # config.Data.publishDBS = 'phys03'

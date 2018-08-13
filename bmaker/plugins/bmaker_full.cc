@@ -220,15 +220,15 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   decorrNN_->readEvent(iEvent, iSetup);
 
   // loop over the jets
-  edm::Handle<edm::View<pat::Jet>> akjets;
-  iEvent.getByToken(jetToken_, akjets);
+  edm::Handle<edm::View<pat::Jet>> ak8jets;
+  iEvent.getByToken(jetToken_, ak8jets);
 
   edm::Handle<pat::JetCollection> sdjetsHandle;
   if (useReclusteredJets_) iEvent.getByToken(sdjetToken_, sdjetsHandle);
 //   cout << "Entering ak8 Jet loop (debug)" << endl;
-  baby.nakjets08() = 0;
-  for (unsigned idx=0; idx<akjets->size(); ++idx){
-    const auto &jet = akjets->at(idx);
+  baby.nak8jets() = 0;
+  for (unsigned idx=0; idx<ak8jets->size(); ++idx){
+    const auto &jet = ak8jets->at(idx);
 //     cout << "In ak8 jet loop, jet # (debug) "<< idx << endl;
     JetHelper jet_helper(&jet);
     // reclustered fatjets do not have subjets linked to them, so need to be set manually
@@ -236,48 +236,48 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 //	bool looseID = jetTool->idJet(jet, jetTool->kLoose);
 	bool goodPtEta = jet.pt() > jetTool->JetPtCut && fabs(jet.eta()) <= jetTool->JetEtaCut;
 	if(goodPtEta) {
-		baby.nakjets08()++;
-		baby.akjets08_pt().push_back(jet.pt());
-		baby.akjets08_eta().push_back(jet.eta());
-		baby.akjets08_phi().push_back(jet.phi());
-		baby.akjets08_m().push_back(jet.mass());
+		baby.nak8jets()++;
+		baby.ak8jets_pt().push_back(jet.pt());
+		baby.ak8jets_eta().push_back(jet.eta());
+		baby.ak8jets_phi().push_back(jet.phi());
+		baby.ak8jets_m().push_back(jet.mass());
 		// jet score prediction
 			// Nominal
 	    const auto& nnpreds = fatjetNN_->predict(jet_helper);
 	    FatJetNNHelper nn(nnpreds);
 				// binarized score (normalized by qcd)
-	    baby.akjets08_deep_nominal_bin_top().push_back(nn.get_binarized_score_top());
-		baby.akjets08_deep_nominal_bin_w().push_back(nn.get_binarized_score_w());
-		baby.akjets08_deep_nominal_bin_z().push_back(nn.get_binarized_score_z());
-		baby.akjets08_deep_nominal_bin_zbb().push_back(nn.get_binarized_score_zbb());
-		baby.akjets08_deep_nominal_bin_hbb().push_back(nn.get_binarized_score_hbb());
-		baby.akjets08_deep_nominal_bin_h4q().push_back(nn.get_binarized_score_h4q());
+	    baby.ak8jets_nom_bin_top().push_back(nn.get_binarized_score_top());
+		baby.ak8jets_nom_bin_w().push_back(nn.get_binarized_score_w());
+		baby.ak8jets_nom_bin_z().push_back(nn.get_binarized_score_z());
+		baby.ak8jets_nom_bin_zbb().push_back(nn.get_binarized_score_zbb());
+		baby.ak8jets_nom_bin_hbb().push_back(nn.get_binarized_score_hbb());
+		baby.ak8jets_nom_bin_h4q().push_back(nn.get_binarized_score_h4q());
 				// raw score
-		baby.akjets08_deep_nominal_raw_top().push_back(nn.get_raw_score_top());
-		baby.akjets08_deep_nominal_raw_w().push_back(nn.get_raw_score_w());
-		baby.akjets08_deep_nominal_raw_z().push_back(nn.get_raw_score_z());
-		baby.akjets08_deep_nominal_raw_zbb().push_back(nn.get_raw_score_zbb());
-		baby.akjets08_deep_nominal_raw_hbb().push_back(nn.get_raw_score_hbb());
-		baby.akjets08_deep_nominal_raw_h4q().push_back(nn.get_raw_score_h4q());
-		baby.akjets08_deep_nominal_raw_qcd().push_back(nn.get_raw_score_qcd());
-			// Decorrelated
+		baby.ak8jets_nom_raw_top().push_back(nn.get_raw_score_top());
+		baby.ak8jets_nom_raw_w().push_back(nn.get_raw_score_w());
+		baby.ak8jets_nom_raw_z().push_back(nn.get_raw_score_z());
+		baby.ak8jets_nom_raw_zbb().push_back(nn.get_raw_score_zbb());
+		baby.ak8jets_nom_raw_hbb().push_back(nn.get_raw_score_hbb());
+		baby.ak8jets_nom_raw_h4q().push_back(nn.get_raw_score_h4q());
+		baby.ak8jets_nom_raw_qcd().push_back(nn.get_raw_score_qcd());
+				// Decorrelated
 		const auto& mdpreds = decorrNN_->predict(jet_helper);
 		FatJetNNHelper md(mdpreds);
 				// binarized score (normalized by qcd)
-	    baby.akjets08_deep_decor_bin_top().push_back(nn.get_binarized_score_top());
-		baby.akjets08_deep_decor_bin_w().push_back(nn.get_binarized_score_w());
-		baby.akjets08_deep_decor_bin_z().push_back(nn.get_binarized_score_z());
-		baby.akjets08_deep_decor_bin_zbb().push_back(nn.get_binarized_score_zbb());
-		baby.akjets08_deep_decor_bin_hbb().push_back(nn.get_binarized_score_hbb());
-		baby.akjets08_deep_decor_bin_h4q().push_back(nn.get_binarized_score_h4q());
+	    baby.ak8jets_decor_bin_top().push_back(md.get_binarized_score_top());
+		baby.ak8jets_decor_bin_w().push_back(md.get_binarized_score_w());
+		baby.ak8jets_decor_bin_z().push_back(md.get_binarized_score_z());
+		baby.ak8jets_decor_bin_zbb().push_back(md.get_binarized_score_zbb());
+		baby.ak8jets_decor_bin_hbb().push_back(md.get_binarized_score_hbb());
+		baby.ak8jets_decor_bin_h4q().push_back(md.get_binarized_score_h4q());
 				// raw score
-		baby.akjets08_deep_decor_raw_top().push_back(nn.get_raw_score_top());
-		baby.akjets08_deep_decor_raw_w().push_back(nn.get_raw_score_w());
-		baby.akjets08_deep_decor_raw_z().push_back(nn.get_raw_score_z());
-		baby.akjets08_deep_decor_raw_zbb().push_back(nn.get_raw_score_zbb());
-		baby.akjets08_deep_decor_raw_hbb().push_back(nn.get_raw_score_hbb());
-		baby.akjets08_deep_decor_raw_h4q().push_back(nn.get_raw_score_h4q());
-		baby.akjets08_deep_decor_raw_qcd().push_back(nn.get_raw_score_qcd());
+		baby.ak8jets_decor_raw_top().push_back(md.get_raw_score_top());
+		baby.ak8jets_decor_raw_w().push_back(md.get_raw_score_w());
+		baby.ak8jets_decor_raw_z().push_back(md.get_raw_score_z());
+		baby.ak8jets_decor_raw_zbb().push_back(md.get_raw_score_zbb());
+		baby.ak8jets_decor_raw_hbb().push_back(md.get_raw_score_hbb());
+		baby.ak8jets_decor_raw_h4q().push_back(md.get_raw_score_h4q());
+		baby.ak8jets_decor_raw_qcd().push_back(md.get_raw_score_qcd());
 	}
   }
   ///////////////////////////////////////////
@@ -2206,7 +2206,7 @@ bmaker_full::bmaker_full(const edm::ParameterSet& iConfig):
   tok_badChCandFilter_(consumes<bool>(edm::InputTag("BadChargedCandidateFilter"))),
   tok_badPFMuonFilter_(consumes<bool>(edm::InputTag("BadPFMuonFilter"))),
   // AK8
-  jetToken_(consumes<edm::View<pat::Jet>>(iConfig.getUntrackedParameter<edm::InputTag>("akjets", edm::InputTag("slimmedJetsAK8")))),
+  jetToken_(consumes<edm::View<pat::Jet>>(iConfig.getUntrackedParameter<edm::InputTag>("ak8jets", edm::InputTag("slimmedJetsAK8")))),
   sdjetToken_(consumes<pat::JetCollection>(iConfig.getUntrackedParameter<edm::InputTag>("subjets", edm::InputTag("slimmedJetsAK8PFPuppiSoftDropPacked")))),
   jetR_(iConfig.getUntrackedParameter<double>("jetR", 0.8)),
   useReclusteredJets_(iConfig.getUntrackedParameter<bool>("useReclusteredJets", true)),

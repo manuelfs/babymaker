@@ -38,7 +38,7 @@ config.section_("JobType")
 config.JobType.pluginName = 'Analysis'
 config.JobType.psetName = 'babymaker/bmaker/python/bmaker_full_cfg.py'
 config.JobType.disableAutomaticOutputCollection = True
-config.JobType.sendExternalFolder = True
+# config.JobType.sendExternalFolder = True #DAK8
 config.JobType.outputFiles = ['fullbaby_' + datasetID + '.root']
 config.JobType.pyCfgParams = ['nEventsSample=' + str(nevents), 'outputFile=fullbaby_' + datasetID + '.root']
 

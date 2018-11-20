@@ -120,10 +120,11 @@ process.load('Configuration.StandardSequences.Services_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 process.GlobalTag.globaltag = globalTag
 
+# DAK8
 # needed for DeepAK8
-process.TransientTrackBuilderESProducer = cms.ESProducer("TransientTrackBuilderESProducer",
-    ComponentName=cms.string('TransientTrackBuilder')
-)
+# process.TransientTrackBuilderESProducer = cms.ESProducer("TransientTrackBuilderESProducer",
+#     ComponentName=cms.string('TransientTrackBuilder')
+# )
 
 process.baby_full = cms.EDAnalyzer('bmaker_full',
                                     condor_subtime = cms.string(options.condorSubTime),

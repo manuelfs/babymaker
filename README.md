@@ -50,14 +50,15 @@ Setup for running on 2018 data and DeepAK8:
     cmsrel CMSSW_10_2_1
     cd CMSSW_10_2_1/src
     cmsenv
-    git clone ssh://git@gitlab.cern.ch:7999/DeepAK8/NNKit.git
-    # setup mxnet library
-    cp NNKit/misc/mxnet_predict.xml $CMSSW_BASE/config/toolbox/$SCRAM_ARCH/tools/selected
-    scram setup mxnet_predict
-    rm $CMSSW_BASE/external/$SCRAM_ARCH/lib/libmxnet_predict.so
-    cp NNKit/misc/lib/libmxnet_predict.so $CMSSW_BASE/external/$SCRAM_ARCH/lib/libmxnet_predict.so
-    # compile
-    scram b -j16
+	# DeepAK8 setup (currently commented out)
+    	git clone ssh://git@gitlab.cern.ch:7999/DeepAK8/NNKit.git
+    	# setup mxnet library
+    	cp NNKit/misc/mxnet_predict.xml $CMSSW_BASE/config/toolbox/$SCRAM_ARCH/tools/selected
+    	scram setup mxnet_predict
+    	rm $CMSSW_BASE/external/$SCRAM_ARCH/lib/libmxnet_predict.so
+    	cp NNKit/misc/lib/libmxnet_predict.so $CMSSW_BASE/external/$SCRAM_ARCH/lib/libmxnet_predict.so
+    	# compile
+    	scram b -j16
     git clone git@github.com:manuelfs/babymaker
     cd babymaker
     ./compile.sh

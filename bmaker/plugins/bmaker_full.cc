@@ -194,14 +194,14 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
                 baby.higd_am(), baby.higd_dm(), baby.higd_drmax(), baby.higd_bin(), baby.mctd());
   writeBBVars(all_baby_jets, sig_leps);
   writeFatJets();
-  
+/* DAK8
   // DeepAk8
   fatjetNN_->readEvent(iEvent, iSetup);
   decorrNN_->readEvent(iEvent, iSetup);
   edm::Handle<edm::View<pat::Jet>> ak8jets;
   iEvent.getByToken(tok_deepJetToken_, ak8jets);
   writeAk8Jets(ak8jets);
-
+*/
   if (doSystematics) {
     for (unsigned isys(0); isys<kSysLast; isys++){
       bool cluster_leps = false;
@@ -919,7 +919,7 @@ void bmaker_full::writeFatJets(){
                           baby, 1.4, jetTool->JetPtCut, cluster_leps);
 
 }
-
+/* DAK8
 void bmaker_full::writeAk8Jets(edm::Handle<edm::View<pat::Jet>> &ak8jets){
 
   baby.nak8jets() = 0;
@@ -978,7 +978,7 @@ void bmaker_full::writeAk8Jets(edm::Handle<edm::View<pat::Jet>> &ak8jets){
     }
   }
 }
-
+*/
 vCands bmaker_full::writeMuons(edm::Handle<pat::MuonCollection> muons, 
                                edm::Handle<pat::PackedCandidateCollection> pfcands, 
                                edm::Handle<reco::VertexCollection> vtx,
@@ -2165,8 +2165,10 @@ bmaker_full::bmaker_full(const edm::ParameterSet& iConfig):
   tok_extLHEProducer_(consumes<LHEEventProduct>(edm::InputTag("externalLHEProducer"))),
   tok_source_(consumes<LHEEventProduct>(edm::InputTag("source"))),
   tok_generator_(consumes<GenEventInfoProduct>(edm::InputTag("generator"))),
-  tok_genlumiheader_(consumes<GenLumiInfoHeader,edm::InLumi>(edm::InputTag("generator"))),
+  tok_genlumiheader_(consumes<GenLumiInfoHeader,edm::InLumi>(edm::InputTag("generator")))
+/* DAK8
   tok_deepJetToken_(consumes<edm::View<pat::Jet> >(edm::InputTag("slimmedJetsAK8")))
+*/
 {
   time(&startTime);
 
@@ -2177,7 +2179,7 @@ bmaker_full::bmaker_full(const edm::ParameterSet& iConfig):
   mcTool     = new mc_tools();
   weightTool = new weight_tools();
   eventTool  = new event_tools(outname);
-  
+/* 
   string deepJetDataPath = "NNKit/data/ak8";
   deepJetR = 0.8;
   auto cc = consumesCollector();
@@ -2194,7 +2196,7 @@ bmaker_full::bmaker_full(const edm::ParameterSet& iConfig):
   // load DNN model and parameter files
   decorrNN_->load_model(edm::FileInPath(deepJetDataPath+"/decorrelated/resnet-symbol.json").fullPath(),
       edm::FileInPath(deepJetDataPath+"/decorrelated/resnet.params").fullPath());
-
+*/
   outfile = new TFile(outname, "recreate");
   outfile->cd();
   baby.tree_.SetDirectory(outfile);

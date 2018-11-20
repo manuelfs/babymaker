@@ -73,6 +73,8 @@ elif "RunIISpring16MiniAOD" in outName:
   jecLabel = 'Spring16_23Sep2016V2_MC' # for ICHEP MC against re-reco data
 elif "RunIISummer16MiniAOD" in outName:
   jecLabel = 'Summer16_23Sep2016V3_MC'
+elif "RunIIFall17MiniAODv2" in outName:
+  jecLabel = 'Fall17_17Nov2017_V8_MC'
 elif "Run2017" in outName:
   jecLabel = 'Summer16_23Sep2016GV3_DATA'
 
@@ -97,6 +99,7 @@ else:
     # These only used for the official application of JECs
     globalTag = "80X_mcRun2_asymptotic_2016_miniAODv2"
     if "RunIISummer16MiniAOD" in outName: globalTag = "80X_mcRun2_asymptotic_2016_TrancheIV_v7"
+    elif "RunIIFall17MiniAODv2" in outName: globalTag = "94X_mc2017_realistic_v14"
     processRECO = "PAT"
     jecLevels = ['L1FastJet', 'L2Relative', 'L3Absolute']
 

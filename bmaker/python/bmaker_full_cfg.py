@@ -210,6 +210,10 @@ if doJEC:
     ## If you only want to re-correct and get the proper uncertainties, no reclustering
     runMetCorAndUncFromMiniAOD(process,
                                isData = isData,
+							   fixEE2017 = True,
+							   fixEE2017Params = {'userawPt': True, 'ptThreshold':50.0, 'miniEtaThreshold':2.65, 'maxEtaThreshold':3.139},
+							   postfix = "ModifiedMET"
+							   
     )
 
 process.dump=cms.EDAnalyzer('EventContentAnalyzer')

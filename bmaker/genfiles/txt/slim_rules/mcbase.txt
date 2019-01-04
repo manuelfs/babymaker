@@ -5,21 +5,19 @@ keep npv
 keep pass*
 keep event
 keep type
+keep is201*
 
 ## Hadronic
 keep ht
 keep st
 keep htx
+keep mht
+keep low_dphi
 keep met*
 keep njets
 keep nbm
 keep nbdm
 keep mj14
-keep ht40
-keep st40
-keep njets40
-keep nbm40
-keep mj40
 keep nisr
 
 ## Leptonic
@@ -45,11 +43,21 @@ keep m_tt
 keep *tru*
 drop ntrupv*
 
+## bb
+keep *bb*
+keep fromGS
+
 ## Weights
 keep weight
-keep w_*
-drop w_pdf
-keep eff_*
+keep w_lumi
+keep w_pu
+keep w_btag_deep
+keep w_isr
+keep w_lep
+keep w_fs_lep
+keep w_prefire
+keep eff_trig
+keep eff_jetid
 
 ## Jets
 keep jets_*
@@ -61,9 +69,6 @@ drop jets_h1
 drop jets_h1d
 drop jets_h2
 drop jets_h2d
-drop jets_gs_index
-drop jets_ntrub
-drop jets_ntruc
 
 ## Dileptons
 keep elel_m
@@ -74,22 +79,12 @@ keep els_pt
 keep els_sceta
 keep els_phi
 keep els_miniso
-keep els_reliso
-keep els_sigid
-keep els_tight
-keep els_scpt
 
 ## Muons
 keep mus_pt
 keep mus_eta
 keep mus_phi
 keep mus_miniso
-keep mus_reliso
-keep mus_sigid
-keep mus_tight
-keep mus_bad
-keep mus_bad_dupl
-keep mus_bad_trkmu
 
 ## Clean up
 drop *vvvl*

@@ -5,6 +5,7 @@ keep npv
 keep pass*
 keep event
 keep type
+keep is201*
 
 ## Higgsino specific
 keep hig*
@@ -55,11 +56,14 @@ drop ntrupv*
 keep weight
 keep w_lumi
 keep w_pu
-keep w_bhig*
+keep w_btag_deep
+keep w_bhig_deep
 keep w_isr
 keep w_lep
 keep w_fs_lep
-keep eff_*
+keep w_prefire
+keep eff_trig
+keep eff_jetid
 
 ## Jets
 keep jets_*

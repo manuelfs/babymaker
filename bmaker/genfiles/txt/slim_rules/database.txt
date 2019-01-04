@@ -8,10 +8,10 @@ keep lumiblock
 keep event
 keep type
 keep json*
+keep is201*
 
 ## Hadronic
 keep ht
-keep ht_ra2
 keep st
 keep htx
 keep mht
@@ -21,11 +21,6 @@ keep njets
 keep nbm
 keep nbdm
 keep mj14
-keep ht40
-keep st40
-keep njets40
-keep nbm40
-keep mj40
 keep nisr
 
 ## Leptonic
@@ -67,31 +62,18 @@ drop jets_h2
 drop jets_h2d
 
 ## Dileptons
-keep elel*
-keep mumu*
+keep elel_m
+keep mumu_m
 
 ## Electrons
 keep els_pt
-keep els_dpt_gs
 keep els_sceta
 keep els_phi
 keep els_miniso
-keep els_reliso
-keep els_sigid
-keep els_tight
-
-keep ph_dpt_gs
 
 ## Muons
 keep mus_pt
 keep mus_eta
 keep mus_phi
 keep mus_miniso
-keep mus_demoted
-keep mus_reliso
-keep mus_sigid
-keep mus_tight
-keep mus_bad
-keep mus_bad_dupl
-keep mus_bad_trkmu
 

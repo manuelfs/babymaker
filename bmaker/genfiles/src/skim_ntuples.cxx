@@ -32,11 +32,11 @@ int main(int argc, char *argv[]){
 
   if(argc < 3) {
     cout<<endl<<"Required at least 2 arguments: "
-	<<"./plot/skim_ntuples.exe infolder outfolder [cuts=\"nleps==1&&st>500&&met>200&&njets>=6&&nbm>=1&&mj14>250&&nveto==0\"] "
+	<<"./plot/skim_ntuples.exe infolder outfolder [cuts=\"nleps==1&&st>500&&met>200&&njets>=6&&nbdm>=1&&mj14>250&&nveto==0\"] "
 	<<"[njobs=0] [ijob=0] [filetag=\"\"]"<<endl<<endl;;
     return 1;
   }
-  TString folder(argv[1]), outfolder(argv[2]), cuts="nleps==1&&st>500&&met>200&&njets>=6&&nbm>=1&&mj14>250&&nveto==0";
+  TString folder(argv[1]), outfolder(argv[2]), cuts="nleps==1&&st>500&&met>200&&njets>=6&&nbdm>=1&&mj14>250&&nveto==0";
   if(argc >= 4) cuts = argv[3]; 
   unsigned njobs(0), ijob(0);
   if(argc >= 6) {
@@ -48,23 +48,22 @@ int main(int argc, char *argv[]){
 
   TString tag = cuts; // Using tag to avoid file names too long for TFile  
   if(cuts=="standard") cuts="nleps>=1&&st>500&&met>100";
+  if(cuts=="nl1met200ht500") cuts="nleps>=1&&ht>500&&met>200";
   if(cuts=="stdnj5") cuts="nleps>=1 && st>500 && met>100 && njets>=5";
-  if(cuts=="abcd") cuts="nleps==1&&st>500&&met>200&&njets>=6&&nbm>=1&&mj14>250&&nveto==0";
-  if(cuts=="baseline") cuts="nleps==1&&st>500&&met>200&&njets>=6&&nbm>=1";
+  if(cuts=="abcd") cuts="nleps==1&&st>500&&met>200&&njets>=6&&nbdm>=1&&mj14>250&&nveto==0";
+  if(cuts=="baseline") cuts="nleps==1&&st>500&&met>200&&njets>=6&&nbdm>=1";
   if(cuts=="sys_abcd") 
-    cuts = "nleps==1&&max(st,Max$(sys_st))>500&&max(met,Max$(sys_met))>200&&max(njets,Max$(sys_njets))>=6&&max(nbm,Max$(sys_nbm))>=1&&max(mj14,Max$(sys_mj14))>250";
+    cuts = "nleps==1&&max(st,Max$(sys_st))>500&&max(met,Max$(sys_met))>200&&max(njets,Max$(sys_njets))>=6&&max(nbdm,Max$(sys_nbdm))>=1&&max(mj14,Max$(sys_mj14))>250";
   if(cuts=="zcand")
     cuts = "nleps==2&&Max$(leps_pt)>40&&((elel_m>80&&elel_m<100)||(mumu_m>80&&mumu_m<100))";
   if(cuts=="dy_ht300")
     cuts = "nvleps==2&&nleps>=1&&Max$(leps_pt)>30&&((elelv_m>80&&elelv_m<100)||(mumuv_m>80&&mumuv_m<100))&&ht>300";
   if(cuts=="ttisr")
-    cuts = "nleps==2&&Max$(leps_pt)>40&&nbm==2";
+    cuts = "nleps==2&&Max$(leps_pt)>40&&nbdm==2";
   if(cuts=="wisr")
-    cuts = "met>100&&Max$(leps_pt)>40&&nbl==0";
+    cuts = "met>100&&Max$(leps_pt)>40&&nbdl==0";
   if(cuts=="wisrht200")
-    cuts = "ht>200&&met>100&&Max$(leps_pt)>40&&nbl==0";
-  if(cuts=="ttdilep_ht300")
-    cuts = "nels==1&&nmus==1&&Max$(leps_pt)>30&&ht>300&&met>100&&nbm>=1";
+    cuts = "ht>200&&met>100&&Max$(leps_pt)>40&&nbdl==0";
   if(cuts=="qcd")
     cuts = "ht>1000&&met<50&&(nvmus+nvels)==0";
   if(cuts=="qcd_njet10")
@@ -74,9 +73,9 @@ int main(int argc, char *argv[]){
   if(cuts=="mm_std_nj5mj250")
 	 cuts="Sum$(mm_nleps>=1&&mm_st>500&&mm_met>200&&mm_njets>=5&&mm_mj14_lep>250)>0||Sum$(mm_nleps>=1&&mm_st>500&&mm_met>200&&mm_njets>=5&&mm_mj14_nolep>250)>0";
   if(cuts=="rpvfit")
-    cuts = "max(st,Max$(sys_st))>1200&&max(njets,Max$(sys_njets))>=4&&max(nbm,Max$(sys_nbm))>=1&&(max(mj12,Max$(sys_mj12))>500)";
+    cuts = "max(st,Max$(sys_st))>1200&&max(njets,Max$(sys_njets))>=4&&max(nbdm,Max$(sys_nbdm))>=1&&(max(mj12,Max$(sys_mj12))>500)";
   if(cuts=="rpvregion")
-    cuts = "((nleps==0&&ht>1500)||(nleps==1&&ht>1200))&&njets>=4&&mj12>=300&&(nbm>=1||nbdm>=1)";
+    cuts = "((nleps==0&&ht>1500)||(nleps==1&&ht>1200))&&njets>=4&&mj12>=300&&(nbdm>=1||nbdm>=1)";
   if(cuts=="st1000")
     cuts = "max(st,Max$(sys_st))>1000";
   if(cuts=="llm60nj2")
@@ -88,14 +87,22 @@ int main(int argc, char *argv[]){
   
   //// Higgsino skims
   TString njcut = "njets>=4&&njets<=5";
+  TString sys_njcut = "(njets==4||sys_njets[1]==4||sys_njets[2]==4||njets==5||sys_njets[1]==5||sys_njets[2]==5)";
   TString nbcut = "&&(nbt>=2||nbdt>=2)";
+  TString sys_nbcut = "&&max(nbdt,Max$(sys_nbdt))>=2";
   TString zcand = "&&(mumu_m*(mumu_m>0)+elel_m*(elel_m>0))>80&&(mumu_m*(mumu_m>0)+elel_m*(elel_m>0))<100";
   TString higtrim = "&&higd_drmax<2.2&&higd_dm<=40&&higd_am<=200";
+  TString sys_higtrim = "&&min(higd_drmax,Min$(sys_higd_drmax))<2.2&&min(higd_dm,Min$(sys_higd_dm))<=40&&min(higd_am,Min$(sys_higd_am))<=200";
   if(cuts=="higqcd")   cuts = njcut      +"&& met>150 && nvleps==0";
   if(cuts=="higloose") cuts = njcut+nbcut+"&& met>150 && nvleps==0";
   if(cuts=="higtight") cuts = njcut+nbcut+"&& met>150 && nvleps==0 && ntks==0&&!low_dphi"+higtrim;
+  if(cuts=="higsys")   cuts = sys_njcut+sys_nbcut+"&& max(met,Max$(sys_met))>150 && nvleps==0 && ntks==0&&!low_dphi"+sys_higtrim;
   if(cuts=="higlep1")  cuts = njcut+nbcut+"&& nleps==1 && Max$(leps_pt)>30";
   if(cuts=="higlep2")  cuts = njcut+zcand+"&& nleps==2 && Max$(leps_pt)>40";
+
+  //// exploration skims
+  if(cuts=="nl2nj3nbdm2zveto")
+    cuts = "nleps>=2&&(elel_m<80||elel_m>100)&&(mumu_m<80||mumu_m>100)&&njets>=3&&nbdm>=2";
 
   if(cuts.Contains("mchi")){
     cuts.ReplaceAll("mchi","");

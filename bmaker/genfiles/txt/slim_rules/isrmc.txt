@@ -5,6 +5,7 @@ keep npv
 keep pass
 keep event
 keep type
+keep is201*
 
 ## Hadronic
 keep ht
@@ -12,33 +13,34 @@ keep st
 keep low_dphi
 keep met
 keep met_phi
-keep met_calo
-keep met_calo_phi
 keep njets
-keep nbm
-keep nbt
-keep nbl
+keep nb*
 keep mj14
 keep nisr
 keep jetsys*
 
 
 ## Leptonic
-keep leps*
+keep leps_pt
 keep nleps
 keep nels
 keep nmus
-keep nvleps
-keep nvels
-keep nvmus
-keep nveto
 keep mt
 
 ## MC
 keep stitch
-keep mgluino
-keep mlsp
-keep mc_*
+keep stitch_met
+keep nisr_me
+keep ht_isr_me
+keep ptll_me
+keep mc_pt
+keep mc_eta
+keep mc_phi
+keep mc_mass
+keep mc_id
+keep mc_mom
+keep mc_momidx
+keep mc_status
 keep nisr_me
 keep ht_isr_me
 keep m_tt
@@ -49,43 +51,25 @@ drop ntrupv*
 
 ## Weights
 keep weight
-keep w_*
-drop w_pdf
-keep eff_*
+keep w_btag_deep
+keep w_isr
+keep w_lep
+keep w_lumi
+keep w_pu
 
 ## Jets
-keep jets_*
-drop jets_fjet*_index
-drop *_nolep*
-drop jets_h1
-drop jets_h2
-drop jets_pt_res
+keep jets_pt
+keep jets_eta
+keep jets_phi
+keep jets_m
+keep jets_gen_pt
+keep jets_islep
+keep jets_hflavor
+keep jets_pflavor
 
-keep 
 ## Dileptons
-keep elel*_m
-keep mumu*_m
-keep elel*_pt
-keep mumu*_pt
+keep elel_m
+keep mumu_m
+keep elel_pt
+keep mumu_pt
 
-
-## Electrons
-keep els_pt
-keep els_sceta
-keep els_phi
-keep els_miniso
-keep els_reliso
-keep els_sigid
-keep els_tight
-
-## Muons
-keep mus_pt
-keep mus_eta
-keep mus_phi
-keep mus_miniso
-keep mus_reliso
-keep mus_sigid
-keep mus_tight
-
-## Clean up
-drop *vvvl*

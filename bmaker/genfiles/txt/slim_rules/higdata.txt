@@ -8,6 +8,8 @@ keep lumiblock
 keep event
 keep type
 keep json*
+keep is201*
+
 
 ## Higgsino specific
 keep hig*
